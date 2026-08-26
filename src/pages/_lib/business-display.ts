@@ -10,6 +10,16 @@
  * ここでは「取得したデータをどう見せるか」の表示ロジックのみを持つ。
  * 確認状態の文言変換は statusToDisplayLabel（src/lib/data/verificationStatus.ts）
  * のみを経由し、ここで独自の変換を行わない。
+ *
+ * 統合時（integrated-mvp、リード作業）のメモ:
+ * 旧 `buildTelHref()` はこのファイル専用の `_partials/ComparisonTable.astro`
+ * （独自実装の比較表。電話・地図・外部リンクをtel:/`<a>`で直接組み立てていた）
+ * でのみ使用されていたが、そのファイルを ui-components 正本の
+ * <ComparisonTable>（サービス比較専任）＋ 新設の
+ * `_partials/BusinessContactList.astro`（PhoneLink/MapLink/OutboundLinkを使用）
+ * へ差し替えたため削除した。tel:リンクの組み立ては PhoneLink.astro 内部が
+ * 担当する。`buildMapSearchUrl()` は MapLink.astro が href を呼び出し側の
+ * 責務としているため、引き続きここで使用する。
  */
 import type { Business, ServiceKey } from '../../types/business';
 
@@ -109,9 +119,4 @@ export function buildMapSearchUrl(business: Business): string {
  */
 export function formatPriceFrom(amountFromJpy: number): string {
   return `${amountFromJpy.toLocaleString('ja-JP')}円〜`;
-}
-
-/** 電話番号のtel:リンク用に空白・ハイフンを保持したまま整形する（桁を推測修正しない）。 */
-export function buildTelHref(phone: string): string {
-  return `tel:${phone.replace(/[^0-9+]/g, '')}`;
 }

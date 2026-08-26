@@ -10,9 +10,19 @@
  *
  * 非公式表記（CLAUDE_CODE_HANDOFF.md 1章）はヘッダー・フッター双方に
  * 常時表示する。個別ページ側で省略しない。
+ *
+ * 統合時（integrated-mvp、リード作業）に以下を追加した:
+ * - `<GaTag />`（feature/seo-analytics）を<head>へ組み込み。GA4 Measurement ID
+ *   未設定時は何も出力しない（`src/lib/analytics/GaTag.astro`参照）ため、
+ *   環境変数未設定でもビルド・表示は壊れない。
+ * - `import '../lib/analytics/autoInit'` をbody末尾で読み込み、
+ *   `data-event`等の属性を持つ要素のクリック/変更を全ページ共通で
+ *   計測ディスパッチャ（`src/lib/analytics/dispatcher.ts`）に接続。
+ *   個別ページ側で毎回importし直す必要はない。
  */
 import { siteConfig } from '../lib/siteConfig';
 import { ROUTES } from '../lib/routes';
+import GaTag from '../lib/analytics/GaTag.astro';
 
 interface Props {
   title: string;
@@ -34,6 +44,7 @@ const pageTitle = title === siteConfig.name ? title : `${title}｜${siteConfig.n
     <meta name="description" content={description} />
     {noindex && <meta name="robots" content="noindex, nofollow" />}
     <link rel="canonical" href={Astro.url.pathname} />
+    <GaTag />
   </head>
   <body>
     <a class="skip-link" href="#main-content">本文へスキップ</a>
@@ -73,6 +84,10 @@ const pageTitle = title === siteConfig.name ? title : `${title}｜${siteConfig.n
       </nav>
       <p class="site-footer__copyright">&copy; {new Date().getFullYear()} {siteConfig.name}</p>
     </footer>
+
+    <script>
+      import '../lib/analytics/autoInit';
+    </script>
   </body>
 </html>
 

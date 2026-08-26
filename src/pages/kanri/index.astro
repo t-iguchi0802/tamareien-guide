@@ -6,8 +6,10 @@
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import { ROUTES } from '../../lib/routes';
 import { getBusinesses } from '../../lib/data';
-import ComparisonTable from '../_partials/ComparisonTable.astro';
+import ComparisonTable from '../../components/business/ComparisonTable.astro';
+import BusinessContactList from '../_partials/BusinessContactList.astro';
 import PriceList from '../_partials/PriceList.astro';
+import CorrectionCta from '../../components/common/CorrectionCta.astro';
 
 const businesses = getBusinesses();
 const serviceKeys = ['annual_management', 'cleaning', 'flowers', 'planting'] as const;
@@ -27,8 +29,12 @@ const description =
     <ComparisonTable
       businesses={businesses}
       visibleServices={[...serviceKeys, 'remote_photo_report']}
-      caption="墓所管理・清掃・供花・遠方対応の状況"
     />
+  </section>
+
+  <section aria-labelledby="kanri-contact-heading">
+    <h2 id="kanri-contact-heading">連絡先・アクセス</h2>
+    <BusinessContactList businesses={businesses} caption="墓所管理・清掃・供花の連絡先一覧" />
   </section>
 
   <section aria-labelledby="kanri-price-heading">
@@ -38,6 +44,8 @@ const description =
     </p>
     <PriceList businesses={businesses} serviceKeys={[...serviceKeys]} />
   </section>
+
+  <CorrectionCta />
 
   <section aria-labelledby="kanri-links-heading">
     <h2 id="kanri-links-heading">関連ページ</h2>

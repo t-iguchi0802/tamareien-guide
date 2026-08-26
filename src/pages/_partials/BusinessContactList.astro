@@ -1,0 +1,110 @@
+---
+/**
+ * 事業者ごとの連絡・アクセスCTA一覧。
+ *
+ * 経緯（統合時、リード作業）:
+ * feature/pages が独自に実装していた `_partials/ComparisonTable.astro` は、
+ * サービス対応比較とtel:/地図/外部リンクのCTAを1つの表に同居させていたが、
+ * feature/ui-components の正式 <ComparisonTable> はサービス対応状況の表示に
+ * 専念し、CTAを持たない設計になっている（両者のREPORT.md参照）。
+ * 統合方針（電話・地図・外部リンクをPhoneLink/MapLink/OutboundLinkへ統一する）
+ * に沿って、比較表側のCTA部分をこのファイルに切り出し、`<a>`直書きをやめて
+ * 正式なアクセスCTA部品（feature/ui-components 正本）を使うように差し替えた。
+ * `_partials` はAstroのルーティング対象外（アンダースコア始まり）。
+ */
+import type { Business } from '../../types/business';
+import PhoneLink from '../../components/access/PhoneLink.astro';
+import MapLink from '../../components/access/MapLink.astro';
+import OutboundLink from '../../components/access/OutboundLink.astro';
+import { buildMapSearchUrl } from '../_lib/business-display';
+
+interface Props {
+  businesses: Business[];
+  caption: string;
+}
+
+const { businesses, caption } = Astro.props;
+
+/** BusinessCard.astro（ui-components）と同じ文言・同じ判定方針。 */
+const UNCONFIRMED_PHONE_TEXT = '電話番号: 公開情報では未確認';
+---
+
+<section class="business-contact-list" aria-label={caption}>
+  <h3 class="business-contact-list__caption">{caption}</h3>
+  <ul class="business-contact-list__items">
+    {
+      businesses.map((business) => (
+        <li class="business-contact-list__item">
+          <p class="business-contact-list__name">{business.name}</p>
+          <ul class="business-contact-list__actions">
+            <li>
+              {business.contact.phone ? (
+                <PhoneLink businessId={business.id} phone={business.contact.phone} />
+              ) : (
+                <span class="business-contact-list__unconfirmed">{UNCONFIRMED_PHONE_TEXT}</span>
+              )}
+            </li>
+            <li>
+              <MapLink businessId={business.id} href={buildMapSearchUrl(business)} />
+            </li>
+            {business.contact.websiteUrl ? (
+              <li>
+                <OutboundLink
+                  businessId={business.id}
+                  linkType="official_site"
+                  href={business.contact.websiteUrl}
+                />
+              </li>
+            ) : (
+              business.contact.directoryUrl && (
+                <li>
+                  <OutboundLink
+                    businessId={business.id}
+                    linkType="directory"
+                    href={business.contact.directoryUrl}
+                  />
+                </li>
+              )
+            )}
+          </ul>
+        </li>
+      ))
+    }
+  </ul>
+</section>
+
+<style>
+  .business-contact-list__caption {
+    margin: 0 0 var(--space-3, 0.75rem);
+  }
+  .business-contact-list__items {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4, 1rem);
+  }
+  .business-contact-list__item {
+    border: 1px solid var(--color-border, #dcdcd4);
+    border-radius: 0.5rem;
+    padding: var(--space-4, 1rem);
+    background: var(--color-surface, #fff);
+  }
+  .business-contact-list__name {
+    margin: 0 0 var(--space-2, 0.5rem);
+    font-weight: 700;
+  }
+  .business-contact-list__actions {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-3, 0.75rem);
+  }
+  .business-contact-list__unconfirmed {
+    color: var(--color-text-muted, #55584f);
+    font-size: 0.95rem;
+  }
+</style>

@@ -7,7 +7,9 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
 import { siteConfig } from '../../lib/siteConfig';
 import { ROUTES } from '../../lib/routes';
 import { getBusinesses } from '../../lib/data';
-import ComparisonTable from '../_partials/ComparisonTable.astro';
+import ComparisonTable from '../../components/business/ComparisonTable.astro';
+import BusinessCard from '../../components/business/BusinessCard.astro';
+import CorrectionCta from '../../components/common/CorrectionCta.astro';
 import { ALL_SERVICE_KEYS } from '../_lib/business-display';
 
 const businesses = getBusinesses();
@@ -28,14 +30,19 @@ const description =
     >をご覧ください。
   </p>
 
+  <section aria-labelledby="directory-heading">
+    <h2 id="directory-heading">事業者一覧・連絡先</h2>
+    <div class="business-grid">
+      {businesses.map((business) => <BusinessCard business={business} />)}
+    </div>
+  </section>
+
   <section aria-labelledby="comparison-heading">
     <h2 id="comparison-heading">全事業者・全サービス比較</h2>
-    <ComparisonTable
-      businesses={businesses}
-      visibleServices={ALL_SERVICE_KEYS}
-      caption={`多磨霊園周辺の石材店${businesses.length}社の全サービス対応状況`}
-    />
+    <ComparisonTable businesses={businesses} visibleServices={ALL_SERVICE_KEYS} />
   </section>
+
+  <CorrectionCta />
 
   <section aria-labelledby="links-heading">
     <h2 id="links-heading">関連ページ</h2>
@@ -47,3 +54,11 @@ const description =
     </ul>
   </section>
 </BaseLayout>
+
+<style>
+  .business-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: var(--space-4, 1rem);
+  }
+</style>

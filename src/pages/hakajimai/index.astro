@@ -6,8 +6,10 @@
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import { ROUTES } from '../../lib/routes';
 import { getBusinesses } from '../../lib/data';
-import ComparisonTable from '../_partials/ComparisonTable.astro';
+import ComparisonTable from '../../components/business/ComparisonTable.astro';
+import BusinessContactList from '../_partials/BusinessContactList.astro';
 import PriceList from '../_partials/PriceList.astro';
+import CorrectionCta from '../../components/common/CorrectionCta.astro';
 
 const businesses = getBusinesses();
 const serviceKeys = ['grave_closure', 'reburial_support'] as const;
@@ -26,11 +28,12 @@ const description =
 
   <section aria-labelledby="hakajimai-comparison-heading">
     <h2 id="hakajimai-comparison-heading">対応状況の比較</h2>
-    <ComparisonTable
-      businesses={businesses}
-      visibleServices={[...serviceKeys]}
-      caption="墓じまい・改葬手続支援の対応状況"
-    />
+    <ComparisonTable businesses={businesses} visibleServices={[...serviceKeys]} />
+  </section>
+
+  <section aria-labelledby="hakajimai-contact-heading">
+    <h2 id="hakajimai-contact-heading">連絡先・アクセス</h2>
+    <BusinessContactList businesses={businesses} caption="墓じまい・改葬手続支援の連絡先一覧" />
   </section>
 
   <section aria-labelledby="hakajimai-price-heading">
@@ -49,4 +52,6 @@ const description =
       >の公式リンクからご確認ください。
     </p>
   </section>
+
+  <CorrectionCta />
 </BaseLayout>
