@@ -11,6 +11,7 @@
 
 import type { Business, ServiceKey, VerificationStatus } from './business';
 import type { OutboundLinkType } from './analytics';
+import type { Sponsor } from './sponsor';
 
 export interface BusinessCardProps {
   business: Business;
@@ -46,4 +47,13 @@ export interface MapLinkProps {
 
 export interface CorrectionCtaProps {
   businessId?: string;
+}
+
+/**
+ * スポンサー枠実装時（2026-08-26）に追加。
+ * 通常掲載（BusinessCardProps）とは別の型契約とし、
+ * 事業者データと広告契約データを混同しないようにする。
+ */
+export interface SponsorCardProps {
+  sponsor: Sponsor;
 }

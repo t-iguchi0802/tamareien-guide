@@ -15,14 +15,21 @@
  * `aria-labelledby="service-filter-heading"` を持つ<section>を描画するため、
  * ここで同じaria-labelledbyを持つ<section>を重ねてラップしない
  * （同名ランドマークの二重ネストを避けるため、ラップ用のsectionは置かない）。
+ *
+ * スポンサー枠実装（2026-08-26）: 検索条件・検索結果件数（ServiceFilter）の
+ * 直後、通常の事業者一覧（このページでは「一覧を見る」CTA＋当サイトについて
+ * セクション）の前に<SponsorSection>を配置する。絞り込み状態・検索結果とは
+ * 一切連動しない、独立したセクションとする。
  */
 import BaseLayout from '../layouts/BaseLayout.astro';
 import { siteConfig } from '../lib/siteConfig';
 import { ROUTES } from '../lib/routes';
-import { getBusinesses } from '../lib/data';
+import { getBusinesses, getActiveSponsors } from '../lib/data';
 import ServiceFilter from '../components/business/ServiceFilter.astro';
+import SponsorSection from '../components/sponsors/SponsorSection.astro';
 
 const businesses = getBusinesses();
+const sponsors = getActiveSponsors();
 ---
 
 <BaseLayout title={siteConfig.name} description={siteConfig.subtitle}>
@@ -34,6 +41,10 @@ const businesses = getBusinesses();
   <hr class="masonry-rule" />
 
   <ServiceFilter businesses={businesses} mode="link" targetPath={ROUTES.sekizaiten.path} />
+
+  <hr class="masonry-rule" />
+
+  <SponsorSection sponsors={sponsors} />
 
   <hr class="masonry-rule" />
 
