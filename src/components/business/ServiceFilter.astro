@@ -1,0 +1,502 @@
+---
+/**
+ * 「目的から探す」絞り込みコンポーネント（editorial-redesign）。
+ *
+ * TOPページ（mode="link"）と /sekizaiten/（mode="inline"）の両方から使う共有部品。
+ * どちらも同じ3つの目的ボタン・同じ詳しい条件チェックボックスを表示し、
+ * 選択内容の意味（AND条件・confirmedのみ対象）を統一する。
+ *
+ * - mode="inline": このコンポーネント自身が<BusinessCard>のグリッドを描画し、
+ *   選択条件に応じてクライアント側で表示・非表示を切り替える（/sekizaiten/用）。
+ * - mode="link": グリッドは描画せず、選択内容を反映したURL
+ *   （?services=a,b,c）へのCTAリンクだけを出す（TOPページ用）。
+ *   遷移先（/sekizaiten/）はページ読み込み時に同じクエリを読み取り、
+ *   同じ選択状態を復元する。
+ *
+ * データの絞り込みは常に「confirmedのみを対象に含める」
+ * （isFilterableStatus、data_dictionary.md 6章）というAND条件で行う。
+ * 未選択時は全事業者を対象とする（絞り込み条件0件 = 制限なし）。
+ * 事業者データ・確認状態・掲載順は一切変更しない。表示順は常に
+ * 呼び出し側から渡されたbusinesses配列の順序を保つ（並べ替えない）。
+ *
+ * JavaScript無効時は、初期HTML（全事業者を表示した状態）のまま
+ * フォールバックする。チェックボックス自体はネイティブ要素なので、
+ * JS無効でも「選べる」こと自体は壊れないが、実際の絞り込み・件数更新・
+ * グリッドの表示切替はJS前提であるため<noscript>で明示する。
+ */
+import type { Business, ServiceKey } from '../../types/business';
+import { PURPOSE_GROUPS, SERVICE_LABELS } from './serviceLabels';
+import { isFilterableStatus } from '../../lib/data/verificationStatus';
+import BusinessCard from './BusinessCard.astro';
+
+interface Props {
+  businesses: Business[];
+  mode: 'inline' | 'link';
+  /** mode="link" のとき必須。絞り込み結果を反映したクエリを付けて遷移する先。 */
+  targetPath?: string;
+}
+
+const { businesses, mode, targetPath } = Astro.props;
+
+/** クライアント側のAND判定用データ（confirmedなserviceKeyのみを持たせる）。 */
+const businessFilterData = businesses.map((business) => ({
+  id: business.id,
+  services: (Object.keys(business.services) as ServiceKey[]).filter((key) =>
+    isFilterableStatus(business.services[key]),
+  ),
+}));
+---
+
+<section
+  class="service-filter"
+  aria-labelledby="service-filter-heading"
+  data-filter-mode={mode}
+  data-filter-target={targetPath ?? ''}
+>
+  <div class="service-filter__purpose">
+    <h2 id="service-filter-heading" class="service-filter__heading">
+      まず、近いものを選んでください
+    </h2>
+    <p class="service-filter__hint">
+      選ぶと、下の「くわしい条件」が自動でチェックされます。あとから条件を追加・変更することもできます。
+    </p>
+    <div class="service-filter__purpose-grid">
+      {
+        PURPOSE_GROUPS.map((group) => (
+          <button
+            type="button"
+            class="purpose-card"
+            data-purpose-button
+            data-purpose-services={group.serviceKeys.join(',')}
+            data-event="comparison_filter_use"
+            data-filter-type="purpose"
+            data-filter-value={group.id}
+          >
+            <span class="purpose-card__heading">{group.heading}</span>
+            <span class="purpose-card__description">{group.description}</span>
+          </button>
+        ))
+      }
+    </div>
+  </div>
+
+  <hr class="masonry-rule" />
+
+  <details class="service-filter__detail" open={mode === 'inline'}>
+    <summary class="service-filter__detail-summary">くわしい条件から選ぶ</summary>
+    <div class="service-filter__groups">
+      {
+        PURPOSE_GROUPS.map((group) => (
+          <fieldset class="service-filter__group">
+            <legend class="service-filter__group-legend">{group.heading}</legend>
+            <div class="service-filter__checks">
+              {group.serviceKeys.map((key) => (
+                <label class="service-check" data-service-check>
+                  <input
+                    type="checkbox"
+                    name="service"
+                    value={key}
+                    data-filter-checkbox
+                    data-event="comparison_filter_use"
+                    data-filter-type="service"
+                    data-filter-value={key}
+                  />
+                  <span class="service-check__label">{SERVICE_LABELS[key]}</span>
+                </label>
+              ))}
+            </div>
+          </fieldset>
+        ))
+      }
+    </div>
+  </details>
+
+  <div class="service-filter__result">
+    <p class="service-filter__result-text" aria-live="polite">
+      選んだ条件について対応を確認できた石材店 <strong data-result-count>{businesses.length}</strong
+      >件
+    </p>
+    <button
+      type="button"
+      class="service-filter__clear"
+      data-filter-clear
+      data-event="comparison_filter_use"
+      data-filter-type="clear"
+      data-filter-value="all"
+    >
+      条件をクリア
+    </button>
+    {
+      mode === 'link' && targetPath && (
+        <a class="service-filter__cta" data-filter-cta href={targetPath}>
+          この条件で石材店の一覧を見る
+        </a>
+      )
+    }
+  </div>
+
+  <noscript>
+    <p class="service-filter__noscript">
+      条件の絞り込みにはJavaScriptが必要です。JavaScriptが無効なため、現在は全事業者を表示しています。
+    </p>
+  </noscript>
+
+  {
+    mode === 'inline' && (
+      <>
+        <p class="service-filter__empty" data-filter-empty hidden>
+          この条件をすべて満たす事業者は、公開情報の範囲では見つかりませんでした。条件を減らすか、
+          「条件をクリア」からやり直してください。詳しい対応状況は各事業者へ直接ご確認ください。
+        </p>
+        <div class="business-grid" data-business-grid>
+          {businesses.map((business) => (
+            <BusinessCard business={business} />
+          ))}
+        </div>
+      </>
+    )
+  }
+
+  <script
+    type="application/json"
+    data-service-filter-data
+    set:html={JSON.stringify(businessFilterData)}
+    is:inline
+  />
+
+  <script>
+    interface FilterBusiness {
+      id: string;
+      services: string[];
+    }
+
+    (function initServiceFilter() {
+      const root = document.querySelector<HTMLElement>('[data-filter-mode]');
+      if (!root) return;
+
+      const dataEl = root.querySelector('[data-service-filter-data]');
+      const businessData: FilterBusiness[] = dataEl ? JSON.parse(dataEl.textContent || '[]') : [];
+      const checkboxes = Array.from(
+        root.querySelectorAll<HTMLInputElement>('input[data-filter-checkbox]'),
+      );
+      const purposeButtons = Array.from(
+        root.querySelectorAll<HTMLButtonElement>('[data-purpose-button]'),
+      );
+      const clearButton = root.querySelector<HTMLButtonElement>('[data-filter-clear]');
+      const resultCountEl = root.querySelector('[data-result-count]');
+      const emptyEl = root.querySelector<HTMLElement>('[data-filter-empty]');
+      const mode = root.getAttribute('data-filter-mode');
+      const targetPath = root.getAttribute('data-filter-target') || '';
+      const ctaLink = root.querySelector('[data-filter-cta]');
+      const grid = root.querySelector<HTMLElement>('[data-business-grid]');
+
+      function getSelected(): Set<string> {
+        return new Set(checkboxes.filter((cb) => cb.checked).map((cb) => cb.value));
+      }
+
+      function applyFilter(): void {
+        const selected = getSelected();
+        const hasSelection = selected.size > 0;
+
+        checkboxes.forEach((cb) => {
+          const label = cb.closest('[data-service-check]');
+          if (label) label.classList.toggle('is-selected', cb.checked);
+        });
+
+        const matchIds: Set<string> = !hasSelection
+          ? new Set(businessData.map((b) => b.id))
+          : new Set(
+              businessData
+                .filter((b) => Array.from(selected).every((key) => b.services.includes(key)))
+                .map((b) => b.id),
+            );
+
+        if (resultCountEl) resultCountEl.textContent = String(matchIds.size);
+
+        if (mode === 'inline' && grid) {
+          // ":scope > " に限定する。PhoneLink/MapLink/OutboundLinkもそれぞれ
+          // 計測用の data-business-id を持つため、限定しないとカード内部の
+          // リンクまで誤って「カード」として拾ってしまう。
+          const cards = grid.querySelectorAll<HTMLElement>(':scope > [data-business-id]');
+          cards.forEach((card) => {
+            const id = card.getAttribute('data-business-id') || '';
+            const isMatch = matchIds.has(id);
+            card.hidden = !isMatch;
+            const prefixEl = card.querySelector('[data-service-prefix]');
+            if (prefixEl) {
+              prefixEl.textContent = hasSelection
+                ? '選んだ条件と一致する対応:'
+                : '対応を確認できるサービス:';
+            }
+            const words = card.querySelectorAll('[data-service-word]');
+            words.forEach((word) => {
+              const key = word.getAttribute('data-service-word') || '';
+              word.classList.toggle('service-word--matched', hasSelection && selected.has(key));
+            });
+          });
+          if (emptyEl) emptyEl.hidden = matchIds.size > 0;
+        }
+
+        if (mode === 'link' && ctaLink && targetPath) {
+          if (hasSelection) {
+            const query = encodeURIComponent(Array.from(selected).join(','));
+            ctaLink.setAttribute('href', `${targetPath}?services=${query}`);
+          } else {
+            ctaLink.setAttribute('href', targetPath);
+          }
+        }
+      }
+
+      checkboxes.forEach((cb) => cb.addEventListener('change', applyFilter));
+
+      purposeButtons.forEach((btn) => {
+        btn.addEventListener('click', () => {
+          const keys = (btn.getAttribute('data-purpose-services') || '').split(',').filter(Boolean);
+          checkboxes.forEach((cb) => {
+            cb.checked = keys.includes(cb.value);
+          });
+          applyFilter();
+        });
+      });
+
+      if (clearButton) {
+        clearButton.addEventListener('click', () => {
+          checkboxes.forEach((cb) => {
+            cb.checked = false;
+          });
+          applyFilter();
+        });
+      }
+
+      // ブラウザ（特にChromium系）は、リロードや戻る操作でチェックボックスの
+      // 選択状態を独自に復元することがある（フォームのsticky state）。
+      // クエリの有無にかかわらず「未選択が既定」を保証するため、まず全て
+      // 未選択にリセットしてから、必要な場合だけ下のクエリ復元で再設定する。
+      checkboxes.forEach((cb) => {
+        cb.checked = false;
+      });
+
+      // TOPページの「この条件で一覧を見る」から遷移してきた場合、
+      // ?services=a,b,c を読み取って同じ選択状態を復元する。
+      const params = new URLSearchParams(window.location.search);
+      const fromQuery = params.get('services');
+      if (fromQuery) {
+        const wanted = new Set(fromQuery.split(',').filter(Boolean));
+        checkboxes.forEach((cb) => {
+          cb.checked = wanted.has(cb.value);
+        });
+      }
+
+      applyFilter();
+    })();
+  </script>
+</section>
+
+<style>
+  .service-filter {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-6);
+  }
+
+  .service-filter__heading {
+    font-family: var(--font-family-heading);
+    margin: 0 0 var(--space-2);
+  }
+
+  .service-filter__hint {
+    margin: 0 0 var(--space-4);
+    color: var(--color-stone-text);
+    font-size: var(--font-size-label);
+  }
+
+  .service-filter__purpose-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: var(--space-4);
+  }
+
+  .purpose-card {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+    text-align: left;
+    background: var(--color-stone-surface);
+    border: 1px solid var(--color-stone-line);
+    border-radius: var(--radius-card);
+    padding: var(--space-4) var(--space-5, 1.25rem);
+    font: inherit;
+    color: var(--color-text);
+    cursor: pointer;
+    min-height: var(--tap-target-min);
+    transition:
+      background-color 0.15s ease,
+      border-color 0.15s ease;
+  }
+
+  .purpose-card:hover {
+    background: var(--color-surface);
+    border-color: var(--color-accent);
+  }
+
+  .purpose-card:focus-visible {
+    outline: 3px solid var(--color-accent);
+    outline-offset: 2px;
+  }
+
+  .purpose-card__heading {
+    font-family: var(--font-family-heading);
+    font-weight: 700;
+    font-size: 1.1rem;
+  }
+
+  .purpose-card__description {
+    color: var(--color-stone-text);
+    font-size: var(--font-size-label);
+    line-height: 1.6;
+  }
+
+  .service-filter__detail {
+    border: none;
+  }
+
+  .service-filter__detail-summary {
+    cursor: pointer;
+    font-family: var(--font-family-heading);
+    font-weight: 700;
+    font-size: 1.1rem;
+    padding: var(--space-2) 0;
+    min-height: var(--tap-target-min);
+    display: flex;
+    align-items: center;
+  }
+
+  .service-filter__groups {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-5, 1.25rem);
+    padding-top: var(--space-3);
+  }
+
+  .service-filter__group {
+    border: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .service-filter__group-legend {
+    padding: 0 0 var(--space-2);
+    font-weight: 700;
+    color: var(--color-stone-text);
+    font-size: var(--font-size-label);
+  }
+
+  .service-filter__checks {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: var(--space-2);
+  }
+
+  .service-check {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    min-height: var(--tap-target-min);
+    padding: 0.6em var(--space-3);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-card);
+    background: var(--color-surface);
+    cursor: pointer;
+    transition:
+      background-color 0.15s ease,
+      border-color 0.15s ease;
+  }
+
+  .service-check input {
+    width: 1.15em;
+    height: 1.15em;
+    accent-color: var(--color-accent);
+    flex: none;
+  }
+
+  .service-check.is-selected {
+    background: var(--color-accent-soft);
+    border-color: var(--color-accent);
+  }
+
+  .service-check:focus-within {
+    outline: 3px solid var(--color-accent);
+    outline-offset: 2px;
+  }
+
+  .service-filter__result {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-4);
+  }
+
+  .service-filter__result-text {
+    margin: 0;
+    font-size: 1.15rem;
+  }
+
+  .service-filter__result-text strong {
+    font-family: var(--font-family-heading);
+    font-size: 1.5rem;
+    color: var(--color-accent-deep);
+  }
+
+  .service-filter__clear {
+    background: none;
+    border: none;
+    color: var(--color-accent);
+    text-decoration: underline;
+    font: inherit;
+    cursor: pointer;
+    padding: 0.3em 0.2em;
+    min-height: var(--tap-target-min);
+  }
+
+  .service-filter__cta {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: var(--tap-target-min);
+    padding: 0.6em 1.4em;
+    border-radius: var(--radius-pill);
+    background: var(--color-accent);
+    color: var(--color-surface);
+    font-weight: 700;
+    text-decoration: none;
+  }
+
+  .service-filter__cta:hover {
+    background: var(--color-accent-deep);
+  }
+
+  .service-filter__noscript {
+    color: var(--color-stone-text);
+    font-size: var(--font-size-label);
+  }
+
+  .service-filter__empty {
+    background: var(--color-stone-surface);
+    border: 1px solid var(--color-stone-line);
+    border-radius: var(--radius-card);
+    padding: var(--space-4);
+    color: var(--color-text);
+  }
+
+  .business-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--space-4);
+  }
+
+  @media (max-width: 767px) {
+    .business-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

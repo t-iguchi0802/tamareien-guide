@@ -19,6 +19,11 @@
  *   `data-event`等の属性を持つ要素のクリック/変更を全ページ共通で
  *   計測ディスパッチャ（`src/lib/analytics/dispatcher.ts`）に接続。
  *   個別ページ側で毎回importし直す必要はない。
+ *
+ * editorial-redesign（TOP/石材店一覧の再設計）で以下を調整した:
+ * - グローバル配色トークンを「温かい石色・生成り・深い緑・墨色」の配色に更新
+ *   （変数名は変更せず、値のみ変更。他コンポーネントへの影響を局所化）。
+ *   全ペアWCAG AA（4.5:1）以上のコントラストを確認済み。
  */
 import { siteConfig } from '../lib/siteConfig';
 import { ROUTES } from '../lib/routes';
@@ -101,15 +106,17 @@ const pageTitle = title === siteConfig.name ? title : `${title}｜${siteConfig.n
    *   - 高齢者・40〜60代家族にも読みやすい基礎値（本文16px以上等）
    */
   :root {
-    /* CLAUDE_CODE_HANDOFF.md 9章: 白・深緑・石色を基調。東京都公式の外観は模倣しない。 */
-    --color-bg: #f7f6f3;
-    --color-surface: #ffffff;
-    --color-text: #23261f;
-    --color-text-muted: #55584f;
-    --color-accent: #2f4a3c;
-    --color-accent-soft: #e7ede8;
-    --color-border: #dcdcd4;
-    --color-warning-bg: #fbf3e3;
+    /* CLAUDE_CODE_HANDOFF.md 9章: 白・深緑・石色を基調。東京都公式の外観は模倣しない。
+       editorial-redesign: 「温かい石色・生成り・深い緑・墨色」を中心に据え、
+       行政サイト/SaaS管理画面のような冷たいグレーを避けた（全ペアAA以上確認済み）。 */
+    --color-bg: #f7f2e7;
+    --color-surface: #fffdf8;
+    --color-text: #2b2926;
+    --color-text-muted: #6b6558;
+    --color-accent: #2f4b3c;
+    --color-accent-soft: #e4e9e0;
+    --color-border: #e1d9c6;
+    --color-warning-bg: #f5efdd;
 
     --font-family-base: 'Noto Sans JP', system-ui, -apple-system, 'Segoe UI', sans-serif;
 

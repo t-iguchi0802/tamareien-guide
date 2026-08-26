@@ -1,302 +1,204 @@
-# QA_REPORT.md — integrated-mvp 独立QA監査
+# QA_REPORT.md — feature/editorial-redesign 独立QA監査
 
-- 担当: QA（`feature/qa`、CLAUDE.md 7章 / WORKTREE_AGENT_PLAN.md）
-- 対象: `integrated-mvp` ブランチ（4エージェント統合後 + リード統合修正 `21c21fe` まで）
+> **本レポートは `feature/editorial-redesign` ブランチ（`integrated-mvp` から分岐、
+> commit `1fbc397`「redesign: TOP/石材店一覧を『目的から探す』地域ガイドへ全面再設計」まで）
+> を対象にした独立QA監査である。旧 `QA_REPORT.md`（`integrated-mvp` 監査分）は本内容で
+> 上書きした。過去の監査内容が必要な場合は git 履歴（`d043381` 時点の `QA_REPORT.md`）を参照すること。**
+
+- 担当: QA（`feature/qa` 相当の独立監査エージェント）
+- 対象: `feature/editorial-redesign`（TOPページ・`/sekizaiten/` の全面再設計）
 - 実施日: 2026-08-26
-- 実施内容: `npm run check` / `npm run lint` / `npm run build`（環境変数あり・なし両方）の独立再実行、
-  データ整合性のスクリプト検証、全ページのソース読解、`dist/` 出力の静的検査、
-  コントラスト計算、見出し構造・内部リンクの機械チェック。
-  ブラウザでの実機目視確認（360/768/1440pxの実描画・スクリーンリーダー実機確認）は
-  環境制約により実施できておらず、CSS・HTML構造の静的読解による判断である旨を明記する。
+- 変更範囲（diff統計）: `src/layouts/BaseLayout.astro`,
+  `src/styles/tokens.css`, `src/components/business/BusinessCard.astro`,
+  `src/components/business/ServiceFilter.astro`（新規）,
+  `src/components/business/serviceLabels.ts`,
+  `src/pages/index.astro`, `src/pages/sekizaiten/index.astro`,
+  `src/pages/_lib/business-display.ts`（GOAL_GROUPS削除）の8ファイル。
+- 実施内容:
+  - `npm run build` / `npm run check` / `npm run lint` の再実行（クリーン確認）。
+  - `PURPOSE_GROUPS` と `ServiceKey` union の全数照合。
+  - `ServiceFilter.astro` の絞り込みロジック（`applyFilter`）のコード読解 +
+    **実ブラウザでの動作検証**（Playwright + Chromiumを一時的に
+    `npm install --no-save` で導入し、本レポート作成後に `npm uninstall --no-save`
+    で削除。`package.json` / `package-lock.json` は無変更であることを確認済み）。
+    AND条件を2パターン手計算し、実際のクリック操作の結果と突き合わせて一致を確認。
+  - `dist/` 出力（`sekizaiten/index.html` / `index.html` 等）の埋め込みJSON・
+    コンパイル済みCSSの詳細度を直接検査。
+  - 360px / 768px / 1440px でのスクリーンショット取得・目視確認（TOP・/sekizaiten/）。
+  - キーボードのみでのTab順序・フォーカスリング表示を実機（Chromium）で確認。
+  - WCAG AA コントラスト比の計算検証（Node.jsで相対輝度式を実装し、
+    `tokens.css` コメント内の計算済み値と照合）。
+  - `businesses.json` / `sources.csv` / `data_dictionary.md` の無変更確認
+    （`git diff integrated-mvp..HEAD` が空）。
+  - `src/data/**` とルート正本の内容一致確認（`diff` で完全一致）。
+  - GA4 `data-event` 属性と `src/lib/analytics/dispatcher.ts` の契約の突き合わせ。
 
 ## サマリー
 
 | 重大度 | 件数 |
 |---|---:|
 | Critical | 0 |
-| Major | 1 |
-| Medium | 4 |
-| Minor | 3 |
-| Info | 3 |
+| Major | 0 |
+| Medium | 1 |
+| Minor | 1 |
+| Info | 2 |
 
-**結論**: CLAUDE.md の絶対厳守ルール（`not_confirmed`の非対応表示化禁止、非公式表記、
-広告と比較の分離、事実データ非改変、sourceId整合性）について、明確な違反は見つからなかった。
-ビルド・型チェック・lintはすべてクリーン。14社は正しくデータ駆動で表示され、
-`businesses.json` / `sources.csv` は正本と完全一致し、`foundation-v1` 以降無改変であることを確認した。
-一方で、統合過程での「作り込み済みだが結線されていない」機能（行政手続コンテンツ、
-`official_procedure_click`計測、構造化データ）が複数見つかったため、Major/Medium として報告する。
+**結論**: CLAUDE.md の絶対厳守ルール（`not_confirmed` の非対応表示化禁止、非公式表記の
+全ページ表示、広告と比較の分離、事実データ非改変、事業者データの手書き複製禁止、
+`sourceId` 整合性）について、明確な違反は見つからなかった。`npm run build` /
+`npm run check` / `npm run lint` はすべてクリーン。`PURPOSE_GROUPS` は12
+`ServiceKey` を過不足・重複なく分類しており、絞り込みのAND条件は実ブラウザ検証で
+手計算と一致した。`.business-card[hidden]` のCSS詳細度問題は正しく修正されていることを
+コンパイル後CSSで確認した。`businesses.json` / `sources.csv` / `data_dictionary.md`
+および `src/data/**` の複製は無改変・完全一致だった。
 
----
-
-## Critical
-
-該当なし。
-
----
-
-## Major
-
-### M-1. data-content担当が作成した行政手続きコンテンツ（`src/content/guides/**`）が /tetsuzuki/ に一切統合されておらず、pages担当が独自の簡易版を重複実装している
-
-- **再現手順**:
-  1. `src/content/guides/reburial-permit-application.md` /
-     `grave-work-notification.md` / `tama-cemetery-official-info.md` /
-     `procedure-differences-overview.md` を確認する。いずれも
-     `targetPage: "/tetsuzuki/"`、`authority` / `topic`（GA4
-     `official_procedure_click`のパラメータと同名）、`sources`（sourceId付き）を
-     frontmatterに持つ、作り込まれた中立解説コンテンツである。
-  2. `src/pages/tetsuzuki/index.astro` を見ると、上記ファイルを一切import/参照しておらず、
-     コメントに「並行実装の都合上、data-content担当のコンテンツ（`src/content/**`）を
-     参照できないため」独自に短い解説文を書いたと明記されている。
-  3. `git show ed2f5eb`（data-content担当のコミット）には、Astro Content
-     Collectionsが`src/content.config.ts`（担当範囲外の共有ファイル）を要求するため
-     未導入である旨の記録があるが、この情報はdata-content担当のコミットメッセージにのみ残り、
-     `REPORT.md`には記載されなかった（`git show feature/data-content:REPORT.md` は
-     存在しない）。そのためpages担当・統合作業（リード）双方に伝わらず、
-     統合修正（`21c21fe`）でも解決されていない。
-  4. `procedure-differences-overview.md`には、「墓所返還」について
-     「当サイトが確認できている公開資料には、墓所返還の具体的な手順・必要書類・窓口を示す
-     出典が含まれていない」という重要な留保が明記されているが、現在の`/tetsuzuki/`ページの
-     文言にはこの留保が明示的に反映されていない（該当箇所を東京都公園協会への案内で
-     やや薄めて言及しているのみ）。
-- **重大度**: Major（機能は壊れていないが、統合担当が作成した検証済みコンテンツが
-  ユーザーに一切届いていない。行政手続きという誤情報リスクが特に高い領域で、
-  より丁寧に出典・留保を書いたコンテンツが使われず、簡易版が公開されている）。
-- **対象ファイル**:
-  - `src/content/guides/reburial-permit-application.md`
-  - `src/content/guides/grave-work-notification.md`
-  - `src/content/guides/tama-cemetery-official-info.md`
-  - `src/content/guides/procedure-differences-overview.md`
-  - `src/pages/tetsuzuki/index.astro`
-- **推奨修正**: リードが `src/content.config.ts` を追加してContent
-  Collectionsとして正式に取り込むか、`src/pages/tetsuzuki/index.astro`側で
-  frontmatter付きMarkdownを`import.meta.glob`等で直接読み込み、`authority`/`topic`を
-  `data-event="official_procedure_click"` のCTA（M-2参照）に渡す形で統合することを検討されたい。
-  特に「墓所返還の出典が現状ない」という留保は、断定回避の観点から本文に明示すべき。
+見つかった問題は、TOPページでの重複ランドマーク構造（Medium）1件と、
+新規ファイルのPrettier未整形（Minor、機能に影響なし）、および参考情報2件のみである。
 
 ---
 
 ## Medium
 
-### D-1. `official_procedure_click` イベントが、型・ディスパッチャ・コンテンツはすべて用意されているのに、実際のUI要素には一切結線されていない
+### M-1: TOPページで `<section aria-labelledby="service-filter-heading">` が二重にネストしている
 
-- **再現手順**: `grep -rn "official_procedure_click" src/` を実行すると、
-  `src/types/analytics.ts`（型定義）、`src/lib/analytics/events.ts`
-  （`trackOfficialProcedureClick`）、`src/lib/analytics/dispatcher.ts`
-  （`data-authority` / `data-topic`読み取りロジック）には実装があるが、
-  `src/pages/**` / `src/components/**` のいずれにも
-  `data-event="official_procedure_click"` を持つ要素が存在しない。
-  `/tetsuzuki/` ページの東京都公園協会・府中市への公式リンクは素の`<a>`タグで、
-  計測属性を持たない。
-- **重大度**: Medium（CLAUDE.md 3章で定義された6イベントのうち1つが、
-  MVPの主要な行政手続導線で一度も発火しない。ビルドやUIは壊れないため
-  Criticalではないが、公開後にこの導線の利用状況が一切計測できない）。
-- **対象ファイル**: `src/pages/tetsuzuki/index.astro`
-- **推奨修正**: `/tetsuzuki/`内の3つの公式リンク`<a>`に
-  `data-event="official_procedure_click"` `data-authority="fuchu_city"` /
-  `"tokyo_park_association"` `data-topic="reburial"` 等（M-1のfrontmatterの
-  `authority`/`topic`値と揃える）を付与する。`initAnalyticsDispatcher`は
-  BaseLayout経由で全ページ有効なため、属性追加のみで計測可能になる。
+- **再現手順**:
+  1. `npm run build` 後、`dist/index.html` を開く。
+  2. `<section aria-labelledby="service-filter-heading">` を検索する。
+  3. 同じ `aria-labelledby="service-filter-heading"` を持つ `<section>` が
+     入れ子になって2つ出現することを確認する（外側: `src/pages/index.astro`
+     が用意した `<section>`、内側: `ServiceFilter.astro` 自身のルート `<section
+     class="service-filter">`）。
 
-### D-2. `comparison_filter_use` イベントに対応する絞り込みUIがMVPに存在しない
+  実際の出力（`dist/index.html` から抜粋）:
 
-- **再現手順**: `src/components/business/ComparisonTable.astro`のコメントに
-  「並べ替え・絞り込みを行わない」と明記されており、`src/pages/**`のいずれにも
-  地域・サービス等の絞り込みUI（`<select>`やチェックボックス等）が実装されていない。
-  `grep -rn "comparison_filter_use" src/`は型・ディスパッチャ・
-  `feature/ui-components`のREPORT.mdコメントにのみ現れ、実UIは無い。
-- **重大度**: Medium（ui-components担当のREPORT.mdには「絞り込みUIはpages側の
-  スコープと判断し作成していない」との申し送りがあり、pages側でも実装されなかった。
-  6イベント契約のうち2つ目が未使用のまま。機能自体の欠落というより、
-  MVPスコープの判断が担当間で明確に合意されないまま倒れた形跡）。
-- **対象ファイル**: `src/components/business/ComparisonTable.astro` /
-  `src/pages/sekizaiten/index.astro` 等
-- **推奨修正**: 今回のMVPで絞り込みUIを追加しないと判断するなら、
-  `CLAUDE_CODE_HANDOFF.md`側にその旨を明記し「MVPでは実装しない」と正式合意する。
-  追加するなら、地域・サービス種別等の絞り込みセレクトをpages側に実装し、
-  `data-event="comparison_filter_use"`を付与する。
+  ```html
+  <section aria-labelledby="service-filter-heading" data-astro-cid-lcdefpme>
+    <section class="service-filter" aria-labelledby="service-filter-heading" ...>
+      ...
+    </section>
+  </section>
+  ```
 
-### D-3. `robots.txt` が実在しない `sitemap-index.xml` を参照している
-
-- **再現手順**: `public/robots.txt`に`Sitemap: /sitemap-index.xml`と記載されているが、
-  `npm run build`後の`dist/`には`sitemap-index.xml`が生成されない
-  （`@astrojs/sitemap`等のsitemap生成が未導入、`astro.config.mjs`にも`site`設定がない）。
-  本番公開時、検索エンジンのクローラーがこのURLを取得すると404になる。
-  `feature/seo-analytics`のREPORT.mdにも「サイトマップ自体が未生成の間、
-  このURLは404になる点に注意」と明記されており、既知の未解決事項として残っている。
-- **重大度**: Medium（実害は軽微だが、公開直前に見落とされやすく、
-  検索エンジン側のクロールエラー・Search Consoleでの警告要因になる）。
-- **対象ファイル**: `public/robots.txt`
-- **推奨修正**: 本番公開前に、`Sitemap:`行を削除するか、実際にサイトマップを
-  生成する仕組み（`@astrojs/sitemap`導入 + `astro.config.mjs`に`site`設定）を追加する。
-
-### D-4. `businesses.json` の `editorialNotes`（重要な確認範囲の留保）がどの画面にも表示されない
-
-- **再現手順**: `businesses.json`の各事業者に`editorialNotes`フィールドがあり、
-  例えば`biz-ibaragi-meiseki`には「石材事業者であることは確認済みだが、多磨霊園の
-  墓石店として数えるには追加の公開情報が必要。比較表ではサービスをすべて未確認表示とする」
-  という、なぜこの事業者の全サービスが「公開情報では未確認」なのかを説明する重要な注記がある。
-  `grep -rn "editorialNotes" src/`では`types/business.ts`・`schema.ts`・
-  `data/businesses.json`にのみ出現し、`src/components/**` / `src/pages/**`の
-  どこからも参照・表示されていない。
-- **重大度**: Medium（表示自体は`statusToDisplayLabel()`経由で正しく
-  「公開情報では未確認」に統一されており、CLAUDE.mdの最重要ルール違反ではない。
-  ただし、なぜ確認できなかったかの背景情報がユーザーに一切届かず、
-  中立性・透明性という編集方針の一部が画面に反映されていない）。
-- **対象ファイル**: `src/components/business/BusinessCard.astro` /
-  `src/components/business/ComparisonTable.astro`
-- **推奨修正**: `BusinessCard`または比較表の事業者行に、`editorialNotes`が
-  存在する場合のみ小さな注記（例: 詳細開閉の`<details>`）として表示することを検討。
-  必ず`statusToDisplayLabel()`とは独立した「編集注記」であることが分かる見せ方にし、
-  対応状況の判定そのものとは混同させないこと。
+- **重大度**: Medium（アクセシビリティ構造の不備。axe-core の `landmark-unique`
+  相当のルールに抵触しうる。同一の役割・同一のアクセシブルネームを持つ
+  ランドマークが入れ子になっており、スクリーンリーダーのランドマークナビゲーションで
+  同じ名前の領域が二重に読み上げられる可能性がある。機能停止やデータ誤表示は
+  伴わないため Critical/Major ではない）。
+- **対象ファイル**:
+  - `src/pages/index.astro`（30〜33行目付近、`<section
+    aria-labelledby="service-filter-heading"><ServiceFilter .../></section>`）
+  - `src/components/business/ServiceFilter.astro`（50行目、
+    コンポーネント自身のルート `<section class="service-filter"
+    aria-labelledby="service-filter-heading" ...>`）
+- **推奨修正**（要人間判断・リード対応）: `ServiceFilter.astro` 自身が
+  見出し付きの `<section>` ランドマークを既に提供しているため、
+  `index.astro` 側の外側 `<section aria-labelledby="service-filter-heading">`
+  を削除し、単なる非ランドマーク要素（`<div>`）にするか、あるいは
+  `index.astro` 側にラップ用のsectionを残す場合は `ServiceFilter.astro`
+  側のmode="link"のときだけルート要素を `<div>`にする等、いずれか一方の
+  ランドマークだけを残す設計に統一する。なお `/sekizaiten/` 側
+  (`src/pages/sekizaiten/index.astro`) は `<ServiceFilter mode="inline" />`
+  を直接呼び出しており、この二重ネスト問題は発生していない（TOPページのみの
+  問題）。
 
 ---
 
 ## Minor
 
-### N-1. `npm run format:check` が `REPORT.md` 内の擬似コードでハードエラーになる
+### N-1: 新規ファイル `ServiceFilter.astro` がPrettier未整形
 
-- **再現手順**: `npm run format:check`を実行すると、`REPORT.md`（feature/ui-componentsの
-  使用例）内の```astro```コードフェンス中の
-  `const businesses: Business[] = /* src/lib/data 経由で取得 */;`が
-  不正な構文としてPrettierのパーサーエラーになり、`format:check`全体がエラー終了する
-  （`.prettierignore`に`REPORT.md`は含まれていない）。
-- **重大度**: Minor（ビルド・型チェック・lintには影響しないが、
-  CLAUDE.md 6章に定義されたコマンドの1つが恒常的に失敗する状態になっている）。
-- **対象ファイル**: `REPORT.md`
-- **推奨修正**: コードフェンス内のプレースホルダーを`// TODO: getBusinesses()等から取得`
-  のようなコメント行に分離するか、`REPORT.md`を`.prettierignore`に追加する。
-
-### N-2. `src/pages/sources/index.astro` の運営方針ページへのリンクが `ROUTES.about.path` 定数を使わずハードコードされている
-
-- **再現手順**: `src/pages/sources/index.astro`21行目の
-  `<a href="/about/">運営方針ページ</a>`は、他ページが一貫して使っている
-  `ROUTES.about.path`（`src/lib/routes.ts`）を経由していない。
-  現時点で値は一致しており実害はないが、将来`ROUTES`側でパスを変更した場合に
-  追随されない。
-- **重大度**: Minor（動作上のリンク切れではない。保守性の指摘）。
-- **対象ファイル**: `src/pages/sources/index.astro`
-- **推奨修正**: `import { ROUTES } from '../../lib/routes';`を追加し、
-  `ROUTES.about.path`を使うよう統一する。
-
-### N-3. `--color-status-na-fg` (#79766a) と `--color-status-na-bg` (#f1efe9) のコントラスト比が約3.96:1で、通常文字のWCAG AA基準（4.5:1）をわずかに下回る
-
-- **再現手順**: `src/styles/tokens.css`の`--color-status-na-fg` /
-  `--color-status-na-bg`の値でコントラスト比を計算すると約3.96:1
-  （他の状態色は6.3〜8.2:1）。`VerificationBadge`の`.verification-badge__label`は
-  `font-size: 0.9375rem`（15px相当）・通常太字（`font-weight: 600`）であり、
-  WCAG AA「大きな文字」（太字18.66px相当以上）の基準は満たさない可能性が高い。
-- **重大度**: Minor（4値中1状態のみ、かつ実データでは使用件数が少ない見込みの
-  `not_applicable`の配色に限定される。他3状態は問題なし）。
-- **対象ファイル**: `src/styles/tokens.css`
-- **推奨修正**: `--color-status-na-fg`をやや濃く（例: `#655f52`程度）調整し、
-  4.5:1以上を確保する。
+- **再現手順**: `npm run format:check` を実行する。`src/components/business/ServiceFilter.astro`
+  が整形対象として警告される。
+- **重大度**: Minor（ビルド・lint・型チェックには影響しない。`npm run
+  format:check` はCLAUDE.md 6章のコマンド一覧には含まれるが、本ブランチの
+  重点確認項目・`npm run build`/`check`/`lint` の合否には含まれない）。
+- **対象ファイル**: `src/components/business/ServiceFilter.astro`
+- **補足**: `integrated-mvp` の時点で既に40ファイルがPrettier未整形の状態であり
+  （`BaseLayout.astro` / `BusinessCard.astro` / `serviceLabels.ts` /
+  `index.astro` / `sekizaiten/index.astro` / `business-display.ts` /
+  `tokens.css` を含む）、これは本ブランチ以前からの既存事象である。本ブランチが
+  新たに未整形化させたのは新規ファイル `ServiceFilter.astro` の1件のみ
+  （`integrated-mvp` と `feature/editorial-redesign` の
+  `format:check` 対象ファイル一覧を `diff` して確認済み）。
+- **推奨修正**: リード側で `npm run format` を一括実行するタイミングで
+  まとめて解消してよい（本ブランチ固有の緊急対応は不要）。
 
 ---
 
-## Info（要確認・参考情報。修正必須ではない）
+## Info（参考情報。対応不要または既存事象）
 
-### I-1. JSON-LD構造化データ（`src/lib/seo/structuredData.ts`）がどのページにも埋め込まれていない
+### I-1: Prettier未整形は `integrated-mvp` の時点から既存の全社的事象
 
-`buildOrganizationJsonLd` / `buildBreadcrumbListJsonLd` / `buildBusinessJsonLd`等は
-`review`/`aggregateRating`を含まない安全な実装だが、feature/seo-analyticsのREPORT.mdに
-「pages担当が呼び出す想定」と明記された統合ポイントが実際には使われていない。
-SEO上のメリットを取りこぼしているだけで、CLAUDE.mdの禁止事項には抵触しない
-（禁止されている評価系プロパティを埋め込んでいないため、むしろ「未使用」の方が安全側ではある）。
-将来対応する場合の担当はpages/リード。
+上述 N-1 参照。プロジェクト全体で40ファイル前後がPrettier未整形であり、
+本ブランチの変更対象8ファイルのうち7ファイル（`BaseLayout.astro` /
+`BusinessCard.astro` / `serviceLabels.ts` / `index.astro` /
+`sekizaiten/index.astro` / `business-display.ts` / `tokens.css`）は
+編集前から既に未整形だった。対応するなら本ブランチ固有ではなく
+プロジェクト全体の整形として実施するのが妥当（要人間判断）。
 
-### I-2. `.claude/worktrees/` 配下に旧並行エージェントの完了済みworktreeが残存している
+### I-2: チェックボックスの check/uncheck が同一の `filter_value` でGA4計測される
 
-`git worktree list`で`feature/ui-components` `feature/data-content`
-`feature/seo-analytics` `feature/pages`の4つが`.claude/worktrees/agent-*`配下に
-残ったままになっている（`git status`では未追跡ディレクトリとして検出）。
-`npm run format:check`等をリポジトリルートから実行すると、これらのworktree内の
-ファイルも巻き込んでノイズになる（今回の監査でも該当ログが混在した）。
-WORKTREE_AGENT_PLAN.md 10章の手順（`git worktree remove`）に従い、
-統合完了後にリードが削除することを推奨する。データ改変やビルド失敗の原因にはなっていない。
-
-### I-3. `CorrectionCta` の `businessId` パラメータは現状すべての呼び出し箇所で未指定
-
-`src/pages/sekizaiten/index.astro` / `hakajimai/index.astro` / `kanri/index.astro`は
-いずれも`<CorrectionCta />`のみを呼び出しており、`businessId`を渡していないため、
-コンポーネント内の「事業者を特定するクエリを付与する」ロジックは現状使われていない
-（`href`は常に`/about/`）。動作不良ではないが、将来事業者個別のカードに
-「この事業者の情報を訂正」ボタンを追加する設計余地として、コンポーネント側は
-すでに対応済みであることを申し送りとして記録する。
+`ServiceFilter.astro` のチェックボックスは `data-filter-value={key}`
+が固定値であり、`change` イベントはチェックON/OFFどちらでも発火する
+（`checkboxes.forEach((cb) => cb.addEventListener('change', applyFilter))`
+とは別に、`autoInit`/`dispatcher.ts` 側の `change` リスナーが同じ要素から
+`comparison_filter_use { filter_type: "service", filter_value: <key> }` を
+毎回送信する）。CLAUDE.md / `CLAUDE_CODE_HANDOFF.md` のGA4契約は
+`filter_type`/`filter_value` の2属性のみを定義しており、ON/OFFの区別は
+契約上要求されていないため契約違反ではないが、GA4データを分析する際に
+「その条件をONにした」のか「OFFにした」のかを区別できない点は
+将来の分析設計上の注意点として記録する（要人間判断。対応不要の可能性が高い）。
 
 ---
 
-## 確認済み・問題なし（重点確認項目チェックリスト）
+## 重点確認項目チェックリスト（すべてPASS。詳細は上記参照）
 
-- [x] `npm run build`（`PUBLIC_GA_MEASUREMENT_ID`未設定・設定両方）成功。8ページ生成。
-- [x] `npm run check`: 0 errors / 0 warnings / 0 hints（46ファイル）。
-- [x] `npm run lint`: エラー・警告なし。
-- [x] 14社すべてが`businesses.json`から読み込まれ、`/sekizaiten/`の一覧・比較表
-      （PC表・モバイルカード双方）に表示されることを`dist/`出力で確認
-      （`biz-ibaragi-meiseki`のような全サービス未確認の事業者も除外されず表示される）。
-- [x] `evidenceSourceIds` / `publishedPrices[].sourceId` は、
-      `src/lib/data/validate.ts`によりビルド時に`sources.csv`の`source_id`と
-      突合検証されており（不整合があれば`npm run build`が失敗する設計）、
-      ビルドが成功していることから整合性を確認した。
-- [x] ルート直下`businesses.json`/`sources.csv`と`src/data/`配下のコピーは
-      `diff`でバイト単位一致を確認。
-- [x] `git diff foundation-v1..HEAD -- businesses.json sources.csv
-      data_dictionary.md CLAUDE_CODE_HANDOFF.md WORKTREE_AGENT_PLAN.md` は空
-      （事実データ・正本ドキュメントの無断変更なし）。
-- [x] `not_confirmed`は`statusToDisplayLabel()`（`src/lib/data/verificationStatus.ts`）
-      経由のみで「公開情報では未確認」と表示され、「非対応」という文言は
-      `explicitly_not_offered`（非対応と明記）以外のどの状態にも使われていない
-      （`grep`によるソース全文検索で確認）。
-- [x] スポンサー枠（`SponsorCard.astro`）は「広告・スポンサー枠」表記・
-      「比較表の掲載順・対応状況の評価には影響しません」の注記を持つ実装だが、
-      現状どのページからも呼び出されていない未使用コンポーネント
-      （＝実データが無いため比較結果に影響のしようがない状態）。
-- [x] 全8ページ（`/`, `/sekizaiten/`, `/hakajimai/`, `/kanri/`, `/tetsuzuki/`,
-      `/about/`, `/sources/`, `/privacy/`）の内部リンクを`dist/`のHTMLから機械抽出し、
-      すべて実在するページ・アセットに解決することを確認（リンク切れなし）。
-- [x] 電話・地図・外部リンクCTAはすべて`PhoneLink` / `MapLink` / `OutboundLink`
-      経由で実装されており、素の`<a>`直書きの事業者CTAは残っていない
-      （行政公式ページへの引用リンクは仕様通り素の`<a>`のまま）。
-- [x] `PUBLIC_GA_MEASUREMENT_ID`未設定でビルド・`dist/index.html`を確認し、
-      `googletagmanager.com`のスクリプトが一切出力されないことを確認。
-      GA4 IDのハードコードも`src/`全体に存在しない。
-- [x] `business_outbound_click` / `business_phone_click` / `business_map_click` /
-      `correction_request_click`の4イベントは、対応する`data-event`属性を持つ
-      コンポーネントが実装され、`BaseLayout.astro`経由で
-      `src/lib/analytics/autoInit`（`initAnalyticsDispatcher`）が全ページに
-      読み込まれていることを確認（`comparison_filter_use` /
-      `official_procedure_click`は上記Medium D-1・D-2で報告）。
-- [x] 非公式表記はBaseLayout（リード共有）のヘッダー・フッター双方に
-      `siteConfig.officialDisclaimer`として常時出力され、個別ページ側で
-      省略している箇所はない（全8ページのdist出力で確認）。
-- [x] 掲載基準・広告方針・訂正窓口は`/about/`に、情報源・最終確認日は`/sources/`に
-      存在し、いずれも`businesses.json`の`editorialPolicy`・`sources.csv`を
-      データソースとしている（HTML直書きの複製ではない）。
-- [x] `notes_internal`相当のフィールドは`businesses.json`に存在しない。
-      `editorialNotes`は営業評価・苦情履歴・個人情報等ではなく、
-      公開情報での確認範囲を説明する編集注記であることを内容確認済み
-      （ただし画面未表示。Medium D-4参照）。
-- [x] 口コミ点数・星評価・独自ランキング・「おすすめ」「人気」「優良」等の語は、
-      ソース中では「使用していない」という否定文脈以外に出現しない。
-      `credentials`内の「全国優良石材店の会（全優石）」は業界団体の固有名詞であり、
-      事実の列挙として妥当。
-- [x] 見出し階層（h1→h2→h3）は全8ページで飛び級・重複h1なし
-      （静的HTML読解による確認）。
-- [x] タップ領域は`--tap-target-min: 44px`がCTA各部品に適用されている。
-      キーボード操作（`<details>`のネイティブ開閉、`:focus-visible`の
-      アウトライン、スキップリンク）はソースコード上実装されていることを確認。
-      実ブラウザでの操作確認は未実施（環境制約。Info欄参照）。
-- [x] スポンサー表示は現状未使用のため、比較結果・掲載順への影響は原理的に発生し得ない。
+| # | 項目 | 結果 |
+|---|---|---|
+| 1 | `npm run check` / `npm run lint` / `npm run build` | PASS（すべてクリーン） |
+| 2 | `PURPOSE_GROUPS` が12 `ServiceKey` を過不足・重複なく分類 | PASS（build:4 + closure:2 + care:6 = 12、重複なし） |
+| 3 | 絞り込みAND条件の正しさ | PASS（コード読解＋実ブラウザ検証で2パターン手計算と一致。詳細下記） |
+| 4 | 未選択時に14社すべてが対象 | PASS（`!hasSelection` 分岐、実ブラウザで件数14を確認） |
+| 5 | `.business-card[hidden]` のCSS詳細度 | PASS（コンパイル後CSSで `.business-card[data-astro-cid-xxx][hidden]{display:none}` が `.business-card[data-astro-cid-xxx]{display:flex}` より高詳細度であることを確認） |
+| 6 | `:scope > [data-business-id]` がPhoneLink等を誤取得していないか | PASS（`:scope >` は直接の子要素のみに限定。PhoneLink/MapLink/OutboundLink/CorrectionCtaのdata-business-idはすべて子孫要素であり対象外） |
+| 7 | `not_confirmed` が「非対応」と誤認させる表現になっていないか | PASS（新しい文はconfirmedのみ列挙。0件時のフォールバック文言「現時点でありません（掲載情報は随時更新します）」も断定を避けている。実機スクリーンショットで確認） |
+| 8 | 重複する「公開情報で確認できる対応」見出しの削除 | PASS（該当文言はコード内コメントにのみ残存し、レンダリング結果には出現しない） |
+| 9 | スポンサー分離・主観語の不在 | PASS（新規コピーに「おすすめ」等の主観語なし。スポンサーコンポーネントは本ブランチで未使用） |
+| 10 | 全8ページで非公式表記がヘッダー・フッターにあるか | PASS（8ページ全てで確認。`BaseLayout.astro`以外のページは無変更） |
+| 11 | WCAG AA コントラスト | PASS（計算した全ペアが4.5:1以上。`tokens.css`コメント内の実測値「stone-text: stone-surface比5.28:1、paper比5.77:1」も計算により再現・確認） |
+| 12 | キーボード操作性 | PASS（Tab順序が論理的。目的ボタン・チェックボックス・クリアボタン・summaryはすべてネイティブ要素で、フォーカスリングも実機確認済み） |
+| 13 | `businesses.json` / `sources.csv` / `data_dictionary.md` 無変更 | PASS（`git diff integrated-mvp..HEAD` が空） |
+| 14 | `src/data` 複製とルート正本の一致 | PASS（`diff`で完全一致） |
+| 15 | GA4 `data-event`契約準拠 | PASS（`data-filter-type`/`data-filter-value`、イベント名`comparison_filter_use`が`dispatcher.ts`契約と一致） |
 
-## 実施できなかった確認（環境制約）
+### 補足: AND条件の実ブラウザ検証詳細
 
-- 実ブラウザでの360px/768px/1440pxのスクリーンショット目視確認、
-  axe-core等によるオートメーテッドアクセシビリティスキャン、
-  スクリーンリーダー実機確認は、本セッションの環境制約（GUIブラウザ操作不可）により
-  実施できていない。CSS・HTMLの静的読解による評価にとどまる点をご承知おきいただきたい。
-  Vitest/Playwrightは`package.json`に未導入（CLAUDE.md 4章の記載通りQA段階での追加対象）。
-  今回は既存の`npm run build`成果物（`dist/`）に対する静的検査スクリプトのみを
-  `scripts/qa/`配下には追加していない（恒久スクリプト化は行わず、都度Node
-  ワンライナーで検証した。将来のCI組み込みを検討する場合は、本レポートの
-  検証手順をベースに`scripts/qa/verify-data-integrity.mjs`等として
-  スクリプト化することを推奨する）。
+`dist/sekizaiten/index.html` に埋め込まれたconfirmedサービスのみのJSONを元に、
+以下2パターンを手計算し、Playwright経由の実際のチェックボックス操作結果と
+突き合わせて一致を確認した。
+
+- **パターンA**: `new_grave` + `engraving` を選択 → 手計算7件
+  （toshimaya, koganeya, ishikatsu, fukaya, shibata, yamada, ishisei）。
+  実機操作結果も `result-count = 7`、可視カードIDも同一7件で一致。
+- **パターンB**: 目的ボタン「お墓を建てる・整える」
+  （`new_grave, engraving, renovation, seismic` の4条件AND）をクリック
+  → 手計算2件（ishikatsu, shibata）。実機操作結果も `result-count = 2` で一致。
+- 「条件をクリア」ボタン押下後は `result-count = 14`（全件）に復帰することを確認。
+
+---
+
+## 監査時に発見しなかった主な確認事項（明示的に問題なしと判断）
+
+- TOPページは `<ServiceFilter mode="link">` を使い、14社カードグリッドを
+  複製描画していない（`dist/index.html` に `class="business-card"` が
+  0件であることを確認）。目的の「業者データベースではなく地域ガイド」という
+  設計方針に沿っている。
+- `/sekizaiten/` では14件の `data-business-id` がすべてユニークであり、
+  `businesses.json` の14社と一致（手書き複製やデータ改変の痕跡なし）。
+- 内部運営情報（`notes_internal` 相当、営業評価・交渉メモ等）の
+  混入は本ブランチ変更ファイル内に見つからなかった。
+- スポンサー表示は本ブランチの変更範囲に含まれておらず、比較結果・
+  掲載順への影響は確認されなかった。
+- GA4 Measurement ID未設定でも `npm run build` は成功し（本監査は
+  環境変数未設定のまま実施）、`GaTag.astro` は何も出力しないため
+  サイトは壊れない。

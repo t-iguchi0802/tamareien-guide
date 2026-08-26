@@ -24,10 +24,16 @@
   --font-size-caption: 0.875rem; /* 14px */
   --font-size-card-title: 1.375rem; /* 22px */
 
-  /* 石の目地を思わせる罫線色（--color-borderより暖色寄り） */
-  --color-stone-line: #cfc9ba;
-  --color-stone-line-soft: #e5e1d4;
-  --color-stone-text: #6e6a5d;
+  /* 石の目地を思わせる罫線色（--color-borderより暖色寄り）
+     editorial-redesign: BaseLayoutの生成り寄りの新トークンに合わせて調整。
+     この二重線モチーフ（border-top: 3px double）をヒーロー・見出し・カード上部で
+     繰り返し使う、このサイトの視覚的シグネチャとする。 */
+  --color-stone-line: #d8cca8;
+  --color-stone-line-soft: #ece3cd;
+  --color-stone-text: #655e4c; /* --color-stone-surface比5.28:1、paper比5.77:1でAA適合確認済み */
+
+  /* カードの地色（石色）。--color-surfaceより一段沈んだ、より「石」寄りの面。 */
+  --color-stone-surface: #efe8d8;
 
   /* 深緑の濃淡（ホバー・押下時など） */
   --color-accent-deep: #1c2e26;
@@ -67,6 +73,17 @@
   --radius-card: 10px;
   --radius-pill: 999px;
   --radius-tag: 6px;
+}
+
+/*
+ * 「石の目地」二重線モチーフ（editorial-redesignのシグネチャ要素）。
+ * ヒーロー下部・見出し・カード上部で共通して使い、装飾を増やさずに
+ * ページ全体をひとつの視覚的ファミリーとしてつなぐ。
+ */
+.masonry-rule {
+  border: none;
+  border-top: 3px double var(--color-stone-line);
+  margin: 0;
 }
 
 /* スクリーンリーダー専用テキスト（視覚的に隠すが読み上げ・キーボード操作は妨げない） */

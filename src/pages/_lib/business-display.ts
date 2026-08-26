@@ -20,6 +20,14 @@
  * へ差し替えたため削除した。tel:リンクの組み立ては PhoneLink.astro 内部が
  * 担当する。`buildMapSearchUrl()` は MapLink.astro が href を呼び出し側の
  * 責務としているため、引き続きここで使用する。
+ *
+ * editorial-redesign（2026-08-26）のメモ:
+ * 旧 `GOAL_GROUPS`（トップページ「困りごと別入口」の4分類、事業者比較ページと
+ * 手続き案内ページへのリンク集）は、TOPページの全面再設計にともない削除した。
+ * 「目的から探す」3分類は `PURPOSE_GROUPS`
+ * （`src/components/business/serviceLabels.ts`）に一本化した。こちらは
+ * TOP・/sekizaiten/ 双方から使う `ServiceFilter.astro` の内部でのみ使用するため、
+ * コンポーネント層に置き、pages専用のこのファイルには複製していない。
  */
 import type { Business, ServiceKey } from '../../types/business';
 
@@ -53,54 +61,6 @@ export const ALL_SERVICE_KEYS: ServiceKey[] = [
   'renovation',
   'seismic',
   'remote_photo_report',
-];
-
-/**
- * トップページ「困りごと別入口」の分類。
- * 各serviceKeyの対応状況を集計する用途にのみ使い、順位付けには使わない。
- */
-export interface GoalGroup {
-  id: string;
-  heading: string;
-  description: string;
-  serviceKeys: ServiceKey[];
-  href: string;
-  linkLabel: string;
-}
-
-export const GOAL_GROUPS: GoalGroup[] = [
-  {
-    id: 'sekizaiten',
-    heading: '石材店を比較したい・新しくお墓を建てたい',
-    description: '建墓、文字彫刻、修理・耐震まで、14社の対応状況を一覧で比較できます。',
-    serviceKeys: ['new_grave', 'engraving', 'renovation', 'seismic'],
-    href: '/sekizaiten/',
-    linkLabel: '14社の一覧・比較表を見る',
-  },
-  {
-    id: 'hakajimai',
-    heading: '墓じまい・墓石撤去をしたい',
-    description: '墓じまい・改葬の手続支援について、公開情報を確認できる事業者を比較できます。',
-    serviceKeys: ['grave_closure', 'reburial_support'],
-    href: '/hakajimai/',
-    linkLabel: '墓じまいの比較を見る',
-  },
-  {
-    id: 'kanri',
-    heading: '管理・清掃・供花をお願いしたい',
-    description: '年間管理、清掃、供花・墓参り代行、植木の対応状況を比較できます。',
-    serviceKeys: ['annual_management', 'cleaning', 'flowers', 'planting'],
-    href: '/kanri/',
-    linkLabel: '墓所管理の比較を見る',
-  },
-  {
-    id: 'tetsuzuki',
-    heading: '改葬・墓所返還などの手続きを知りたい',
-    description: '事業者比較ではなく、行政の公式ページに基づく手続きの案内です。',
-    serviceKeys: ['reburial_support', 'interment'],
-    href: '/tetsuzuki/',
-    linkLabel: '手続きの案内を見る',
-  },
 ];
 
 /**
