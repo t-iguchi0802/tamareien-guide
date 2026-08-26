@@ -1,0 +1,80 @@
+/**
+ * UIコンポーネント層のデザイントークン。
+ *
+ * src/layouts/BaseLayout.astro が定義するグローバルトークン
+ * （--color-bg / --color-surface / --color-text / --color-accent 等）は
+ * ここで再定義しない。このファイルはBaseLayoutの値をvar()で参照しつつ、
+ * コンポーネント固有の意味づけ（状態色・見出し書体・罫線モチーフ等）だけを追加する。
+ *
+ * デザイン方針（frontend-design検討結果の要約）:
+ * - 白・深緑・石色の落ち着いた配色（東京都公式サイトの外観を模倣しない）。
+ * - 見出しは明朝体（刻字を思わせる書体）、本文はゴシック体のまま。
+ *   Webフォントは追加せず、OS標準の明朝体だけで構成する（レイアウト非依存）。
+ * - カード上部・区切り線に「石の目地」を思わせる二重の細罫線を使う
+ *   （このサイトの視覚的シグネチャ）。
+ * - not_confirmedは「不可・赤」を連想させない中間的な石色で表現する
+ *   （非対応と誤認させないため）。
+ */
+:root {
+  /* 見出し用書体: OS標準の明朝体のみ（刻字・銘板を想起させる、Webフォント不使用） */
+  --font-family-heading: 'Yu Mincho', 'YuMincho', 'Hiragino Mincho ProN', 'Noto Serif JP', serif;
+
+  /* コンポーネント内の補助文字サイズ（バッジ・キャプション用。本文は17px基準を維持） */
+  --font-size-label: 0.9375rem; /* 15px */
+  --font-size-caption: 0.875rem; /* 14px */
+  --font-size-card-title: 1.375rem; /* 22px */
+
+  /* 石の目地を思わせる罫線色（--color-borderより暖色寄り） */
+  --color-stone-line: #cfc9ba;
+  --color-stone-line-soft: #e5e1d4;
+  --color-stone-text: #6e6a5d;
+
+  /* 深緑の濃淡（ホバー・押下時など） */
+  --color-accent-deep: #1c2e26;
+
+  /* 確認状態の色。confirmedはBaseLayoutの--color-accent系をそのまま使う。 */
+  --color-status-confirmed-fg: var(--color-accent);
+  --color-status-confirmed-bg: var(--color-accent-soft);
+  --color-status-confirmed-border: #9fb5a7;
+
+  /* not_confirmed: 「非対応」と誤認させないための中立な石色（赤系を使わない） */
+  --color-status-unconfirmed-fg: #5c5748;
+  --color-status-unconfirmed-bg: #f2f0e9;
+  --color-status-unconfirmed-border: #cec7b3;
+
+  /* explicitly_not_offered: 事業者が明記した非対応。落ち着いた土色で区別する */
+  --color-status-notoffered-fg: #7a3b2c;
+  --color-status-notoffered-bg: #f5ece8;
+  --color-status-notoffered-border: #dbb6ab;
+
+  /* not_applicable: 対象外。もっとも目立たない配色 */
+  --color-status-na-fg: #79766a;
+  --color-status-na-bg: #f1efe9;
+  --color-status-na-border: #ddd9cb;
+
+  /* スポンサー枠専用配色。比較カードと明確に異なる暖色系にする */
+  --color-sponsor-bg: #fdf8ec;
+  --color-sponsor-border: #d9b45c;
+  --color-sponsor-fg: #4a3710;
+
+  /* タップ領域の最小高さ */
+  --tap-target-min: 44px;
+
+  /* コンポーネントの角丸: カードは石版を思わせる控えめな角丸、CTAボタンは丸ボタン */
+  --radius-card: 10px;
+  --radius-pill: 999px;
+  --radius-tag: 6px;
+}
+
+/* スクリーンリーダー専用テキスト（視覚的に隠すが読み上げ・キーボード操作は妨げない） */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}

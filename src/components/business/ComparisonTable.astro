@@ -1,0 +1,283 @@
+---
+/**
+ * 比較コンポーネント。
+ *
+ * PC幅ではsticky見出し・sticky事業者列を持つ<table>、
+ * 狭い幅ではネイティブ<details>を使ったカード形式に切り替える
+ * （JS不要・キーボード操作可能・data_dictionary.md「スマートフォンではカード表示」要件）。
+ *
+ * 並び順は呼び出し側が渡すbusinesses配列の順序をそのまま使う
+ * （このコンポーネント自身は並べ替え・絞り込みを行わない。displayOrderは
+ * 推奨順位ではないため、独自の並べ替えロジックを追加しない）。
+ *
+ * 各セルの状態表示は VerificationBadge を必ず経由する
+ * （statusToDisplayLabel()の唯一の経路を守るため、テーブル側で文言を作らない）。
+ */
+import '../../styles/tokens.css';
+import type { ComparisonTableProps } from '../../types/components';
+import VerificationBadge from '../common/VerificationBadge.astro';
+import { SERVICE_LABELS } from './serviceLabels';
+
+type Props = ComparisonTableProps;
+const { businesses, visibleServices } = Astro.props;
+---
+
+<div class="comparison-table">
+  <p class="comparison-table__note">
+    「公開情報では未確認」は非対応という意味ではなく、事業者の公開情報で対応の有無を確認できていないことを示します。
+  </p>
+
+  <div class="comparison-table__scroll">
+    <table class="comparison-table__table">
+      <caption class="sr-only">
+        多磨霊園周辺の石材店・お墓関連事業者{businesses.length}社のサービス対応状況の比較表
+      </caption>
+      <thead>
+        <tr>
+          <th scope="col" class="comparison-table__corner">事業者</th>
+          {
+            visibleServices.map((key) => (
+              <th scope="col" class="comparison-table__col-head">
+                {SERVICE_LABELS[key]}
+              </th>
+            ))
+          }
+        </tr>
+      </thead>
+      <tbody>
+        {
+          businesses.map((business) => (
+            <tr>
+              <th scope="row" class="comparison-table__row-head">
+                <span class="comparison-table__business-name">{business.name}</span>
+                <span class="comparison-table__business-meta">
+                  {business.location.city}
+                  {business.location.nearestGateStatus === 'confirmed' &&
+                    business.location.nearestGate && <>・{business.location.nearestGate}</>}
+                </span>
+              </th>
+              {visibleServices.map((key) => (
+                <td class="comparison-table__cell">
+                  <VerificationBadge status={business.services[key]} />
+                </td>
+              ))}
+            </tr>
+          ))
+        }
+      </tbody>
+    </table>
+  </div>
+
+  <ul class="comparison-table__mobile-list">
+    {
+      businesses.map((business) => (
+        <li>
+          <details class="comparison-card">
+            <summary class="comparison-card__summary">
+              <span class="comparison-card__name">{business.name}</span>
+              <span class="comparison-card__meta">
+                {business.location.city}
+                {business.location.nearestGateStatus === 'confirmed' &&
+                  business.location.nearestGate && <>・{business.location.nearestGate}</>}
+              </span>
+            </summary>
+            <dl class="comparison-card__services">
+              {visibleServices.map((key) => (
+                <div class="comparison-card__service-row">
+                  <dt>{SERVICE_LABELS[key]}</dt>
+                  <dd>
+                    <VerificationBadge status={business.services[key]} />
+                  </dd>
+                </div>
+              ))}
+            </dl>
+          </details>
+        </li>
+      ))
+    }
+  </ul>
+</div>
+
+<style>
+  .comparison-table__note {
+    margin: 0 0 var(--space-3);
+    font-size: var(--font-size-label);
+    color: var(--color-stone-text);
+  }
+
+  /* --- デスクトップ表（768px以上を主な対象。狭い幅では横スクロール可能） --- */
+  .comparison-table__scroll {
+    display: none;
+    overflow-x: auto;
+    border: 1px solid var(--color-stone-line);
+    border-radius: var(--radius-card);
+  }
+
+  .comparison-table__table {
+    border-collapse: separate;
+    border-spacing: 0;
+    width: 100%;
+    min-width: max-content;
+    background: var(--color-surface);
+  }
+
+  .comparison-table__table th,
+  .comparison-table__table td {
+    border-bottom: 1px solid var(--color-stone-line-soft);
+    padding: var(--space-3);
+    text-align: left;
+    vertical-align: middle;
+  }
+
+  .comparison-table__corner,
+  .comparison-table__col-head {
+    position: sticky;
+    top: 0;
+    background: var(--color-accent-soft);
+    color: var(--color-text);
+    font-size: var(--font-size-label);
+    font-weight: 700;
+    border-top: 3px double var(--color-stone-line);
+    z-index: 2;
+    min-width: 9.5rem;
+  }
+
+  .comparison-table__corner {
+    left: 0;
+    z-index: 3;
+    min-width: 11rem;
+  }
+
+  .comparison-table__row-head {
+    position: sticky;
+    left: 0;
+    background: var(--color-surface);
+    z-index: 1;
+    font-weight: 400;
+    min-width: 11rem;
+  }
+
+  .comparison-table__business-name {
+    display: block;
+    font-family: var(--font-family-heading);
+    font-weight: 700;
+    font-size: 1.05rem;
+    color: var(--color-text);
+  }
+
+  .comparison-table__business-meta {
+    display: block;
+    font-size: var(--font-size-caption);
+    color: var(--color-stone-text);
+  }
+
+  .comparison-table__cell {
+    min-width: 9.5rem;
+  }
+
+  .comparison-table__table tbody tr:nth-child(even) .comparison-table__row-head,
+  .comparison-table__table tbody tr:nth-child(even) .comparison-table__cell {
+    background: var(--color-bg);
+  }
+
+  /* --- モバイルカード（767px以下。<details>でJS無しの開閉を実現） --- */
+  .comparison-table__mobile-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .comparison-card {
+    border: 1px solid var(--color-stone-line);
+    border-top: 3px double var(--color-stone-line);
+    border-radius: var(--radius-card);
+    background: var(--color-surface);
+    padding: 0;
+    overflow: hidden;
+  }
+
+  .comparison-card__summary {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15em;
+    padding: var(--space-4);
+    min-height: var(--tap-target-min);
+    cursor: pointer;
+    list-style: none;
+  }
+
+  .comparison-card__summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .comparison-card__summary::after {
+    content: '対応状況を見る ▾';
+    margin-top: 0.4em;
+    font-size: var(--font-size-caption);
+    color: var(--color-accent);
+    font-weight: 700;
+  }
+
+  .comparison-card[open] .comparison-card__summary::after {
+    content: '対応状況を閉じる ▴';
+  }
+
+  .comparison-card__summary:focus-visible {
+    outline: 3px solid var(--color-accent);
+    outline-offset: -3px;
+  }
+
+  .comparison-card__name {
+    font-family: var(--font-family-heading);
+    font-weight: 700;
+    font-size: 1.1rem;
+    color: var(--color-text);
+  }
+
+  .comparison-card__meta {
+    font-size: var(--font-size-label);
+    color: var(--color-stone-text);
+  }
+
+  .comparison-card__services {
+    margin: 0;
+    padding: var(--space-2) var(--space-4) var(--space-4);
+    border-top: 1px solid var(--color-stone-line-soft);
+    display: flex;
+    flex-direction: column;
+  }
+
+  .comparison-card__service-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-3);
+    padding: var(--space-2) 0;
+    border-bottom: 1px solid var(--color-stone-line-soft);
+  }
+
+  .comparison-card__service-row:last-child {
+    border-bottom: none;
+  }
+
+  .comparison-card__service-row dt {
+    color: var(--color-text);
+    font-size: var(--font-size-label);
+  }
+
+  .comparison-card__service-row dd {
+    margin: 0;
+  }
+
+  @media (min-width: 768px) {
+    .comparison-table__scroll {
+      display: block;
+    }
+    .comparison-table__mobile-list {
+      display: none;
+    }
+  }
+</style>
