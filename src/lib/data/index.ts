@@ -9,6 +9,11 @@ export * from './loadBusinesses';
 export * from './loadSources';
 export * from './validate';
 export * from './verificationStatus';
+// スポンサーデータ（src/data/sponsors.json）はbusinesses.jsonと完全に別経路。
+// getBusinessDataset()の検証・キャッシュとは合流させない
+// （data_dictionary.md 9章「通常比較表のデータと広告契約データを
+// 同じJSONに混在させない」）。
+export * from './loadSponsors';
 
 let validated = false;
 

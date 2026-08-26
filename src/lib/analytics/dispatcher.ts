@@ -17,6 +17,11 @@
  *   comparison_filter_use   : data-filter-type, data-filter-value
  *   official_procedure_click: data-authority, data-topic
  *   correction_request_click: （追加属性なし）
+ *   sponsor_click            : data-sponsor-id, data-campaign-id
+ *
+ * sponsor_impression（表示回数）はクリック/変更イベントで発火しないため、
+ * このディスパッチャの対象外。表示検知（IntersectionObserver等）を行う
+ * コンポーネント側で `trackSponsorImpression()`（./events）を直接呼び出す。
  *
  * 使用例（pages/ui-components側の実装イメージ。このファイルは変更しない）:
  *
@@ -49,6 +54,7 @@ import {
   trackComparisonFilterUse,
   trackOfficialProcedureClick,
   trackCorrectionRequestClick,
+  trackSponsorClick,
 } from './events';
 import type { AnalyticsEventName, OutboundLinkType } from '../../types/analytics';
 
@@ -132,6 +138,15 @@ function dispatchFromElement(el: Element): void {
     }
     case 'correction_request_click': {
       trackCorrectionRequestClick({ page_path: pagePath });
+      return;
+    }
+    case 'sponsor_click': {
+      const sponsorId = el.getAttribute('data-sponsor-id');
+      const campaignId = el.getAttribute('data-campaign-id');
+      if (!sponsorId || !campaignId) {
+        return;
+      }
+      trackSponsorClick({ sponsor_id: sponsorId, campaign_id: campaignId, page_path: pagePath });
       return;
     }
     default:
