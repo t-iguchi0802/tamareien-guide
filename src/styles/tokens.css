@@ -47,8 +47,11 @@
   --color-status-notoffered-bg: #f5ece8;
   --color-status-notoffered-border: #dbb6ab;
 
-  /* not_applicable: 対象外。もっとも目立たない配色 */
-  --color-status-na-fg: #79766a;
+  /* not_applicable: 対象外。もっとも目立たない配色
+     （2026-08-26 QA監査 N-3: 元の#79766aは背景比コントラスト約3.96:1で
+     WCAG AA通常文字基準4.5:1をわずかに下回っていたため、同系色のまま
+     #655f52へ濃く調整。約5.51:1を確保。） */
+  --color-status-na-fg: #655f52;
   --color-status-na-bg: #f1efe9;
   --color-status-na-border: #ddd9cb;
 

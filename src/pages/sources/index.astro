@@ -4,6 +4,7 @@
  * 正本: CLAUDE_CODE_HANDOFF.md 5章 / src/lib/routes.ts ROUTES.sources
  */
 import BaseLayout from '../../layouts/BaseLayout.astro';
+import { ROUTES } from '../../lib/routes';
 import { getBusinesses, getSources } from '../../lib/data';
 
 const sources = getSources();
@@ -18,7 +19,7 @@ const description = '掲載情報の出典（公式サイト・行政ページ�
   <h1>{pageTitle}</h1>
   <p>
     当サイトに掲載している情報は、以下の出典（事業者の公式サイト、行政の公式ページ、商工会等の名簿）をもとにしています。住所・電話・料金・制度は90日ごと、行政制度は30日ごとまたは公開直前を目安に再確認しています。リンク切れに気づいた場合は<a
-      href="/about/">運営方針ページ</a
+      href={ROUTES.about.path}>運営方針ページ</a
     >の訂正窓口までお知らせください。
   </p>
 

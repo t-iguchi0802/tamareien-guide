@@ -3,6 +3,11 @@ dist/
 node_modules/
 package-lock.json
 
+# 完了済み並行実装エージェントのworktree（WORKTREE_AGENT_PLAN.md 10章の手順で
+# 統合後に削除される想定だが、削除しない運用の場合もリポジトリルートからの
+# npm run format:check / format を巻き込まないよう除外する）。
+.claude/worktrees/
+
 # ルート直下の正本ドキュメント・正本データ。実装エージェントは内容を変更しない
 # （CLAUDE_CODE_HANDOFF.md 4章 / data_dictionary.md 最重要ルール）。
 # 整形目的であっても書式を変更しない。

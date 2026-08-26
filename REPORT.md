@@ -59,7 +59,8 @@ import VerificationBadge from '../components/common/VerificationBadge.astro';
 import CorrectionCta from '../components/common/CorrectionCta.astro';
 import type { Business, ServiceKey } from '../types/business';
 
-const businesses: Business[] = /* src/lib/data 経由で取得 */;
+// businesses は src/lib/data 経由で取得する（getBusinesses() 等）
+declare const businesses: Business[];
 const visibleServices: ServiceKey[] = [
   'new_grave', 'grave_closure', 'reburial_support', 'interment',
   'engraving', 'cleaning', 'annual_management', 'flowers',

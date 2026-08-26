@@ -9,6 +9,18 @@
  * （SRC-TAMA-OFFICIAL / SRC-TAMA-WORK-NOTICE / SRC-FUCHU-REBURIAL）
  * に基づく短い中立説明のみとし、出典URLへのリンクを必ず併記する。
  * 行政手続を法律相談として断定しない。
+ *
+ * QA監査 D-1（2026-08-26）対応: 3つの公式リンクに`data-event="official_procedure_click"`
+ * `data-authority` `data-topic` を付与し、計測ディスパッチャに接続した。
+ * `authority`/`topic`の値は `src/content/guides/**` のfrontmatター（data-content担当が
+ * 作成済み、本ページ未統合）と揃えてある。
+ *
+ * QA監査 M-1（2026-08-26、未対応・要人間判断）: `src/content/guides/**` には
+ * このページより詳しい出典付き解説（`procedure-differences-overview.md`の
+ * 「墓所返還の具体的な手順・必要書類・窓口を示す出典が現状ない」という留保を含む）が
+ * 存在するが、Content Collections化（`src/content.config.ts`の新設）を要するため、
+ * 統合時のリード判断では対応していない。本文の書き換えは編集内容の正確性に関わる
+ * ため、事実判断としてリード（人間）へ報告し、コードでの独断修正はしていない。
  */
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import { ROUTES } from '../../lib/routes';
@@ -37,7 +49,14 @@ const tamaOfficial = getSourceById('SRC-TAMA-OFFICIAL');
     {
       fuchuReburial && (
         <p>
-          <a href={fuchuReburial.url} rel="noopener" target="_blank">
+          <a
+            href={fuchuReburial.url}
+            rel="noopener"
+            target="_blank"
+            data-event="official_procedure_click"
+            data-authority="fuchu_city"
+            data-topic="reburial"
+          >
             {fuchuReburial.publisher}公式ページ「{fuchuReburial.title}」を見る
           </a>
           <br />
@@ -55,7 +74,14 @@ const tamaOfficial = getSourceById('SRC-TAMA-OFFICIAL');
     {
       tamaWorkNotice && (
         <p>
-          <a href={tamaWorkNotice.url} rel="noopener" target="_blank">
+          <a
+            href={tamaWorkNotice.url}
+            rel="noopener"
+            target="_blank"
+            data-event="official_procedure_click"
+            data-authority="tokyo_park_association"
+            data-topic="grave_work_notice"
+          >
             {tamaWorkNotice.publisher}公式ページ「{tamaWorkNotice.title}」を見る
           </a>
           <br />
@@ -73,7 +99,14 @@ const tamaOfficial = getSourceById('SRC-TAMA-OFFICIAL');
     {
       tamaOfficial && (
         <p>
-          <a href={tamaOfficial.url} rel="noopener" target="_blank">
+          <a
+            href={tamaOfficial.url}
+            rel="noopener"
+            target="_blank"
+            data-event="official_procedure_click"
+            data-authority="tokyo_park_association"
+            data-topic="overview"
+          >
             {tamaOfficial.publisher}公式ページ「{tamaOfficial.title}」を見る
           </a>
           <br />

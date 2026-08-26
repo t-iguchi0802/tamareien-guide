@@ -6,6 +6,8 @@
 User-agent: *
 Allow: /
 
-# 実際のsitemap生成はPhase 1のスコープ外。
-# パスのみ仮に記載（本番origin確定後に絶対URLへ更新が必要）。
-Sitemap: /sitemap-index.xml
+# 実際のsitemap生成はPhase 1のスコープ外（@astrojs/sitemap等が未導入）。
+# QA監査D-3（2026-08-26）: 未生成のsitemap-index.xmlをSitemap:行で参照すると
+# 本番公開時に404となりクロールエラーの原因になるため、生成されるまでの間は
+# 行自体を記載しない。sitemap生成を導入する際に本行を復活させ、
+# 本番origin確定後の絶対URLへ更新すること。
