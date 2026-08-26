@@ -1,0 +1,95 @@
+---
+/**
+ * 訂正・非掲載依頼への導線。
+ *
+ * 掲載基準・訂正窓口の実体は /about/（siteConfig.contact.correctionUrl）にある。
+ * スポンサー契約の有無に関わらず訂正を受け付けることを明示する
+ * （CLAUDE_CODE_HANDOFF.md 6章）。
+ * businessIdが渡された場合は、遷移先で対象事業者が分かるようクエリに残す
+ * （/about/ 側のフォーム実装は本コンポーネントの担当範囲外）。
+ */
+import '../../styles/tokens.css';
+import type { CorrectionCtaProps } from '../../types/components';
+import { siteConfig } from '../../lib/siteConfig';
+
+type Props = CorrectionCtaProps;
+const { businessId } = Astro.props;
+
+const href = businessId
+  ? `${siteConfig.contact.correctionUrl}?business=${encodeURIComponent(businessId)}`
+  : siteConfig.contact.correctionUrl;
+
+const pagePath = Astro.url.pathname;
+---
+
+<aside class="correction-cta" aria-label="掲載情報の訂正・非掲載依頼">
+  <p class="correction-cta__title">掲載情報に誤りがある場合</p>
+  <p class="correction-cta__body">
+    店舗名・住所・料金・対応状況などについて、事実と異なる情報にお気づきの場合はご連絡ください。
+    スポンサー契約の有無に関わらず、すべての掲載事業者について訂正・非掲載のご依頼を受け付けています。
+  </p>
+  <a
+    class="correction-cta__link"
+    data-event="correction_request_click"
+    data-page-path={pagePath}
+    data-business-id={businessId}
+    href={href}
+  >
+    訂正・非掲載を依頼する
+  </a>
+</aside>
+
+<style>
+  .correction-cta {
+    border: 1px solid var(--color-stone-line);
+    border-radius: var(--radius-card);
+    background: var(--color-surface);
+    padding: var(--space-4);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+  }
+
+  .correction-cta__title {
+    margin: 0;
+    font-family: var(--font-family-heading);
+    font-weight: 700;
+    font-size: 1.1rem;
+    color: var(--color-text);
+  }
+
+  .correction-cta__body {
+    margin: 0;
+    color: var(--color-text-muted);
+    font-size: var(--font-size-label);
+    line-height: 1.7;
+  }
+
+  .correction-cta__link {
+    align-self: flex-start;
+    display: inline-flex;
+    align-items: center;
+    min-height: var(--tap-target-min);
+    padding: 0.6em 1.25em;
+    margin-top: 0.25em;
+    border-radius: var(--radius-pill);
+    border: 1.5px solid var(--color-accent);
+    color: var(--color-accent);
+    font-weight: 700;
+    text-decoration: none;
+    background: transparent;
+    transition:
+      background-color 0.15s ease,
+      color 0.15s ease;
+  }
+
+  .correction-cta__link:hover {
+    background: var(--color-accent);
+    color: var(--color-surface);
+  }
+
+  .correction-cta__link:focus-visible {
+    outline: 3px solid var(--color-accent);
+    outline-offset: 2px;
+  }
+</style>

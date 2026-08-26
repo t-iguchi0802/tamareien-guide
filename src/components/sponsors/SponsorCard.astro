@@ -1,0 +1,109 @@
+---
+/**
+ * スポンサー枠のプレースホルダー。
+ *
+ * 実データ（isSponsored / campaignId 等）は data_dictionary.md 9章の通り
+ * 比較用JSONとは別データで管理する想定であり、本MVPでは未整備のため、
+ * 本コンポーネントは差し込み位置と見た目だけを用意する暫定実装である。
+ *
+ * 比較カード（BusinessCard）と混同されないよう、配色・枠線を明確に変え、
+ * 「広告」「スポンサー」の表記を必ず含める（CLAUDE.md 2章）。
+ * 掲載順・比較結果には一切影響しないことをUI上でも示す。
+ *
+ * Props契約: src/types/components.ts には未定義（スポンサー実データ未確定のため）。
+ * 実データ設計が固まった時点でリードに型契約の追加を検討してもらう
+ * （REPORT.mdに記載）。
+ */
+import '../../styles/tokens.css';
+
+export interface SponsorCardProps {
+  /** 広告主名（事業者名） */
+  name: string;
+  /** 広告主が用意した短い説明文（当サイトの中立要約とは別扱い） */
+  description: string;
+  /** 広告主サイトへのリンク */
+  href: string;
+}
+
+type Props = SponsorCardProps;
+const { name, description, href } = Astro.props;
+---
+
+<aside class="sponsor-card" aria-label="広告">
+  <p class="sponsor-card__flag">広告・スポンサー枠</p>
+  <p class="sponsor-card__name">{name}</p>
+  <p class="sponsor-card__description">{description}</p>
+  <a class="sponsor-card__link" href={href} target="_blank" rel="noopener noreferrer sponsored">
+    サイトを見る
+  </a>
+  <p class="sponsor-card__disclosure">
+    このスポンサー表示は、比較表の掲載順・対応状況の評価には影響しません。
+  </p>
+</aside>
+
+<style>
+  .sponsor-card {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+    background: var(--color-sponsor-bg);
+    border: 1.5px dashed var(--color-sponsor-border);
+    border-radius: var(--radius-card);
+    padding: var(--space-4);
+  }
+
+  .sponsor-card__flag {
+    align-self: flex-start;
+    margin: 0;
+    padding: 0.2em 0.6em;
+    border-radius: var(--radius-tag);
+    background: var(--color-sponsor-border);
+    color: var(--color-sponsor-fg);
+    font-size: var(--font-size-caption);
+    font-weight: 700;
+    letter-spacing: 0.02em;
+  }
+
+  .sponsor-card__name {
+    margin: 0;
+    font-family: var(--font-family-heading);
+    font-weight: 700;
+    font-size: 1.15rem;
+    color: var(--color-sponsor-fg);
+  }
+
+  .sponsor-card__description {
+    margin: 0;
+    color: var(--color-text);
+  }
+
+  .sponsor-card__link {
+    align-self: flex-start;
+    display: inline-flex;
+    align-items: center;
+    min-height: var(--tap-target-min);
+    padding: 0.6em 1.1em;
+    border-radius: var(--radius-pill);
+    background: var(--color-surface);
+    border: 1.5px solid var(--color-sponsor-border);
+    color: var(--color-sponsor-fg);
+    font-weight: 700;
+    text-decoration: none;
+  }
+
+  .sponsor-card__link:hover {
+    background: var(--color-sponsor-border);
+    color: var(--color-surface);
+  }
+
+  .sponsor-card__link:focus-visible {
+    outline: 3px solid var(--color-accent);
+    outline-offset: 2px;
+  }
+
+  .sponsor-card__disclosure {
+    margin: 0;
+    font-size: var(--font-size-caption);
+    color: var(--color-stone-text);
+  }
+</style>

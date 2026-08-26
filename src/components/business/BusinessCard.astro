@@ -1,0 +1,237 @@
+---
+/**
+ * 事業者カード（一覧・比較表で使用）。
+ *
+ * 表示方針:
+ * - listingTier（A/B）は品質評価ではない社内管理値のため画面には出さない
+ *   （data_dictionary.md 3章）。displayOrderも同様に非表示（推奨順位ではない）。
+ * - 星評価・独自ランキング・「おすすめ」等は一切追加しない。
+ * - 対応サービスのタグは「事業者が公開情報で確認できる対応」の事実列挙であり、
+ *   件数の多寡で優劣を主張する意図では使わない（並び順は serviceKeys の定義順）。
+ * - 電話が未確認の場合はPhoneLinkを描画せず、「公開情報では未確認」の文言で示す
+ *   （data_dictionary.md 5章）。
+ * - 地図リンクは、確認済みの住所文字列から検索クエリを組み立てる
+ *   （座標・徒歩分数等の独自推定は行わない）。
+ */
+import '../../styles/tokens.css';
+import type { BusinessCardProps } from '../../types/components';
+import type { ServiceKey } from '../../types/business';
+import OutboundLink from '../access/OutboundLink.astro';
+import PhoneLink from '../access/PhoneLink.astro';
+import MapLink from '../access/MapLink.astro';
+import { SERVICE_LABELS } from './serviceLabels';
+
+type Props = BusinessCardProps;
+const { business } = Astro.props;
+
+const UNCONFIRMED_TEXT = '公開情報では未確認';
+
+const confirmedServiceKeys = (Object.keys(SERVICE_LABELS) as ServiceKey[]).filter(
+  (key) => business.services[key] === 'confirmed',
+);
+
+const addressText = [
+  business.location.prefecture,
+  business.location.city,
+  business.location.addressLine,
+]
+  .filter(Boolean)
+  .join('');
+const mapHref = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
+  `${business.name} ${addressText}`,
+)}`;
+
+const primaryOutbound = business.contact.websiteUrl
+  ? {
+      href: business.contact.websiteUrl,
+      linkType: 'official_site' as const,
+      label: '公式サイトを見る',
+    }
+  : business.contact.directoryUrl
+    ? {
+        href: business.contact.directoryUrl,
+        linkType: 'directory' as const,
+        label: '掲載ページを見る',
+      }
+    : null;
+
+const showSeparateContact =
+  business.contact.contactUrl && business.contact.contactUrl !== business.contact.websiteUrl;
+---
+
+<article class="business-card" data-business-id={business.id}>
+  <header class="business-card__header">
+    <h3 class="business-card__name">{business.name}</h3>
+    <p class="business-card__meta">
+      {business.location.city}
+      {
+        business.location.nearestGateStatus === 'confirmed' && business.location.nearestGate && (
+          <>・{business.location.nearestGate}</>
+        )
+      }
+      {business.founded && <>・創業 {business.founded}</>}
+    </p>
+  </header>
+
+  <p class="business-card__summary">{business.summary}</p>
+
+  {
+    confirmedServiceKeys.length > 0 && (
+      <div class="business-card__services">
+        <p class="business-card__services-label">公開情報で確認できる対応</p>
+        <ul class="business-card__service-tags">
+          {confirmedServiceKeys.map((key) => (
+            <li class="service-tag">{SERVICE_LABELS[key]}</li>
+          ))}
+        </ul>
+      </div>
+    )
+  }
+
+  {
+    business.credentials.length > 0 && (
+      <ul class="business-card__credentials">
+        {business.credentials.map((credential) => (
+          <li>{credential}</li>
+        ))}
+      </ul>
+    )
+  }
+
+  <div class="business-card__contact-row">
+    {
+      business.contact.phone ? (
+        <PhoneLink businessId={business.id} phone={business.contact.phone} />
+      ) : (
+        <p class="business-card__unconfirmed-note">電話番号: {UNCONFIRMED_TEXT}</p>
+      )
+    }
+  </div>
+
+  <footer class="business-card__cta-row">
+    {
+      primaryOutbound && (
+        <OutboundLink
+          businessId={business.id}
+          linkType={primaryOutbound.linkType}
+          href={primaryOutbound.href}
+          label={primaryOutbound.label}
+        />
+      )
+    }
+    <MapLink businessId={business.id} href={mapHref} />
+    {
+      showSeparateContact && business.contact.contactUrl && (
+        <span class="business-card__secondary-cta">
+          <OutboundLink
+            businessId={business.id}
+            linkType="contact"
+            href={business.contact.contactUrl}
+            label="問い合わせページを見る"
+          />
+        </span>
+      )
+    }
+  </footer>
+</article>
+
+<style>
+  .business-card {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-top: 4px double var(--color-stone-line);
+    border-radius: var(--radius-card);
+    padding: var(--space-6);
+  }
+
+  .business-card__header {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2em;
+  }
+
+  .business-card__name {
+    margin: 0;
+    font-family: var(--font-family-heading);
+    font-weight: 700;
+    font-size: var(--font-size-card-title);
+    letter-spacing: 0.01em;
+    color: var(--color-text);
+  }
+
+  .business-card__meta {
+    margin: 0;
+    color: var(--color-stone-text);
+    font-size: var(--font-size-label);
+  }
+
+  .business-card__summary {
+    margin: 0;
+    color: var(--color-text);
+  }
+
+  .business-card__services {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+  }
+
+  .business-card__services-label {
+    margin: 0;
+    font-size: var(--font-size-caption);
+    color: var(--color-stone-text);
+    font-weight: 700;
+  }
+
+  .business-card__service-tags {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+  }
+
+  .service-tag {
+    border: 1px solid var(--color-status-confirmed-border);
+    background: var(--color-status-confirmed-bg);
+    color: var(--color-status-confirmed-fg);
+    border-radius: var(--radius-tag);
+    padding: 0.3em 0.6em;
+    font-size: var(--font-size-label);
+  }
+
+  .business-card__credentials {
+    margin: 0;
+    padding-left: 1.2em;
+    color: var(--color-text-muted);
+    font-size: var(--font-size-label);
+  }
+
+  .business-card__unconfirmed-note {
+    margin: 0;
+    color: var(--color-status-unconfirmed-fg);
+    font-size: var(--font-size-label);
+  }
+
+  .business-card__cta-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-3);
+    padding-top: var(--space-2);
+    border-top: 1px solid var(--color-stone-line-soft);
+  }
+
+  .business-card__secondary-cta :global(.outbound-link) {
+    background: transparent;
+    color: var(--color-accent);
+  }
+
+  .business-card__secondary-cta :global(.outbound-link:hover) {
+    background: var(--color-accent-soft);
+    border-color: var(--color-accent);
+  }
+</style>

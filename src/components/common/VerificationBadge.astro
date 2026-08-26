@@ -1,0 +1,114 @@
+---
+/**
+ * 確認状態バッジ。
+ *
+ * 表示文言は必ず statusToDisplayLabel() を経由する。
+ * コンポーネント側で独自の文言変換・略語化を行わない
+ * （not_confirmedを「非対応」に見せないための最重要ルールの実装上の担保）。
+ *
+ * 配色は「非対応」ではなく「未確認」であることが伝わるよう、
+ * not_confirmedには赤系ではなく中立な石色を用いる（src/styles/tokens.css）。
+ * アイコンは装飾（aria-hidden）で、読み上げ・比較の根拠は必ずテキストに置く。
+ */
+import '../../styles/tokens.css';
+import type { VerificationBadgeProps } from '../../types/components';
+import { statusToDisplayLabel } from '../../lib/data/verificationStatus';
+
+type Props = VerificationBadgeProps;
+const { status } = Astro.props;
+
+const label = statusToDisplayLabel(status);
+
+const toneClass: Record<typeof status, string> = {
+  confirmed: 'is-confirmed',
+  not_confirmed: 'is-unconfirmed',
+  explicitly_not_offered: 'is-notoffered',
+  not_applicable: 'is-na',
+};
+---
+
+<span class:list={['verification-badge', toneClass[status]]} data-status={status}>
+  <svg class="verification-badge__icon" viewBox="0 0 16 16" aria-hidden="true" focusable="false">
+    {
+      status === 'confirmed' && (
+        <path
+          d="M3 8.5l3 3 7-7"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.8"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        />
+      )
+    }
+    {
+      status === 'not_confirmed' && (
+        <>
+          <circle cx="8" cy="8" r="6" fill="none" stroke="currentColor" stroke-width="1.4" />
+          <text x="8" y="11" text-anchor="middle" font-size="9" fill="currentColor" stroke="none">
+            ?
+          </text>
+        </>
+      )
+    }
+    {
+      status === 'explicitly_not_offered' && (
+        <path
+          d="M4 8h8"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.8"
+          stroke-linecap="round"
+        />
+      )
+    }
+    {status === 'not_applicable' && <circle cx="8" cy="8" r="1.6" fill="currentColor" />}
+  </svg>
+  <span class="verification-badge__label">{label}</span>
+</span>
+
+<style>
+  .verification-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35em;
+    padding: 0.3em 0.65em;
+    border-radius: var(--radius-tag);
+    border: 1px solid transparent;
+    font-size: var(--font-size-label);
+    line-height: 1.3;
+    font-weight: 600;
+    white-space: normal;
+  }
+
+  .verification-badge__icon {
+    width: 1em;
+    height: 1em;
+    flex: none;
+  }
+
+  .is-confirmed {
+    color: var(--color-status-confirmed-fg);
+    background: var(--color-status-confirmed-bg);
+    border-color: var(--color-status-confirmed-border);
+  }
+
+  .is-unconfirmed {
+    color: var(--color-status-unconfirmed-fg);
+    background: var(--color-status-unconfirmed-bg);
+    border-color: var(--color-status-unconfirmed-border);
+    border-style: dashed;
+  }
+
+  .is-notoffered {
+    color: var(--color-status-notoffered-fg);
+    background: var(--color-status-notoffered-bg);
+    border-color: var(--color-status-notoffered-border);
+  }
+
+  .is-na {
+    color: var(--color-status-na-fg);
+    background: var(--color-status-na-bg);
+    border-color: var(--color-status-na-border);
+  }
+</style>
