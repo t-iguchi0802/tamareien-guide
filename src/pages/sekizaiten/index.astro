@@ -1,0 +1,49 @@
+---
+/**
+ * 14社の一覧・比較表。
+ * 正本: CLAUDE_CODE_HANDOFF.md 5章 / src/lib/routes.ts ROUTES.sekizaiten
+ */
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { siteConfig } from '../../lib/siteConfig';
+import { ROUTES } from '../../lib/routes';
+import { getBusinesses } from '../../lib/data';
+import ComparisonTable from '../_partials/ComparisonTable.astro';
+import { ALL_SERVICE_KEYS } from '../_lib/business-display';
+
+const businesses = getBusinesses();
+const pageTitle = '石材店一覧・比較';
+const description =
+  '多磨霊園周辺の石材店・お墓関連事業者14社を、公開情報のみで全12サービスの対応状況を比較します。';
+---
+
+<BaseLayout title={pageTitle} description={description}>
+  <h1>{pageTitle}</h1>
+  <p>
+    多磨霊園周辺の石材店・お墓関連事業者{businesses.length}社について、公開されている情報のみを基準に12種類のサービスへの対応状況を比較しています。「○
+    公開確認済み」以外は対応がないという意味ではなく、公開ページ上で確認できなかったことを示します。詳しくは各事業者へ直接ご確認ください。
+  </p>
+  <p>
+    {siteConfig.officialDisclaimer} 掲載順は事業者の推奨順位ではありません。詳しくは<a
+      href={ROUTES.about.path}>運営方針・掲載基準</a
+    >をご覧ください。
+  </p>
+
+  <section aria-labelledby="comparison-heading">
+    <h2 id="comparison-heading">全事業者・全サービス比較</h2>
+    <ComparisonTable
+      businesses={businesses}
+      visibleServices={ALL_SERVICE_KEYS}
+      caption={`多磨霊園周辺の石材店${businesses.length}社の全サービス対応状況`}
+    />
+  </section>
+
+  <section aria-labelledby="links-heading">
+    <h2 id="links-heading">関連ページ</h2>
+    <ul>
+      <li><a href={ROUTES.hakajimai.path}>墓じまい・墓石撤去の比較を見る</a></li>
+      <li><a href={ROUTES.kanri.path}>墓所管理・清掃・供花の比較を見る</a></li>
+      <li><a href={ROUTES.tetsuzuki.path}>改葬・墓所返還などの手続きを見る</a></li>
+      <li><a href={ROUTES.sources.path}>情報源・最終確認日を見る</a></li>
+    </ul>
+  </section>
+</BaseLayout>

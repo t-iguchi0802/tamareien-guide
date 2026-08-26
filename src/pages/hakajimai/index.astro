@@ -1,0 +1,52 @@
+---
+/**
+ * 墓じまい・墓石撤去の比較と見積項目。
+ * 正本: CLAUDE_CODE_HANDOFF.md 5章 / src/lib/routes.ts ROUTES.hakajimai
+ */
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { ROUTES } from '../../lib/routes';
+import { getBusinesses } from '../../lib/data';
+import ComparisonTable from '../_partials/ComparisonTable.astro';
+import PriceList from '../_partials/PriceList.astro';
+
+const businesses = getBusinesses();
+const serviceKeys = ['grave_closure', 'reburial_support'] as const;
+const pageTitle = '墓じまい・墓石撤去の比較';
+const description =
+  '墓じまい・墓石撤去、改葬の手続支援について、公開情報で確認できる事業者の対応状況と見積項目を比較します。';
+---
+
+<BaseLayout title={pageTitle} description={description}>
+  <h1>{pageTitle}</h1>
+  <p>
+    墓じまい（墓石の解体・撤去）と、改葬にともなう手続支援について、公開ページで確認できた対応状況をまとめています。実際の見積りは現地確認が必要になることが一般的です。行政手続き（改葬許可申請等）については<a
+      href={ROUTES.tetsuzuki.path}>手続きの案内ページ</a
+    >をご覧ください。
+  </p>
+
+  <section aria-labelledby="hakajimai-comparison-heading">
+    <h2 id="hakajimai-comparison-heading">対応状況の比較</h2>
+    <ComparisonTable
+      businesses={businesses}
+      visibleServices={[...serviceKeys]}
+      caption="墓じまい・改葬手続支援の対応状況"
+    />
+  </section>
+
+  <section aria-labelledby="hakajimai-price-heading">
+    <h2 id="hakajimai-price-heading">見積り・価格の目安</h2>
+    <p>
+      公開ページ上に金額の記載がある場合のみ、以下に「◯円〜」の形式で表示します。固定価格ではなく、墓所の広さ・立地・現況等により変動する場合があります。
+    </p>
+    <PriceList businesses={businesses} serviceKeys={[...serviceKeys]} />
+  </section>
+
+  <section aria-labelledby="hakajimai-checklist-heading">
+    <h2 id="hakajimai-checklist-heading">見積りを依頼する前に</h2>
+    <p>
+      墓石の広さや搬出経路、行政手続きの要否によって見積り内容は変わります。個別の事業者・墓所ごとの正確な項目や金額は、上の比較表・価格の目安を参考に、各事業者へ直接ご確認ください。行政手続き（改葬許可申請等）の詳細は<a
+        href={ROUTES.tetsuzuki.path}>手続きの案内ページ</a
+      >の公式リンクからご確認ください。
+    </p>
+  </section>
+</BaseLayout>

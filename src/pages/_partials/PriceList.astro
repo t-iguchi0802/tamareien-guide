@@ -1,0 +1,103 @@
+---
+/**
+ * 公開価格一覧（指定したserviceKeysに該当するpublishedPricesのみ表示）。
+ * data_dictionary.md 7章: 「〜」の価格を固定価格として表示せず、
+ * 必ず「◯円〜」＋条件を併記する。
+ *
+ * `_partials` はAstroのルーティング対象外。
+ */
+import type { Business, ServiceKey } from '../../types/business';
+import { getSourceById } from '../../lib/data';
+import { SERVICE_LABELS, formatPriceFrom } from '../_lib/business-display';
+
+interface Props {
+  businesses: Business[];
+  serviceKeys: ServiceKey[];
+}
+
+const { businesses, serviceKeys } = Astro.props;
+
+const rows = businesses.flatMap((business) =>
+  business.publishedPrices
+    .filter((price) => serviceKeys.includes(price.serviceKey))
+    .map((price) => ({ business, price, source: getSourceById(price.sourceId) })),
+);
+---
+
+{
+  rows.length > 0 ? (
+    <div class="price-list__scroll">
+      <table class="price-list">
+        <caption>公開情報で確認できた価格の目安（税込・税別や条件は事業者ごとに異なります）</caption>
+        <thead>
+          <tr>
+            <th scope="col">事業者名</th>
+            <th scope="col">項目</th>
+            <th scope="col">金額の目安</th>
+            <th scope="col">単位</th>
+            <th scope="col">税込区分</th>
+            <th scope="col">条件</th>
+            <th scope="col">出典</th>
+          </tr>
+        </thead>
+        <tbody>
+          {rows.map(({ business, price, source }) => (
+            <tr>
+              <th scope="row">{business.name}</th>
+              <td>{SERVICE_LABELS[price.serviceKey]}（{price.label}）</td>
+              <td>{formatPriceFrom(price.amountFromJpy)}</td>
+              <td>{price.unit}</td>
+              <td>
+                {price.taxIncluded === true
+                  ? '税込確認済み'
+                  : price.taxIncluded === false
+                    ? '税別確認済み'
+                    : '公開情報では未確認'}
+              </td>
+              <td>{price.conditions}</td>
+              <td>
+                {source ? (
+                  <a href={source.url} rel="noopener" target="_blank">
+                    {source.publisher}（確認日 {source.checked_at}）
+                  </a>
+                ) : (
+                  '出典情報なし'
+                )}
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  ) : (
+    <p>
+      現時点で、公開ページ上に金額の記載を確認できた事業者はありません。掲載がないことは対応していないことを意味しません。詳しい金額は各事業者へ直接お問い合わせください。
+    </p>
+  )
+}
+
+<style>
+  .price-list__scroll {
+    overflow-x: auto;
+  }
+  .price-list {
+    border-collapse: collapse;
+    width: 100%;
+    min-width: 640px;
+  }
+  .price-list caption {
+    text-align: left;
+    font-weight: 700;
+    margin-bottom: var(--space-2, 0.5rem);
+  }
+  .price-list th,
+  .price-list td {
+    border: 1px solid var(--color-border, #dcdcd4);
+    padding: var(--space-2, 0.5rem) var(--space-3, 0.75rem);
+    text-align: left;
+    vertical-align: top;
+  }
+  .price-list thead th {
+    background: var(--color-accent-soft, #e7ede8);
+  }
+</style>

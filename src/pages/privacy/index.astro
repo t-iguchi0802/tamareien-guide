@@ -1,0 +1,67 @@
+---
+/**
+ * プライバシーポリシー。
+ * 正本: CLAUDE_CODE_HANDOFF.md 5章 / src/lib/routes.ts ROUTES.privacy
+ *
+ * GA4のIDは環境変数管理（feature/seo-analytics担当）であり未設定の可能性がある。
+ * ここでは「導入する場合がある」という控えめな一般的記述にとどめ、
+ * 断定的な法的主張はしない。
+ */
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { siteConfig } from '../../lib/siteConfig';
+import { ROUTES } from '../../lib/routes';
+
+const pageTitle = 'プライバシーポリシー';
+const description = '当サイトにおけるアクセス解析・個人情報の取り扱いについての一般的な方針です。';
+const lastUpdated = '2026-08-26';
+---
+
+<BaseLayout title={pageTitle} description={description}>
+  <h1>{pageTitle}</h1>
+  <p>最終更新日: {lastUpdated}</p>
+
+  <p>{siteConfig.officialDisclaimer}</p>
+
+  <section aria-labelledby="privacy-scope-heading">
+    <h2 id="privacy-scope-heading">このページについて</h2>
+    <p>
+      このページは、当サイト（{siteConfig.name}）における個人情報・アクセス情報の取り扱いについての一般的な考え方をまとめたものです。法律上の助言を行うものではありません。内容についてご質問がある場合は<a
+        href={ROUTES.about.path}>運営方針ページ</a
+      >の窓口までお問い合わせください。
+    </p>
+  </section>
+
+  <section aria-labelledby="privacy-analytics-heading">
+    <h2 id="privacy-analytics-heading">アクセス解析について</h2>
+    <p>
+      当サイトでは、サイトの利用状況を把握する目的で、Googleアナリティクス4（GA4）等のアクセス解析ツールを導入する場合があります。導入する場合、閲覧ページ、参照元、おおよその地域、使用端末の種類など、個人を特定しない形式の情報がツール提供元（Google等）に送信されることがあります。これらのツールはCookie等の技術を利用する場合があります。
+    </p>
+    <p>
+      アクセス解析の具体的な設定状況（有効・無効、計測項目）は、サイトの運用状況により変わることがあります。ブラウザの設定により、Cookieの利用を制限・拒否することも可能です。
+    </p>
+  </section>
+
+  <section aria-labelledby="privacy-personal-heading">
+    <h2 id="privacy-personal-heading">個人情報の取り扱い</h2>
+    <p>
+      当サイトは、口コミ投稿・会員登録・見積り一括送信等の機能を提供していません。掲載情報の訂正のご連絡をいただく際にご提供いただいた連絡先等の情報は、訂正対応の目的の範囲内でのみ利用し、目的外に利用しません。
+    </p>
+    <p>
+      掲載している事業者の名称・住所・電話番号等は、各事業者が公開している情報をもとに整理したものです。個人（担当者個人等）に関する情報は掲載していません。
+    </p>
+  </section>
+
+  <section aria-labelledby="privacy-links-heading">
+    <h2 id="privacy-links-heading">外部サイトへのリンク</h2>
+    <p>
+      当サイトには、各事業者の公式サイトや行政機関の公式ページへのリンクを含みます。リンク先のサイトにおける個人情報の取り扱いについては、それぞれのサイトのプライバシーポリシー等をご確認ください。
+    </p>
+  </section>
+
+  <section aria-labelledby="privacy-changes-heading">
+    <h2 id="privacy-changes-heading">このページの変更</h2>
+    <p>
+      このページの内容は、サイトの運用状況や関連法令の動向に応じて、予告なく変更する場合があります。
+    </p>
+  </section>
+</BaseLayout>
