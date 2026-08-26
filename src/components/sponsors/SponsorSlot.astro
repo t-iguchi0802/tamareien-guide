@@ -1,0 +1,153 @@
+---
+/**
+ * 広告スポンサー枠（1枠）。
+ *
+ * 2026-08-26 レイアウト刷新: 中央本文内の「スポンサー」セクション
+ * （1〜4件のグリッド／0件時の「地域スポンサー募集中」案内）を廃止し、
+ * PC幅では中央本文の左右に本コンポーネントを2枠ずつ・計4枠配置する
+ * 構成へ変更した（配置自体は呼び出し側のsrc/pages/index.astroが担当し、
+ * このコンポーネントは「1枠の中身」だけに責務を絞る）。
+ *
+ * - 契約済みスポンサーが無い枠は「広告」ラベル＋「スポンサー枠」の
+ *   文字だけを表示する（仮の企業名・推薦文・ロゴを創作しない）。
+ * - 4枠は常に同じ大きさ・同じ扱いで、埋まっている枠を優先表示したり
+ *   強調したりしない（呼び出し側もdisplayOrder以外で並べ替えない）。
+ * - 通常掲載（BusinessCard/ServiceFilter）とは完全に分離しており、
+ *   検索条件・絞り込み結果を一切参照しない。
+ * - 計測: 実際にスポンサーが入っている枠の外部リンクにのみ
+ *   `data-event="sponsor_click"` を付与する（空枠はリンクを持たないため
+ *   計測対象にならない）。表示回数（sponsor_impression）は呼び出し側
+ *   （index.astro）のIntersectionObserverが `data-sponsor-id` を持つ
+ *   枠だけを対象に送信する。
+ * - 有料リンクには `rel="sponsored"` を付与する。
+ *
+ * ルート要素は`<aside>`ではなく`<div>`にしている。`<aside>`は
+ * 既定でcomplementaryランドマークになり、4枠とも同名（無名）の
+ * ランドマークが並ぶ状態はaxeの`landmark-unique`に抵触する
+ * （実機検証で検出・修正）。呼び出し側の`.top-layout__rails`に
+ * `aria-label="広告"`を付けているため、個々の枠をランドマーク化する
+ * 必要はない。
+ */
+import '../../styles/tokens.css';
+import type { SponsorSlotProps } from '../../types/components';
+
+type Props = SponsorSlotProps;
+const { sponsor } = Astro.props;
+---
+
+<div
+  class="sponsor-slot"
+  data-sponsor-slot
+  data-sponsor-id={sponsor?.id}
+  data-campaign-id={sponsor?.campaignId}
+>
+  <p class="sponsor-slot__eyebrow">広告</p>
+  {
+    sponsor ? (
+      <div class="sponsor-slot__filled">
+        {sponsor.logoUrl && (
+          <img class="sponsor-slot__logo" src={sponsor.logoUrl} alt="" loading="lazy" width="32" height="32" />
+        )}
+        <p class="sponsor-slot__name">{sponsor.name}</p>
+        <p class="sponsor-slot__summary">{sponsor.summary}</p>
+        <a
+          class="sponsor-slot__link"
+          href={sponsor.websiteUrl}
+          target="_blank"
+          rel="noopener noreferrer sponsored"
+          data-event="sponsor_click"
+          data-sponsor-id={sponsor.id}
+          data-campaign-id={sponsor.campaignId}
+        >
+          サイトを見る
+          <span class="sr-only">（外部サイトを新しいタブで開きます）</span>
+        </a>
+      </div>
+    ) : (
+      <p class="sponsor-slot__placeholder">スポンサー枠</p>
+    )
+  }
+</div>
+
+<style>
+  .sponsor-slot {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+    min-height: 180px;
+    background: var(--color-sponsor-bg);
+    border: 1px solid var(--color-sponsor-border);
+    border-radius: var(--radius-card);
+    padding: var(--space-3);
+  }
+
+  .sponsor-slot__eyebrow {
+    margin: 0;
+    font-size: var(--font-size-caption);
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    color: var(--color-sponsor-fg);
+  }
+
+  .sponsor-slot__placeholder {
+    margin: auto 0 0;
+    color: var(--color-stone-text);
+    font-size: var(--font-size-label);
+  }
+
+  .sponsor-slot__filled {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4em;
+    flex: 1;
+  }
+
+  .sponsor-slot__logo {
+    flex: none;
+    width: 32px;
+    height: 32px;
+    object-fit: contain;
+    border-radius: 6px;
+    background: var(--color-surface);
+  }
+
+  .sponsor-slot__name {
+    margin: 0;
+    font-weight: 700;
+    font-size: 0.95rem;
+    color: var(--color-text);
+  }
+
+  .sponsor-slot__summary {
+    margin: 0;
+    color: var(--color-text);
+    font-size: var(--font-size-caption);
+    line-height: 1.5;
+  }
+
+  .sponsor-slot__link {
+    margin-top: auto;
+    align-self: flex-start;
+    display: inline-flex;
+    align-items: center;
+    min-height: var(--tap-target-min);
+    padding: 0.4em 0.9em;
+    border-radius: var(--radius-pill);
+    background: var(--color-surface);
+    border: 1.5px solid var(--color-sponsor-border);
+    color: var(--color-sponsor-fg);
+    font-weight: 700;
+    font-size: var(--font-size-caption);
+    text-decoration: none;
+  }
+
+  .sponsor-slot__link:hover {
+    background: var(--color-sponsor-border);
+    color: var(--color-surface);
+  }
+
+  .sponsor-slot__link:focus-visible {
+    outline: 3px solid var(--color-accent);
+    outline-offset: 2px;
+  }
+</style>

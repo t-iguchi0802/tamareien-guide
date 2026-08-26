@@ -53,7 +53,12 @@ export interface CorrectionCtaProps {
  * スポンサー枠実装時（2026-08-26）に追加。
  * 通常掲載（BusinessCardProps）とは別の型契約とし、
  * 事業者データと広告契約データを混同しないようにする。
+ *
+ * レイアウト刷新（2026-08-26）: 中央本文左右の4枠固定レイアウトに
+ * 合わせ、`sponsor: Sponsor` から `sponsor: Sponsor | null` へ変更した
+ * （契約が無い枠は`null`を渡し、「スポンサー枠」というプレースホルダーを
+ * 表示する。4枠を常に同じ大きさ・同じ扱いで表示するための変更）。
  */
-export interface SponsorCardProps {
-  sponsor: Sponsor;
+export interface SponsorSlotProps {
+  sponsor: Sponsor | null;
 }

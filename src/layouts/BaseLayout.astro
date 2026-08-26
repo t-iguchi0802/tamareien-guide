@@ -24,6 +24,14 @@
  * - グローバル配色トークンを「温かい石色・生成り・深い緑・墨色」の配色に更新
  *   （変数名は変更せず、値のみ変更。他コンポーネントへの影響を局所化）。
  *   全ペアWCAG AA（4.5:1）以上のコントラストを確認済み。
+ *
+ * 公開前仕上げ修正（2026-08-26）: フッターが画面幅いっぱいに左寄せで
+ * 表示される（`.site-main`と揃わない）問題を修正した。`.site-footer`
+ * 直下に`.site-footer__inner`を追加し、`.site-main`と同じ960pxを
+ * 上限に`margin-inline: auto`で中央配置した。ナビゲーションはPCでは
+ * 中央揃えで折り返し、480px以下では2列グリッドに切り替える。
+ * 非公式表記はフッター内で1箇所のみ（`.site-footer__disclaimer`）に
+ * 保っている（重複させない）。
  */
 import { siteConfig } from '../lib/siteConfig';
 import { ROUTES } from '../lib/routes';
@@ -76,18 +84,20 @@ const pageTitle = title === siteConfig.name ? title : `${title}｜${siteConfig.n
     </main>
 
     <footer class="site-footer">
-      <p class="site-footer__disclaimer">{siteConfig.officialDisclaimer}</p>
-      <nav class="site-footer__nav" aria-label="フッターメニュー">
-        <a href={ROUTES.top.path}>トップ</a>
-        <a href={ROUTES.sekizaiten.path}>石材店一覧・比較</a>
-        <a href={ROUTES.hakajimai.path}>墓じまい</a>
-        <a href={ROUTES.kanri.path}>墓所管理</a>
-        <a href={ROUTES.tetsuzuki.path}>手続き</a>
-        <a href={ROUTES.about.path}>運営方針・掲載基準・広告方針・訂正窓口</a>
-        <a href={ROUTES.sources.path}>情報源・最終確認日</a>
-        <a href={ROUTES.privacy.path}>プライバシーポリシー</a>
-      </nav>
-      <p class="site-footer__copyright">&copy; {new Date().getFullYear()} {siteConfig.name}</p>
+      <div class="site-footer__inner">
+        <p class="site-footer__disclaimer">{siteConfig.officialDisclaimer}</p>
+        <nav class="site-footer__nav" aria-label="フッターメニュー">
+          <a href={ROUTES.top.path}>トップ</a>
+          <a href={ROUTES.sekizaiten.path}>石材店一覧・比較</a>
+          <a href={ROUTES.hakajimai.path}>墓じまい</a>
+          <a href={ROUTES.kanri.path}>墓所管理</a>
+          <a href={ROUTES.tetsuzuki.path}>手続き</a>
+          <a href={ROUTES.about.path}>運営方針・掲載基準・広告方針・訂正窓口</a>
+          <a href={ROUTES.sources.path}>情報源・最終確認日</a>
+          <a href={ROUTES.privacy.path}>プライバシーポリシー</a>
+        </nav>
+        <p class="site-footer__copyright">&copy; {new Date().getFullYear()} {siteConfig.name}</p>
+      </div>
     </footer>
 
     <script>
@@ -189,11 +199,27 @@ const pageTitle = title === siteConfig.name ? title : `${title}｜${siteConfig.n
     color: var(--color-text-muted);
   }
 
-  .site-header__nav,
-  .site-footer__nav {
+  .site-header__nav {
     display: flex;
     flex-wrap: wrap;
     gap: var(--space-4);
+  }
+
+  .site-footer__nav {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: var(--space-4);
+  }
+
+  @media (max-width: 480px) {
+    .site-footer__nav {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      justify-items: center;
+      text-align: center;
+      column-gap: var(--space-3);
+    }
   }
 
   .disclaimer-banner,
@@ -218,6 +244,17 @@ const pageTitle = title === siteConfig.name ? title : `${title}｜${siteConfig.n
     color: var(--color-text-muted);
     font-size: 0.9rem;
   }
+
+  .site-footer__inner {
+    max-width: 960px;
+    margin-inline: auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-3);
+    text-align: center;
+  }
+
   .site-footer__copyright {
     margin-top: var(--space-4);
   }
