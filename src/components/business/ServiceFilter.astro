@@ -47,9 +47,16 @@ const businessFilterData = businesses.map((business) => ({
 }));
 ---
 
-<section class="service-filter" aria-labelledby="service-filter-heading" data-filter-mode={mode} data-filter-target={targetPath ?? ''}>
+<section
+  class="service-filter"
+  aria-labelledby="service-filter-heading"
+  data-filter-mode={mode}
+  data-filter-target={targetPath ?? ''}
+>
   <div class="service-filter__purpose">
-    <h2 id="service-filter-heading" class="service-filter__heading">まず、近いものを選んでください</h2>
+    <h2 id="service-filter-heading" class="service-filter__heading">
+      まず、近いものを選んでください
+    </h2>
     <p class="service-filter__hint">
       選ぶと、下の「くわしい条件」が自動でチェックされます。あとから条件を追加・変更することもできます。
     </p>
@@ -106,7 +113,8 @@ const businessFilterData = businesses.map((business) => ({
 
   <div class="service-filter__result">
     <p class="service-filter__result-text" aria-live="polite">
-      選んだ条件について対応を確認できた石材店 <strong data-result-count>{businesses.length}</strong>件
+      選んだ条件について対応を確認できた石材店 <strong data-result-count>{businesses.length}</strong
+      >件
     </p>
     <button
       type="button"
@@ -149,7 +157,12 @@ const businessFilterData = businesses.map((business) => ({
     )
   }
 
-  <script type="application/json" data-service-filter-data set:html={JSON.stringify(businessFilterData)} is:inline />
+  <script
+    type="application/json"
+    data-service-filter-data
+    set:html={JSON.stringify(businessFilterData)}
+    is:inline
+  />
 
   <script>
     interface FilterBusiness {
@@ -163,8 +176,12 @@ const businessFilterData = businesses.map((business) => ({
 
       const dataEl = root.querySelector('[data-service-filter-data]');
       const businessData: FilterBusiness[] = dataEl ? JSON.parse(dataEl.textContent || '[]') : [];
-      const checkboxes = Array.from(root.querySelectorAll<HTMLInputElement>('input[data-filter-checkbox]'));
-      const purposeButtons = Array.from(root.querySelectorAll<HTMLButtonElement>('[data-purpose-button]'));
+      const checkboxes = Array.from(
+        root.querySelectorAll<HTMLInputElement>('input[data-filter-checkbox]'),
+      );
+      const purposeButtons = Array.from(
+        root.querySelectorAll<HTMLButtonElement>('[data-purpose-button]'),
+      );
       const clearButton = root.querySelector<HTMLButtonElement>('[data-filter-clear]');
       const resultCountEl = root.querySelector('[data-result-count]');
       const emptyEl = root.querySelector<HTMLElement>('[data-filter-empty]');
