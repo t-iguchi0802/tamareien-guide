@@ -1,0 +1,49 @@
+---
+/**
+ * GA4（gtag.js）読み込み用の任意コンポーネント。
+ *
+ * `PUBLIC_GA_MEASUREMENT_ID` が未設定の場合は何も出力しない
+ * （GA4未設定でもサイトが壊れない、を<head>レベルで担保する）。
+ *
+ * 統合方法（レイアウト/ページ担当が必要と判断した場合のみ、<head>内で使用）:
+ *
+ * ```astro
+ * ---
+ * import GaTag from '../lib/analytics/GaTag.astro';
+ * ---
+ * <head>
+ *   <GaTag />
+ * </head>
+ * ```
+ *
+ * このコンポーネント自体はどのレイアウト/ページにも組み込まれていない
+ * （src/layouts/** はリード共有のため、seo-analytics担当からは変更しない）。
+ * 統合はレイアウト/ページ担当・リードが行う。
+ *
+ * 実装メモ: 未設定時はfrontmatterで早期return（何も描画しない）する。
+ * `{measurementId && (<script>...)}` のようにscriptタグをJSX式で条件分岐
+ * すると、prettier-plugin-astroがscript内の`{`/`}`を式コンテナの一部として
+ * 誤認しSyntaxErrorになる既知の制約があるため、早期returnで回避している。
+ *
+ * 所有者: feature/seo-analytics（src/lib/analytics/**）
+ */
+import { getGaMeasurementId } from './config';
+
+const measurementId = getGaMeasurementId();
+
+if (!measurementId) {
+  return;
+}
+---
+
+<script is:inline async src={`https://www.googletagmanager.com/gtag/js?id=${measurementId}`}
+></script>
+<script is:inline define:vars={{ measurementId }}>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(...args) {
+    window.dataLayer.push(args);
+  }
+  window.gtag = gtag;
+  gtag('js', new Date());
+  gtag('config', measurementId);
+</script>
