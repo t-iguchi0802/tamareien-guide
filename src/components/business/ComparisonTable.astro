@@ -12,6 +12,13 @@
  *
  * 各セルの状態表示は VerificationBadge を必ず経由する
  * （statusToDisplayLabel()の唯一の経路を守るため、テーブル側で文言を作らない）。
+ *
+ * 公開前仕上げ修正（2026-08-26）: `.comparison-table__scroll`
+ * （横スクロール領域）に `tabindex="0"` `role="region"` `aria-label` を付与し、
+ * axeの`scrollable-region-focusable`（serious）を解消した。キーボード利用者が
+ * Tabでこの領域へフォーカスし、矢印キー等でスクロールできるようにするための
+ * 追加であり、見た目・スマートフォンでのタッチスクロール操作は変更していない
+ * （`:focus-visible`のアウトラインはキーボード操作時のみ表示される）。
  */
 import '../../styles/tokens.css';
 import type { ComparisonTableProps } from '../../types/components';
@@ -27,7 +34,12 @@ const { businesses, visibleServices } = Astro.props;
     「公開情報では未確認」は非対応という意味ではなく、事業者の公開情報で対応の有無を確認できていないことを示します。
   </p>
 
-  <div class="comparison-table__scroll">
+  <div
+    class="comparison-table__scroll"
+    tabindex="0"
+    role="region"
+    aria-label={`比較表（横にスクロールできます）: 石材店${businesses.length}社のサービス対応状況`}
+  >
     <table class="comparison-table__table">
       <caption class="sr-only">
         多磨霊園周辺の石材店・お墓関連事業者{businesses.length}社のサービス対応状況の比較表
@@ -111,6 +123,11 @@ const { businesses, visibleServices } = Astro.props;
     overflow-x: auto;
     border: 1px solid var(--color-stone-line);
     border-radius: var(--radius-card);
+  }
+
+  .comparison-table__scroll:focus-visible {
+    outline: 3px solid var(--color-accent);
+    outline-offset: -3px;
   }
 
   .comparison-table__table {

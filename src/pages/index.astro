@@ -20,6 +20,15 @@
  * 直後、通常の事業者一覧（このページでは「一覧を見る」CTA＋当サイトについて
  * セクション）の前に<SponsorSection>を配置する。絞り込み状態・検索結果とは
  * 一切連動しない、独立したセクションとする。
+ *
+ * 公開前仕上げ修正（2026-08-26）: 「公開情報をもとに整理しています」という
+ * 趣旨の説明が、このページの「当サイトについて」セクションと /sekizaiten/
+ * とで異なる文言により重複していたため、指定の推奨文へ統一し、
+ * このページの上部（ヒーロー直下）に1回だけ表示するよう移動した
+ * （下部の「当サイトについて」からは同趣旨の文を削除し、リンク段落のみ残す）。
+ * 「事業者への確認で得た情報は、確認後に随時反映します」という文言により、
+ * 事前ヒアリングを実施済みであるとは述べていない（今後確認が得られた場合の
+ * 反映方針を示すのみ）。
  */
 import BaseLayout from '../layouts/BaseLayout.astro';
 import { siteConfig } from '../lib/siteConfig';
@@ -36,6 +45,9 @@ const sponsors = getActiveSponsors();
   <section class="hero" aria-labelledby="hero-heading">
     <h1 id="hero-heading" class="hero__heading">多磨霊園のお墓のことを、目的から探す</h1>
     <p class="hero__lead">墓石建立、墓じまい、管理・清掃。公開情報を同じ基準で整理しました。</p>
+    <p class="hero__note">
+      掲載情報は、各社のWebサイト等で確認できた公開情報をもとに整理しています。事業者への確認で得た情報は、確認後に随時反映します。
+    </p>
   </section>
 
   <hr class="masonry-rule" />
@@ -52,12 +64,9 @@ const sponsors = getActiveSponsors();
     <h2 id="trust-heading">当サイトについて</h2>
     <p>{siteConfig.officialDisclaimer}</p>
     <p>
-      多磨霊園周辺の石材店・お墓関連事業者{businesses.length}社について、公開情報のみをもとに中立に整理しています。事前ヒアリングやスポンサー営業は行っていません。掲載順は事業者の推奨順位ではありません。
-    </p>
-    <p>
-      掲載基準・広告方針・訂正窓口は<a href={ROUTES.about.path}>運営方針ページ</a>を、情報源と最終確認日は<a
-        href={ROUTES.sources.path}>情報源ページ</a
-      >をご覧ください。
+      多磨霊園周辺の石材店・お墓関連事業者{businesses.length}社を掲載しています。掲載順は事業者の推奨順位ではありません。掲載基準・広告方針・訂正窓口は<a
+        href={ROUTES.about.path}>運営方針ページ</a
+      >を、情報源と最終確認日は<a href={ROUTES.sources.path}>情報源ページ</a>をご覧ください。
     </p>
   </section>
 </BaseLayout>
@@ -80,6 +89,12 @@ const sponsors = getActiveSponsors();
   .hero__lead {
     margin: 0;
     font-size: 1.15rem;
+    color: var(--color-stone-text);
+  }
+
+  .hero__note {
+    margin: var(--space-3) 0 0;
+    font-size: var(--font-size-label, 0.9375rem);
     color: var(--color-stone-text);
   }
 
