@@ -41,6 +41,9 @@
  *   同じ4要素をCSSだけで配置し直している。
  * - スポンサー表示は検索条件・検索結果件数を一切参照せず、絞り込み操作の
  *   前後でも内容・DOM構造が変化しないことをQAで確認する。
+ * - QA監査 M-1（2026-08-27）対応: 4枠のDOM順は「見出し→検索条件→広告→
+ *   当サイトについて」とし、1279px以下での視覚順（検索条件の直後に広告）
+ *   と一致させた（詳細は下記スタイル直前のコメント参照）。
  * - ヒーローに `public/images/hero-cemetery-v1.png`
  *   （多磨霊園を実際に撮影したものではない、雰囲気を伝えるための画像）を
  *   背景として敷き、薄い生成りのオーバーレイで見出し・説明文の可読性を
@@ -80,22 +83,17 @@ const sponsorSlots = [sponsors[0] ?? null, sponsors[1] ?? null, sponsors[2] ?? n
       <hr class="masonry-rule" />
     </div>
 
-    <section aria-labelledby="trust-heading" class="trust top-layout__trust">
-      <h2 id="trust-heading">当サイトについて</h2>
-      <p>{siteConfig.officialDisclaimer}</p>
-      <p>
-        多磨霊園周辺の石材店・お墓関連事業者{businesses.length}社を掲載しています。掲載順は事業者の推奨順位ではありません。掲載基準・広告方針・訂正窓口は<a
-          href={ROUTES.about.path}>運営方針ページ</a
-        >を、情報源と最終確認日は<a href={ROUTES.sources.path}>情報源ページ</a>をご覧ください。
-      </p>
-    </section>
-
     <!--
-      スポンサー4枠はDOM上ここ（本文の最後）に置き、grid-areaで
-      デスクトップ幅では左右のレールへ、タブレット/スマホでは検索条件の
-      直後へ視覚的に配置し直す。キーボード・スクリーンリーダーの読み上げ順は
-      「見出し→検索条件→当サイトについて→広告」となり、広告が主要な
-      操作の手前に割り込まないようにしている。
+      QA監査 M-1（2026-08-27）対応: 以前はこのdivを本文の最後（trustの後）に
+      置いていたが、1279px以下ではgrid-areaにより検索条件とtrustの「間」に
+      視覚的に配置されるため、DOM順（＝キーボードのTab順）と視覚順が
+      食い違っていた（sponsors.jsonが空でリンクを持たない現在は無症状だが、
+      実際のスポンサーリンクが入ると、trust内のリンクへ到達した直後に
+      画面上で1つ上にあるスポンサーへ視覚的に「後戻り」する形になる）。
+      視覚順と一致させるため、DOM上もfilterとtrustの間に移動した。
+      PC幅（1280px以上）ではgrid-areaが左右レールへ配置し直すため、
+      このDOM位置の変更によるデスクトップ表示への影響はない
+      （grid-areaによる配置はDOM順に依存しない）。
     -->
     <div class="top-layout__rails" data-sponsor-root aria-label="広告">
       <div class="sponsor-rail sponsor-rail--left">
@@ -107,6 +105,16 @@ const sponsorSlots = [sponsors[0] ?? null, sponsors[1] ?? null, sponsors[2] ?? n
         <SponsorSlot sponsor={sponsorSlots[3]} />
       </div>
     </div>
+
+    <section aria-labelledby="trust-heading" class="trust top-layout__trust">
+      <h2 id="trust-heading">当サイトについて</h2>
+      <p>{siteConfig.officialDisclaimer}</p>
+      <p>
+        多磨霊園周辺の石材店・お墓関連事業者{businesses.length}社を掲載しています。掲載順は事業者の推奨順位ではありません。掲載基準・広告方針・訂正窓口は<a
+          href={ROUTES.about.path}>運営方針ページ</a
+        >を、情報源と最終確認日は<a href={ROUTES.sources.path}>情報源ページ</a>をご覧ください。
+      </p>
+    </section>
   </div>
 
   <script>
