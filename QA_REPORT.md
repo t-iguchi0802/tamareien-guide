@@ -1,204 +1,251 @@
-# QA_REPORT.md — feature/editorial-redesign 独立QA監査
+# QA_REPORT.md
 
-> **本レポートは `feature/editorial-redesign` ブランチ（`integrated-mvp` から分岐、
-> commit `1fbc397`「redesign: TOP/石材店一覧を『目的から探す』地域ガイドへ全面再設計」まで）
-> を対象にした独立QA監査である。旧 `QA_REPORT.md`（`integrated-mvp` 監査分）は本内容で
-> 上書きした。過去の監査内容が必要な場合は git 履歴（`d043381` 時点の `QA_REPORT.md`）を参照すること。**
+**監査対象ブランチ**: `feature/sponsor-and-responsive-qa`（`integrated-mvp` から分岐、コミット `f44a607` まで）
+**監査担当**: 独立QAエージェント（`feature/qa` ワークツリー）
+**監査日**: 2026-08-26
+**監査範囲**: (1) TOPページへのスポンサー枠実装、(2) レスポンシブQA（360/390/768/1024/1440px）
 
-- 担当: QA（`feature/qa` 相当の独立監査エージェント）
-- 対象: `feature/editorial-redesign`（TOPページ・`/sekizaiten/` の全面再設計）
-- 実施日: 2026-08-26
-- 変更範囲（diff統計）: `src/layouts/BaseLayout.astro`,
-  `src/styles/tokens.css`, `src/components/business/BusinessCard.astro`,
-  `src/components/business/ServiceFilter.astro`（新規）,
-  `src/components/business/serviceLabels.ts`,
-  `src/pages/index.astro`, `src/pages/sekizaiten/index.astro`,
-  `src/pages/_lib/business-display.ts`（GOAL_GROUPS削除）の8ファイル。
-- 実施内容:
-  - `npm run build` / `npm run check` / `npm run lint` の再実行（クリーン確認）。
-  - `PURPOSE_GROUPS` と `ServiceKey` union の全数照合。
-  - `ServiceFilter.astro` の絞り込みロジック（`applyFilter`）のコード読解 +
-    **実ブラウザでの動作検証**（Playwright + Chromiumを一時的に
-    `npm install --no-save` で導入し、本レポート作成後に `npm uninstall --no-save`
-    で削除。`package.json` / `package-lock.json` は無変更であることを確認済み）。
-    AND条件を2パターン手計算し、実際のクリック操作の結果と突き合わせて一致を確認。
-  - `dist/` 出力（`sekizaiten/index.html` / `index.html` 等）の埋め込みJSON・
-    コンパイル済みCSSの詳細度を直接検査。
-  - 360px / 768px / 1440px でのスクリーンショット取得・目視確認（TOP・/sekizaiten/）。
-  - キーボードのみでのTab順序・フォーカスリング表示を実機（Chromium）で確認。
-  - WCAG AA コントラスト比の計算検証（Node.jsで相対輝度式を実装し、
-    `tokens.css` コメント内の計算済み値と照合）。
-  - `businesses.json` / `sources.csv` / `data_dictionary.md` の無変更確認
-    （`git diff integrated-mvp..HEAD` が空）。
-  - `src/data/**` とルート正本の内容一致確認（`diff` で完全一致）。
-  - GA4 `data-event` 属性と `src/lib/analytics/dispatcher.ts` の契約の突き合わせ。
+本レポートは `feature/sponsor-and-responsive-qa` の差分（`git diff --stat integrated-mvp..HEAD`）
+に基づく監査結果である。差分は以下11ファイルに限定されており、想定スコープ（TOPページ・共有基盤のみ）
+と一致することを確認済み。
 
-## サマリー
+```text
+src/components/sponsors/SponsorCard.astro
+src/components/sponsors/SponsorSection.astro
+src/data/sponsors.json
+src/lib/analytics/dispatcher.ts
+src/lib/analytics/events.ts
+src/lib/data/index.ts
+src/lib/data/loadSponsors.ts
+src/pages/index.astro
+src/types/analytics.ts
+src/types/components.ts
+src/types/sponsor.ts
+```
+
+`businesses.json` / `sources.csv` / `data_dictionary.md` は `git diff integrated-mvp..HEAD` で差分ゼロを確認。
+`src/data/businesses.json` / `src/data/sources.csv` はルート正本と完全一致（`diff` で確認）。
+検証作業中に一時的に `npm install -D playwright @axe-core/playwright --no-save` および
+`src/data/sponsors.json` へのテストデータ投入を行ったが、検証後に `package.json` /
+`package-lock.json` が無変更であることを確認し（diffゼロ）、`src/data/sponsors.json` は
+空配列 `{ "schemaVersion": "1.0.0", "sponsors": [] }` に復元し、一時パッケージも
+アンインストール済みである。
+
+---
+
+## サマリー（重大度別）
 
 | 重大度 | 件数 |
 |---|---:|
 | Critical | 0 |
 | Major | 0 |
-| Medium | 1 |
+| Medium | 1（このブランチの変更対象外・既存コンポーネントの問題） |
 | Minor | 1 |
-| Info | 2 |
+| Info | 複数（正常性確認の記録） |
 
-**結論**: CLAUDE.md の絶対厳守ルール（`not_confirmed` の非対応表示化禁止、非公式表記の
-全ページ表示、広告と比較の分離、事実データ非改変、事業者データの手書き複製禁止、
-`sourceId` 整合性）について、明確な違反は見つからなかった。`npm run build` /
-`npm run check` / `npm run lint` はすべてクリーン。`PURPOSE_GROUPS` は12
-`ServiceKey` を過不足・重複なく分類しており、絞り込みのAND条件は実ブラウザ検証で
-手計算と一致した。`.business-card[hidden]` のCSS詳細度問題は正しく修正されていることを
-コンパイル後CSSで確認した。`businesses.json` / `sources.csv` / `data_dictionary.md`
-および `src/data/**` の複製は無改変・完全一致だった。
+**結論**: 今回の変更範囲（スポンサー枠実装・TOPページ配置）において、Critical/Major な問題は
+見つからなかった。スポンサーと通常掲載データの分離、`not_confirmed`表示規則の非侵犯、
+広告表記・`rel="sponsored"`・料金非表示・GA4計測・0/1/4件時の表示・displayOrder順の
+先頭4件切り詰めロジックは、いずれもコードレビューと実ブラウザ（Playwright/Chromium）検証の
+両方で意図通りに動作することを確認した。
 
-見つかった問題は、TOPページでの重複ランドマーク構造（Medium）1件と、
-新規ファイルのPrettier未整形（Minor、機能に影響なし）、および参考情報2件のみである。
+検出した1件（Medium）は、このブランチの変更ファイルには含まれない共有コンポーネント
+（`ComparisonTable.astro`、/kanri/ページ）の既存アクセシビリティ課題であり、
+このブランチが原因ではない（`integrated-mvp` から変更されていないファイル）。
+念のため報告する。
 
 ---
 
 ## Medium
 
-### M-1: TOPページで `<section aria-labelledby="service-filter-heading">` が二重にネストしている
+### M-1: `.comparison-table__scroll`（ComparisonTable.astro）が axe の `scrollable-region-focusable` に抵触（このブランチの変更対象外）
 
 - **再現手順**:
-  1. `npm run build` 後、`dist/index.html` を開く。
-  2. `<section aria-labelledby="service-filter-heading">` を検索する。
-  3. 同じ `aria-labelledby="service-filter-heading"` を持つ `<section>` が
-     入れ子になって2つ出現することを確認する（外側: `src/pages/index.astro`
-     が用意した `<section>`、内側: `ServiceFilter.astro` 自身のルート `<section
-     class="service-filter">`）。
-
-  実際の出力（`dist/index.html` から抜粋）:
-
-  ```html
-  <section aria-labelledby="service-filter-heading" data-astro-cid-lcdefpme>
-    <section class="service-filter" aria-labelledby="service-filter-heading" ...>
-      ...
-    </section>
-  </section>
-  ```
-
-- **重大度**: Medium（アクセシビリティ構造の不備。axe-core の `landmark-unique`
-  相当のルールに抵触しうる。同一の役割・同一のアクセシブルネームを持つ
-  ランドマークが入れ子になっており、スクリーンリーダーのランドマークナビゲーションで
-  同じ名前の領域が二重に読み上げられる可能性がある。機能停止やデータ誤表示は
-  伴わないため Critical/Major ではない）。
-- **対象ファイル**:
-  - `src/pages/index.astro`（30〜33行目付近、`<section
-    aria-labelledby="service-filter-heading"><ServiceFilter .../></section>`）
-  - `src/components/business/ServiceFilter.astro`（50行目、
-    コンポーネント自身のルート `<section class="service-filter"
-    aria-labelledby="service-filter-heading" ...>`）
-- **推奨修正**（要人間判断・リード対応）: `ServiceFilter.astro` 自身が
-  見出し付きの `<section>` ランドマークを既に提供しているため、
-  `index.astro` 側の外側 `<section aria-labelledby="service-filter-heading">`
-  を削除し、単なる非ランドマーク要素（`<div>`）にするか、あるいは
-  `index.astro` 側にラップ用のsectionを残す場合は `ServiceFilter.astro`
-  側のmode="link"のときだけルート要素を `<div>`にする等、いずれか一方の
-  ランドマークだけを残す設計に統一する。なお `/sekizaiten/` 側
-  (`src/pages/sekizaiten/index.astro`) は `<ServiceFilter mode="inline" />`
-  を直接呼び出しており、この二重ネスト問題は発生していない（TOPページのみの
-  問題）。
+  1. `npm run build && npm run preview -- --port 4321`
+  2. `/kanri/` を1024×900のビューポートで開く。
+  3. `@axe-core/playwright` の `AxeBuilder({ page }).analyze()` を実行する。
+  4. `scrollable-region-focusable`（impact: serious）が
+     `.comparison-table__scroll` 要素に対して1件検出される
+     （「Element should have focusable content」「Element should be focusable」）。
+- **重大度**: Medium（axeでは serious 判定だが、既存コンポーネントの問題でありこのブランチの
+  差分に含まれないため、本ブランチのマージ判断には影響しない想定。可視性のため報告する）
+- **対象ファイル**: `src/components/business/ComparisonTable.astro`
+  （`git diff --stat integrated-mvp..HEAD` に含まれないファイル。`/sekizaiten/` `/hakajimai/` では
+  検証時のビューポート幅でテーブルが折り返さずaxeに検出されなかったが、同じコンポーネントを
+  使っているため、より狭い幅では同様に発生する可能性がある）
+- **推奨修正**: 横スクロール領域となる `div.comparison-table__scroll` に
+  `tabindex="0"` と `role="region"` +　`aria-label`（例: 「比較表（横スクロール可能）」）を付与し、
+  キーボードのみでもスクロール操作ができるようにする。このブランチの担当範囲外のため、
+  `ui-components` または元のページ実装担当への差し戻しを推奨する。
 
 ---
 
 ## Minor
 
-### N-1: 新規ファイル `ServiceFilter.astro` がPrettier未整形
+### m-1: 非公式表記の掲載箇所数がページによって異なる（このブランチとは無関係、既存仕様）
 
-- **再現手順**: `npm run format:check` を実行する。`src/components/business/ServiceFilter.astro`
-  が整形対象として警告される。
-- **重大度**: Minor（ビルド・lint・型チェックには影響しない。`npm run
-  format:check` はCLAUDE.md 6章のコマンド一覧には含まれるが、本ブランチの
-  重点確認項目・`npm run build`/`check`/`lint` の合否には含まれない）。
-- **対象ファイル**: `src/components/business/ServiceFilter.astro`
-- **補足**: `integrated-mvp` の時点で既に40ファイルがPrettier未整形の状態であり
-  （`BaseLayout.astro` / `BusinessCard.astro` / `serviceLabels.ts` /
-  `index.astro` / `sekizaiten/index.astro` / `business-display.ts` /
-  `tokens.css` を含む）、これは本ブランチ以前からの既存事象である。本ブランチが
-  新たに未整形化させたのは新規ファイル `ServiceFilter.astro` の1件のみ
-  （`integrated-mvp` と `feature/editorial-redesign` の
-  `format:check` 対象ファイル一覧を `diff` して確認済み）。
-- **推奨修正**: リード側で `npm run format` を一括実行するタイミングで
-  まとめて解消してよい（本ブランチ固有の緊急対応は不要）。
+- **再現手順**: `dist/*/index.html` に対し `grep -o "公式サイトではありません"` で
+  出現数を数えると、`/`・`/about/`・`/privacy/` は3回、他の5ページは2回出現する。
+- **重大度**: Minor（CLAUDE.mdの要求「全ページのヘッダー・フッターに常時表示」は
+  ヘッダー1回・フッター1回の計2回で満たされており、3回になっているページは
+  本文中に追加で `siteConfig.officialDisclaimer` を再掲しているだけで、
+  欠落ではなく重複表示。実害はないが、`BaseLayout.astro`（共有ファイル）を
+  経由しない箇所での重複表示は将来の文言修正時に更新漏れの温床になりうる）
+- **対象ファイル**: `src/pages/index.astro`（「当サイトについて」セクション内で
+  `{siteConfig.officialDisclaimer}` を再掲）、`src/pages/about/index.astro`、
+  `src/pages/privacy/index.astro`（このブランチの差分には含まれない）
+- **推奨修正**: 対応不要（現状で要件は満たしている）。将来的に文言を一本化したい場合のみ、
+  本文中の再掲を削除し「詳しくはヘッダー/フッター参照」等に変更することを検討。
 
 ---
 
-## Info（参考情報。対応不要または既存事象）
+## Info（正常性確認の記録）
 
-### I-1: Prettier未整形は `integrated-mvp` の時点から既存の全社的事象
+### I-1: ビルド・型チェック・Lint
 
-上述 N-1 参照。プロジェクト全体で40ファイル前後がPrettier未整形であり、
-本ブランチの変更対象8ファイルのうち7ファイル（`BaseLayout.astro` /
-`BusinessCard.astro` / `serviceLabels.ts` / `index.astro` /
-`sekizaiten/index.astro` / `business-display.ts` / `tokens.css`）は
-編集前から既に未整形だった。対応するなら本ブランチ固有ではなく
-プロジェクト全体の整形として実施するのが妥当（要人間判断）。
+- `npm run check`: 0 errors / 0 warnings / 0 hints（50ファイル）
+- `npm run lint`: エラー・警告なし
+- `npm run build`: `src/data/sponsors.json` が空配列の状態で成功（8ページ生成）
 
-### I-2: チェックボックスの check/uncheck が同一の `filter_value` でGA4計測される
+### I-2: スポンサーデータの分離
 
-`ServiceFilter.astro` のチェックボックスは `data-filter-value={key}`
-が固定値であり、`change` イベントはチェックON/OFFどちらでも発火する
-（`checkboxes.forEach((cb) => cb.addEventListener('change', applyFilter))`
-とは別に、`autoInit`/`dispatcher.ts` 側の `change` リスナーが同じ要素から
-`comparison_filter_use { filter_type: "service", filter_value: <key> }` を
-毎回送信する）。CLAUDE.md / `CLAUDE_CODE_HANDOFF.md` のGA4契約は
-`filter_type`/`filter_value` の2属性のみを定義しており、ON/OFFの区別は
-契約上要求されていないため契約違反ではないが、GA4データを分析する際に
-「その条件をONにした」のか「OFFにした」のかを区別できない点は
-将来の分析設計上の注意点として記録する（要人間判断。対応不要の可能性が高い）。
+- `src/lib/data/index.ts` で `loadSponsors.ts` の `export *` は
+  `getBusinessDataset()` の検証・キャッシュ処理（`validated`フラグ、
+  `validateBusinessData()`）とは完全に独立していることをコードで確認。
+- `src/lib/data/loadSponsors.ts` は `businesses.json` / `schema.ts` /
+  `validate.ts` のいずれにも依存せず、独自の `sponsorDatasetSchema`（Zod）で
+  `src/data/sponsors.json` のみを検証する。
+- `getActiveSponsors()` は `getBusinesses()` / `ServiceFilter` の絞り込み状態を
+  一切参照しない（引数は `today: Date` のみ）。
+
+### I-3: `src/data/sponsors.json` の内容
+
+- 現状 `{ "schemaVersion": "1.0.0", "sponsors": [] }`（空配列）であることを確認。
+  実在しない企業名・推薦文の創作は無い。
+
+### I-4: 0件時の表示（実ブラウザ検証）
+
+- `npm run build`後の `dist/index.html` および `preview`起動中の実ブラウザで、
+  スポンサー0件時は4枠の空白ではなく「地域スポンサー募集中」の案内カードが
+  **1つだけ**表示されることを確認（`cardCount: 0, hasRecruit: true`）。
+- 料金・契約条件の記載は募集中カードに一切ない（本文に「円」「月額」等の語を含まない）。
+
+### I-5: `getActiveSponsors()` のロジック検証（一時テストデータ、検証後に空配列へ復元済み）
+
+一時的に以下8件のテストデータ（active/未来開始/期限切れ/5件超のケースを含む）を投入し、
+`npm run build` 後の `dist/index.html` に出力された `data-sponsor-id` を確認した。
+
+| id | active | periodStart | periodEnd | displayOrder | 結果 |
+|---|---|---|---|---|---|
+| test-sponsor-8 | true | 過去 | null | 0 | 表示（1位） |
+| test-sponsor-1 | true | 過去 | null | 1 | 表示（2位） |
+| test-sponsor-2 | true | 過去 | 未来 | 2 | 表示（3位） |
+| test-sponsor-3-inactive | **false** | 過去 | null | 3 | 除外（active=false） |
+| test-sponsor-4-future | true | **未来** | null | 4 | 除外（開始日未到来） |
+| test-sponsor-5-expired | true | 過去 | **過去** | 5 | 除外（終了日経過） |
+| test-sponsor-6 | true | 過去 | null | 6 | 表示（4位） |
+| test-sponsor-7 | true | 過去 | null | 7 | **切り詰めで除外**（有効5件中、displayOrder上位4件のみ表示） |
+
+実際に `dist/index.html` へ出力されたのは `test-sponsor-8, 1, 2, 6` の4件のみで、
+`displayOrder` 昇順・先頭4件への切り詰めが仕様通り動作することを確認した。
+`periodEnd: null`（終了日未定）のスポンサーが現在有効なら含まれることも確認した
+（test-sponsor-8, 1, 6はいずれも`periodEnd: null`）。
+
+検証後、`src/data/sponsors.json` を空配列に復元し、再ビルドして元の状態に戻したことを確認済み。
+
+### I-6: スポンサー表示と通常掲載の相互不干渉（実ブラウザ検証）
+
+- TOPページでスポンサー0件表示中に `ServiceFilter` の目的ボタンをクリックし、
+  絞り込み結果件数（`data-result-count`）が変化する一方、スポンサーセクション
+  （`.sponsor-card` / `.sponsor-recruit` の有無）は変化しないことを確認
+  （逆方向：絞り込み操作→スポンサー表示への影響なし）。
+- コードレビューでも、`SponsorSection.astro` / `getActiveSponsors()` が
+  `businesses` や絞り込み状態を一切引数に取らないことを確認済み
+  （順方向：スポンサー側→通常掲載側への影響もそもそも経路が存在しない）。
+
+### I-7: 広告表記・外部リンクのrel属性
+
+- スポンサーカード（1〜4件のテストデータで検証）全件に「広告・スポンサー」ラベル
+  （`.sponsor-card__eyebrow`）が表示されることを確認。
+- 「サイトを見る」リンクの `rel` 属性はすべて `"noopener noreferrer sponsored"`
+  （4件のテストデータで確認）。
+- 各カードに「掲載順・比較結果には影響しません。」という開示文を確認。
+
+### I-8: 料金・契約条件の非表示
+
+- `Sponsor`型（`src/types/sponsor.ts`）、`SponsorCard.astro`、`SponsorSection.astro`、
+  募集中カードのいずれにも料金フィールド・金額表記は存在しない。
+- 実ブラウザでTOPページの本文（`document.body.innerText`）に「円」「月額」の文字列が
+  含まれないことを確認（テストスポンサー表示中・0件時の両方）。
+
+### I-9: GA4計測（`window.gtag`モック、実ブラウザ）
+
+- `sponsor_impression`: スポンサーグリッドを表示→非表示→再表示と3回スクロール操作したが、
+  4件のスポンサーそれぞれについて **ちょうど1回ずつ**（計4回）しか発火しないことを確認
+  （`IntersectionObserver`の`unobserve()`によるガードが機能している）。
+- `sponsor_click`: 「サイトを見る」リンクのクリックで
+  `{ sponsor_id: "test-sponsor-8", campaign_id: "camp-8", page_path: "/" }` が
+  正しいパラメータで1回発火することを確認。
+- 検証は一時的に `playwright` を `--no-save` でインストールして実施し、
+  検証後にアンインストール、`package.json` / `package-lock.json` の無変更を
+  diffで確認済み。
+
+### I-10: レスポンシブ（360/390/768/1024/1440px、実ブラウザ）
+
+- 全8ページ×5ビューポートで `document.documentElement.scrollWidth === clientWidth`
+  （横スクロールなし）を確認（0件の逸脱）。
+- TOPページの目的ボタン（`.purpose-card`）・詳しい条件チェックボックスの実際の
+  タップ領域（`<label class="service-check">`、`<input>`自体ではなくラベル全体）は
+  360px幅で幅312px・高さ約51〜120pxであり、44px以上を満たすことを確認
+  （`<input>`要素自体は約15×15pxだが、`min-height: var(--tap-target-min)`を持つ
+  ラベル/ボタンが実際のタップ領域であるため問題なし。これはこのブランチの変更対象外
+  ＝`ServiceFilter.astro`の既存実装であり、正しく実装されていることの確認）。
+- スポンサーカードは1件・2件・4件いずれの件数でも `max-width: 260px` の制約により
+  カードサイズが揃い、間延びや崩れが無いことを1440px幅で確認
+  （4件時: 全カード260×283px、1件時: 単一カードも260px幅で崩れなし）。
+- `/sekizaiten/` を390px・1024pxで開き横スクロールが発生しないことを確認
+  （比較表・事業者カードのレイアウト自体はこのブランチの変更対象外）。
+- キーボードのみでTabキーを送出し、スポンサーの「サイトを見る」リンクへ
+  フォーカスが到達すること、および`:focus-visible`のアウトライン定義
+  （`outline: 3px solid var(--color-accent)`）がCSSに存在することを確認。
+
+### I-11: axe-core相当のアクセシビリティスキャン（`@axe-core/playwright`、一時導入）
+
+- 全8ページ（1024×900）でスキャンし、critical/serious違反は `/kanri/` の
+  M-1（既存コンポーネント、このブランチの差分外）1件のみ。
+  それ以外の7ページ（`/`, `/sekizaiten/`, `/hakajimai/`, `/tetsuzuki/`, `/about/`,
+  `/sources/`, `/privacy/`）は critical/serious 違反0件。
+- 検証後、`@axe-core/playwright` と `playwright` はアンインストール済み。
+  `package.json` / `package-lock.json` は無変更（diffゼロ）。
+
+### I-12: `not_confirmed`表示・非公式表記・事業者データの独立確認（このブランチとは無関係の一般確認）
+
+- `dist/sekizaiten/index.html` 内の「非対応」という文字列は、
+  「非対応という意味ではなく、事業者の公開情報で対応の有無を確認できていないことを示します。」
+  という**説明文の一部としてのみ**出現し、状態そのものを「非対応」と誤表示している箇所はない。
+- 非公式表記は全8ページのヘッダー・フッター双方に存在（`grep -o`で各ページ2回以上を確認）。
+- `businesses.json` / `src/data/businesses.json` に内部運営メモ相当の文字列
+  （`notes_internal`, `internal_note`, 「営業メモ」「交渉メモ」「苦情」等）は検出されなかった。
+- `evidenceSourceIds` / `publishedPrices[].sourceId` はすべて `sources.csv` の
+  `source_id`（30件）に存在することをNode.jsスクリプトで独立検証（欠落0件）。
 
 ---
 
-## 重点確認項目チェックリスト（すべてPASS。詳細は上記参照）
+## 検証環境・実施コマンド（再現用メモ）
 
-| # | 項目 | 結果 |
-|---|---|---|
-| 1 | `npm run check` / `npm run lint` / `npm run build` | PASS（すべてクリーン） |
-| 2 | `PURPOSE_GROUPS` が12 `ServiceKey` を過不足・重複なく分類 | PASS（build:4 + closure:2 + care:6 = 12、重複なし） |
-| 3 | 絞り込みAND条件の正しさ | PASS（コード読解＋実ブラウザ検証で2パターン手計算と一致。詳細下記） |
-| 4 | 未選択時に14社すべてが対象 | PASS（`!hasSelection` 分岐、実ブラウザで件数14を確認） |
-| 5 | `.business-card[hidden]` のCSS詳細度 | PASS（コンパイル後CSSで `.business-card[data-astro-cid-xxx][hidden]{display:none}` が `.business-card[data-astro-cid-xxx]{display:flex}` より高詳細度であることを確認） |
-| 6 | `:scope > [data-business-id]` がPhoneLink等を誤取得していないか | PASS（`:scope >` は直接の子要素のみに限定。PhoneLink/MapLink/OutboundLink/CorrectionCtaのdata-business-idはすべて子孫要素であり対象外） |
-| 7 | `not_confirmed` が「非対応」と誤認させる表現になっていないか | PASS（新しい文はconfirmedのみ列挙。0件時のフォールバック文言「現時点でありません（掲載情報は随時更新します）」も断定を避けている。実機スクリーンショットで確認） |
-| 8 | 重複する「公開情報で確認できる対応」見出しの削除 | PASS（該当文言はコード内コメントにのみ残存し、レンダリング結果には出現しない） |
-| 9 | スポンサー分離・主観語の不在 | PASS（新規コピーに「おすすめ」等の主観語なし。スポンサーコンポーネントは本ブランチで未使用） |
-| 10 | 全8ページで非公式表記がヘッダー・フッターにあるか | PASS（8ページ全てで確認。`BaseLayout.astro`以外のページは無変更） |
-| 11 | WCAG AA コントラスト | PASS（計算した全ペアが4.5:1以上。`tokens.css`コメント内の実測値「stone-text: stone-surface比5.28:1、paper比5.77:1」も計算により再現・確認） |
-| 12 | キーボード操作性 | PASS（Tab順序が論理的。目的ボタン・チェックボックス・クリアボタン・summaryはすべてネイティブ要素で、フォーカスリングも実機確認済み） |
-| 13 | `businesses.json` / `sources.csv` / `data_dictionary.md` 無変更 | PASS（`git diff integrated-mvp..HEAD` が空） |
-| 14 | `src/data` 複製とルート正本の一致 | PASS（`diff`で完全一致） |
-| 15 | GA4 `data-event`契約準拠 | PASS（`data-filter-type`/`data-filter-value`、イベント名`comparison_filter_use`が`dispatcher.ts`契約と一致） |
+```bash
+npm run check
+npm run lint
+npm run build
+npm run preview -- --port 4321   # 別プロセスで起動、検証後にPIDをkill
+npm install -D playwright@latest --no-save
+npx playwright install chromium
+npm install -D @axe-core/playwright@latest --no-save
+# Playwrightスクリプトでレスポンシブ・GA4・axeを検証（検証用一時スクリプトは
+# tests/**やscripts/qa/**配下に保存せず、作業完了後に削除済み）
+npm uninstall playwright @axe-core/playwright --no-save
+```
 
-### 補足: AND条件の実ブラウザ検証詳細
-
-`dist/sekizaiten/index.html` に埋め込まれたconfirmedサービスのみのJSONを元に、
-以下2パターンを手計算し、Playwright経由の実際のチェックボックス操作結果と
-突き合わせて一致を確認した。
-
-- **パターンA**: `new_grave` + `engraving` を選択 → 手計算7件
-  （toshimaya, koganeya, ishikatsu, fukaya, shibata, yamada, ishisei）。
-  実機操作結果も `result-count = 7`、可視カードIDも同一7件で一致。
-- **パターンB**: 目的ボタン「お墓を建てる・整える」
-  （`new_grave, engraving, renovation, seismic` の4条件AND）をクリック
-  → 手計算2件（ishikatsu, shibata）。実機操作結果も `result-count = 2` で一致。
-- 「条件をクリア」ボタン押下後は `result-count = 14`（全件）に復帰することを確認。
-
----
-
-## 監査時に発見しなかった主な確認事項（明示的に問題なしと判断）
-
-- TOPページは `<ServiceFilter mode="link">` を使い、14社カードグリッドを
-  複製描画していない（`dist/index.html` に `class="business-card"` が
-  0件であることを確認）。目的の「業者データベースではなく地域ガイド」という
-  設計方針に沿っている。
-- `/sekizaiten/` では14件の `data-business-id` がすべてユニークであり、
-  `businesses.json` の14社と一致（手書き複製やデータ改変の痕跡なし）。
-- 内部運営情報（`notes_internal` 相当、営業評価・交渉メモ等）の
-  混入は本ブランチ変更ファイル内に見つからなかった。
-- スポンサー表示は本ブランチの変更範囲に含まれておらず、比較結果・
-  掲載順への影響は確認されなかった。
-- GA4 Measurement ID未設定でも `npm run build` は成功し（本監査は
-  環境変数未設定のまま実施）、`GaTag.astro` は何も出力しないため
-  サイトは壊れない。
+`src/data/sponsors.json` は検証の一時期間のみテストデータに書き換え、
+検証後に `{ "schemaVersion": "1.0.0", "sponsors": [] }` へ復元し、
+`npm run build` で再ビルドして状態を確認済み。
