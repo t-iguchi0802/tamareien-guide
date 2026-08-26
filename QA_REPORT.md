@@ -1,251 +1,123 @@
 # QA_REPORT.md
 
-**監査対象ブランチ**: `feature/sponsor-and-responsive-qa`（`integrated-mvp` から分岐、コミット `f44a607` まで）
-**監査担当**: 独立QAエージェント（`feature/qa` ワークツリー）
-**監査日**: 2026-08-26
-**監査範囲**: (1) TOPページへのスポンサー枠実装、(2) レスポンシブQA（360/390/768/1024/1440px）
+**この監査の対象ブランチ: `feature/top-layout-sponsor-hero-footer`**
+（`integrated-mvp` から分岐、コミット `b25c2d1` まで）
 
-本レポートは `feature/sponsor-and-responsive-qa` の差分（`git diff --stat integrated-mvp..HEAD`）
-に基づく監査結果である。差分は以下11ファイルに限定されており、想定スコープ（TOPページ・共有基盤のみ）
-と一致することを確認済み。
+本レポートは、TOPページのPCスポンサー配置・ヒーロー背景画像・フッター中央化の
+変更を対象にした独立QA監査の結果である。過去の統合監査
+（`feature/sponsor-and-responsive-qa` 時点の指摘）はこのレポートで上書きしている。
+過去の指摘事項自体は該当コミット（`ce80239` 等）の履歴を参照すること。
 
-```text
-src/components/sponsors/SponsorCard.astro
-src/components/sponsors/SponsorSection.astro
-src/data/sponsors.json
-src/lib/analytics/dispatcher.ts
-src/lib/analytics/events.ts
-src/lib/data/index.ts
-src/lib/data/loadSponsors.ts
-src/pages/index.astro
-src/types/analytics.ts
-src/types/components.ts
-src/types/sponsor.ts
-```
-
-`businesses.json` / `sources.csv` / `data_dictionary.md` は `git diff integrated-mvp..HEAD` で差分ゼロを確認。
-`src/data/businesses.json` / `src/data/sources.csv` はルート正本と完全一致（`diff` で確認）。
-検証作業中に一時的に `npm install -D playwright @axe-core/playwright --no-save` および
-`src/data/sponsors.json` へのテストデータ投入を行ったが、検証後に `package.json` /
-`package-lock.json` が無変更であることを確認し（diffゼロ）、`src/data/sponsors.json` は
-空配列 `{ "schemaVersion": "1.0.0", "sponsors": [] }` に復元し、一時パッケージも
-アンインストール済みである。
+監査日: 2026-08-27
+監査者: 独立QA担当エージェント（`feature/qa` 相当、worktreeなしでブランチを直接チェックアウトして実施）
+検証方法: Astro公式ビルド/型検査/lint、Playwright（一時導入・検証後アンインストール済み）による
+実機スクリーンショット・キーボード操作・DOM構造・axe-core自動監査・Canvasによる実画素コントラスト計算。
 
 ---
 
-## サマリー（重大度別）
+## 総合判定
 
-| 重大度 | 件数 |
-|---|---:|
-| Critical | 0 |
-| Major | 0 |
-| Medium | 1（このブランチの変更対象外・既存コンポーネントの問題） |
-| Minor | 1 |
-| Info | 複数（正常性確認の記録） |
+**Critical / Major な指摘なし。ビルド・型・lint・axeはすべてクリーン。**
+Medium 1件（視覚順序とフォーカス順序の不一致、スポンサー契約後に顕在化する潜在バグ）、
+Info/要人間判断を数件報告する。
 
-**結論**: 今回の変更範囲（スポンサー枠実装・TOPページ配置）において、Critical/Major な問題は
-見つからなかった。スポンサーと通常掲載データの分離、`not_confirmed`表示規則の非侵犯、
-広告表記・`rel="sponsored"`・料金非表示・GA4計測・0/1/4件時の表示・displayOrder順の
-先頭4件切り詰めロジックは、いずれもコードレビューと実ブラウザ（Playwright/Chromium）検証の
-両方で意図通りに動作することを確認した。
+---
 
-検出した1件（Medium）は、このブランチの変更ファイルには含まれない共有コンポーネント
-（`ComparisonTable.astro`、/kanri/ページ）の既存アクセシビリティ課題であり、
-このブランチが原因ではない（`integrated-mvp` から変更されていないファイル）。
-念のため報告する。
+## 実施結果サマリー
+
+| 項目 | 結果 |
+|---|---|
+| `npm run build` | 成功（8ページ生成、データ検証込み） |
+| `npm run check`（astro check） | 0 errors / 0 warnings / 0 hints |
+| `npm run lint`（eslint） | エラーなし |
+| 360/390/768/1024/1280/1440/1920pxでの横スクロール | すべて `scrollWidth === clientWidth`（横スクロールなし） |
+| axe-core（全8ページ×1440/1024/768/390/360px = 40通り） | violations 0件（スポンサー1〜4件の仮データ投入時も0件、`landmark-unique`含め問題なし） |
+| ヒーロー背景画像上のテキストコントラスト（実画像画素で実測） | 最悪ケースで `--color-stone-text` 側 約4.66〜4.72:1、`--color-text`（見出し）側 約10.48〜10.62:1。いずれもWCAG AA（4.5:1）を満たす。コードコメントの「4.69:1」という記載は実測でほぼ裏付けられた |
+| `.site-main`最大幅拡張のCSS分離 | TOPページの `index.*.css` バンドルにのみ含まれ、他7ページのHTMLは同バンドルを読み込んでいないことを確認 |
+| `businesses.json` / `sources.csv` / `data_dictionary.md` | `git diff integrated-mvp..HEAD` で完全に差分なし（`src/data/`の作業コピー含む） |
+| `src/data/sponsors.json` | 変更なし（`sponsors: []`）。検証のため一時的に4件のテストデータを投入したが、検証後に元の空配列へ復元し、`npm run build`で最終状態を確認済み |
+| package.json / package-lock.json | axe-core検証用に `playwright` 等を `--no-save` で一時導入・使用後にアンインストール。`git diff`で無変更を確認済み |
+| スポンサー表示とフィルタ操作の分離 | 目的ボタンクリック・条件クリアの前後で `[data-sponsor-root]` のDOM（outerHTML）が完全に一致することを実機確認 |
+| 非公式表記 | 全8ページで最低2回（ヘッダー＋フッター）出現を確認。`/about/`と`/privacy/`は3回（本文中にも記載があるため） |
+| `not_confirmed`の表示 | `/sekizaiten/`で「公開情報では未確認」185箇所、「非対応」は「『公開情報では未確認』は非対応という意味ではなく」という説明文の中の1箇所のみで、誤変換なし（本ブランチの変更範囲外だが念のため確認） |
+| ヒーロー画像の実際の撮影地表示 | `<section>`の`background-image`として実装されており`<img alt>`は存在しない。ページ内文言・HTMLのどこにも「多磨霊園を撮影した」という主張はなく、「画像はイメージです」の注記が常時表示される |
 
 ---
 
 ## Medium
 
-### M-1: `.comparison-table__scroll`（ComparisonTable.astro）が axe の `scrollable-region-focusable` に抵触（このブランチの変更対象外）
+### M-1. モバイル/タブレット幅（1279px以下）で、スポンサー枠の視覚的表示順とキーボードのフォーカス順が一致しない
 
-- **再現手順**:
-  1. `npm run build && npm run preview -- --port 4321`
-  2. `/kanri/` を1024×900のビューポートで開く。
-  3. `@axe-core/playwright` の `AxeBuilder({ page }).analyze()` を実行する。
-  4. `scrollable-region-focusable`（impact: serious）が
-     `.comparison-table__scroll` 要素に対して1件検出される
-     （「Element should have focusable content」「Element should be focusable」）。
-- **重大度**: Medium（axeでは serious 判定だが、既存コンポーネントの問題でありこのブランチの
-  差分に含まれないため、本ブランチのマージ判断には影響しない想定。可視性のため報告する）
-- **対象ファイル**: `src/components/business/ComparisonTable.astro`
-  （`git diff --stat integrated-mvp..HEAD` に含まれないファイル。`/sekizaiten/` `/hakajimai/` では
-  検証時のビューポート幅でテーブルが折り返さずaxeに検出されなかったが、同じコンポーネントを
-  使っているため、より狭い幅では同様に発生する可能性がある）
-- **推奨修正**: 横スクロール領域となる `div.comparison-table__scroll` に
-  `tabindex="0"` と `role="region"` +　`aria-label`（例: 「比較表（横スクロール可能）」）を付与し、
-  キーボードのみでもスクロール操作ができるようにする。このブランチの担当範囲外のため、
-  `ui-components` または元のページ実装担当への差し戻しを推奨する。
+**重大度**: Medium
+**対象ファイル**: `src/pages/index.astro`（`.top-layout`のgrid-template-areasと`<div class="top-layout__rails">`のDOM位置）
 
----
+**再現手順**:
+1. `src/data/sponsors.json` に有効なスポンサーを1件以上投入する（`active: true`、期間内）。
+2. `npm run build && npm run preview` の後、幅768px（または390px、1024px）でトップページを開く。
+3. 画面を上から下へスクロールすると、視覚的には「くわしい条件から選ぶ」セクションの直後・「当サイトについて」より前にスポンサー4枠が表示される（実測: `.top-layout__filter` top=682px、`.top-layout__rails` top=1706px、`.top-layout__trust` top=2160px、390px幅時）。
+4. ページ先頭からTabキーで進むと、フォーカスは「ヘッダー→目的ボタン→検索条件詳細→『運営方針ページ』『情報源ページ』リンク（当サイトについて）→スポンサーの外部リンク→フッター」の順に移動する（実機確認済み）。
+5. つまり、視覚的には「検索条件→広告→当サイトについて」の順で表示されるのに対し、キーボードでは「検索条件→当サイトについて→広告」の順でフォーカスが移動する。晴眼のキーボード操作者にとっては、フォーカスが「当サイトについて」の下（画面上でより下）にあるリンクへ到達した直後、画面上ではそれより上に位置する広告リンクへ「戻る」ように見える。
 
-## Minor
+**原因**: `.top-layout__rails`（スポンサー4枠のラッパー）はDOMの最後（`</section>`だけの`trust`セクションより後）に配置されているが、`grid-template-areas`では`'sponsors'`行が`'trust'`行より前に定義されているため、1279px以下では視覚位置だけが繰り上がる。CSS Gridの`grid-area`による再配置はDOM順・フォーカス順を変更しないため、視覚順とフォーカス順が乖離する（WCAG 1.3.2 意味のある順序 / 2.4.3 フォーカス順序の観点で望ましくない）。
 
-### m-1: 非公式表記の掲載箇所数がページによって異なる（このブランチとは無関係、既存仕様）
+**現状で顕在化しない理由**: 現在 `src/data/sponsors.json` は空配列であり、空のスポンサー枠は内部にリンク等のフォーカス可能要素を持たない（`<p>スポンサー枠</p>`のみ）。そのためこの問題は「スポンサー契約が実際に成立し、枠内に外部リンクが入った瞬間」に初めて表面化する潜在バグである。プレースホルダー状態のQAだけでは検出できない。
 
-- **再現手順**: `dist/*/index.html` に対し `grep -o "公式サイトではありません"` で
-  出現数を数えると、`/`・`/about/`・`/privacy/` は3回、他の5ページは2回出現する。
-- **重大度**: Minor（CLAUDE.mdの要求「全ページのヘッダー・フッターに常時表示」は
-  ヘッダー1回・フッター1回の計2回で満たされており、3回になっているページは
-  本文中に追加で `siteConfig.officialDisclaimer` を再掲しているだけで、
-  欠落ではなく重複表示。実害はないが、`BaseLayout.astro`（共有ファイル）を
-  経由しない箇所での重複表示は将来の文言修正時に更新漏れの温床になりうる）
-- **対象ファイル**: `src/pages/index.astro`（「当サイトについて」セクション内で
-  `{siteConfig.officialDisclaimer}` を再掲）、`src/pages/about/index.astro`、
-  `src/pages/privacy/index.astro`（このブランチの差分には含まれない）
-- **推奨修正**: 対応不要（現状で要件は満たしている）。将来的に文言を一本化したい場合のみ、
-  本文中の再掲を削除し「詳しくはヘッダー/フッター参照」等に変更することを検討。
+**推奨修正**（リード判断）: 次のいずれかで視覚順とDOM順を一致させる。
+- (a) `<div class="top-layout__rails">`をDOM上「検索条件セクションの直後・trustセクションの前」に移動する（コメントにある「見出し→検索条件→当サイトについて→広告」という設計意図自体を「見出し→検索条件→広告→当サイトについて」に変更する）。
+- (b) DOM順を変えずに`grid-template-areas`側を`'hero' 'filter' 'trust' 'sponsors'`の順に修正し、視覚順をDOM順（フォーカス順）に合わせる。
+- どちらを選ぶかはデザイン方針次第のため、**最終的な採否はリードの判断**とする。
 
 ---
 
-## Info（正常性確認の記録）
+## Info / 要人間判断（バグではないが記録する）
 
-### I-1: ビルド・型チェック・Lint
+### I-1. ヒーロー背景画像が実際の多磨霊園と誤認され得る程度に「本物らしい」墓地写真である
 
-- `npm run check`: 0 errors / 0 warnings / 0 hints（50ファイル）
-- `npm run lint`: エラー・警告なし
-- `npm run build`: `src/data/sponsors.json` が空配列の状態で成功（8ページ生成）
+**重大度**: Info（要人間判断）
+**対象ファイル**: `public/images/hero-cemetery-v1.png`、`src/pages/index.astro`
 
-### I-2: スポンサーデータの分離
+画像自体を確認したところ、日本の霊園でよく見る規則的な区画・墓石の並び・石灯籠・並木道という、極めて「それらしい」構図の写真（ストック写真または生成画像）であり、キャプションを読まないユーザーには実際の多磨霊園の写真だと誤解される可能性がある。ページ内には「画像はイメージです」という注記が右下に常時表示されており、CLAUDE.mdが求める「実際の多磨霊園の写真であるという断定的な文言がないこと」という要件そのものには違反していない（文言レベルでは問題なし）。
 
-- `src/lib/data/index.ts` で `loadSponsors.ts` の `export *` は
-  `getBusinessDataset()` の検証・キャッシュ処理（`validated`フラグ、
-  `validateBusinessData()`）とは完全に独立していることをコードで確認。
-- `src/lib/data/loadSponsors.ts` は `businesses.json` / `schema.ts` /
-  `validate.ts` のいずれにも依存せず、独自の `sponsorDatasetSchema`（Zod）で
-  `src/data/sponsors.json` のみを検証する。
-- `getActiveSponsors()` は `getBusinesses()` / `ServiceFilter` の絞り込み状態を
-  一切参照しない（引数は `today: Date` のみ）。
+一方で、注記が背景に溶け込みやすい小さな白半透明チップであるため、スクロールの速いユーザーや一瞥しかしないユーザーには見落とされやすい。「多磨霊園のお墓のことを、目的から探す」という見出しの直下という文脈も相まって、この画像が多磨霊園そのものであるかのような第一印象を与えるリスクはゼロではない。これはデザイン方針・リスク許容度に関わる判断であり、**修正するかどうかはリード・依頼者の判断に委ねる**（例: 注記をもう少し目立たせる、または「イメージ写真（多磨霊園ではありません）」等より明示的な文言にする、といった選択肢がある）。
 
-### I-3: `src/data/sponsors.json` の内容
+### I-2. ヒーロー画像・生成りオーバーレイのコントラスト余裕は実測で約3〜5%とやや小さい
 
-- 現状 `{ "schemaVersion": "1.0.0", "sponsors": [] }`（空配列）であることを確認。
-  実在しない企業名・推薦文の創作は無い。
+**重大度**: Info
+**対象ファイル**: `src/pages/index.astro`（`.hero::before`のコメントと`rgba(247,242,231,0.9)`）
 
-### I-4: 0件時の表示（実ブラウザ検証）
+実際の画像ファイルの全画素（4px間隔でサンプリング）を対象に、オーバーレイ合成後の最暗画素と `--color-stone-text` のコントラスト比を計算したところ、約4.66〜4.72:1であった（WCAG AA基準4.5:1に対し余裕は約3.5〜4.9%）。コード内コメントの「4.69:1」という記載はほぼ裏付けられており、**現時点では基準を満たしている**。ただし、余裕が小さいため、将来ヒーロー画像を差し替える場合は同様の実測（本レポートで用いた手法: Canvasで画像とオーバーレイを合成し、`getImageData`から実際の画素値でコントラスト比を計算）を都度行うことを推奨する。
 
-- `npm run build`後の `dist/index.html` および `preview`起動中の実ブラウザで、
-  スポンサー0件時は4枠の空白ではなく「地域スポンサー募集中」の案内カードが
-  **1つだけ**表示されることを確認（`cardCount: 0, hasRecruit: true`）。
-- 料金・契約条件の記載は募集中カードに一切ない（本文に「円」「月額」等の語を含まない）。
+### I-3. `src/layouts/BaseLayout.astro`・`src/types/components.ts`（共有ファイル）への変更
 
-### I-5: `getActiveSponsors()` のロジック検証（一時テストデータ、検証後に空配列へ復元済み）
+**重大度**: Info
+**対象ファイル**: `src/layouts/BaseLayout.astro`、`src/types/components.ts`
 
-一時的に以下8件のテストデータ（active/未来開始/期限切れ/5件超のケースを含む）を投入し、
-`npm run build` 後の `dist/index.html` に出力された `data-sponsor-id` を確認した。
-
-| id | active | periodStart | periodEnd | displayOrder | 結果 |
-|---|---|---|---|---|---|
-| test-sponsor-8 | true | 過去 | null | 0 | 表示（1位） |
-| test-sponsor-1 | true | 過去 | null | 1 | 表示（2位） |
-| test-sponsor-2 | true | 過去 | 未来 | 2 | 表示（3位） |
-| test-sponsor-3-inactive | **false** | 過去 | null | 3 | 除外（active=false） |
-| test-sponsor-4-future | true | **未来** | null | 4 | 除外（開始日未到来） |
-| test-sponsor-5-expired | true | 過去 | **過去** | 5 | 除外（終了日経過） |
-| test-sponsor-6 | true | 過去 | null | 6 | 表示（4位） |
-| test-sponsor-7 | true | 過去 | null | 7 | **切り詰めで除外**（有効5件中、displayOrder上位4件のみ表示） |
-
-実際に `dist/index.html` へ出力されたのは `test-sponsor-8, 1, 2, 6` の4件のみで、
-`displayOrder` 昇順・先頭4件への切り詰めが仕様通り動作することを確認した。
-`periodEnd: null`（終了日未定）のスポンサーが現在有効なら含まれることも確認した
-（test-sponsor-8, 1, 6はいずれも`periodEnd: null`）。
-
-検証後、`src/data/sponsors.json` を空配列に復元し、再ビルドして元の状態に戻したことを確認済み。
-
-### I-6: スポンサー表示と通常掲載の相互不干渉（実ブラウザ検証）
-
-- TOPページでスポンサー0件表示中に `ServiceFilter` の目的ボタンをクリックし、
-  絞り込み結果件数（`data-result-count`）が変化する一方、スポンサーセクション
-  （`.sponsor-card` / `.sponsor-recruit` の有無）は変化しないことを確認
-  （逆方向：絞り込み操作→スポンサー表示への影響なし）。
-- コードレビューでも、`SponsorSection.astro` / `getActiveSponsors()` が
-  `businesses` や絞り込み状態を一切引数に取らないことを確認済み
-  （順方向：スポンサー側→通常掲載側への影響もそもそも経路が存在しない）。
-
-### I-7: 広告表記・外部リンクのrel属性
-
-- スポンサーカード（1〜4件のテストデータで検証）全件に「広告・スポンサー」ラベル
-  （`.sponsor-card__eyebrow`）が表示されることを確認。
-- 「サイトを見る」リンクの `rel` 属性はすべて `"noopener noreferrer sponsored"`
-  （4件のテストデータで確認）。
-- 各カードに「掲載順・比較結果には影響しません。」という開示文を確認。
-
-### I-8: 料金・契約条件の非表示
-
-- `Sponsor`型（`src/types/sponsor.ts`）、`SponsorCard.astro`、`SponsorSection.astro`、
-  募集中カードのいずれにも料金フィールド・金額表記は存在しない。
-- 実ブラウザでTOPページの本文（`document.body.innerText`）に「円」「月額」の文字列が
-  含まれないことを確認（テストスポンサー表示中・0件時の両方）。
-
-### I-9: GA4計測（`window.gtag`モック、実ブラウザ）
-
-- `sponsor_impression`: スポンサーグリッドを表示→非表示→再表示と3回スクロール操作したが、
-  4件のスポンサーそれぞれについて **ちょうど1回ずつ**（計4回）しか発火しないことを確認
-  （`IntersectionObserver`の`unobserve()`によるガードが機能している）。
-- `sponsor_click`: 「サイトを見る」リンクのクリックで
-  `{ sponsor_id: "test-sponsor-8", campaign_id: "camp-8", page_path: "/" }` が
-  正しいパラメータで1回発火することを確認。
-- 検証は一時的に `playwright` を `--no-save` でインストールして実施し、
-  検証後にアンインストール、`package.json` / `package-lock.json` の無変更を
-  diffで確認済み。
-
-### I-10: レスポンシブ（360/390/768/1024/1440px、実ブラウザ）
-
-- 全8ページ×5ビューポートで `document.documentElement.scrollWidth === clientWidth`
-  （横スクロールなし）を確認（0件の逸脱）。
-- TOPページの目的ボタン（`.purpose-card`）・詳しい条件チェックボックスの実際の
-  タップ領域（`<label class="service-check">`、`<input>`自体ではなくラベル全体）は
-  360px幅で幅312px・高さ約51〜120pxであり、44px以上を満たすことを確認
-  （`<input>`要素自体は約15×15pxだが、`min-height: var(--tap-target-min)`を持つ
-  ラベル/ボタンが実際のタップ領域であるため問題なし。これはこのブランチの変更対象外
-  ＝`ServiceFilter.astro`の既存実装であり、正しく実装されていることの確認）。
-- スポンサーカードは1件・2件・4件いずれの件数でも `max-width: 260px` の制約により
-  カードサイズが揃い、間延びや崩れが無いことを1440px幅で確認
-  （4件時: 全カード260×283px、1件時: 単一カードも260px幅で崩れなし）。
-- `/sekizaiten/` を390px・1024pxで開き横スクロールが発生しないことを確認
-  （比較表・事業者カードのレイアウト自体はこのブランチの変更対象外）。
-- キーボードのみでTabキーを送出し、スポンサーの「サイトを見る」リンクへ
-  フォーカスが到達すること、および`:focus-visible`のアウトライン定義
-  （`outline: 3px solid var(--color-accent)`）がCSSに存在することを確認。
-
-### I-11: axe-core相当のアクセシビリティスキャン（`@axe-core/playwright`、一時導入）
-
-- 全8ページ（1024×900）でスキャンし、critical/serious違反は `/kanri/` の
-  M-1（既存コンポーネント、このブランチの差分外）1件のみ。
-  それ以外の7ページ（`/`, `/sekizaiten/`, `/hakajimai/`, `/tetsuzuki/`, `/about/`,
-  `/sources/`, `/privacy/`）は critical/serious 違反0件。
-- 検証後、`@axe-core/playwright` と `playwright` はアンインストール済み。
-  `package.json` / `package-lock.json` は無変更（diffゼロ）。
-
-### I-12: `not_confirmed`表示・非公式表記・事業者データの独立確認（このブランチとは無関係の一般確認）
-
-- `dist/sekizaiten/index.html` 内の「非対応」という文字列は、
-  「非対応という意味ではなく、事業者の公開情報で対応の有無を確認できていないことを示します。」
-  という**説明文の一部としてのみ**出現し、状態そのものを「非対応」と誤表示している箇所はない。
-- 非公式表記は全8ページのヘッダー・フッター双方に存在（`grep -o`で各ページ2回以上を確認）。
-- `businesses.json` / `src/data/businesses.json` に内部運営メモ相当の文字列
-  （`notes_internal`, `internal_note`, 「営業メモ」「交渉メモ」「苦情」等）は検出されなかった。
-- `evidenceSourceIds` / `publishedPrices[].sourceId` はすべて `sources.csv` の
-  `source_id`（30件）に存在することをNode.jsスクリプトで独立検証（欠落0件）。
+CLAUDE.md 5章では`src/layouts/**`・`src/types/**`は「リード以外変更禁止」の共有ファイルと定義されている。本ブランチ（`feature/top-layout-sponsor-hero-footer`）はこれらに変更を加えているが、内容から判断してリード自身による統合修正（フッター中央化、`SponsorSlotProps`契約の更新）と推測される。ブランチ名・コミットメッセージからは実行者がリードであるか並行実装エージェントであるかを判別できないため、念のため記録する。変更内容自体（フッター中央化CSS追加、`SponsorCardProps`→`SponsorSlotProps`への置き換え）に技術的な問題は見つからなかった。
 
 ---
 
-## 検証環境・実施コマンド（再現用メモ）
+## 確認済み・問題なし項目（詳細）
 
-```bash
-npm run check
-npm run lint
-npm run build
-npm run preview -- --port 4321   # 別プロセスで起動、検証後にPIDをkill
-npm install -D playwright@latest --no-save
-npx playwright install chromium
-npm install -D @axe-core/playwright@latest --no-save
-# Playwrightスクリプトでレスポンシブ・GA4・axeを検証（検証用一時スクリプトは
-# tests/**やscripts/qa/**配下に保存せず、作業完了後に削除済み）
-npm uninstall playwright @axe-core/playwright --no-save
-```
+- **ビルド/型/lint**: `npm run check`は49ファイルで0 errors/0 warnings/0 hints。`npm run lint`はエラーなし。`npm run build`は8ページ（`/`, `/sekizaiten/`, `/hakajimai/`, `/kanri/`, `/tetsuzuki/`, `/about/`, `/sources/`, `/privacy/`）を正常生成。
+- **レスポンシブ・横スクロール**: 360/390/768/1024/1280/1440/1920pxすべてで`document.documentElement.scrollWidth === clientWidth`を実測（横スクロールなし）。
+- **PCレール（1280px以上）**: 左右各2枠・計4枠が中央本文（最大920px）と均衡して配置され、sticky動作もCSS上確認（`position: sticky; top: var(--space-4)`）。スクリーンショット目視でも崩れなし。
+- **1279px以下の2列グリッド**: 検索条件セクション直後に4枠がまとまり、本文を圧迫する巨大な空欄にはなっていない（360/390/768/1024pxで確認）。
+- **ヒーロー背景・可読性**: 見出し・説明文は生成りオーバーレイ越しに明瞭に読め、画像だけが突出して目立つ印象はない。右下に「画像はイメージです」を確認。
+- **フッター中央化**: 1024px幅で中央に揃っており、左端張り付きは解消されている。420px幅（480px以下）でナビゲーションが2列グリッドになることを確認。
+- **キーボード操作**: 空のスポンサー枠（現行の本番データ状態）はフォーカス順に一切割り込まない。「ヘッダー→目的ボタン→検索条件→当サイトについて」の順を実機で確認（サマリー参照。フォーカス順自体は仕様どおりだが、テストデータ投入時にM-1の視覚順ズレを検出）。
+- **axe-core**: 全8ページ×5ビューポート（1440/1024/768/390/360px）で計40通り、テストデータ投入時（スポンサー1〜4件）も含めてviolations 0件。`landmark-unique`の再発なし（`SponsorSlot`のルート要素が`<div>`であること、`aria-label="広告"`は親の`.top-layout__rails`にのみ付与されていることを確認）。
+- **スポンサー表示と検索結果の分離**: 目的ボタンのクリック・条件クリアの前後で`[data-sponsor-root]`のouterHTMLが完全一致することを実機確認。スポンサー枠は`displayOrder`のみで並び、検索条件・件数を一切参照しない実装であることをコード・実機の両方で確認。
+- **データ正本の不変性**: `git diff integrated-mvp..HEAD -- businesses.json sources.csv data_dictionary.md`（および`src/data/`の作業コピー）が完全に空であることを確認。
+- **`src/data/sponsors.json`**: 変更なし（空配列）。検証用に一時投入したテストデータ（`test-sponsor-1`〜`4`、`example.com`宛のダミーURL）は検証後に完全に復元し、`npm run build`で最終状態を確認。
+- **`.site-main`最大幅拡張の分離**: `dist/`のCSSバンドルを解析し、`max-width:1400px`を含むのはTOPページ専用の`index.*.css`のみで、他7ページのHTMLはこのバンドルを読み込んでいないことを確認。
+- **非公式表記**: 全8ページで最低2回（ヘッダー・フッター）出現。
+- **`not_confirmed`表示**: 本ブランチの変更範囲外だが、`/sekizaiten/`で「公開情報では未確認」が正しく表示され、「非対応」への誤変換がないことを確認（既存の解説文中の言及のみ）。
+- **package.json / package-lock.json**: axe-core検証のために`playwright`・`axe-core`・`@axe-core/playwright`を`--no-save`で一時導入し、検証後にアンインストール。`git diff`で無変更を確認。
 
-`src/data/sponsors.json` は検証の一時期間のみテストデータに書き換え、
-検証後に `{ "schemaVersion": "1.0.0", "sponsors": [] }` へ復元し、
-`npm run build` で再ビルドして状態を確認済み。
+---
+
+## QA作業ノート（検証環境・後片付け）
+
+- Playwright（1.62.1、既存キャッシュのChromiumを使用）と`@axe-core/playwright`を`npm install --no-save`で一時導入し、検証完了後に`npm uninstall --no-save`で削除した。`package.json`/`package-lock.json`に差分がないことを`git diff`で確認済み。
+- `src/data/sponsors.json`に一時的に4件のダミースポンサー（`example.com`宛の仮URL、名称「QAテストスポンサーA〜D」）を投入し、フォーカス順・axe・スポンサー独立性の検証を行った。検証後、`git`管理下の内容（`sponsors: []`）へ完全に復元し、`npm run build`で最終ビルドが元の状態と一致することを確認した。
+- 検証に使用した一時スクリプト（`scripts/qa/tmp-*.mjs`）はすべて削除済みで、`tests/**`・`scripts/qa/**`・`QA_REPORT.md`以外のファイルはコミット時点から変更していない。
