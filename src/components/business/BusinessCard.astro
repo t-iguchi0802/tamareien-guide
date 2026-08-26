@@ -12,6 +12,20 @@
  *   （data_dictionary.md 5章）。
  * - 地図リンクは、確認済みの住所文字列から検索クエリを組み立てる
  *   （座標・徒歩分数等の独自推定は行わない）。
+ *
+ * editorial-redesign（2026-08-26）での変更点:
+ * - 「公開情報で確認できる対応」という説明見出しと、確認済みサービスを
+ *   すべて緑枠タグとして並べる表現をやめた。代わりに、対応状況を1本の
+ *   文章（読点区切り）として、名前・所在地の直後（要約文より前）に置く。
+ *   タグの壁ではなく、地の文として読める形にする。
+ * - 各サービス名を`data-service-word`付きの<span>として個別にマークし、
+ *   `ServiceFilter.astro`のスクリプトが、選択中の条件と一致する語だけを
+ *   実行時に太字・深緑にする（どの条件で絞り込まれたかはビルド時にはまだ
+ *   決まらないため、ハイライトはクライアント側で行う）。フィルタ未使用の
+ *   ページ・JS無効時でも、全確認済みサービスが淡い地の文として読める。
+ * - `data-service-keys`（カンマ区切り）を要素に持たせ、フィルタスクリプトが
+ *   AND条件の一致判定に使う。ここでの判定ロジック自体は持たない
+ *   （表示コンポーネントとしての責務にとどめる）。
  */
 import '../../styles/tokens.css';
 import type { BusinessCardProps } from '../../types/components';
@@ -59,7 +73,11 @@ const showSeparateContact =
   business.contact.contactUrl && business.contact.contactUrl !== business.contact.websiteUrl;
 ---
 
-<article class="business-card" data-business-id={business.id}>
+<article
+  class="business-card"
+  data-business-id={business.id}
+  data-service-keys={confirmedServiceKeys.join(',')}
+>
   <header class="business-card__header">
     <h3 class="business-card__name">{business.name}</h3>
     <p class="business-card__meta">
@@ -73,20 +91,27 @@ const showSeparateContact =
     </p>
   </header>
 
-  <p class="business-card__summary">{business.summary}</p>
-
   {
-    confirmedServiceKeys.length > 0 && (
-      <div class="business-card__services">
-        <p class="business-card__services-label">公開情報で確認できる対応</p>
-        <ul class="business-card__service-tags">
-          {confirmedServiceKeys.map((key) => (
-            <li class="service-tag">{SERVICE_LABELS[key]}</li>
-          ))}
-        </ul>
-      </div>
+    confirmedServiceKeys.length > 0 ? (
+      <p class="business-card__services">
+        <span data-service-prefix>対応を確認できるサービス:</span>{' '}
+        {confirmedServiceKeys.map((key, i) => (
+          <>
+            {i > 0 && '、'}
+            <span class="service-word" data-service-word={key}>
+              {SERVICE_LABELS[key]}
+            </span>
+          </>
+        ))}
+      </p>
+    ) : (
+      <p class="business-card__services business-card__services--none">
+        公開ページ上で対応を確認できたサービスは、現時点でありません（掲載情報は随時更新します）。
+      </p>
     )
   }
+
+  <p class="business-card__summary">{business.summary}</p>
 
   {
     business.credentials.length > 0 && (
@@ -142,9 +167,20 @@ const showSeparateContact =
     gap: var(--space-3);
     background: var(--color-surface);
     border: 1px solid var(--color-border);
-    border-top: 4px double var(--color-stone-line);
+    border-top: 3px double var(--color-stone-line);
     border-radius: var(--radius-card);
     padding: var(--space-6);
+  }
+
+  /*
+   * ServiceFilter.astroが絞り込み非該当のカードに`hidden`属性を付与するが、
+   * `.business-card { display: flex }`（Astroのスコープ用属性セレクタが付くため
+   * 詳細度がブラウザ既定の`[hidden] { display: none }`と同格になる）が
+   * それを上書きしてしまい、非表示のはずのカードが表示され続ける不具合が
+   * あったため、明示的に上書きする。
+   */
+  .business-card[hidden] {
+    display: none;
   }
 
   .business-card__header {
@@ -168,40 +204,36 @@ const showSeparateContact =
     font-size: var(--font-size-label);
   }
 
-  .business-card__summary {
-    margin: 0;
-    color: var(--color-text);
-  }
-
   .business-card__services {
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-2);
+    margin: 0;
+    color: var(--color-stone-text);
+    font-size: var(--font-size-label);
+    line-height: 1.6;
   }
 
-  .business-card__services-label {
-    margin: 0;
-    font-size: var(--font-size-caption);
+  .business-card__services--none {
+    font-style: normal;
+  }
+
+  [data-service-prefix] {
+    color: var(--color-text-muted);
+  }
+
+  .service-word {
     color: var(--color-stone-text);
+  }
+
+  /* ServiceFilter.astroのスクリプトが、選択中の条件と一致する語にだけ付与する。
+     背景色・枠線は付けず、太字と深緑への文字色変化だけで示す
+     （タグ／バッジ的なUI部品にしないため）。 */
+  .service-word--matched {
+    color: var(--color-accent-deep);
     font-weight: 700;
   }
 
-  .business-card__service-tags {
+  .business-card__summary {
     margin: 0;
-    padding: 0;
-    list-style: none;
-    display: flex;
-    flex-wrap: wrap;
-    gap: var(--space-2);
-  }
-
-  .service-tag {
-    border: 1px solid var(--color-status-confirmed-border);
-    background: var(--color-status-confirmed-bg);
-    color: var(--color-status-confirmed-fg);
-    border-radius: var(--radius-tag);
-    padding: 0.3em 0.6em;
-    font-size: var(--font-size-label);
+    color: var(--color-text);
   }
 
   .business-card__credentials {

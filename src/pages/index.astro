@@ -1,68 +1,45 @@
 ---
 /**
- * トップページ・困りごと別入口。
+ * トップページ・目的から探す入口。
  * 正本: CLAUDE_CODE_HANDOFF.md 5章 / src/lib/routes.ts ROUTES.top
  *
- * 14社の詳細比較はここに複製せず、/sekizaiten/ 等の各比較ページへ導線を張る。
+ * editorial-redesign（2026-08-26）: 「業者データベース」ではなく
+ * 「目的から相談先を探せる地域ガイド」という方向で全面再設計した。
+ * 14社の詳細な一覧・カードグリッドはここに複製せず、共有コンポーネント
+ * <ServiceFilter mode="link"> の「この条件で一覧を見る」から
+ * /sekizaiten/ へ選択条件（?services=a,b,c）を引き継いで遷移する
+ * （困りごと別の入口というこのページの役割を保ちつつ、
+ * 「3つの目的→くわしい条件→対応できた件数」の体験は共通化する）。
  */
 import BaseLayout from '../layouts/BaseLayout.astro';
 import { siteConfig } from '../lib/siteConfig';
 import { ROUTES } from '../lib/routes';
 import { getBusinesses } from '../lib/data';
-import { isFilterableStatus } from '../lib/data/verificationStatus';
-import { GOAL_GROUPS, SERVICE_LABELS } from './_lib/business-display';
+import ServiceFilter from '../components/business/ServiceFilter.astro';
 
 const businesses = getBusinesses();
-const totalCount = businesses.length;
-
-const goalStats = GOAL_GROUPS.map((goal) => {
-  const confirmedCount = businesses.filter((b) =>
-    goal.serviceKeys.some((key) => isFilterableStatus(b.services[key])),
-  ).length;
-  return { ...goal, confirmedCount };
-});
 ---
 
 <BaseLayout title={siteConfig.name} description={siteConfig.subtitle}>
   <section class="hero" aria-labelledby="hero-heading">
-    <h1 id="hero-heading">{siteConfig.name}</h1>
-    <p class="hero__lead">{siteConfig.subtitle}</p>
-    <p>
-      多磨霊園周辺の石材店・お墓関連事業者{totalCount}社について、公開情報のみをもとに中立に整理しています。事前ヒアリングやスポンサー営業は行っていません。
-    </p>
-    <p class="hero__actions">
-      <a href={ROUTES.sekizaiten.path}>14社の一覧・比較表を見る</a>
-      <a href={ROUTES.about.path}>運営方針・掲載基準を見る</a>
-    </p>
+    <h1 id="hero-heading" class="hero__heading">多磨霊園のお墓のことを、目的から探す</h1>
+    <p class="hero__lead">墓石建立、墓じまい、管理・清掃。公開情報を同じ基準で整理しました。</p>
   </section>
 
-  <section aria-labelledby="goals-heading">
-    <h2 id="goals-heading">困りごとから探す</h2>
-    <p>
-      当てはまる項目を選ぶと、関連するサービスの比較ページへ移動します。件数は「公開情報で対応を確認できた事業者数」であり、おすすめ順ではありません。
-    </p>
-    <ul class="goal-list">
-      {
-        goalStats.map((goal) => (
-          <li class="goal-list__item">
-            <h3>{goal.heading}</h3>
-            <p>{goal.description}</p>
-            <p class="goal-list__stat">
-              公開情報で対応を確認できた事業者: {goal.confirmedCount}社 / {totalCount}社中
-            </p>
-            <p class="goal-list__services">
-              関連サービス: {goal.serviceKeys.map((key) => SERVICE_LABELS[key]).join('、')}
-            </p>
-            <a href={goal.href}>{goal.linkLabel}</a>
-          </li>
-        ))
-      }
-    </ul>
+  <hr class="masonry-rule" />
+
+  <section aria-labelledby="service-filter-heading">
+    <ServiceFilter businesses={businesses} mode="link" targetPath={ROUTES.sekizaiten.path} />
   </section>
 
-  <section aria-labelledby="trust-heading">
+  <hr class="masonry-rule" />
+
+  <section aria-labelledby="trust-heading" class="trust">
     <h2 id="trust-heading">当サイトについて</h2>
     <p>{siteConfig.officialDisclaimer}</p>
+    <p>
+      多磨霊園周辺の石材店・お墓関連事業者{businesses.length}社について、公開情報のみをもとに中立に整理しています。事前ヒアリングやスポンサー営業は行っていません。掲載順は事業者の推奨順位ではありません。
+    </p>
     <p>
       掲載基準・広告方針・訂正窓口は<a href={ROUTES.about.path}>運営方針ページ</a>を、情報源と最終確認日は<a
         href={ROUTES.sources.path}>情報源ページ</a
@@ -72,31 +49,35 @@ const goalStats = GOAL_GROUPS.map((goal) => {
 </BaseLayout>
 
 <style>
-  .hero__actions {
-    display: flex;
-    flex-wrap: wrap;
-    gap: var(--space-4, 1rem);
+  .hero {
+    padding-block: var(--space-4) var(--space-2);
   }
-  .goal-list {
-    list-style: none;
+
+  .hero__heading {
+    font-family: var(--font-family-heading);
+    font-weight: 700;
+    font-size: clamp(1.75rem, 4.5vw, 2.75rem);
+    line-height: 1.45;
+    letter-spacing: 0.01em;
+    margin: 0 0 var(--space-3);
+    color: var(--color-text);
+  }
+
+  .hero__lead {
     margin: 0;
-    padding: 0;
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-    gap: var(--space-4, 1rem);
+    font-size: 1.15rem;
+    color: var(--color-stone-text);
   }
-  .goal-list__item {
-    border: 1px solid var(--color-border, #dcdcd4);
-    border-radius: 0.5rem;
-    padding: var(--space-4, 1rem);
-    background: var(--color-surface, #fff);
+
+  .masonry-rule {
+    margin-block: var(--space-6);
   }
-  .goal-list__item h3 {
-    margin-top: 0;
+
+  .trust {
+    color: var(--color-text);
   }
-  .goal-list__stat,
-  .goal-list__services {
-    color: var(--color-text-muted, #55584f);
-    font-size: 0.95rem;
+
+  .trust p {
+    color: inherit;
   }
 </style>

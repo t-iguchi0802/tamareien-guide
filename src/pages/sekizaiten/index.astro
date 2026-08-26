@@ -2,45 +2,53 @@
 /**
  * 14社の一覧・比較表。
  * 正本: CLAUDE_CODE_HANDOFF.md 5章 / src/lib/routes.ts ROUTES.sekizaiten
+ *
+ * editorial-redesign（2026-08-26）: 「目的から探す」体験の本体をこのページに置く。
+ * 共有コンポーネント <ServiceFilter mode="inline"> が、3つの目的ボタン・
+ * くわしい条件チェックボックス・対応件数・事業者カードグリッドを
+ * まとめて描画する（絞り込みロジックはServiceFilter側に一本化）。
+ * TOPページの「この条件で一覧を見る」から遷移した場合、
+ * ?services=a,b,c を読み取って同じ選択状態を復元する
+ * （ServiceFilter内のスクリプトが担当）。
+ *
+ * 全12サービスの詳細な比較表（<ComparisonTable>）は、SaaS管理画面的な
+ * 密な表を主役にしないよう<details>で折りたたみ、必要な人だけが開く
+ * 「詳しい比較表」として維持する（機能・データは変更していない）。
  */
 import BaseLayout from '../../layouts/BaseLayout.astro';
-import { siteConfig } from '../../lib/siteConfig';
 import { ROUTES } from '../../lib/routes';
 import { getBusinesses } from '../../lib/data';
 import ComparisonTable from '../../components/business/ComparisonTable.astro';
-import BusinessCard from '../../components/business/BusinessCard.astro';
+import ServiceFilter from '../../components/business/ServiceFilter.astro';
 import CorrectionCta from '../../components/common/CorrectionCta.astro';
 import { ALL_SERVICE_KEYS } from '../_lib/business-display';
 
 const businesses = getBusinesses();
 const pageTitle = '石材店一覧・比較';
 const description =
-  '多磨霊園周辺の石材店・お墓関連事業者14社を、公開情報のみで全12サービスの対応状況を比較します。';
+  '多磨霊園周辺の石材店・お墓関連事業者14社を、公開情報のみで目的別に探せる一覧です。';
 ---
 
 <BaseLayout title={pageTitle} description={description}>
   <h1>{pageTitle}</h1>
   <p>
-    多磨霊園周辺の石材店・お墓関連事業者{businesses.length}社について、公開されている情報のみを基準に12種類のサービスへの対応状況を比較しています。「○
-    公開確認済み」以外は対応がないという意味ではなく、公開ページ上で確認できなかったことを示します。詳しくは各事業者へ直接ご確認ください。
-  </p>
-  <p>
-    {siteConfig.officialDisclaimer} 掲載順は事業者の推奨順位ではありません。詳しくは<a
+    掲載情報は、各社のWebサイト等で確認できた公開情報をもとに整理しています。事業者への確認で得た情報は、確認後に随時反映します。掲載順は事業者の推奨順位ではありません。詳しくは<a
       href={ROUTES.about.path}>運営方針・掲載基準</a
     >をご覧ください。
   </p>
 
-  <section aria-labelledby="directory-heading">
-    <h2 id="directory-heading">事業者一覧・連絡先</h2>
-    <div class="business-grid">
-      {businesses.map((business) => <BusinessCard business={business} />)}
-    </div>
-  </section>
+  <ServiceFilter businesses={businesses} mode="inline" />
 
-  <section aria-labelledby="comparison-heading">
-    <h2 id="comparison-heading">全事業者・全サービス比較</h2>
+  <hr class="masonry-rule" />
+
+  <details class="detail-table">
+    <summary class="detail-table__summary">全事業者・全12サービスの詳しい比較表を見る</summary>
+    <p class="detail-table__note">
+      上のカードで表示しきれない、すべてのサービスの対応状況を1つの表にまとめたものです。「○
+      公開確認済み」以外は対応がないという意味ではなく、公開ページ上で確認できなかったことを示します。
+    </p>
     <ComparisonTable businesses={businesses} visibleServices={ALL_SERVICE_KEYS} />
-  </section>
+  </details>
 
   <CorrectionCta />
 
@@ -56,9 +64,27 @@ const description =
 </BaseLayout>
 
 <style>
-  .business-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-    gap: var(--space-4, 1rem);
+  .masonry-rule {
+    margin-block: var(--space-6);
+  }
+
+  .detail-table {
+    margin-bottom: var(--space-6);
+  }
+
+  .detail-table__summary {
+    cursor: pointer;
+    font-family: var(--font-family-heading);
+    font-weight: 700;
+    font-size: 1.1rem;
+    min-height: var(--tap-target-min);
+    display: flex;
+    align-items: center;
+    padding: var(--space-2) 0;
+  }
+
+  .detail-table__note {
+    color: var(--color-stone-text);
+    font-size: var(--font-size-label, 0.9375rem);
   }
 </style>
