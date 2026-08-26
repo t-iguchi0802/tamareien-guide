@@ -1,42 +1,102 @@
 ---
 /**
- * Phase 0 プレースホルダー。
+ * トップページ・困りごと別入口。
+ * 正本: CLAUDE_CODE_HANDOFF.md 5章 / src/lib/routes.ts ROUTES.top
  *
- * これはトップページの本実装ではない。共通基盤（データ読み込み・型・
- * レイアウト）がビルド時に正しく機能することを確認するための最小限の
- * スモークテストページである。
- *
- * 本実装は feature/pages 担当が、02_DESIGN.md・04_WIREFRAME.md等を
- * 「今回の目的と矛盾しない範囲」の参考にしつつ、
- * CLAUDE_CODE_HANDOFF.md の内容に沿って作成する（CLAUDE.md参照）。
+ * 14社の詳細比較はここに複製せず、/sekizaiten/ 等の各比較ページへ導線を張る。
  */
 import BaseLayout from '../layouts/BaseLayout.astro';
 import { siteConfig } from '../lib/siteConfig';
+import { ROUTES } from '../lib/routes';
 import { getBusinesses } from '../lib/data';
-import { statusToDisplayLabel } from '../lib/data/verificationStatus';
+import { isFilterableStatus } from '../lib/data/verificationStatus';
+import { GOAL_GROUPS, SERVICE_LABELS } from './_lib/business-display';
 
 const businesses = getBusinesses();
+const totalCount = businesses.length;
+
+const goalStats = GOAL_GROUPS.map((goal) => {
+  const confirmedCount = businesses.filter((b) =>
+    goal.serviceKeys.some((key) => isFilterableStatus(b.services[key])),
+  ).length;
+  return { ...goal, confirmedCount };
+});
 ---
 
 <BaseLayout title={siteConfig.name} description={siteConfig.subtitle}>
-  <h1>{siteConfig.name}</h1>
-  <p>{siteConfig.subtitle}</p>
-
-  <section aria-labelledby="foundation-status-heading">
-    <h2 id="foundation-status-heading">Phase 0 共通基盤: データ読み込み確認</h2>
+  <section class="hero" aria-labelledby="hero-heading">
+    <h1 id="hero-heading">{siteConfig.name}</h1>
+    <p class="hero__lead">{siteConfig.subtitle}</p>
     <p>
-      このセクションは本番コンテンツではなく、事業者データ（<code>src/data/businesses.json</code
-      >）が ビルド時に検証済みで読み込めていることを確認するための一時的な表示である。
+      多磨霊園周辺の石材店・お墓関連事業者{totalCount}社について、公開情報のみをもとに中立に整理しています。事前ヒアリングやスポンサー営業は行っていません。
     </p>
-    <p>読み込み件数: {businesses.length}件</p>
-    <ul>
+    <p class="hero__actions">
+      <a href={ROUTES.sekizaiten.path}>14社の一覧・比較表を見る</a>
+      <a href={ROUTES.about.path}>運営方針・掲載基準を見る</a>
+    </p>
+  </section>
+
+  <section aria-labelledby="goals-heading">
+    <h2 id="goals-heading">困りごとから探す</h2>
+    <p>
+      当てはまる項目を選ぶと、関連するサービスの比較ページへ移動します。件数は「公開情報で対応を確認できた事業者数」であり、おすすめ順ではありません。
+    </p>
+    <ul class="goal-list">
       {
-        businesses.slice(0, 3).map((b) => (
-          <li>
-            {b.name}（{b.location.city}） — 新規建墓: {statusToDisplayLabel(b.services.new_grave)}
+        goalStats.map((goal) => (
+          <li class="goal-list__item">
+            <h3>{goal.heading}</h3>
+            <p>{goal.description}</p>
+            <p class="goal-list__stat">
+              公開情報で対応を確認できた事業者: {goal.confirmedCount}社 / {totalCount}社中
+            </p>
+            <p class="goal-list__services">
+              関連サービス: {goal.serviceKeys.map((key) => SERVICE_LABELS[key]).join('、')}
+            </p>
+            <a href={goal.href}>{goal.linkLabel}</a>
           </li>
         ))
       }
     </ul>
   </section>
+
+  <section aria-labelledby="trust-heading">
+    <h2 id="trust-heading">当サイトについて</h2>
+    <p>{siteConfig.officialDisclaimer}</p>
+    <p>
+      掲載基準・広告方針・訂正窓口は<a href={ROUTES.about.path}>運営方針ページ</a>を、情報源と最終確認日は<a
+        href={ROUTES.sources.path}>情報源ページ</a
+      >をご覧ください。
+    </p>
+  </section>
 </BaseLayout>
+
+<style>
+  .hero__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-4, 1rem);
+  }
+  .goal-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: var(--space-4, 1rem);
+  }
+  .goal-list__item {
+    border: 1px solid var(--color-border, #dcdcd4);
+    border-radius: 0.5rem;
+    padding: var(--space-4, 1rem);
+    background: var(--color-surface, #fff);
+  }
+  .goal-list__item h3 {
+    margin-top: 0;
+  }
+  .goal-list__stat,
+  .goal-list__services {
+    color: var(--color-text-muted, #55584f);
+    font-size: 0.95rem;
+  }
+</style>
