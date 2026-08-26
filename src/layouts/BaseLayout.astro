@@ -1,0 +1,208 @@
+---
+/**
+ * 全ページ共通レイアウト。
+ *
+ * 所有者: リード（src/layouts/** は共有契約）。
+ * ここに定義するCSSカスタムプロパティ（デザイントークン）と構造ランドマークは、
+ * feature/ui-components が src/styles/** に本格的なスタイルを積み上げる際の
+ * 土台となる。並行実装エージェントは本ファイルを直接変更せず、
+ * 変更が必要な場合はREPORT.mdでリードへ報告する（WORKTREE_AGENT_PLAN.md）。
+ *
+ * 非公式表記（CLAUDE_CODE_HANDOFF.md 1章）はヘッダー・フッター双方に
+ * 常時表示する。個別ページ側で省略しない。
+ */
+import { siteConfig } from '../lib/siteConfig';
+import { ROUTES } from '../lib/routes';
+
+interface Props {
+  title: string;
+  description: string;
+  /** trueの場合、検索エンジンにインデックスさせない。 */
+  noindex?: boolean;
+}
+
+const { title, description, noindex = false } = Astro.props;
+const pageTitle = title === siteConfig.name ? title : `${title}｜${siteConfig.name}`;
+---
+
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{pageTitle}</title>
+    <meta name="description" content={description} />
+    {noindex && <meta name="robots" content="noindex, nofollow" />}
+    <link rel="canonical" href={Astro.url.pathname} />
+  </head>
+  <body>
+    <a class="skip-link" href="#main-content">本文へスキップ</a>
+
+    <header class="site-header">
+      <div class="site-header__inner">
+        <a class="site-header__brand" href={ROUTES.top.path}>
+          <span class="site-header__name">{siteConfig.name}</span>
+          <span class="site-header__subtitle">{siteConfig.subtitle}</span>
+        </a>
+        <nav class="site-header__nav" aria-label="主要メニュー">
+          <a href={ROUTES.sekizaiten.path}>石材店一覧・比較</a>
+          <a href={ROUTES.hakajimai.path}>墓じまい</a>
+          <a href={ROUTES.kanri.path}>墓所管理</a>
+          <a href={ROUTES.tetsuzuki.path}>手続き</a>
+          <a href={ROUTES.about.path}>運営方針・訂正窓口</a>
+        </nav>
+      </div>
+      <p class="disclaimer-banner">{siteConfig.officialDisclaimer}</p>
+    </header>
+
+    <main id="main-content" class="site-main">
+      <slot />
+    </main>
+
+    <footer class="site-footer">
+      <p class="site-footer__disclaimer">{siteConfig.officialDisclaimer}</p>
+      <nav class="site-footer__nav" aria-label="フッターメニュー">
+        <a href={ROUTES.top.path}>トップ</a>
+        <a href={ROUTES.sekizaiten.path}>石材店一覧・比較</a>
+        <a href={ROUTES.hakajimai.path}>墓じまい</a>
+        <a href={ROUTES.kanri.path}>墓所管理</a>
+        <a href={ROUTES.tetsuzuki.path}>手続き</a>
+        <a href={ROUTES.about.path}>運営方針・掲載基準・広告方針・訂正窓口</a>
+        <a href={ROUTES.sources.path}>情報源・最終確認日</a>
+        <a href={ROUTES.privacy.path}>プライバシーポリシー</a>
+      </nav>
+      <p class="site-footer__copyright">&copy; {new Date().getFullYear()} {siteConfig.name}</p>
+    </footer>
+  </body>
+</html>
+
+<style is:global>
+  /*
+   * 基盤デザイントークン・リセット（Phase 0）。
+   * 実際の見た目・コンポーネントスタイルは feature/ui-components が
+   * src/styles/** に構築する。ここでは以下だけを保証する。
+   *   - サイト全体で共有する配色・タイポグラフィのトークン
+   *   - header/footer/main の最低限読める構造
+   *   - 高齢者・40〜60代家族にも読みやすい基礎値（本文16px以上等）
+   */
+  :root {
+    /* CLAUDE_CODE_HANDOFF.md 9章: 白・深緑・石色を基調。東京都公式の外観は模倣しない。 */
+    --color-bg: #f7f6f3;
+    --color-surface: #ffffff;
+    --color-text: #23261f;
+    --color-text-muted: #55584f;
+    --color-accent: #2f4a3c;
+    --color-accent-soft: #e7ede8;
+    --color-border: #dcdcd4;
+    --color-warning-bg: #fbf3e3;
+
+    --font-family-base: 'Noto Sans JP', system-ui, -apple-system, 'Segoe UI', sans-serif;
+
+    --font-size-base: 17px;
+    --line-height-base: 1.7;
+
+    --space-2: 0.5rem;
+    --space-3: 0.75rem;
+    --space-4: 1rem;
+    --space-6: 1.5rem;
+    --space-8: 2rem;
+  }
+
+  * {
+    box-sizing: border-box;
+  }
+
+  html {
+    color-scheme: light;
+  }
+
+  body {
+    margin: 0;
+    background: var(--color-bg);
+    color: var(--color-text);
+    font-family: var(--font-family-base);
+    font-size: var(--font-size-base);
+    line-height: var(--line-height-base);
+  }
+
+  a {
+    color: var(--color-accent);
+  }
+
+  .skip-link {
+    position: absolute;
+    left: -9999px;
+    top: 0;
+    background: var(--color-surface);
+    color: var(--color-text);
+    padding: var(--space-3) var(--space-4);
+    z-index: 100;
+  }
+  .skip-link:focus {
+    left: var(--space-4);
+    top: var(--space-4);
+  }
+
+  .site-header__inner {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--space-4);
+    padding: var(--space-4) var(--space-6);
+  }
+
+  .site-header__brand {
+    display: flex;
+    flex-direction: column;
+    text-decoration: none;
+    color: var(--color-text);
+  }
+  .site-header__name {
+    font-weight: 700;
+    font-size: 1.25rem;
+  }
+  .site-header__subtitle {
+    font-size: 0.9rem;
+    color: var(--color-text-muted);
+  }
+
+  .site-header__nav,
+  .site-footer__nav {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-4);
+  }
+
+  .disclaimer-banner,
+  .site-footer__disclaimer {
+    margin: 0;
+    padding: var(--space-2) var(--space-6);
+    background: var(--color-warning-bg);
+    color: var(--color-text);
+    font-size: 0.9rem;
+  }
+
+  .site-main {
+    max-width: 960px;
+    margin-inline: auto;
+    padding: var(--space-6);
+    min-height: 40vh;
+  }
+
+  .site-footer {
+    border-top: 1px solid var(--color-border);
+    padding: var(--space-6);
+    color: var(--color-text-muted);
+    font-size: 0.9rem;
+  }
+  .site-footer__copyright {
+    margin-top: var(--space-4);
+  }
+
+  a:focus-visible,
+  button:focus-visible {
+    outline: 3px solid var(--color-accent);
+    outline-offset: 2px;
+  }
+</style>

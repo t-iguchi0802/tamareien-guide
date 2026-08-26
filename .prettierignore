@@ -1,0 +1,30 @@
+dist/
+.astro/
+node_modules/
+package-lock.json
+
+# ルート直下の正本ドキュメント・正本データ。実装エージェントは内容を変更しない
+# （CLAUDE_CODE_HANDOFF.md 4章 / data_dictionary.md 最重要ルール）。
+# 整形目的であっても書式を変更しない。
+00_README.md
+01_CONTENT.md
+02_DESIGN.md
+03_SITE_STRUCTURE.md
+04_WIREFRAME.md
+05_DATA.md
+06_TECH.md
+07_QA.md
+08_REVIEW_DECISIONS.md
+AGENTS.md
+CLAUDE_CODE_HANDOFF.md
+WORKTREE_AGENT_PLAN.md
+businesses.json
+data_dictionary.md
+sources.csv
+
+# src/data/ のビルド用コピーも正本と完全一致させる運用のため対象外とする。
+src/data/businesses.json
+src/data/sources.csv
+
+# Claude Code のローカル設定
+.claude/settings.local.json

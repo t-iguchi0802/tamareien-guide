@@ -1,0 +1,42 @@
+---
+/**
+ * Phase 0 プレースホルダー。
+ *
+ * これはトップページの本実装ではない。共通基盤（データ読み込み・型・
+ * レイアウト）がビルド時に正しく機能することを確認するための最小限の
+ * スモークテストページである。
+ *
+ * 本実装は feature/pages 担当が、02_DESIGN.md・04_WIREFRAME.md等を
+ * 「今回の目的と矛盾しない範囲」の参考にしつつ、
+ * CLAUDE_CODE_HANDOFF.md の内容に沿って作成する（CLAUDE.md参照）。
+ */
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { siteConfig } from '../lib/siteConfig';
+import { getBusinesses } from '../lib/data';
+import { statusToDisplayLabel } from '../lib/data/verificationStatus';
+
+const businesses = getBusinesses();
+---
+
+<BaseLayout title={siteConfig.name} description={siteConfig.subtitle}>
+  <h1>{siteConfig.name}</h1>
+  <p>{siteConfig.subtitle}</p>
+
+  <section aria-labelledby="foundation-status-heading">
+    <h2 id="foundation-status-heading">Phase 0 共通基盤: データ読み込み確認</h2>
+    <p>
+      このセクションは本番コンテンツではなく、事業者データ（<code>src/data/businesses.json</code
+      >）が ビルド時に検証済みで読み込めていることを確認するための一時的な表示である。
+    </p>
+    <p>読み込み件数: {businesses.length}件</p>
+    <ul>
+      {
+        businesses.slice(0, 3).map((b) => (
+          <li>
+            {b.name}（{b.location.city}） — 新規建墓: {statusToDisplayLabel(b.services.new_grave)}
+          </li>
+        ))
+      }
+    </ul>
+  </section>
+</BaseLayout>

@@ -1,0 +1,62 @@
+/**
+ * GA4イベント契約。
+ *
+ * 正本: CLAUDE_CODE_HANDOFF.md 第7章。
+ *
+ * 注意: repoルートの旧設計資料（00〜08_*.md, AGENTS.md）に記載のイベント名
+ * （shop_card_click, phone_click 等）は「三鷹・街の電器屋」比較サイトという
+ * 別プロジェクトのものであり、本プロジェクトでは使用しない。CLAUDE.md参照。
+ *
+ * 所有者: リード（型契約）。実装は feature/seo-analytics 担当が
+ * src/lib/analytics/** に置く。
+ */
+
+export type AnalyticsEventName =
+  | 'business_outbound_click'
+  | 'business_phone_click'
+  | 'business_map_click'
+  | 'comparison_filter_use'
+  | 'official_procedure_click'
+  | 'correction_request_click';
+
+export type OutboundLinkType = 'official_site' | 'contact' | 'directory';
+
+export interface BusinessOutboundClickParams {
+  business_id: string;
+  link_type: OutboundLinkType;
+  page_path: string;
+}
+
+export interface BusinessPhoneClickParams {
+  business_id: string;
+  page_path: string;
+}
+
+export interface BusinessMapClickParams {
+  business_id: string;
+  page_path: string;
+}
+
+export interface ComparisonFilterUseParams {
+  filter_type: string;
+  filter_value: string;
+  page_path: string;
+}
+
+export interface OfficialProcedureClickParams {
+  authority: string;
+  topic: string;
+  page_path: string;
+}
+
+export interface CorrectionRequestClickParams {
+  page_path: string;
+}
+
+export type AnalyticsEventParams =
+  | { name: 'business_outbound_click'; params: BusinessOutboundClickParams }
+  | { name: 'business_phone_click'; params: BusinessPhoneClickParams }
+  | { name: 'business_map_click'; params: BusinessMapClickParams }
+  | { name: 'comparison_filter_use'; params: ComparisonFilterUseParams }
+  | { name: 'official_procedure_click'; params: OfficialProcedureClickParams }
+  | { name: 'correction_request_click'; params: CorrectionRequestClickParams };

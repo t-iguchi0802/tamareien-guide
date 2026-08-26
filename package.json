@@ -1,0 +1,35 @@
+{
+  "name": "tama-reien-hikaku-guide",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "多磨霊園のお墓相談比較ガイド — 公開情報のみで石材店・お墓関連事業者を比較する静的サイト",
+  "engines": {
+    "node": ">=22.12.0"
+  },
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "check": "astro check",
+    "lint": "eslint .",
+    "format": "prettier --write .",
+    "format:check": "prettier --check ."
+  },
+  "dependencies": {
+    "astro": "^7.2.7",
+    "csv-parse": "^7.0.2",
+    "zod": "^4.4.3"
+  },
+  "devDependencies": {
+    "typescript": "^5.9.3",
+    "eslint": "^10.9.1",
+    "prettier": "^3.9.6",
+    "@astrojs/check": "^0.9.10",
+    "@eslint/js": "^10.0.1",
+    "@types/node": "^24.13.3",
+    "eslint-plugin-astro": "^3.1.0",
+    "prettier-plugin-astro": "^0.14.1",
+    "typescript-eslint": "^8.68.0"
+  }
+}

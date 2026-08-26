@@ -1,0 +1,31 @@
+﻿source_id,business_id,source_type,publisher,title,url,checked_at,claims,status,notes
+SRC-TOSHIMAYA-COMPANY,biz-toshimaya,official_site,有限会社豊島屋,店舗案内・会社概要,https://www.toshimaya.net/company,2026-08-24,法人名、代表者、創業、住所、電話、定休日、小金井門からの位置、資格・店舗設備,checked,営業時間はページ上で確認できないため未確認
+SRC-TOSHIMAYA-HOME,biz-toshimaya,official_site,有限会社豊島屋,東京都多磨霊園小金井門前の石材店 豊島屋,https://www.toshimaya.net/,2026-08-24,"建墓、清掃管理、修理、納骨、墓じまい、清掃5,500円から、墓じまい66,000円/㎡から",checked,料金は最低価格で現地見積り条件あり
+SRC-TOSHIMAYA-CHAMBER,biz-toshimaya,chamber_directory,小金井市商工会,豊島屋石材店,https://koganei-s.or.jp/shop/toshimaya-sekizai/,2026-08-24,住所、電話、定休日、駐車場、維持管理、清掃、供花・線香等,checked,公式サイトの補助情報
+SRC-KOGANEYA-COMPANY,biz-koganeya,official_site,こがねや石材株式会社,こがねや石材について,https://www.koganeya-148.com/company/,2026-08-24,法人名、住所、電話、営業時間、年中無休、創業、代表、資本金、許可、墓所施工、申請、リフォーム、クリーニング、墓じまい・改葬,checked,営業目的の問い合わせを控える旨の記載あり
+SRC-TUKUBAYA-OFFICE,biz-tukubaya,official_site,つくば家石材株式会社,店舗案内,https://www.tukubaya.co.jp/office.html,2026-08-24,本社住所、電話、営業時間、定休日、小金井門徒歩2分、参道口徒歩1分,checked,
+SRC-TUKUBAYA-DISMANTLE,biz-tukubaya,official_site,つくば家石材株式会社,お墓の管理にお困りの方,https://www.tukubaya.co.jp/dismantle.html,2026-08-24,多磨霊園近く、墓所返還工事、墓じまい対応,checked,その他の管理サービスはこのページだけでは確定しない
+SRC-ISHIKATSU-HOME,biz-ishikatsu,official_site,石勝店,石勝店 都立多磨霊園表門近くの石材店,https://www.ishikatsu10.com/,2026-08-24,住所、電話、営業時間、定休日、表門近く、建墓、リフォーム、清掃、年間管理、供花、植木、納骨、彫刻、耐震・免震、墓じまい、法事,checked,
+SRC-YONAIYA-HOME,biz-yonaiya,official_site,米内家石材店,米内家石材店 ホーム,https://yonaiya.jp/,2026-08-24,住所、電話、営業時間、定休日、建墓、改葬・墓じまい、修繕、雑草対策,checked,
+SRC-YONAIYA-ABOUT,biz-yonaiya,official_site,米内家石材店,米内家について,https://yonaiya.jp/about/,2026-08-24,昭和8年創業、正門そば、三代目店主、施工保証、手続代行、清掃・墓参り代行、雑草対策、お墓ディレクター,checked,
+SRC-TAMAGAWA-HOME,biz-tamagawa,official_site,玉川石材工業株式会社,多磨霊園正門前の玉川石材工業,https://www.tamagawasekizai.co.jp/,2026-08-24,正門前、建墓、埋葬・法事、クリーニング、供花、植木、状態確認、移設・撤去、リフォーム、霊園申込相談,checked,墓じまい一括支援とは断定しない
+SRC-TAMAGAWA-OFFICE,biz-tamagawa,official_site,玉川石材工業株式会社,店舗紹介,https://www.tamagawasekizai.co.jp/office.html,2026-08-24,本店住所、電話、営業時間,checked,
+SRC-FUKAYA-ASSOCIATION,biz-fukaya,industry_association,全国石製品協同組合,有限会社深谷石材店,https://zenseki.or.jp/sekizai/00022.shtml,2026-08-24,法人名、住所、電話、代表、創業、営業時間、定休日、業界団体掲載、多摩地区対応,checked,
+SRC-FUKAYA-SERVICES,biz-fukaya,official_site,有限会社深谷石材店,お墓参り・供花,https://www.fukaya.com/%E3%81%8A%E5%A2%93%E5%8F%82%E3%82%8A-%E4%BE%9B%E8%8A%B1/,2026-08-24,代理供花、墓所掃除、年間掃除、多磨霊園限定の管理サービス、営業時間・定休日,checked,料金は面積・内容により見積り
+SRC-FUKAYA-GRAVE-CLOSURE,biz-fukaya,official_site,有限会社深谷石材店,改葬・墓じまい,https://www.fukaya.com/%E3%81%8A%E5%A2%93%E3%81%AE%E6%94%B9%E4%BF%AE-1/%E6%94%B9%E8%91%AC-%E5%A2%93%E3%81%98%E3%81%BE%E3%81%84/,2026-08-24,改葬・墓じまい、申請手順案内,checked,行政手続は公式窓口情報を優先する
+SRC-TOMITA-COMPANY,biz-tomita,official_site,有限会社富田石材店,会社案内,https://www.tomitasekizai.com/company.html,2026-08-24,法人名、所在地、電話、創業、資本金、墓所・墓石販売・設計施工,checked,
+SRC-TOMITA-CLEANING,biz-tomita,official_site,有限会社富田石材店,お墓のクリーニング・リフォーム,https://www.tomitasekizai.com/cleaning.html,2026-08-24,墓石クリーニング、リフォーム,checked,
+SRC-TOMITA-CHAMBER,biz-tomita,chamber_directory,小金井市商工会,有限会社富田石材店,https://koganei-s.or.jp/shop/tomita-sekizai/,2026-08-24,所在地、電話、公式サイト,checked,公式サイトの補助情報
+SRC-SHIBATA-ABOUT,biz-shibata,official_site,柴田石材株式会社,柴田石材について,https://www.shibatasekizai-corp.jp/about/,2026-08-24,法人名、代表、設立、所在地、電話、受付時間、資格団体、建墓、納骨・改葬、彫刻、清掃、墓じまい、粉骨、リフォーム、耐震、永代供養等,checked,
+SRC-YAMADA-HOME,biz-yamada,official_site,有限会社つなぎ館丸忠山田石材店,丸忠山田石材店 公式サイト,https://www.yamadasekizaiten.com/,2026-08-24,法人名、住所、電話、営業時間、南参道前、墓石・石材工事、彫刻、外柵、リフォーム、沿革,checked,
+SRC-YAMADA-DIRECTORY,biz-yamada,business_directory,iタウンページ,有限会社つなぎ館丸忠山田石材店,https://itp.ne.jp/zenkoku/tokyo/fuchushi/momijigaoka/132882731122061760,2026-08-24,住所、電話、営業時間、駐車場、正門徒歩30秒との掲載,checked,門の表現は公式サイトの南参道前を優先
+SRC-TACHIBANAYA-CHAMBER,biz-tachibanaya,chamber_directory,小金井市商工会,有限会社立花家石材店,https://koganei-s.or.jp/shop/tachibanaya-sekizaiten/,2026-08-24,法人名、住所、電話、石材カテゴリ,checked,個別サービスは未確認
+SRC-OKAMURA-CHAMBER,biz-okamura,chamber_directory,小金井市商工会,岡村石材,https://koganei-s.or.jp/shop/okamura-sekizai/,2026-08-24,名称、住所、電話、石材カテゴリ、第三者事業者ページURL,checked,個別サービスは未確認
+SRC-IBARAGI-HOME,biz-ibaragi-meiseki,official_site,茨城銘石工業株式会社,茨城銘石工業 ホーム,https://ibaragimeiseki-k.co.jp/,2026-08-24,所在地、電話、営業時間、定休日、建築・土木石材工事、製作・販売・施工,checked,墓所向けサービスは未確認
+SRC-IBARAGI-COMPANY,biz-ibaragi-meiseki,official_site,茨城銘石工業株式会社,会社概要,https://ibaragimeiseki-k.co.jp/company.html,2026-08-24,法人名、設立、所在地、電話、資本金、代表、営業種目,checked,
+SRC-IBARAGI-CHAMBER,biz-ibaragi-meiseki,chamber_directory,小金井市商工会,茨城銘石工業株式会社,https://koganei-s.or.jp/shop/ibaragi-meiseki-kougyou/,2026-08-24,所在地、電話、公式サイト、石材カテゴリ,checked,
+SRC-ISHISEI-COMPANY,biz-ishisei,official_site,石誠メモリアルサポート,会社概要,https://ishisei-memorial.jp/kaisyagaiyou/,2026-08-24,商号、代表、所在地、電話、新小金井駅前、多磨霊園から車約10分、駐車場、墓所紹介、改葬、清掃、リフォーム、撤去,checked,営業時間・定休日は未確認
+SRC-ISHISEI-KOGANEI,biz-ishisei,official_site,石誠メモリアルサポート,小金井市の墓石建立・墓じまい,https://ishisei-memorial.jp/koganeishi/,2026-08-24,多磨霊園での建墓、墓じまい、手続支援、納骨・彫刻、清掃、供花、雑草・樹木対応、リフォーム、遠方対応、写真報告の施工事例,checked,事業者自身による実績掲載
+SRC-TAMA-OFFICIAL,,government,公益財団法人東京都公園協会,多磨霊園,https://www.tokyo-park.or.jp/reien/tama/index.html,2026-08-24,多磨霊園の公式概要、開園日、面積、利用案内,checked,制度・施設情報は事業者サイトより優先
+SRC-TAMA-WORK-NOTICE,,government,公益財団法人東京都公園協会,墓所工事における着手届の提出について,https://www.tokyo-park.or.jp/reien/news/2026/information_15.html,2026-08-24,2026年4月1日から工事着手届・完了届を求める案内,checked,公開直前に再確認
+SRC-FUCHU-REBURIAL,,government,府中市,改葬許可申請,https://www.city.fuchu.tokyo.jp/kurashi/tetuduki/sonota/kaisoukyoka.html,2026-08-24,改葬許可の流れ、必要書類、受付窓口,checked,公開直前に再確認
