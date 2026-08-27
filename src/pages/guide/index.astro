@@ -17,11 +17,13 @@ const description =
 
 const categories = [
   {
+    id: 'access',
     heading: '墓参り・アクセス',
     description: '電車・バス・車での行き方、門ごとの開閉時間、地図・墓所ナビへのリンクです。',
     links: [{ href: ROUTES.access.path, label: '多磨霊園への行き方｜電車・バス・車と入口の選び方' }],
   },
   {
+    id: 'procedures',
     heading: '墓じまい・お墓の手続き',
     description: '墓じまい・改葬・墓所返還など、行政手続きと石材店対応をあわせて整理しています。',
     links: [
@@ -33,6 +35,7 @@ const categories = [
     ],
   },
   {
+    id: 'history',
     heading: '多磨霊園の歴史・著名人',
     description: '1923年の開園からの歴史と、著名人の墓所についてのご案内です。',
     links: [
@@ -54,8 +57,8 @@ const categories = [
   <div class="guide-categories">
     {
       categories.map((category) => (
-        <section class="guide-category" aria-labelledby={`guide-cat-${category.heading}`}>
-          <h2 id={`guide-cat-${category.heading}`}>{category.heading}</h2>
+        <section class="guide-category" aria-labelledby={`guide-cat-${category.id}`}>
+          <h2 id={`guide-cat-${category.id}`}>{category.heading}</h2>
           <p class="guide-category__description">{category.description}</p>
           <ul class="guide-category__links">
             {category.links.map((link) => (
