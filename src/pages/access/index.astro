@@ -21,7 +21,36 @@
  *   案内自体が見当たらなかった。「無料駐車場あり」等の断定はしていない。
  *   みたま堂前の障害者用駐車スペース2台は、公式ページに明記があるため
  *   確認済みとして記載する。
+ *
+ * UX/UI見直し（2026-08-28、ミチのレビュー対応）:
+ * - 「まず結論」という記事作成上の内部表現をやめ、利用者向けの見出し
+ *   「墓所の場所に合う入口を選ぶ」に変更した。
+ * - 地図の導線を「公式園内案内図」「Googleマップ」の2つに絞った
+ *   （「公式墓所ナビを開く」ボタンは削除）。公式墓所ナビ自体は、
+ *   区画確認という別の用途で「墓所の場所に合う入口を選ぶ」「出発前に
+ *   確認すること」の本文中に文章リンクとして残している（ボタンの
+ *   3つ目としては置かない）。
+ * - ページ構成を、コンパクトな写真付きヒーロー→入口の選び方→電車・バス→
+ *   車→駐車→地図→出発前チェックリスト→更新日/情報源→関連ガイドの順に
+ *   再編した。既存の正確な文章・出典は変更していない（未確認情報は追加せず、
+ *   文章の位置と見出しだけを整理した）。
+ * - 4つの交通手段カード（JR中央線方面／京王線方面／西武多摩川線／車）を
+ *   新設し、ページ内リンクで詳細セクションへ誘導する。カードには、
+ *   公式ページで確認できた内容だけを表示し、未確認の門の割り当ては
+ *   行っていない。
+ * - 各交通ルートに「駅→バス／徒歩→入口」の経路表示を追加した（実際の
+ *   到着停留所・入口は既存の確認済み出典のまま。推測で表門・裏門・
+ *   小金井門を割り当てていない）。
+ * - 電車・バス・徒歩・車の線画アイコン（自作の最小限のインラインSVG、
+ *   外部アイコンライブラリは追加していない）を使い、写真・色・カードを
+ *   増やしすぎずに視覚的な手がかりを加えた。
+ * - 駐車についての注記は、黄色い注意帯ではなく、共通スタイル
+ *   （src/styles/guide-article.cssの.article__callout、淡い石色）にした。
+ * - ガイド記事共通のCSS（.article、.article__button等）は
+ *   src/styles/guide-article.cssへ切り出し、他のガイド記事
+ *   （/guide/history/ 等）と共通化した（詳細は同CSSファイルのコメント参照）。
  */
+import '../../styles/guide-article.css';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import { ROUTES } from '../../lib/routes';
 import { getSourceById } from '../../lib/data';
@@ -29,10 +58,75 @@ import { GUIDE_SOURCES } from '../_lib/guide-sources';
 
 const pageTitle = '多磨霊園への行き方｜電車・バス・車と入口の選び方';
 const description =
-  '多磨霊園への行き方を、電車・バス・車のルート別に公式情報をもとに整理しました。門ごとの開閉時間、駐車場について公式ページで確認できる範囲、地図・墓所ナビへのリンクを掲載しています。';
+  '多磨霊園への行き方を、電車・バス・車のルート別に公式情報をもとに整理しました。門ごとの開閉時間、駐車場について公式ページで確認できる範囲、地図へのリンクを掲載しています。';
 
 const tamaOfficial = getSourceById('SRC-TAMA-OFFICIAL');
 const checkedAt = '2026-08-27';
+
+/**
+ * 線画アイコン（最小限の自作インラインSVG。外部アイコンライブラリは追加していない）。
+ * viewBox・線幅・線色（currentColor）を統一し、色数を増やさない。
+ */
+const ICONS = {
+  train:
+    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="6" y="3" width="12" height="13" rx="3"/><line x1="6" y1="9" x2="18" y2="9"/><line x1="9" y1="9" x2="9" y2="13"/><line x1="15" y1="9" x2="15" y2="13"/><circle cx="9" cy="19" r="1.3"/><circle cx="15" cy="19" r="1.3"/><line x1="9.5" y1="16" x2="7.5" y2="19"/><line x1="14.5" y1="16" x2="16.5" y2="19"/></svg>',
+  bus: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="11" rx="2.5"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="7" y1="7.5" x2="7" y2="10"/><line x1="12" y1="7.5" x2="12" y2="10"/><line x1="17" y1="7.5" x2="17" y2="10"/><circle cx="7.5" cy="19" r="1.4"/><circle cx="16.5" cy="19" r="1.4"/></svg>',
+  walk: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="13.2" cy="4.2" r="1.6"/><path d="M11 8l2.4 2.6-1 4.2 2.6 5"/><path d="M13.4 10.6l3 .8 1.8-2.2"/><path d="M12.4 14.8l-3.2 1.8-1 3"/></svg>',
+  car: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 16l1.4-5.3A2 2 0 0 1 7.3 9.2h9.4a2 2 0 0 1 1.9 1.5L20 16"/><rect x="3" y="16" width="18" height="4" rx="1.5"/><circle cx="8" cy="20" r="1.4"/><circle cx="16" cy="20" r="1.4"/></svg>',
+  map: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 4L4 6v14l5-2 6 2 5-2V4l-5 2-6-2z"/><line x1="9" y1="4" x2="9" y2="18"/><line x1="15" y1="6" x2="15" y2="20"/></svg>',
+  pin: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s7-6.4 7-11.5A7 7 0 0 0 5 9.5C5 14.6 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.4"/></svg>',
+  externalArrow:
+    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17L17 7"/><path d="M9 7h8v8"/></svg>',
+} as const;
+
+interface TransportCard {
+  anchor: string;
+  icon: keyof typeof ICONS;
+  mode: string;
+  departure: string;
+  connection: string;
+  arrival: string;
+  linkLabel: string;
+}
+
+const transportCards: TransportCard[] = [
+  {
+    anchor: '#route-jr',
+    icon: 'train',
+    mode: '電車＋バス',
+    departure: 'JR中央線 武蔵小金井駅',
+    connection: '京王バス（表門下車）',
+    arrival: '表門（南側）',
+    linkLabel: '詳しい行き方を見る',
+  },
+  {
+    anchor: '#route-keio',
+    icon: 'train',
+    mode: '電車＋バス',
+    departure: '京王線 多磨霊園駅',
+    connection: '京王バス（表門下車）',
+    arrival: '表門（南側）',
+    linkLabel: '詳しい行き方を見る',
+  },
+  {
+    anchor: '#route-seibu',
+    icon: 'walk',
+    mode: '電車＋徒歩',
+    departure: '西武多摩川線 多磨駅',
+    connection: '徒歩10分',
+    arrival: '正門',
+    linkLabel: '詳しい行き方を見る',
+  },
+  {
+    anchor: '#by-car',
+    icon: 'car',
+    mode: '車',
+    departure: '－',
+    connection: '－',
+    arrival: '正門・小金井門・バス通り車止め',
+    linkLabel: '開閉時間を見る',
+  },
+];
 ---
 
 <BaseLayout title={pageTitle} description={description}>
@@ -41,52 +135,100 @@ const checkedAt = '2026-08-27';
     <h1>{pageTitle}</h1>
     <p class="article__meta">確認日: {checkedAt} ／ 情報源: 東京都公園協会公式サイト（本文末に一覧）</p>
 
-    <section aria-labelledby="access-summary-heading">
-      <h2 id="access-summary-heading">まず結論</h2>
-      <ul>
-        <li>
-          多磨霊園は約128万平方メートルと広く、正門・小金井門・裏門・バス通り側など複数の入口があります。どの入口が便利かは、目的の墓所がある「区」の位置によって変わります。
-        </li>
-        <li>
-          墓所の場所が分かっている場合は、先に<a
-            href={GUIDE_SOURCES.tamaHakaNavi.url}
-            rel="noopener"
-            target="_blank"
-            data-event="official_procedure_click"
-            data-authority="tokyo_park_association"
-            data-topic="access_haka_navi">公式墓所ナビ</a
-          >で「区・種・側・番」を確認してから向かうルートを決めることをおすすめします。
-        </li>
-      </ul>
+    <div class="access-hero">
+      <p class="access-hero__credit">画像はイメージです</p>
+    </div>
+
+    <section aria-labelledby="access-entry-heading">
+      <h2 id="access-entry-heading">墓所の場所に合う入口を選ぶ</h2>
+      <p>
+        多磨霊園は広く、墓所の位置によって便利な入口が異なります。墓所の区画と利用する門を確認してから、経路を選びましょう。区画がわかっている場合は、<a
+          href={GUIDE_SOURCES.tamaHakaNavi.url}
+          rel="noopener"
+          target="_blank"
+          data-event="official_procedure_click"
+          data-authority="tokyo_park_association"
+          data-topic="access_haka_navi">公式墓所ナビ</a
+        >で「区・種・側・番」を確認すると、より近い入口を選べます。
+      </p>
+
+      <div class="transport-grid">
+        {
+          transportCards.map((card) => (
+            <a class="transport-card" href={card.anchor}>
+              <span class="transport-card__icon" set:html={ICONS[card.icon]} />
+              <span class="transport-card__body">
+                <span class="transport-card__mode">{card.mode}</span>
+                <span class="transport-card__row">
+                  <span class="transport-card__label">出発</span>
+                  {card.departure}
+                </span>
+                <span class="transport-card__row">
+                  <span class="transport-card__label">利用</span>
+                  {card.connection}
+                </span>
+                <span class="transport-card__row">
+                  <span class="transport-card__label">方面</span>
+                  {card.arrival}
+                </span>
+                <span class="transport-card__link">{card.linkLabel}</span>
+              </span>
+            </a>
+          ))
+        }
+      </div>
     </section>
 
-    <section aria-labelledby="access-north-heading">
-      <h2 id="access-north-heading">北側から（JR中央線・武蔵小金井駅）</h2>
-      <p>
-        東京都公園協会の公式ページでは、JR中央線「武蔵小金井」駅から京王バスに乗り、「多磨霊園表門」で下車、徒歩2分と案内されています。この停留所は表門（南側）にあり、南側から向かう場合と同じバス・同じ停留所です。
-      </p>
-      <p>
-        「小金井門」は北側の入口として存在し、開閉時間の案内もありますが（下記「車で行く場合」参照）、武蔵小金井駅から小金井門へ直接向かうバス路線は公式ページ上で確認できませんでした。北側の墓所へ徒歩・バスで向かう場合の具体的な経路は、現時点の公開情報だけでは断定できないため、バス会社の公式サイトや現地でのご確認をおすすめします。
-      </p>
+    <section aria-labelledby="access-transit-heading">
+      <h2 id="access-transit-heading">電車・バスで行く</h2>
+
+      <div class="transit-route" id="route-jr">
+        <h3>JR中央線方面から（武蔵小金井駅）</h3>
+        <div class="route-diagram" role="img" aria-label="武蔵小金井駅から京王バスで多磨霊園表門へ、徒歩2分">
+          <span class="route-step"><span class="route-step__icon" set:html={ICONS.train} />武蔵小金井駅</span>
+          <span class="route-arrow"></span>
+          <span class="route-step"><span class="route-step__icon" set:html={ICONS.bus} />京王バス</span>
+          <span class="route-arrow"></span>
+          <span class="route-step"><span class="route-step__icon" set:html={ICONS.pin} />多磨霊園表門</span>
+        </div>
+        <p>
+          東京都公園協会の公式ページでは、JR中央線「武蔵小金井」駅から京王バスに乗り、「多磨霊園表門」で下車、徒歩2分と案内されています。この停留所は表門（南側）にあり、南側から向かう場合と同じバス・同じ停留所です。
+        </p>
+        <p>
+          「小金井門」は北側の入口として存在し、開閉時間の案内もありますが（後述「車で行く」参照）、武蔵小金井駅から小金井門へ直接向かうバス路線は公式ページ上で確認できませんでした。北側の墓所へ徒歩・バスで向かう場合の具体的な経路は、現時点の公開情報だけでは断定できないため、バス会社の公式サイトや現地でのご確認をおすすめします。
+        </p>
+      </div>
+
+      <div class="transit-route" id="route-keio">
+        <h3>京王線方面から（多磨霊園駅）</h3>
+        <div class="route-diagram" role="img" aria-label="多磨霊園駅から京王バスで多磨霊園表門へ、徒歩2分">
+          <span class="route-step"><span class="route-step__icon" set:html={ICONS.train} />多磨霊園駅</span>
+          <span class="route-arrow"></span>
+          <span class="route-step"><span class="route-step__icon" set:html={ICONS.bus} />京王バス</span>
+          <span class="route-arrow"></span>
+          <span class="route-step"><span class="route-step__icon" set:html={ICONS.pin} />多磨霊園表門</span>
+        </div>
+        <p>
+          京王線「多磨霊園」駅から京王バスに乗り、「多磨霊園表門」で下車、徒歩2分です。表門は霊園の南側にあり、管理事務所やみたま堂に近い主要な入口です。
+        </p>
+      </div>
+
+      <div class="transit-route" id="route-seibu">
+        <h3>西武多摩川線・多磨駅から</h3>
+        <div class="route-diagram" role="img" aria-label="多磨駅から徒歩10分で正門へ">
+          <span class="route-step"><span class="route-step__icon" set:html={ICONS.train} />多磨駅</span>
+          <span class="route-arrow"></span>
+          <span class="route-step"><span class="route-step__icon" set:html={ICONS.walk} />徒歩10分</span>
+          <span class="route-arrow"></span>
+          <span class="route-step"><span class="route-step__icon" set:html={ICONS.pin} />正門</span>
+        </div>
+        <p>西武多摩川線「多磨」駅から徒歩10分です。正門側の入口に近いルートとして公式ページに案内があります。</p>
+      </div>
     </section>
 
-    <section aria-labelledby="access-south-heading">
-      <h2 id="access-south-heading">南側から（京王線・多磨霊園駅）</h2>
-      <p>
-        京王線「多磨霊園」駅から京王バスに乗り、「多磨霊園表門」で下車、徒歩2分です。表門は霊園の南側にあり、管理事務所やみたま堂に近い主要な入口です。
-      </p>
-    </section>
-
-    <section aria-labelledby="access-seibu-heading">
-      <h2 id="access-seibu-heading">西武多摩川線から</h2>
-      <p>西武多摩川線「多磨」駅から徒歩10分です。正門側の入口に近いルートとして公式ページに案内があります。</p>
-    </section>
-
-    <section aria-labelledby="access-car-heading">
-      <h2 id="access-car-heading">車で行く場合</h2>
-      <p>
-        公式ページには、車両が出入りできる入口として正門・小金井門・バス通り車止めの開閉時間が掲載されています。
-      </p>
+    <section aria-labelledby="access-car-heading" id="by-car">
+      <h2 id="access-car-heading">車で行く</h2>
+      <p>公式ページには、車両が出入りできる入口として正門・小金井門・バス通り車止めの開閉時間が掲載されています。</p>
       <div class="article__table-scroll" tabindex="0" role="region" aria-label="入口の開閉時間の表（横スクロールできます）">
         <table>
           <caption>入口の開閉時間（東京都公園協会公式ページより）</caption>
@@ -117,69 +259,82 @@ const checkedAt = '2026-08-27';
 
     <section aria-labelledby="access-parking-heading">
       <h2 id="access-parking-heading">駐車について</h2>
-      <p>
-        公式ページ上には、一般来園者向けのまとまった駐車場についての案内が見当たりませんでした。そのため、「無料駐車場あり」といった断定はしていません。みたま堂前に障害者用駐車スペースが2台ある旨は、公式ページに明記されています。一般車の駐車方法については、管理事務所（受付時間
-        8:30〜17:30、書類受付は〜16:30）へのお問い合わせ、または現地でのご確認をおすすめします。石材店のサイト等に掲載されている駐車案内は、当サイトでは転載していません。
-      </p>
-    </section>
-
-    <section aria-labelledby="access-gate-heading">
-      <h2 id="access-gate-heading">どの門から入るか</h2>
-      <ul>
-        <li><strong>南側（表門）</strong>: 京王線・多磨霊園駅、JR中央線・武蔵小金井駅のいずれからもバスで表門に到着します。管理事務所・みたま堂に近い入口です。</li>
-        <li><strong>正門</strong>: 西武多摩川線・多磨駅から徒歩10分。車での出入りも可能です。</li>
-        <li><strong>小金井門</strong>: 車での出入りが可能な北側の入口です（開閉時間は上表参照）。公共交通での直通経路は確認できていません。</li>
-      </ul>
-      <p>
-        どの入口が近いかは、墓所の「区・種・側・番」によって変わります。訪問前に<a
-          href={GUIDE_SOURCES.tamaHakaNavi.url}
-          rel="noopener"
-          target="_blank"
-          data-event="official_procedure_click"
-          data-authority="tokyo_park_association"
-          data-topic="access_gate_choice">公式墓所ナビ</a
-        >で場所を確認することをおすすめします。
-      </p>
+      <div class="article__callout">
+        <p>
+          公式ページ上には、一般来園者向けのまとまった駐車場についての案内が見当たりませんでした。そのため、「無料駐車場あり」といった断定はしていません。
+        </p>
+        <p>
+          みたま堂前に障害者用駐車スペースが2台ある旨は、公式ページに明記されています。一般車の駐車方法については、管理事務所（受付時間
+          8:30〜17:30、書類受付は〜16:30）へのお問い合わせ、または現地でのご確認をおすすめします。石材店のサイト等に掲載されている駐車案内は、当サイトでは転載していません。
+        </p>
+      </div>
     </section>
 
     <section aria-labelledby="access-map-heading">
-      <h2 id="access-map-heading">地図</h2>
-      <div class="article__button-row">
+      <h2 id="access-map-heading">地図で入口を確認する</h2>
+      <div class="map-actions">
         <a
-          class="article__button"
+          class="map-action"
           href={GUIDE_SOURCES.tamaMapPdf.url}
           rel="noopener"
           target="_blank"
           data-event="official_procedure_click"
           data-authority="tokyo_park_association"
-          data-topic="access_map_pdf">公式園内案内図を開く（PDF）</a
+          data-topic="access_map_pdf"
         >
+          <span class="map-action__icon" set:html={ICONS.map} />
+          <span class="map-action__text">
+            <span class="map-action__label"
+              >公式園内案内図を見る
+              <span class="map-action__external" set:html={ICONS.externalArrow} />
+              <span class="sr-only">（新しいタブでPDFが開きます）</span>
+            </span>
+            <span class="map-action__hint">門・区画・園内施設を確認できます</span>
+          </span>
+        </a>
         <a
-          class="article__button"
+          class="map-action"
           href={GUIDE_SOURCES.googleMapsTama.url}
           rel="noopener"
           target="_blank"
           data-event="official_procedure_click"
           data-authority="google_maps"
-          data-topic="access_google_maps">Googleマップで多磨霊園を開く</a
+          data-topic="access_google_maps"
         >
-        <a
-          class="article__button"
-          href={GUIDE_SOURCES.tamaHakaNavi.url}
-          rel="noopener"
-          target="_blank"
-          data-event="official_procedure_click"
-          data-authority="tokyo_park_association"
-          data-topic="access_haka_navi_button">公式墓所ナビを開く</a
-        >
+          <span class="map-action__icon" set:html={ICONS.pin} />
+          <span class="map-action__text">
+            <span class="map-action__label"
+              >Googleマップで経路を調べる
+              <span class="map-action__external" set:html={ICONS.externalArrow} />
+              <span class="sr-only">（新しいタブで開きます）</span>
+            </span>
+            <span class="map-action__hint">現在地や出発駅からの経路を確認できます</span>
+          </span>
+        </a>
       </div>
-      <p class="article__note">
-        地図・園内案内図はいずれも公式サイトへのリンクです。画像としての保存・転載はしていません。
-      </p>
+      <p class="article__note">地図・園内案内図はいずれも公式サイトへのリンクです。画像としての保存・転載はしていません。</p>
+    </section>
+
+    <section aria-labelledby="access-checklist-heading">
+      <h2 id="access-checklist-heading">出発前に確認すること</h2>
+      <ul>
+        <li>
+          墓所の「区・種・側・番」を<a
+            href={GUIDE_SOURCES.tamaHakaNavi.url}
+            rel="noopener"
+            target="_blank"
+            data-event="official_procedure_click"
+            data-authority="tokyo_park_association"
+            data-topic="access_checklist_haka_navi">公式墓所ナビ</a
+          >で確認し、近い入口を把握しておきましょう。
+        </li>
+        <li>お彼岸等の時期は開閉時間が通常と異なる場合があるため、訪問前に公式ページでご確認ください。</li>
+        <li>車で向かう場合、一般来園者向けの駐車場は公式ページで確認できていないため、事前に管理事務所へお問い合わせください。</li>
+      </ul>
     </section>
 
     <section aria-labelledby="access-sources-heading">
-      <h2 id="access-sources-heading">情報源</h2>
+      <h2 id="access-sources-heading">更新日・情報源</h2>
       <ul class="article__sources">
         {
           tamaOfficial && (
@@ -210,7 +365,7 @@ const checkedAt = '2026-08-27';
     </section>
 
     <section aria-labelledby="access-related-heading">
-      <h2 id="access-related-heading">関連ページ</h2>
+      <h2 id="access-related-heading">関連ガイド</h2>
       <ul>
         <li><a href={ROUTES.guide.path}>多磨霊園ガイド一覧を見る</a></li>
         <li><a href={ROUTES.guideProcedures.path}>墓じまい・お墓の手続き 総合案内を見る</a></li>
@@ -221,78 +376,242 @@ const checkedAt = '2026-08-27';
 </BaseLayout>
 
 <style>
-  .article {
-    max-width: 800px;
-    margin-inline: auto;
+  .access-hero {
+    position: relative;
+    height: 220px;
+    border-radius: var(--radius-card, 10px);
+    overflow: hidden;
+    margin-block: var(--space-4) var(--space-6);
+    background-image: url('/images/hero-cemetery-photo-v2.png');
+    background-size: cover;
+    /* TOPページのヒーローとは異なるトリミングに見えるよう、
+       中央よりやや下（園路・墓石側）を基準にする。画像自体・彩度・
+       オーバーレイは変更していない。 */
+    background-position: center 70%;
   }
 
-  .article__eyebrow {
-    margin: 0 0 var(--space-2);
-    color: var(--color-stone-text, var(--color-text-muted));
-    font-size: var(--font-size-label, 0.9375rem);
+  @media (min-width: 640px) {
+    .access-hero {
+      height: 300px;
+    }
   }
 
-  .article__meta {
-    color: var(--color-text-muted);
-    font-size: var(--font-size-label, 0.9375rem);
+  .access-hero__credit {
+    position: absolute;
+    right: var(--space-3);
+    bottom: var(--space-3);
+    margin: 0;
+    padding: 0.15em 0.6em;
+    border-radius: var(--radius-tag, 6px);
+    background: rgba(255, 255, 255, 0.72);
+    color: #2b2926;
+    font-size: var(--font-size-caption, 0.875rem);
   }
 
-  .article__table-scroll {
-    overflow-x: auto;
+  /* --- 交通手段カード（「墓所の場所に合う入口を選ぶ」直下） --- */
+  .transport-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--space-3);
+    margin-top: var(--space-4);
   }
 
-  table {
-    border-collapse: collapse;
-    width: 100%;
-    min-width: 480px;
+  @media (min-width: 480px) {
+    .transport-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
   }
 
-  caption {
-    text-align: left;
-    font-weight: 700;
-    margin-bottom: var(--space-2);
+  .transport-card {
+    display: flex;
+    gap: var(--space-3);
+    align-items: flex-start;
+    padding: var(--space-3) var(--space-4);
+    border: 1px solid var(--color-stone-line, var(--color-border));
+    border-radius: var(--radius-card, 10px);
+    background: var(--color-surface);
+    text-decoration: none;
+    color: var(--color-text);
+    min-height: var(--tap-target-min);
   }
 
-  th,
-  td {
-    border: 1px solid var(--color-border);
-    padding: var(--space-2) var(--space-3);
-    text-align: left;
-    vertical-align: top;
-  }
-
-  thead th {
+  .transport-card:hover {
+    border-color: var(--color-accent);
     background: var(--color-accent-soft);
   }
 
-  .article__button-row {
-    display: flex;
-    flex-wrap: wrap;
-    gap: var(--space-3);
+  .transport-card__icon {
+    flex: none;
+    width: 28px;
+    height: 28px;
+    color: var(--color-accent);
   }
 
-  .article__button {
+  .transport-card__icon :global(svg) {
+    width: 100%;
+    height: 100%;
+  }
+
+  .transport-card__body {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15em;
+    font-size: var(--font-size-label, 0.9375rem);
+    line-height: 1.5;
+  }
+
+  .transport-card__mode {
+    font-weight: 700;
+    color: var(--color-text);
+  }
+
+  .transport-card__row {
+    color: var(--color-stone-text, var(--color-text-muted));
+  }
+
+  .transport-card__label {
+    display: inline-block;
+    min-width: 3em;
+    color: var(--color-text-muted);
+  }
+
+  .transport-card__link {
+    margin-top: 0.3em;
+    color: var(--color-accent);
+    font-weight: 700;
+    text-decoration: underline;
+  }
+
+  /* --- 経路詳細（電車・バスで行く） --- */
+  .transit-route {
+    margin-block: var(--space-5, 1.25rem);
+  }
+
+  .transit-route h3 {
+    font-family: var(--font-family-heading);
+    margin-bottom: var(--space-2);
+  }
+
+  .route-diagram {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-2);
+    margin-bottom: var(--space-3);
+  }
+
+  .route-step {
     display: inline-flex;
     align-items: center;
-    min-height: var(--tap-target-min);
-    padding: 0.6em 1.2em;
+    gap: 0.4em;
+    padding: 0.35em 0.8em;
+    background: var(--color-stone-surface);
+    border: 1px solid var(--color-stone-line);
     border-radius: var(--radius-pill, 999px);
+    font-size: var(--font-size-label, 0.9375rem);
+    color: var(--color-text);
+  }
+
+  .route-step__icon {
+    display: inline-flex;
+    width: 18px;
+    height: 18px;
+    color: var(--color-accent);
+    flex: none;
+  }
+
+  .route-step__icon :global(svg) {
+    width: 100%;
+    height: 100%;
+  }
+
+  .route-arrow {
+    color: var(--color-stone-text, var(--color-text-muted));
+    font-weight: 700;
+  }
+
+  .route-arrow::before {
+    content: '→';
+  }
+
+  @media (max-width: 420px) {
+    .route-diagram {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+
+    .route-arrow::before {
+      content: '↓';
+    }
+  }
+
+  /* --- 地図への大きな操作ボタン --- */
+  .map-actions {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--space-3);
+    margin-bottom: var(--space-3);
+  }
+
+  @media (min-width: 640px) {
+    .map-actions {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  .map-action {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    padding: var(--space-4);
+    min-height: var(--tap-target-min);
+    border-radius: var(--radius-card, 10px);
     background: var(--color-accent);
     color: var(--color-surface);
-    font-weight: 700;
     text-decoration: none;
   }
 
-  .article__button:hover {
+  .map-action:hover {
     background: var(--color-accent-deep, var(--color-accent));
   }
 
-  .article__note {
-    color: var(--color-text-muted);
-    font-size: var(--font-size-label, 0.9375rem);
+  .map-action__icon {
+    flex: none;
+    width: 30px;
+    height: 30px;
   }
 
-  .article__sources {
-    padding-left: 1.2em;
+  .map-action__icon :global(svg) {
+    width: 100%;
+    height: 100%;
+  }
+
+  .map-action__text {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2em;
+  }
+
+  .map-action__label {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35em;
+    font-weight: 700;
+  }
+
+  .map-action__external {
+    display: inline-flex;
+    width: 14px;
+    height: 14px;
+  }
+
+  .map-action__external :global(svg) {
+    width: 100%;
+    height: 100%;
+  }
+
+  .map-action__hint {
+    font-size: var(--font-size-caption, 0.875rem);
+    color: rgba(255, 253, 248, 0.85);
   }
 </style>

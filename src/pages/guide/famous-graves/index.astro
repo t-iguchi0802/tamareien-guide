@@ -23,6 +23,7 @@
  * モデルコースの入れ物）だけを用意した。個別記事は、公式資料または
  * 信頼できる一次資料での確認が取れ次第、追記する。
  */
+import '../../../styles/guide-article.css';
 import BaseLayout from '../../../layouts/BaseLayout.astro';
 import { ROUTES } from '../../../lib/routes';
 import { GUIDE_SOURCES } from '../../_lib/guide-sources';
@@ -126,56 +127,8 @@ const categories = [
 </BaseLayout>
 
 <style>
-  .article {
-    max-width: 800px;
-    margin-inline: auto;
-  }
-
-  .article__eyebrow {
-    margin: 0 0 var(--space-2);
-    color: var(--color-stone-text, var(--color-text-muted));
-    font-size: var(--font-size-label, 0.9375rem);
-  }
-
-  .article__meta {
-    color: var(--color-text-muted);
-    font-size: var(--font-size-label, 0.9375rem);
-  }
-
-  .article__button-row {
-    display: flex;
-    flex-wrap: wrap;
-    gap: var(--space-3);
-  }
-
-  .article__button {
-    display: inline-flex;
-    align-items: center;
-    min-height: var(--tap-target-min);
-    padding: 0.6em 1.2em;
-    border-radius: var(--radius-pill, 999px);
-    background: var(--color-accent);
-    color: var(--color-surface);
-    font-weight: 700;
-    text-decoration: none;
-  }
-
-  .article__button:hover {
-    background: var(--color-accent-deep, var(--color-accent));
-  }
-
-  .article__button--secondary {
-    background: transparent;
-    border: 1.5px solid var(--color-accent);
-    color: var(--color-accent);
-  }
-
   .article__category-list {
     padding-left: 1.2em;
     color: var(--color-stone-text, var(--color-text-muted));
-  }
-
-  .article__sources {
-    padding-left: 1.2em;
   }
 </style>

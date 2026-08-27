@@ -16,6 +16,7 @@
  * 既存の 'grave_closure' と 'reburial_support' のみで、新しいキーは
  * 作っていない。
  */
+import '../../../../styles/guide-article.css';
 import BaseLayout from '../../../../layouts/BaseLayout.astro';
 import { ROUTES } from '../../../../lib/routes';
 import { getSourceById } from '../../../../lib/data';
@@ -143,40 +144,3 @@ const closureServiceQuery = 'grave_closure,reburial_support';
   </article>
 </BaseLayout>
 
-<style>
-  .article {
-    max-width: 800px;
-    margin-inline: auto;
-  }
-
-  .article__eyebrow {
-    margin: 0 0 var(--space-2);
-    color: var(--color-stone-text, var(--color-text-muted));
-    font-size: var(--font-size-label, 0.9375rem);
-  }
-
-  .article__meta {
-    color: var(--color-text-muted);
-    font-size: var(--font-size-label, 0.9375rem);
-  }
-
-  .article__button {
-    display: inline-flex;
-    align-items: center;
-    min-height: var(--tap-target-min);
-    padding: 0.6em 1.2em;
-    border-radius: var(--radius-pill, 999px);
-    background: var(--color-accent);
-    color: var(--color-surface);
-    font-weight: 700;
-    text-decoration: none;
-  }
-
-  .article__button:hover {
-    background: var(--color-accent-deep, var(--color-accent));
-  }
-
-  .article__sources {
-    padding-left: 1.2em;
-  }
-</style>

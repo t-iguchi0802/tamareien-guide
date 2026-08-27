@@ -13,6 +13,7 @@
  * 参考情報として、情報源欄に別掲したうえで記載している
  * （公式ページの記載と参考情報の出典を混同しないようにする）。
  */
+import '../../../styles/guide-article.css';
 import BaseLayout from '../../../layouts/BaseLayout.astro';
 import { ROUTES } from '../../../lib/routes';
 import { getSourceById } from '../../../lib/data';
@@ -96,25 +97,3 @@ const checkedAt = '2026-08-27';
     </section>
   </article>
 </BaseLayout>
-
-<style>
-  .article {
-    max-width: 800px;
-    margin-inline: auto;
-  }
-
-  .article__eyebrow {
-    margin: 0 0 var(--space-2);
-    color: var(--color-stone-text, var(--color-text-muted));
-    font-size: var(--font-size-label, 0.9375rem);
-  }
-
-  .article__meta {
-    color: var(--color-text-muted);
-    font-size: var(--font-size-label, 0.9375rem);
-  }
-
-  .article__sources {
-    padding-left: 1.2em;
-  }
-</style>

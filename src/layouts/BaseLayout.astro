@@ -57,7 +57,20 @@
  *   担保する方式への変更）に伴う。運営者情報・掲載方針は`/about/`、
  *   情報源・確認日は`/sources/`に維持しており、フッターのリンクからも
  *   到達できる。
+ *
+ * 不具合修正（2026-08-28、アクセスページUX見直し中に発見）: `.sr-only`は
+ * `src/styles/tokens.css`で定義されているが、このレイアウト自身は
+ * 同ファイルをimportしておらず、`BusinessCard.astro`/`SponsorSlot.astro`
+ * 経由の間接importに頼っていた。そのため、これらのコンポーネントを
+ * 描画しないページ（/access/ /about/ /privacy/ /sources/ /tetsuzuki/
+ * /guide/** 等）では`.sr-only`が定義されず、当レイアウト自身が使う
+ * ナビ折りたたみの`<span class="sr-only">`（本ファイル内）が
+ * 画面に丸見えになっていた（実機で確認）。全ページの土台である
+ * このレイアウトでtokens.cssを直接importし、`.sr-only`・
+ * `--font-family-heading`等のトークンをページ内容に関係なく
+ * 常に利用可能にした。
  */
+import '../styles/tokens.css';
 import { siteConfig } from '../lib/siteConfig';
 import { ROUTES } from '../lib/routes';
 import GaTag from '../lib/analytics/GaTag.astro';
