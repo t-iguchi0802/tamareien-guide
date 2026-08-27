@@ -7,6 +7,15 @@
  * siteConfig.contact.contactEmail が現時点で null のため、
  * メールアドレスを断定表示せず、準備中である旨を明示する
  * （未確認・未設定の連絡先を推測で作らない）。
+ *
+ * 運営者情報の記載方針変更（2026-08-27、サイト所有者判断）: 従来ここに
+ * 表示していた非公式表記の定型文（siteConfig.officialDisclaimer）は
+ * 削除した。CLAUDE.md 2章の改定により、誤認防止は「常時表示の注意書き」
+ * ではなく、専用ページ（このページ）での運営者情報の明示によって担保する
+ * 方針になったため、見出しを「非公式表記」から「運営者について」へ変更し、
+ * 運営者が東京都・多磨霊園・東京都公園協会のいずれとも異なる独立した
+ * 民間の運営者であることを、この段落でのみ説明する（他ページへは
+ * 繰り返し表示しない）。
  */
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import { siteConfig } from '../../lib/siteConfig';
@@ -18,17 +27,19 @@ const { editorialPolicy } = dataset;
 
 const pageTitle = '運営方針・掲載基準・広告方針・訂正窓口';
 const description =
-  '当サイトの非公式表記、掲載基準、広告・スポンサー方針、掲載情報の訂正窓口について説明します。';
+  '当サイトの運営者情報、掲載基準、広告・スポンサー方針、掲載情報の訂正窓口について説明します。';
 ---
 
 <BaseLayout title={pageTitle} description={description}>
   <h1>{pageTitle}</h1>
 
   <section aria-labelledby="disclaimer-heading">
-    <h2 id="disclaimer-heading">非公式表記</h2>
-    <p>{siteConfig.officialDisclaimer}</p>
+    <h2 id="disclaimer-heading">運営者について</h2>
     <p>
-      当サイトの名称・デザインは、東京都・多磨霊園・東京都公園協会の公式サイトを模倣したものではありません。制度・行政手続きに関する正確な情報は、必ず各公式ページでご確認ください（<a
+      {siteConfig.name}は、多磨霊園周辺の石材店・お墓関連事業者を、公開情報のみで独自に調査・整理して紹介する民間の情報サイトです。運営者は、東京都・多磨霊園・東京都公園協会のいずれとも異なる独立した事業者であり、これらの機関からの委託や公認を受けたものではありません。
+    </p>
+    <p>
+      当サイトの名称・デザインは、東京都・多磨霊園・東京都公園協会の公式サイトを模倣したものではなく、ロゴ等の使用もしていません。制度・行政手続きに関する正確な情報は、必ず各公式ページでご確認ください（<a
         href={ROUTES.tetsuzuki.path}>手続きの案内ページ</a
       >からリンクしています）。
     </p>

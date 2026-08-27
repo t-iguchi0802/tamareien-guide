@@ -1,0 +1,182 @@
+---
+/**
+ * 墓じまいと改葬の違い｜多磨霊園で手続きを始める前に。
+ * 正本: src/lib/routes.ts ROUTES.guideProceduresHakajimaiVsKaisou（2026-08-27新設）。
+ *
+ * 出典: sources.csv 既存レコード（SRC-FUCHU-REBURIAL / SRC-TAMA-WORK-NOTICE /
+ * SRC-TAMA-OFFICIAL）。tetsuzuki.astro が既に使っている出典と同じもので、
+ * sources.csvへの追加・変更は行っていない。改葬の定義文は tetsuzuki.astro
+ * と同じ出典に基づく同一の要約表現を用いている（重複した独自解釈を作らない）。
+ * 行政手続きの詳細（必要書類・窓口の具体的な流れ等）は、当ページでは
+ * 断定せず、公式ページへのリンクへ誘導する（tetsuzuki.astroと同方針）。
+ *
+ * 記事末尾のCTAは、既存のServiceFilter（/sekizaiten/側、mode="inline"）が
+ * ?services= クエリを読み取って選択状態を復元する既存機構をそのまま使う
+ * （ServiceFilter.astro自体は変更していない）。使用するServiceKeyは
+ * 既存の 'grave_closure' と 'reburial_support' のみで、新しいキーは
+ * 作っていない。
+ */
+import BaseLayout from '../../../../layouts/BaseLayout.astro';
+import { ROUTES } from '../../../../lib/routes';
+import { getSourceById } from '../../../../lib/data';
+
+const pageTitle = '墓じまいと改葬の違い｜多磨霊園で手続きを始める前に';
+const description =
+  '「墓じまい」と「改葬」の違いを、行政の公式情報をもとに整理しました。多磨霊園でお墓の整理を検討する際に、まず確認しておきたいポイントをまとめています。';
+
+const fuchuReburial = getSourceById('SRC-FUCHU-REBURIAL');
+const tamaWorkNotice = getSourceById('SRC-TAMA-WORK-NOTICE');
+const tamaOfficial = getSourceById('SRC-TAMA-OFFICIAL');
+
+const checkedAt = '2026-08-27';
+const closureServiceQuery = 'grave_closure,reburial_support';
+---
+
+<BaseLayout title={pageTitle} description={description}>
+  <article class="article">
+    <p class="article__eyebrow"><a href={ROUTES.guideProcedures.path}>墓じまい・お墓の手続き 総合案内</a></p>
+    <h1>{pageTitle}</h1>
+    <p class="article__meta">確認日: {checkedAt} ／ 情報源: 府中市・東京都公園協会 公式ページ（本文末に一覧）</p>
+
+    <section aria-labelledby="hakajimai-kaisou-definition-heading">
+      <h2 id="hakajimai-kaisou-definition-heading">それぞれの意味</h2>
+      <p>
+        <strong>墓じまい</strong>は、墓石を解体・撤去し、墓所を更地にして使用権を返還することを指す一般的な呼び方です。多磨霊園内での墓石の解体・撤去工事については、東京都公園協会の公式ページで案内が公開されています。
+      </p>
+      <p>
+        <strong>改葬</strong>とは、すでに納められているご遺骨を他のお墓や納骨堂などへ移すことをいいます。改葬には、市区町村が発行する改葬許可証が必要です。
+      </p>
+    </section>
+
+    <section aria-labelledby="hakajimai-kaisou-relation-heading">
+      <h2 id="hakajimai-kaisou-relation-heading">墓じまいと改葬の関係</h2>
+      <p>
+        お墓を閉じてご遺骨を別の場所へ移す場合、「墓石の解体・撤去（墓じまい）」と「ご遺骨の移動（改葬）」の両方が必要になることが一般的です。どちらか一方だけを指して「墓じまい」と呼ぶ場合もあり、言葉の使われ方には幅があります。行政手続きとして必要になるのは、遺骨を移す際の改葬許可申請です。具体的な要否・進め方は、必ず下記の公式ページでご確認ください。当サイトの記載内容は法律相談ではありません。
+      </p>
+    </section>
+
+    <section aria-labelledby="hakajimai-kaisou-official-heading">
+      <h2 id="hakajimai-kaisou-official-heading">公式ページで確認する</h2>
+      {
+        fuchuReburial && (
+          <p>
+            <a
+              href={fuchuReburial.url}
+              rel="noopener"
+              target="_blank"
+              data-event="official_procedure_click"
+              data-authority="fuchu_city"
+              data-topic="reburial"
+            >
+              {fuchuReburial.publisher}公式ページ「{fuchuReburial.title}」を見る
+            </a>
+            <br />
+            <small>最終確認日: {fuchuReburial.checked_at}</small>
+          </p>
+        )
+      }
+      {
+        tamaWorkNotice && (
+          <p>
+            <a
+              href={tamaWorkNotice.url}
+              rel="noopener"
+              target="_blank"
+              data-event="official_procedure_click"
+              data-authority="tokyo_park_association"
+              data-topic="grave_work_notice"
+            >
+              {tamaWorkNotice.publisher}公式ページ「{tamaWorkNotice.title}」を見る
+            </a>
+            <br />
+            <small>最終確認日: {tamaWorkNotice.checked_at}</small>
+          </p>
+        )
+      }
+      <p>
+        より詳しい行政手続きの案内は<a href={ROUTES.tetsuzuki.path}>改葬・墓所返還・施設変更の違いと公式リンクのページ</a>にもまとめています。
+      </p>
+    </section>
+
+    <section aria-labelledby="hakajimai-kaisou-cta-heading">
+      <h2 id="hakajimai-kaisou-cta-heading">石材店の対応を確認する</h2>
+      <p>
+        墓石の解体・撤去や、改葬にともなう手続支援については、公開情報で対応状況を確認できた石材店を比較できます。
+      </p>
+      <p>
+        <a class="article__button" href={`${ROUTES.sekizaiten.path}?services=${closureServiceQuery}`}>
+          墓じまい対応を確認できた石材店を見る
+        </a>
+      </p>
+    </section>
+
+    <section aria-labelledby="hakajimai-kaisou-sources-heading">
+      <h2 id="hakajimai-kaisou-sources-heading">情報源</h2>
+      <ul class="article__sources">
+        {fuchuReburial && (
+          <li>
+            <a href={fuchuReburial.url} rel="noopener" target="_blank">
+              {fuchuReburial.publisher}「{fuchuReburial.title}」
+            </a>
+            （最終確認日: {fuchuReburial.checked_at}）
+          </li>
+        )}
+        {tamaWorkNotice && (
+          <li>
+            <a href={tamaWorkNotice.url} rel="noopener" target="_blank">
+              {tamaWorkNotice.publisher}「{tamaWorkNotice.title}」
+            </a>
+            （最終確認日: {tamaWorkNotice.checked_at}）
+          </li>
+        )}
+        {tamaOfficial && (
+          <li>
+            <a href={tamaOfficial.url} rel="noopener" target="_blank">
+              {tamaOfficial.publisher}「{tamaOfficial.title}」
+            </a>
+            （最終確認日: {tamaOfficial.checked_at}）
+          </li>
+        )}
+      </ul>
+      <p><a href={ROUTES.about.path}>誤りに気づいた場合の訂正窓口はこちら</a></p>
+    </section>
+  </article>
+</BaseLayout>
+
+<style>
+  .article {
+    max-width: 800px;
+    margin-inline: auto;
+  }
+
+  .article__eyebrow {
+    margin: 0 0 var(--space-2);
+    color: var(--color-stone-text, var(--color-text-muted));
+    font-size: var(--font-size-label, 0.9375rem);
+  }
+
+  .article__meta {
+    color: var(--color-text-muted);
+    font-size: var(--font-size-label, 0.9375rem);
+  }
+
+  .article__button {
+    display: inline-flex;
+    align-items: center;
+    min-height: var(--tap-target-min);
+    padding: 0.6em 1.2em;
+    border-radius: var(--radius-pill, 999px);
+    background: var(--color-accent);
+    color: var(--color-surface);
+    font-weight: 700;
+    text-decoration: none;
+  }
+
+  .article__button:hover {
+    background: var(--color-accent-deep, var(--color-accent));
+  }
+
+  .article__sources {
+    padding-left: 1.2em;
+  }
+</style>

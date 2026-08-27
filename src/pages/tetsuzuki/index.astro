@@ -21,6 +21,11 @@
  * 存在するが、Content Collections化（`src/content.config.ts`の新設）を要するため、
  * 統合時のリード判断では対応していない。本文の書き換えは編集内容の正確性に関わる
  * ため、事実判断としてリード（人間）へ報告し、コードでの独断修正はしていない。
+ *
+ * 誤認防止ルール改定（2026-08-27、サイト所有者判断）: 末尾にあった
+ * 「当サイトは東京都公園協会・府中市とは無関係の民間サイトです」という
+ * 一文（非公式表記と同趣旨の重複文）を削除した。運営者情報は`/about/`への
+ * リンクに置き換えている。
  */
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import { ROUTES } from '../../lib/routes';
@@ -115,7 +120,9 @@ const tamaOfficial = getSourceById('SRC-TAMA-OFFICIAL');
       )
     }
     <p>
-      当サイトは東京都公園協会・府中市とは無関係の民間サイトです。上記はいずれも各機関の公式ページへのリンクであり、当サイトが手続きを代行するものではありません。
+      上記はいずれも各機関の公式ページへのリンクであり、当サイトが手続きを代行するものではありません。運営者情報は<a
+        href={ROUTES.about.path}>運営方針ページ</a
+      >でご確認いただけます。
     </p>
   </section>
 
@@ -123,6 +130,7 @@ const tamaOfficial = getSourceById('SRC-TAMA-OFFICIAL');
     <h2 id="tetsuzuki-links-heading">関連ページ</h2>
     <ul>
       <li><a href={ROUTES.hakajimai.path}>墓じまい・墓石撤去の比較を見る</a></li>
+      <li><a href={ROUTES.guideProcedures.path}>墓じまい・お墓の手続き 総合案内を見る</a></li>
       <li><a href={ROUTES.sources.path}>情報源・最終確認日を見る</a></li>
     </ul>
   </section>

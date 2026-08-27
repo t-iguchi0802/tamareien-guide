@@ -12,6 +12,11 @@
  * 再掲されていたため、ここでは掲載方針ページ（/about/）へのリンクに置き換えた。
  * 個人情報を掲載していないという、このページ本来の論点（プライバシー）は
  * 維持している。
+ *
+ * 誤認防止ルール改定（2026-08-27、サイト所有者判断）: 従来ここに表示していた
+ * 非公式表記の定型文（siteConfig.officialDisclaimer）は削除した。運営者情報は
+ * `/about/` にまとめてあるため、このページでは本来の論点（個人情報の取り扱い）
+ * だけを扱う。
  */
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import { siteConfig } from '../../lib/siteConfig';
@@ -25,8 +30,6 @@ const lastUpdated = '2026-08-26';
 <BaseLayout title={pageTitle} description={description}>
   <h1>{pageTitle}</h1>
   <p>最終更新日: {lastUpdated}</p>
-
-  <p>{siteConfig.officialDisclaimer}</p>
 
   <section aria-labelledby="privacy-scope-heading">
     <h2 id="privacy-scope-heading">このページについて</h2>

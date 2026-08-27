@@ -151,14 +151,34 @@ const sponsorSlots = [sponsors[0] ?? null, sponsors[1] ?? null, sponsors[2] ?? n
 
     <section aria-labelledby="trust-heading" class="trust top-layout__trust">
       <h2 id="trust-heading">当サイトについて</h2>
-      <p>{siteConfig.officialDisclaimer}</p>
       <p>
-        多磨霊園周辺の石材店・お墓関連事業者{businesses.length}社を掲載しています。掲載順は事業者の推奨順位ではありません。掲載基準・広告方針・訂正窓口は<a
+        多磨霊園周辺の石材店・お墓関連事業者{businesses.length}社を、公開情報のみで中立に比較する民間の情報サイトです。掲載順は事業者の推奨順位ではありません。運営者情報・掲載基準・広告方針・訂正窓口は<a
           href={ROUTES.about.path}>運営方針ページ</a
         >を、情報源と最終確認日は<a href={ROUTES.sources.path}>情報源ページ</a>をご覧ください。
       </p>
     </section>
   </div>
+
+  <hr class="masonry-rule" />
+
+  <section aria-labelledby="top-guide-heading" class="top-guide">
+    <h2 id="top-guide-heading">多磨霊園ガイド</h2>
+    <p class="top-guide__lead">お参り・お墓の手続き・歴史について、公開情報をもとにまとめた記事です。</p>
+    <div class="top-guide__entries">
+      <a class="top-guide__entry" href={ROUTES.access.path}>
+        <span class="top-guide__entry-heading">行き方・園内案内</span>
+        <span class="top-guide__entry-description">電車・バス・車での行き方と、門ごとの開閉時間です。</span>
+      </a>
+      <a class="top-guide__entry" href={ROUTES.guideProcedures.path}>
+        <span class="top-guide__entry-heading">墓じまい・各種手続き</span>
+        <span class="top-guide__entry-description">墓じまいと改葬の違いや、行政手続きの公式リンクです。</span>
+      </a>
+      <a class="top-guide__entry" href={ROUTES.guideHistory.path}>
+        <span class="top-guide__entry-heading">歴史・著名人の墓所</span>
+        <span class="top-guide__entry-description">1923年開園の経緯と、著名人の墓所についてです。</span>
+      </a>
+    </div>
+  </section>
 
   <script>
     import { trackSponsorImpression } from '../lib/analytics/events';
@@ -404,5 +424,65 @@ const sponsorSlots = [sponsors[0] ?? null, sponsors[1] ?? null, sponsors[2] ?? n
 
   .trust p {
     color: inherit;
+  }
+
+  /* --- 多磨霊園ガイド（控えめな3入口。石材店比較の主役性を奪わない） --- */
+  .top-guide {
+    max-width: 960px;
+    margin-inline: auto;
+  }
+
+  .top-guide h2 {
+    font-family: var(--font-family-heading);
+    margin: 0 0 var(--space-2);
+  }
+
+  .top-guide__lead {
+    margin: 0 0 var(--space-4);
+    color: var(--color-stone-text);
+    font-size: var(--font-size-label);
+  }
+
+  .top-guide__entries {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--space-4);
+  }
+
+  @media (max-width: 767px) {
+    .top-guide__entries {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  .top-guide__entry {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+    padding: var(--space-4) var(--space-5, 1.25rem);
+    border: 1px solid var(--color-stone-line);
+    border-radius: var(--radius-card);
+    background: var(--color-stone-surface);
+    color: var(--color-text);
+    text-decoration: none;
+    min-height: var(--tap-target-min);
+  }
+
+  .top-guide__entry:hover {
+    background: var(--color-surface);
+    border-color: var(--color-accent);
+  }
+
+  .top-guide__entry-heading {
+    font-family: var(--font-family-heading);
+    font-weight: 700;
+    font-size: 1.05rem;
+    color: var(--color-text);
+  }
+
+  .top-guide__entry-description {
+    color: var(--color-stone-text);
+    font-size: var(--font-size-label);
+    line-height: 1.6;
   }
 </style>

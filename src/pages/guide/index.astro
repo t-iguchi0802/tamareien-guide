@@ -1,0 +1,112 @@
+---
+/**
+ * 多磨霊園ガイド一覧。
+ * 正本: src/lib/routes.ts ROUTES.guide（2026-08-27新設）。
+ *
+ * 石材店比較（既存ページ、URL不変）とは別枠の情報記事の入口。
+ * 各カテゴリーは代表記事を3〜5件までに絞り、記事を大量に並べない
+ * （CLAUDE.md「薄い個別ページを量産しない」の考え方を、事業者ページだけでなく
+ * ガイド記事の一覧構成にも適用している）。
+ */
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { ROUTES } from '../../lib/routes';
+
+const pageTitle = '多磨霊園ガイド';
+const description =
+  '多磨霊園への行き方、墓じまい・お墓の手続き、歴史・著名人について、公開情報をもとに整理したガイド記事の一覧です。';
+
+const categories = [
+  {
+    heading: '墓参り・アクセス',
+    description: '電車・バス・車での行き方、門ごとの開閉時間、地図・墓所ナビへのリンクです。',
+    links: [{ href: ROUTES.access.path, label: '多磨霊園への行き方｜電車・バス・車と入口の選び方' }],
+  },
+  {
+    heading: '墓じまい・お墓の手続き',
+    description: '墓じまい・改葬・墓所返還など、行政手続きと石材店対応をあわせて整理しています。',
+    links: [
+      { href: ROUTES.guideProcedures.path, label: '墓じまい・お墓の手続き 総合案内' },
+      { href: ROUTES.guideProceduresHakajimaiVsKaisou.path, label: '墓じまいと改葬の違い｜多磨霊園で手続きを始める前に' },
+      { href: ROUTES.hakajimai.path, label: '墓じまい・墓石撤去の比較を見る' },
+      { href: ROUTES.kanri.path, label: '墓所管理・清掃・供花の比較を見る' },
+      { href: ROUTES.tetsuzuki.path, label: '改葬・墓所返還・施設変更の公式リンク' },
+    ],
+  },
+  {
+    heading: '多磨霊園の歴史・著名人',
+    description: '1923年の開園からの歴史と、著名人の墓所についてのご案内です。',
+    links: [
+      { href: ROUTES.guideHistory.path, label: '多磨霊園はなぜ造られた？1923年開園からの歴史' },
+      { href: ROUTES.guideFamousGraves.path, label: '多磨霊園に眠る著名人｜公式案内図で巡る墓所ガイド' },
+    ],
+  },
+] as const;
+---
+
+<BaseLayout title={pageTitle} description={description}>
+  <h1>{pageTitle}</h1>
+  <p>
+    多磨霊園にお参り・お墓相談で訪れる方向けに、行き方・手続き・歴史についての記事をまとめています。石材店の比較は<a
+      href={ROUTES.sekizaiten.path}>石材店一覧・比較ページ</a
+    >をご覧ください。
+  </p>
+
+  <div class="guide-categories">
+    {
+      categories.map((category) => (
+        <section class="guide-category" aria-labelledby={`guide-cat-${category.heading}`}>
+          <h2 id={`guide-cat-${category.heading}`}>{category.heading}</h2>
+          <p class="guide-category__description">{category.description}</p>
+          <ul class="guide-category__links">
+            {category.links.map((link) => (
+              <li>
+                <a href={link.href}>{link.label}</a>
+              </li>
+            ))}
+          </ul>
+        </section>
+      ))
+    }
+  </div>
+</BaseLayout>
+
+<style>
+  .guide-categories {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--space-6);
+    margin-top: var(--space-6);
+  }
+
+  @media (max-width: 767px) {
+    .guide-categories {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  .guide-category {
+    background: var(--color-stone-surface, var(--color-surface));
+    border: 1px solid var(--color-stone-line, var(--color-border));
+    border-top: 3px double var(--color-stone-line, var(--color-border));
+    border-radius: var(--radius-card, 10px);
+    padding: var(--space-6);
+  }
+
+  .guide-category h2 {
+    margin-top: 0;
+    font-family: var(--font-family-heading);
+  }
+
+  .guide-category__description {
+    color: var(--color-stone-text, var(--color-text-muted));
+    font-size: var(--font-size-label, 0.9375rem);
+  }
+
+  .guide-category__links {
+    padding-left: 1.1em;
+  }
+
+  .guide-category__links li {
+    margin-bottom: var(--space-2);
+  }
+</style>

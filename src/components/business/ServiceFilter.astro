@@ -23,6 +23,22 @@
  * フォールバックする。チェックボックス自体はネイティブ要素なので、
  * JS無効でも「選べる」こと自体は壊れないが、実際の絞り込み・件数更新・
  * グリッドの表示切替はJS前提であるため<noscript>で明示する。
+ *
+ * スポンサー条件付き上位表示（2026-08-27追加、mode="inline"のみ対象）:
+ * - 「以前確定した仕様」に基づく。条件未選択時は通常掲載順を完全に維持し、
+ *   スポンサーだからといって無条件で上位表示しない。
+ * - 1つ以上の条件が選択され、AND絞り込みの結果にスポンサー契約中の
+ *   事業者が含まれる場合だけ、その事業者を結果の先頭へ寄せる。
+ *   条件に一致しないスポンサー事業者は他の非該当事業者と同様に非表示のまま。
+ * - 実装はDOM複製やカードの並べ替え（要素の移動）ではなく、CSSの
+ *   `order`をJSから設定するだけで行う（`.business-grid`はdisplay:grid
+ *   のため`order`が効く）。これにより「件数は重複なしの総数のまま」
+ *   「スポンサー以外の相対順は変えない」を、絞り込みロジック本体
+ *   （AND判定・非表示判定）に一切手を入れずに満たせる。
+ * - 上位表示された事業者にだけ`BusinessCard.astro`の
+ *   `.business-card__sponsor-badge`（「広告・スポンサー掲載」）を表示する。
+ * - mode="link"（TOPページ）はそもそもカードグリッドを描画しないため、
+ *   このロジックはmode="inline"（/sekizaiten/）でのみ意味を持つ。
  */
 import type { Business, ServiceKey } from '../../types/business';
 import { PURPOSE_GROUPS, SERVICE_LABELS } from './serviceLabels';
@@ -42,9 +58,16 @@ interface Props {
    * ユーザーは表示後も任意に閉じたり開いたりできる（open属性の初期値のみ変更）。
    */
   openByDefault?: boolean;
+  /**
+   * スポンサー契約中の事業者id一覧（sponsors.jsonのlinkedBusinessIdから
+   * 呼び出し側が計算して渡す）。既定は空配列で、指定しない呼び出し元の
+   * 挙動は変えない。ServiceFilter.astro自身はsponsors.jsonを直接読まない
+   * （通常掲載データと広告契約データの読み込み経路を分離したまま保つ）。
+   */
+  sponsoredBusinessIds?: string[];
 }
 
-const { businesses, mode, targetPath, openByDefault = false } = Astro.props;
+const { businesses, mode, targetPath, openByDefault = false, sponsoredBusinessIds = [] } = Astro.props;
 
 /** クライアント側のAND判定用データ（confirmedなserviceKeyのみを持たせる）。 */
 const businessFilterData = businesses.map((business) => ({
@@ -52,6 +75,7 @@ const businessFilterData = businesses.map((business) => ({
   services: (Object.keys(business.services) as ServiceKey[]).filter((key) =>
     isFilterableStatus(business.services[key]),
   ),
+  sponsored: sponsoredBusinessIds.includes(business.id),
 }));
 ---
 
@@ -176,6 +200,7 @@ const businessFilterData = businesses.map((business) => ({
     interface FilterBusiness {
       id: string;
       services: string[];
+      sponsored: boolean;
     }
 
     (function initServiceFilter() {
@@ -184,6 +209,7 @@ const businessFilterData = businesses.map((business) => ({
 
       const dataEl = root.querySelector('[data-service-filter-data]');
       const businessData: FilterBusiness[] = dataEl ? JSON.parse(dataEl.textContent || '[]') : [];
+      const businessById = new Map(businessData.map((b) => [b.id, b]));
       const checkboxes = Array.from(
         root.querySelectorAll<HTMLInputElement>('input[data-filter-checkbox]'),
       );
@@ -241,6 +267,15 @@ const businessFilterData = businesses.map((business) => ({
               const key = word.getAttribute('data-service-word') || '';
               word.classList.toggle('service-word--matched', hasSelection && selected.has(key));
             });
+
+            // スポンサー条件付き上位表示: 条件が選択され、かつ一致し、
+            // かつスポンサー契約中の事業者だけを結果の先頭へ寄せる。
+            // 条件未選択時（hasSelection===false）は必ず通常掲載順に戻す。
+            const record = businessById.get(id);
+            const promote = hasSelection && isMatch && !!record?.sponsored;
+            card.style.order = promote ? '-1' : '';
+            const badgeEl = card.querySelector<HTMLElement>('[data-sponsor-badge]');
+            if (badgeEl) badgeEl.hidden = !promote;
           });
           if (emptyEl) emptyEl.hidden = matchIds.size > 0;
         }

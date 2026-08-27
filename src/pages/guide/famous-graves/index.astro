@@ -1,0 +1,181 @@
+---
+/**
+ * 多磨霊園に眠る著名人｜公式案内図で巡る墓所ガイド。
+ * 正本: src/lib/routes.ts ROUTES.guideFamousGraves（2026-08-27新設）。
+ *
+ * 【重要・意図的な範囲縮小について】
+ * ユーザー指示では「公開済みの公式案内図に掲載されている著名人だけを対象に、
+ * 12人程度・区画（区・種・側・番）まで表示する」ことが求められていた。
+ * 実装時（2026-08-27）に以下を確認した:
+ * - 東京都公園協会公式サイトの多磨霊園ページに、著名人一覧のHTMLページは
+ *   見当たらなかった（園内案内図PDFの裏面に掲載がある旨はFAQで示唆されて
+ *   いるが、そのPDF自体はこの実行環境でテキスト抽出・画像レンダリングが
+ *   できず、内容を直接確認できなかった＝pdftoppm等が未導入）。
+ * - Wikipedia「多磨霊園」記事には、区画番号付きの著名人一覧が存在した。
+ *   しかしWikipediaは二次（三次）資料であり、ユーザー指示の
+ *   「公式案内図や信頼できる一次資料で確認」という基準を満たさない。
+ *   区画番号を誤って転記した場合、実在する（八柱・多磨霊園に縁のある）
+ *   歴史上の人物の埋葬情報を誤って公開することになり、
+ *   本サイト全体の「未確認情報を断定しない」という編集方針に反する。
+ *
+ * 上記の理由により、このページでは個別の氏名・区画番号を掲載せず、
+ * 公式案内図・公式墓所ナビへの案内と、ページの構成（カテゴリー・
+ * モデルコースの入れ物）だけを用意した。個別記事は、公式資料または
+ * 信頼できる一次資料での確認が取れ次第、追記する。
+ */
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import { ROUTES } from '../../../lib/routes';
+import { GUIDE_SOURCES } from '../../_lib/guide-sources';
+
+const pageTitle = '多磨霊園に眠る著名人｜公式案内図で巡る墓所ガイド';
+const description =
+  '多磨霊園に墓所がある著名人について、公式案内図・公式墓所ナビで確認できる範囲をご案内します。個別の氏名・区画は、一次資料での確認が取れたものから順次掲載します。';
+
+const checkedAt = '2026-08-27';
+
+const categories = [
+  { id: 'literature', heading: '文学者' },
+  { id: 'politics', heading: '政治家・歴史上の人物' },
+  { id: 'arts', heading: '芸術家・芸能関係' },
+  { id: 'science', heading: '科学者・教育者' },
+] as const;
+---
+
+<BaseLayout title={pageTitle} description={description}>
+  <article class="article">
+    <p class="article__eyebrow"><a href={ROUTES.guide.path}>多磨霊園ガイド</a> ／ 多磨霊園の歴史・著名人</p>
+    <h1>{pageTitle}</h1>
+    <p class="article__meta">確認日: {checkedAt}</p>
+
+    <section aria-labelledby="famous-status-heading">
+      <h2 id="famous-status-heading">このページについて（確認状況）</h2>
+      <p>
+        多磨霊園には、文学・政治・芸術・学術などさまざまな分野で知られる方の墓所があることが広く知られています。ただし当サイトでは、個別の氏名・墓所の区画（区・種・側・番）について、公式案内図または信頼できる一次資料で確認が取れたものだけを掲載する方針です。
+      </p>
+      <p>
+        東京都公園協会の公式ページ・FAQでは、園内案内図に著名人の墓所案内が掲載されている旨が示されていますが、当サイトの制作時点ではPDF形式の案内図の内容を直接確認できなかったため、個別の氏名・区画はまだ掲載していません。確認が取れ次第、このページに追記します。
+      </p>
+      <p>
+        今すぐ特定の方の墓所を探したい場合は、下記の公式案内図・公式墓所ナビをご利用ください。
+      </p>
+      <div class="article__button-row">
+        <a
+          class="article__button"
+          href={GUIDE_SOURCES.tamaMapPdf.url}
+          rel="noopener"
+          target="_blank"
+          data-event="official_procedure_click"
+          data-authority="tokyo_park_association"
+          data-topic="famous_graves_map_pdf">公式園内案内図を開く（PDF）</a
+        >
+        <a
+          class="article__button article__button--secondary"
+          href={GUIDE_SOURCES.tamaHakaNavi.url}
+          rel="noopener"
+          target="_blank"
+          data-event="official_procedure_click"
+          data-authority="tokyo_park_association"
+          data-topic="famous_graves_haka_navi">公式墓所ナビを開く</a
+        >
+      </div>
+    </section>
+
+    <section aria-labelledby="famous-categories-heading">
+      <h2 id="famous-categories-heading">カテゴリー（準備中）</h2>
+      <p>今後、確認が取れた方から順にカテゴリーごとへ追記していきます。</p>
+      <ul class="article__category-list">
+        {categories.map((category) => <li>{category.heading} — 確認中</li>)}
+      </ul>
+    </section>
+
+    <section aria-labelledby="famous-course-heading">
+      <h2 id="famous-course-heading">モデルコースについて</h2>
+      <p>
+        「文学者を巡るコース」「歴史上の人物を巡るコース」のようなモデルコースも用意する予定です。徒歩時間・経路は当サイトで推測せず、公式墓所ナビでの経路検索結果、または現地での確認に基づいて作成します。
+      </p>
+    </section>
+
+    <section aria-labelledby="famous-sources-heading">
+      <h2 id="famous-sources-heading">情報源</h2>
+      <ul class="article__sources">
+        <li>
+          <a href={GUIDE_SOURCES.tamaMapPdf.url} rel="noopener" target="_blank">
+            {GUIDE_SOURCES.tamaMapPdf.publisher}「{GUIDE_SOURCES.tamaMapPdf.title}」
+          </a>
+          （最終確認日: {GUIDE_SOURCES.tamaMapPdf.checkedAt}）
+        </li>
+        <li>
+          <a href={GUIDE_SOURCES.tamaHakaNavi.url} rel="noopener" target="_blank">
+            {GUIDE_SOURCES.tamaHakaNavi.publisher}「{GUIDE_SOURCES.tamaHakaNavi.title}」
+          </a>
+          （最終確認日: {GUIDE_SOURCES.tamaHakaNavi.checkedAt}）
+        </li>
+      </ul>
+      <p><a href={ROUTES.about.path}>掲載してほしい情報・訂正のご連絡はこちら</a></p>
+    </section>
+
+    <section aria-labelledby="famous-related-heading">
+      <h2 id="famous-related-heading">関連ページ</h2>
+      <ul>
+        <li><a href={ROUTES.guideHistory.path}>多磨霊園の歴史を見る</a></li>
+        <li><a href={ROUTES.access.path}>多磨霊園への行き方を見る</a></li>
+        <li><a href={ROUTES.guide.path}>多磨霊園ガイド一覧を見る</a></li>
+      </ul>
+    </section>
+  </article>
+</BaseLayout>
+
+<style>
+  .article {
+    max-width: 800px;
+    margin-inline: auto;
+  }
+
+  .article__eyebrow {
+    margin: 0 0 var(--space-2);
+    color: var(--color-stone-text, var(--color-text-muted));
+    font-size: var(--font-size-label, 0.9375rem);
+  }
+
+  .article__meta {
+    color: var(--color-text-muted);
+    font-size: var(--font-size-label, 0.9375rem);
+  }
+
+  .article__button-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-3);
+  }
+
+  .article__button {
+    display: inline-flex;
+    align-items: center;
+    min-height: var(--tap-target-min);
+    padding: 0.6em 1.2em;
+    border-radius: var(--radius-pill, 999px);
+    background: var(--color-accent);
+    color: var(--color-surface);
+    font-weight: 700;
+    text-decoration: none;
+  }
+
+  .article__button:hover {
+    background: var(--color-accent-deep, var(--color-accent));
+  }
+
+  .article__button--secondary {
+    background: transparent;
+    border: 1.5px solid var(--color-accent);
+    color: var(--color-accent);
+  }
+
+  .article__category-list {
+    padding-left: 1.2em;
+    color: var(--color-stone-text, var(--color-text-muted));
+  }
+
+  .article__sources {
+    padding-left: 1.2em;
+  }
+</style>

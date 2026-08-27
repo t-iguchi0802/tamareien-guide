@@ -24,6 +24,18 @@ export interface Sponsor {
   logoUrl: string | null;
   /** 表示順（管理用の安定順で、優先度・おすすめ度ではない）。 */
   displayOrder: number;
+  /**
+   * このスポンサーが、businesses.json に掲載済みの事業者と同一の場合、
+   * その事業者の `id` を指定する（該当なしはnull）。
+   *
+   * 条件付き上位表示（2026-08-27追加）専用のフィールド。businesses.json
+   * 側は一切変更せず、広告契約データ側（このファイル）だけにIDで
+   * 参照を持たせることで、「通常掲載データと広告契約データを混在させない」
+   * という既存方針を保ったまま関連付けを表現する。
+   * `src/lib/data/loadSponsors.ts` が、参照先が実在する事業者IDであることを
+   * ビルド時に検証する（存在しないIDは許可しない）。
+   */
+  linkedBusinessId: string | null;
   /** 掲載期間の開始日（ISO 8601、例: "2026-09-01"）。 */
   periodStart: string;
   /** 掲載期間の終了日。nullの場合は終了日未定（契約継続中）。 */
