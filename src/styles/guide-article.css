@@ -1,0 +1,123 @@
+/**
+ * 多磨霊園ガイド記事（/access/、/guide/history/、/guide/famous-graves/、
+ * /guide/procedures/hakajimai-to-kaisou/ 等）で共通して使う記事シェルのCSS。
+ *
+ * 2026-08-28（ミチのUX/UIレビュー対応）: 各ガイド記事ページの<style>内に
+ * ほぼ同一のCSS（.article / .article__eyebrow / .article__meta /
+ * .article__button 等）が重複していたため、共通スタイルシートへ切り出した。
+ * tokens.cssと同じ方式（.astroのfrontmatterでプレーンCSSとしてimportする）。
+ * ページ固有の見た目（アクセスページのヒーロー写真・交通手段カード・
+ * 経路表示・アイコン等）はこのファイルへ含めず、各ページの<style>に残す
+ * （「新しいコンポーネント・共通ファイルを必要以上に増やさない」方針の
+ * 範囲内で、本当に重複していた部分だけを共通化する）。
+ *
+ * 本文幅は760〜820px程度の範囲で800pxに設定（既存の値を維持）。
+ */
+
+.article {
+  max-width: 800px;
+  margin-inline: auto;
+}
+
+.article__eyebrow {
+  margin: 0 0 var(--space-2);
+  color: var(--color-stone-text, var(--color-text-muted));
+  font-size: var(--font-size-label, 0.9375rem);
+}
+
+.article__meta {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-label, 0.9375rem);
+}
+
+.article__button-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+}
+
+.article__button {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--tap-target-min);
+  padding: 0.6em 1.2em;
+  border-radius: var(--radius-pill, 999px);
+  background: var(--color-accent);
+  color: var(--color-surface);
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.article__button:hover {
+  background: var(--color-accent-deep, var(--color-accent));
+}
+
+.article__button--secondary {
+  background: transparent;
+  border: 1.5px solid var(--color-accent);
+  color: var(--color-accent);
+}
+
+.article__note {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-label, 0.9375rem);
+}
+
+.article__sources {
+  padding-left: 1.2em;
+}
+
+/* 石色の落ち着いた補足欄（駐車についての注記等）。
+   注意書きの黄色い帯にはしない（誤認防止ルール改定・UXレビューの両方の方針）。 */
+.article__callout {
+  background: var(--color-stone-surface, var(--color-surface));
+  border: 1px solid var(--color-stone-line, var(--color-border));
+  border-radius: var(--radius-card, 10px);
+  padding: var(--space-4);
+}
+
+.article__table-scroll {
+  overflow-x: auto;
+}
+
+.article__table-scroll table {
+  border-collapse: collapse;
+  width: 100%;
+  min-width: 480px;
+}
+
+.article__table-scroll caption {
+  text-align: left;
+  font-weight: 700;
+  margin-bottom: var(--space-2);
+}
+
+.article__table-scroll th,
+.article__table-scroll td {
+  border: 1px solid var(--color-border);
+  padding: var(--space-2) var(--space-3);
+  text-align: left;
+  vertical-align: top;
+}
+
+.article__table-scroll thead th {
+  background: var(--color-accent-soft);
+}
+
+/* 見出し脇の細い深緑のアクセント線（UXレビュー対応。色数を増やさず、
+   既存の--color-accentのみを使う）。 */
+.article h2 {
+  position: relative;
+  padding-left: var(--space-3);
+}
+
+.article h2::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0.15em;
+  bottom: 0.15em;
+  width: 3px;
+  background: var(--color-accent);
+  border-radius: 2px;
+}
