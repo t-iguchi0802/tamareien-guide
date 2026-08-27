@@ -34,9 +34,17 @@ interface Props {
   mode: 'inline' | 'link';
   /** mode="link" のとき必須。絞り込み結果を反映したクエリを付けて遷移する先。 */
   targetPath?: string;
+  /**
+   * 詳しい条件（<details>）を初期状態で開いておくかどうか。
+   * 既定値はfalseで、指定しない呼び出し元（/sekizaiten/等）の挙動は変えない。
+   * mode="inline"は元々常時open扱いのため実質的な影響はなく、
+   * mode="link"（TOPページ等）で明示的にtrueを渡した場合だけ効果を持つ。
+   * ユーザーは表示後も任意に閉じたり開いたりできる（open属性の初期値のみ変更）。
+   */
+  openByDefault?: boolean;
 }
 
-const { businesses, mode, targetPath } = Astro.props;
+const { businesses, mode, targetPath, openByDefault = false } = Astro.props;
 
 /** クライアント側のAND判定用データ（confirmedなserviceKeyのみを持たせる）。 */
 const businessFilterData = businesses.map((business) => ({
@@ -82,7 +90,7 @@ const businessFilterData = businesses.map((business) => ({
 
   <hr class="masonry-rule" />
 
-  <details class="service-filter__detail" open={mode === 'inline'}>
+  <details class="service-filter__detail" open={mode === 'inline' || openByDefault}>
     <summary class="service-filter__detail-summary">くわしい条件から選ぶ</summary>
     <div class="service-filter__groups">
       {
