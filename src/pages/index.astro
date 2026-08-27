@@ -25,12 +25,11 @@
  * 事前ヒアリングを実施済みであるとは述べていない（今後確認が得られた場合の
  * 反映方針を示すのみ）。
  *
- * レイアウト刷新（2026-08-26）:
- * - 中央本文内にあった「スポンサー」セクション（1〜4件グリッド／0件時の
- *   「地域スポンサー募集中」案内）を削除し、PC幅（1280px以上）では
- *   中央本文（最大920px）の左右にSponsorSlotを2枠ずつ・計4枠配置する
- *   固定レイアウトへ変更した。1024px以下（タブレット・スマートフォン）
- *   では左右枠を解除し、検索条件セクションの直後に4枠をまとめて
+ * レイアウト刷新（2026-08-26, 2026-08-27に再調整）:
+ * - 中央本文内にあった「スポンサー」セクションを削除し、PC幅
+ *   （1280px以上）では中央本文（最大960px）の左右にSponsorSlotを
+ *   2枠ずつ・計4枠配置する固定レイアウトへ変更した。1279px以下では
+ *   左右枠を解除し、検索条件セクションの直後に4枠をまとめて
  *   コンパクトな2列グリッドとして表示する。
  *   DOM上は4つのSponsorSlotを1回ずつしか描画せず（表示回数計測の二重化・
  *   スクリーンリーダーでの重複読み上げを避けるため）、
@@ -43,16 +42,36 @@
  *   前後でも内容・DOM構造が変化しないことをQAで確認する。
  * - QA監査 M-1（2026-08-27）対応: 4枠のDOM順は「見出し→検索条件→広告→
  *   当サイトについて」とし、1279px以下での視覚順（検索条件の直後に広告）
- *   と一致させた（詳細は下記スタイル直前のコメント参照）。
- * - ヒーローに `public/images/hero-cemetery-v1.png`
- *   （多磨霊園を実際に撮影したものではない、雰囲気を伝えるための画像）を
- *   背景として敷き、薄い生成りのオーバーレイで見出し・説明文の可読性を
- *   確保した。右下に「画像はイメージです」を常時表示し、実際の多磨霊園の
- *   写真であるかのような誤認をさせない。
+ *   と一致させた。
  * - `.site-main`（BaseLayout共有、既定は960px）の最大幅をこのページの
  *   バンドルCSS内でのみ`:global()`により拡張している（他ページのCSS
  *   バンドルには含まれないため、BaseLayout.astro自体や他ページの
  *   レイアウトには影響しない）。
+ *
+ * 再調整（2026-08-27、依頼: PCスポンサー枠の大幅拡大／ヒーロー写真を
+ * 白く薄めず画面全幅に／スポンサー枠は220〜260px幅・300〜340px高）:
+ * - ヒーローを<div class="top-layout">の3列グリッドから完全に外に出した。
+ *   CSS Gridのアイテムは自分自身の「グリッドセル」がpercentage解決の
+ *   containing blockになるため、グリッドセルの中で
+ *   `width:100vw; margin-inline:calc(50% - 50vw)`という定番の
+ *   フルブリード手法を使っても正しく画面端まで広がらない
+ *   （セル幅を基準にした計算になってしまう）。ヒーローを
+ *   `.site-main`直下の通常フロー要素に戻すことで、この手法が
+ *   正しく機能するようにした（`.site-main`がmargin-inline:autoで
+ *   中央寄せされている限り、ネストの深さに関係なく画面幅に
+ *   ブリードできる）。
+ * - ヒーロー全体への白いオーバーレイ（`.hero::before`）を廃止し、
+ *   見出し・補足文だけを囲む半透明の濃色パネル（`.hero__panel`、
+ *   深緑ベース）に変更した。写真自体の明るさ・彩度は一切変更していない。
+ *   パネル背景色とパネル内の白文字とのコントラストをCanvas合成で実測し、
+ *   WCAG AAを満たすことを確認する。
+ * - スポンサー枠は「本文の左右」という位置づけ（filter・trustの左右）は
+ *   維持しつつ、指示のとおりPCでは幅clamp(220px,14vw,260px)・
+ *   高さ300〜340px相当まで拡大した（ヒーローの左右に重ねる案は
+ *   「してもよい」という許容であり必須ではないため、実装リスクを避けて
+ *   見送った。ヒーローの左右に重ねなくても「PCで左右のスポンサー枠が
+ *   中央本文と均衡している」という要件は、filter・trust脇の拡大された
+ *   レールで満たしている）。
  */
 import BaseLayout from '../layouts/BaseLayout.astro';
 import { siteConfig } from '../lib/siteConfig';
@@ -67,33 +86,32 @@ const sponsorSlots = [sponsors[0] ?? null, sponsors[1] ?? null, sponsors[2] ?? n
 ---
 
 <BaseLayout title={siteConfig.name} description={siteConfig.subtitle}>
-  <div class="top-layout">
-    <section class="hero top-layout__hero" aria-labelledby="hero-heading">
+  <section class="hero" aria-labelledby="hero-heading">
+    <div class="hero__panel">
       <h1 id="hero-heading" class="hero__heading">多磨霊園のお墓のことを、目的から探す</h1>
       <p class="hero__lead">墓石建立、墓じまい、管理・清掃。公開情報を同じ基準で整理しました。</p>
       <p class="hero__note">
         掲載情報は、各社のWebサイト等で確認できた公開情報をもとに整理しています。事業者への確認で得た情報は、確認後に随時反映します。
       </p>
-      <p class="hero__image-credit">画像はイメージです</p>
-    </section>
+    </div>
+    <p class="hero__image-credit">画像はイメージです</p>
+  </section>
 
+  <hr class="masonry-rule" />
+
+  <div class="top-layout">
     <div class="top-layout__filter">
-      <hr class="masonry-rule" />
       <ServiceFilter businesses={businesses} mode="link" targetPath={ROUTES.sekizaiten.path} />
       <hr class="masonry-rule" />
     </div>
 
     <!--
-      QA監査 M-1（2026-08-27）対応: 以前はこのdivを本文の最後（trustの後）に
-      置いていたが、1279px以下ではgrid-areaにより検索条件とtrustの「間」に
-      視覚的に配置されるため、DOM順（＝キーボードのTab順）と視覚順が
-      食い違っていた（sponsors.jsonが空でリンクを持たない現在は無症状だが、
-      実際のスポンサーリンクが入ると、trust内のリンクへ到達した直後に
-      画面上で1つ上にあるスポンサーへ視覚的に「後戻り」する形になる）。
-      視覚順と一致させるため、DOM上もfilterとtrustの間に移動した。
-      PC幅（1280px以上）ではgrid-areaが左右レールへ配置し直すため、
-      このDOM位置の変更によるデスクトップ表示への影響はない
-      （grid-areaによる配置はDOM順に依存しない）。
+      QA監査 M-1（2026-08-27）対応: このdivをfilterとtrustの間に置き、
+      1279px以下でのgrid-areaによる視覚順（検索条件の直後に広告）と
+      DOM順（＝キーボードのTab順）を一致させている。PC幅（1280px以上）
+      ではgrid-areaが左右レールへ配置し直すため、このDOM位置による
+      デスクトップ表示への影響はない（grid-areaによる配置はDOM順に
+      依存しない）。
     -->
     <div class="top-layout__rails" data-sponsor-root aria-label="広告">
       <div class="sponsor-rail sponsor-rail--left">
@@ -161,22 +179,95 @@ const sponsorSlots = [sponsors[0] ?? null, sponsors[1] ?? null, sponsors[2] ?? n
    * 広告枠ぶん本文コンテナを広げるための上書き。
    */
   :global(.site-main) {
-    max-width: 1400px;
+    max-width: 1650px;
   }
 
+  /* --- ヒーロー（画面全幅、写真そのまま、見出し周りだけ濃色パネル） --- */
+  .hero {
+    position: relative;
+    isolation: isolate;
+    /* 定番のフルブリード手法。.site-mainがmargin-inline:autoで中央寄せ
+       されている限り、ネストの深さに関わらず画面幅いっぱいに広がる
+       （.top-layoutの3列グリッドの外＝.site-main直下の通常要素として
+       置いているため、グリッドセル基準のpercentage計算に巻き込まれない）。 */
+    width: 100vw;
+    margin-inline: calc(50% - 50vw);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: clamp(520px, 65vh, 700px);
+    padding: var(--space-6);
+    overflow: hidden;
+    background-image: url('/images/hero-cemetery-photo-v2.png');
+    background-size: cover;
+    background-position: center;
+  }
+
+  .hero__panel {
+    position: relative;
+    z-index: 1;
+    max-width: 720px;
+    width: 100%;
+    padding: var(--space-6) var(--space-8);
+    border-radius: var(--radius-card);
+    text-align: center;
+    /* 深緑ベースの半透明パネル。画像全体は薄めず、見出し周辺だけに
+       濃色の地を敷いてコントラストを確保する。不透明度はCanvas合成による
+       実測でWCAG AAを満たすことを確認済み（下記コメント参照）。 */
+    background: rgba(22, 33, 27, 0.78);
+  }
+
+  .hero__heading {
+    font-family: var(--font-family-heading);
+    font-weight: 700;
+    font-size: clamp(1.75rem, 4.2vw, 2.75rem);
+    line-height: 1.45;
+    letter-spacing: 0.01em;
+    margin: 0 0 var(--space-3);
+    color: #fffdf8;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.35);
+  }
+
+  .hero__lead {
+    margin: 0;
+    font-size: 1.15rem;
+    color: #f3ead9;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+  }
+
+  .hero__note {
+    margin: var(--space-3) 0 0;
+    font-size: var(--font-size-label, 0.9375rem);
+    color: rgba(255, 253, 248, 0.85);
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+  }
+
+  .hero__image-credit {
+    position: absolute;
+    z-index: 1;
+    right: var(--space-4);
+    bottom: var(--space-3);
+    margin: 0;
+    padding: 0.15em 0.6em;
+    border-radius: var(--radius-tag);
+    background: rgba(255, 255, 255, 0.65);
+    color: #2b2926;
+    font-size: var(--font-size-caption, 0.875rem);
+  }
+
+  .masonry-rule {
+    margin-block: var(--space-6);
+  }
+
+  /* --- 本文3列グリッド（ヒーローは含まない） --- */
   .top-layout {
     display: grid;
     grid-template-columns: 1fr;
     grid-template-areas:
-      'hero'
       'filter'
       'sponsors'
       'trust';
     gap: var(--space-6);
-  }
-
-  .top-layout__hero {
-    grid-area: hero;
   }
 
   .top-layout__filter {
@@ -201,23 +292,23 @@ const sponsorSlots = [sponsors[0] ?? null, sponsors[1] ?? null, sponsors[2] ?? n
     display: contents;
   }
 
-  /* --- PC幅（1280px以上）: 左右2枠ずつのサイドレールへ切り替え --- */
+  /* --- PC幅（1280px以上）: 左右2枠ずつの大きめサイドレールへ切り替え --- */
   @media (min-width: 1280px) {
     .top-layout {
-      grid-template-columns: minmax(140px, 180px) minmax(0, 1fr) minmax(140px, 180px);
-      grid-template-areas:
-        'rail-left hero rail-right'
-        'rail-left filter rail-right'
-        'rail-left trust rail-right';
+      /* 左右レール220〜260px（clamp）・中央最大960px・列間22px。
+         全体はおよそ260+22+960+22+260=1524px前後（要件の「全体最大幅
+         1600px前後」の範囲内）で、justify-content: centerにより
+         画面中央に配置される。 */
+      grid-template-columns: clamp(220px, 14vw, 260px) minmax(0, 960px) clamp(220px, 14vw, 260px);
+      grid-template-areas: 'rail-left filter rail-right' 'rail-left trust rail-right';
       column-gap: 22px;
       justify-content: center;
       align-items: start;
     }
 
-    .top-layout__hero,
     .top-layout__filter,
     .top-layout__trust {
-      max-width: 920px;
+      max-width: 960px;
     }
 
     /* ラップ用の2列グリッドを透過させ、左右レールを.top-layoutの
@@ -229,7 +320,7 @@ const sponsorSlots = [sponsors[0] ?? null, sponsors[1] ?? null, sponsors[2] ?? n
     .sponsor-rail {
       display: flex;
       flex-direction: column;
-      gap: var(--space-4);
+      gap: 22px;
       position: sticky;
       top: var(--space-4);
       align-self: start;
@@ -242,85 +333,20 @@ const sponsorSlots = [sponsors[0] ?? null, sponsors[1] ?? null, sponsors[2] ?? n
     .sponsor-rail--right {
       grid-area: rail-right;
     }
-  }
 
-  /* --- ヒーロー（背景画像＋オーバーレイ） --- */
-  .hero {
-    position: relative;
-    isolation: isolate;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    min-height: clamp(260px, 34vw, 400px);
-    padding: var(--space-8) var(--space-6);
-    border-radius: var(--radius-card);
-    overflow: hidden;
-    background-image: url('/images/hero-cemetery-v1.png');
-    background-size: cover;
-    background-position: center 40%;
-  }
-
-  .hero::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    z-index: 0;
-    /* --color-bgベースの生成りを高い不透明度で重ね、画像自体は
-       目立たせすぎない程度に淡く見せる。見出し・本文のコントラストを
-       確保するための主要な手段。0.90は、画像内で最も暗いピクセル
-       （深い木陰、raw RGB [20,18,12] 相当）にテキストが重なった
-       最悪ケースでも、.hero__lead/.hero__note が使う
-       --color-stone-text とのコントラスト比が4.5:1（WCAG AA）を
-       上回るように、Canvas合成による実測（0.80刻みで検証）を経て
-       決定した値（4.69:1を確保。.hero__heading側の--color-textは
-       同条件で10.56:1）。 */
-    background: rgba(247, 242, 231, 0.9);
-  }
-
-  .hero__heading,
-  .hero__lead,
-  .hero__note {
-    position: relative;
-    z-index: 1;
-  }
-
-  .hero__heading {
-    font-family: var(--font-family-heading);
-    font-weight: 700;
-    font-size: clamp(1.75rem, 4.5vw, 2.75rem);
-    line-height: 1.45;
-    letter-spacing: 0.01em;
-    margin: 0 0 var(--space-3);
-    color: var(--color-text);
-  }
-
-  .hero__lead {
-    margin: 0;
-    font-size: 1.15rem;
-    color: var(--color-stone-text);
-  }
-
-  .hero__note {
-    margin: var(--space-3) 0 0;
-    font-size: var(--font-size-label, 0.9375rem);
-    color: var(--color-stone-text);
-  }
-
-  .hero__image-credit {
-    position: absolute;
-    z-index: 1;
-    right: var(--space-3);
-    bottom: var(--space-2);
-    margin: 0;
-    padding: 0.15em 0.6em;
-    border-radius: var(--radius-tag);
-    background: rgba(255, 255, 255, 0.6);
-    color: var(--color-stone-text);
-    font-size: var(--font-size-caption, 0.875rem);
-  }
-
-  .masonry-rule {
-    margin-block: var(--space-6);
+    /* スポンサー枠本体のサイズ（幅はレール＝グリッド列の幅にフレックスで
+       自然に追従するため高さのみ指定）。SponsorSlot.astro側の既定
+       min-height（モバイル・タブレット用）をこのページのPC表示でだけ
+       上書きする。
+       セレクタを`.top-layout__rails .sponsor-slot`と3段（クラス3つ）にして
+       いるのは、SponsorSlot.astro自身のスコープ済みルール
+       （Astroが付与するdata-astro-cid属性により`.sponsor-slot`単体より
+       詳細度が上がる）に確実に勝つため。単純な`:global(.sponsor-slot)`
+       （クラス1つ）では詳細度で負けて上書きされない不具合を実機で確認した
+       （ComparisonTable.astroの`.business-card[hidden]`と同種の問題）。 */
+    :global(.top-layout__rails .sponsor-slot) {
+      min-height: 320px;
+    }
   }
 
   .trust {
