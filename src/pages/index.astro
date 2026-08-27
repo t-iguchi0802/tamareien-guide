@@ -25,10 +25,12 @@
  * 事前ヒアリングを実施済みであるとは述べていない（今後確認が得られた場合の
  * 反映方針を示すのみ）。
  *
- * レイアウト刷新（2026-08-26, 2026-08-27に再調整）:
+ * レイアウト刷新（2026-08-26, 2026-08-27に再調整、2026-08-27に
+ * しきい値1280px→1500pxへ再々調整。詳細は本ファイル末尾の
+ * 「条件選択UI視認性修正」コメント参照）:
  * - 中央本文内にあった「スポンサー」セクションを削除し、PC幅
- *   （1280px以上）では中央本文（最大960px）の左右にSponsorSlotを
- *   2枠ずつ・計4枠配置する固定レイアウトへ変更した。1279px以下では
+ *   （1500px以上）では中央本文（最大960px）の左右にSponsorSlotを
+ *   2枠ずつ・計4枠配置する固定レイアウトへ変更した。1499px以下では
  *   左右枠を解除し、検索条件セクションの直後に4枠をまとめて
  *   コンパクトな2列グリッドとして表示する。
  *   DOM上は4つのSponsorSlotを1回ずつしか描画せず（表示回数計測の二重化・
@@ -41,7 +43,7 @@
  * - スポンサー表示は検索条件・検索結果件数を一切参照せず、絞り込み操作の
  *   前後でも内容・DOM構造が変化しないことをQAで確認する。
  * - QA監査 M-1（2026-08-27）対応: 4枠のDOM順は「見出し→検索条件→広告→
- *   当サイトについて」とし、1279px以下での視覚順（検索条件の直後に広告）
+ *   当サイトについて」とし、1499px以下での視覚順（検索条件の直後に広告）
  *   と一致させた。
  * - `.site-main`（BaseLayout共有、既定は960px）の最大幅をこのページの
  *   バンドルCSS内でのみ`:global()`により拡張している（他ページのCSS
@@ -72,6 +74,29 @@
  *   見送った。ヒーローの左右に重ねなくても「PCで左右のスポンサー枠が
  *   中央本文と均衡している」という要件は、filter・trust脇の拡大された
  *   レールで満たしている）。
+ *
+ * 条件選択UI視認性修正（2026-08-27、調査結果に基づく修正）:
+ * 症状「スポンサー枠を追加してから画面レイアウトがおかしくなった」
+ * 「条件をチェックしてAND絞り込みする仕組みが画面から消えた」を調査した結果、
+ * ServiceFilter.astro本体・呼び出し・JS・ServiceKeyのいずれも壊れておらず、
+ * 直接原因はヒーローの`min-height`が段階的に拡大（無指定→260〜400px→
+ * 520〜700px）し、条件選択UI（目的ボタン・くわしい条件）が初期表示の
+ * スクロール範囲外へ押し出されていたことだった。これに対し、
+ * - `.hero`の`min-height`をPC側`clamp(300px,32vw,420px)`、
+ *   767px以下`clamp(240px,58vw,340px)`へ縮小した（写真は
+ *   画面全幅・background-size: coverのまま、白く薄めもしていない）。
+ * - `<ServiceFilter mode="link">`にのみ`openByDefault`を指定し、
+ *   TOPページでは「くわしい条件から選ぶ」を初期状態で開いた状態にした
+ *   （ServiceFilter.astro側にopenByDefault?: boolean、既定falseの
+ *   propを追加。open属性の初期値だけを変え、絞り込みロジック・
+ *   ServiceKey・チェックボックス・分析イベントには触れていない。
+ *   ユーザーは表示後も任意に開閉できる）。
+ * - スポンサーの左右レール化のしきい値を1280px→1500pxへ引き上げ、
+ *   1280〜1499px幅でも中央本文（filter/trust）が880〜960px程度を
+ *   確保できるようにした。ヒーローは元々`.top-layout`グリッドの外に
+ *   あるためスポンサー枠の高さの影響を受けず、`.top-layout__filter`も
+ *   グリッドの1行目に独立して配置されているためスポンサー枠（レール）の
+ *   高さによって開始位置が下がることはない。
  */
 import BaseLayout from '../layouts/BaseLayout.astro';
 import { siteConfig } from '../lib/siteConfig';
@@ -97,11 +122,11 @@ const sponsorSlots = [sponsors[0] ?? null, sponsors[1] ?? null, sponsors[2] ?? n
     <p class="hero__image-credit">画像はイメージです</p>
   </section>
 
-  <hr class="masonry-rule" />
+  <hr class="masonry-rule masonry-rule--hero" />
 
   <div class="top-layout">
     <div class="top-layout__filter">
-      <ServiceFilter businesses={businesses} mode="link" targetPath={ROUTES.sekizaiten.path} />
+      <ServiceFilter businesses={businesses} mode="link" targetPath={ROUTES.sekizaiten.path} openByDefault />
       <hr class="masonry-rule" />
     </div>
 
@@ -195,12 +220,23 @@ const sponsorSlots = [sponsors[0] ?? null, sponsors[1] ?? null, sponsors[2] ?? n
     display: flex;
     align-items: center;
     justify-content: center;
-    min-height: clamp(520px, 65vh, 700px);
+    /* 2026-08-27 再修正: 65vh・700pxまでの拡大は、条件選択UI（目的ボタン・
+       くわしい条件）をスクロールなしの初期画面から押し出してしまう
+       副作用が確認されたため縮小した。PC/スマートフォンとも、
+       ヒーロー写真は画面全幅・background-size: coverのまま維持し、
+       高さだけを抑える。 */
+    min-height: clamp(300px, 32vw, 420px);
     padding: var(--space-6);
     overflow: hidden;
     background-image: url('/images/hero-cemetery-photo-v2.png');
     background-size: cover;
     background-position: center;
+  }
+
+  @media (max-width: 767px) {
+    .hero {
+      min-height: clamp(240px, 58vw, 340px);
+    }
   }
 
   .hero__panel {
@@ -259,6 +295,15 @@ const sponsorSlots = [sponsors[0] ?? null, sponsors[1] ?? null, sponsors[2] ?? n
     margin-block: var(--space-6);
   }
 
+  /* 2026-08-27追記: ヒーロー直下の区切り線だけは余白を詰める。
+     PC幅（1440x900等）で、標準の余白（space-6を上下＝計48px）のままだと
+     「詳しい条件から選ぶ」の見出し行がスクロールなしの初期画面から
+     わずかにはみ出すことを実機で確認したため、この区切り線に限り
+     margin-blockを0にした（他の.masonry-ruleの余白には影響しない）。 */
+  .masonry-rule--hero {
+    margin-block: 0;
+  }
+
   /* --- 本文3列グリッド（ヒーローは含まない） --- */
   .top-layout {
     display: grid;
@@ -292,8 +337,12 @@ const sponsorSlots = [sponsors[0] ?? null, sponsors[1] ?? null, sponsors[2] ?? n
     display: contents;
   }
 
-  /* --- PC幅（1280px以上）: 左右2枠ずつの大きめサイドレールへ切り替え --- */
-  @media (min-width: 1280px) {
+  /* --- PC幅（1500px以上）: 左右2枠ずつの大きめサイドレールへ切り替え ---
+     2026-08-27再修正: しきい値を1280px→1500pxへ引き上げた。1280〜1499px幅では
+     左右レール（220px固定×2＋列間22px×2＝484px）を確保すると中央本文が
+     880〜960px程度を確保しにくくなるため、その帯では中央本文を狭めず
+     スポンサーを本文内（検索条件の後・関連コンテンツの前）配置のままにする。 */
+  @media (min-width: 1500px) {
     .top-layout {
       /* 左右レール220〜260px（clamp）・中央最大960px・列間22px。
          全体はおよそ260+22+960+22+260=1524px前後（要件の「全体最大幅
