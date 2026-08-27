@@ -27,6 +27,12 @@
  * （実機検証で検出・修正）。呼び出し側の`.top-layout__rails`に
  * `aria-label="広告"`を付けているため、個々の枠をランドマーク化する
  * 必要はない。
+ *
+ * 再調整（2026-08-27）: PC幅での枠サイズはsrc/pages/index.astro側の
+ * 上書き（`:global(.sponsor-slot)`、1280px以上のみ）で決める
+ * （このファイルの`min-height`はモバイル・タブレット時の既定値）。
+ * 未契約時の「スポンサー枠」文言は、枠が縦に大きくなっても間延びして
+ * 見えないよう、上部の「広告」ラベルを除いた残り領域の中央に表示する。
  */
 import '../../styles/tokens.css';
 import type { SponsorSlotProps } from '../../types/components';
@@ -79,6 +85,9 @@ const { sponsor } = Astro.props;
     border: 1px solid var(--color-sponsor-border);
     border-radius: var(--radius-card);
     padding: var(--space-3);
+    /* 枠線だけでなくごく弱い影も付け、写真等の背景に埋もれず
+       「広告枠」として視認できるようにする。 */
+    box-shadow: 0 1px 3px rgba(43, 41, 38, 0.1);
   }
 
   .sponsor-slot__eyebrow {
@@ -90,7 +99,12 @@ const { sponsor } = Astro.props;
   }
 
   .sponsor-slot__placeholder {
-    margin: auto 0 0;
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0;
+    text-align: center;
     color: var(--color-stone-text);
     font-size: var(--font-size-label);
   }
