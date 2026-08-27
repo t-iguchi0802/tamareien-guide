@@ -1,0 +1,120 @@
+---
+/**
+ * 多磨霊園はなぜ造られた？1923年開園からの歴史。
+ * 正本: src/lib/routes.ts ROUTES.guideHistory（2026-08-27新設）。
+ *
+ * 出典: 東京都公園協会公式サイト（sources.csv既存レコード SRC-TAMA-OFFICIAL、
+ * および src/pages/_lib/guide-sources.ts の tamaOverview）。
+ * 開設年月日・面積・「日本初の公園墓地」「ドイツの森林墓地を参考」は
+ * 公式ページの記載を要約したもの（本文の転載はしていない）。
+ * 「都立霊園の中で最大規模」「区画は26区」は、東京都公園協会の
+ * 公式ページ本文には数値としての明記が見当たらなかったため、
+ * 実装時（2026-08-27）にWikipedia「多磨霊園」記事で補強確認した
+ * 参考情報として、情報源欄に別掲したうえで記載している
+ * （公式ページの記載と参考情報の出典を混同しないようにする）。
+ */
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import { ROUTES } from '../../../lib/routes';
+import { getSourceById } from '../../../lib/data';
+import { GUIDE_SOURCES } from '../../_lib/guide-sources';
+
+const pageTitle = '多磨霊園はなぜ造られた？1923年開園からの歴史';
+const description =
+  '多磨霊園がなぜ、どのように造られたのかを、東京都公園協会の公式情報をもとに要約しました。開設の背景、日本初の公園墓地としての位置づけ、名称の変遷を紹介します。';
+
+const tamaOfficial = getSourceById('SRC-TAMA-OFFICIAL');
+const checkedAt = '2026-08-27';
+---
+
+<BaseLayout title={pageTitle} description={description}>
+  <article class="article">
+    <p class="article__eyebrow"><a href={ROUTES.guide.path}>多磨霊園ガイド</a> ／ 多磨霊園の歴史・著名人</p>
+    <h1>{pageTitle}</h1>
+    <p class="article__meta">確認日: {checkedAt} ／ 情報源: 東京都公園協会公式サイト（本文末に一覧）</p>
+
+    <section aria-labelledby="history-background-heading">
+      <h2 id="history-background-heading">なぜ新しい墓地が必要だったのか</h2>
+      <p>
+        明治から大正にかけて東京市街地は急激に発展し、それまであった市内の墓地の多くが使用許可済みとなっていました。新しい墓地用地を郊外に確保する必要から計画されたのが多磨霊園です。1923年（大正12年）4月1日に開設され、当初は「多磨墓地」という名称でした。
+      </p>
+    </section>
+
+    <section aria-labelledby="history-parkcemetery-heading">
+      <h2 id="history-parkcemetery-heading">日本で最初の「公園墓地」</h2>
+      <p>
+        多磨霊園は、公式サイト上で「我が国初めての公園墓地」と紹介されています。墓石が並ぶだけの従来型の墓地ではなく、樹木や園路を配した公園のような環境をめざして計画された点が特徴です。設計にあたっては、ドイツの森林墓地が参考にされたとされています。
+      </p>
+    </section>
+
+    <section aria-labelledby="history-rename-heading">
+      <h2 id="history-rename-heading">「多磨墓地」から「多磨霊園」へ</h2>
+      <p>
+        1935年（昭和10年）、千葉県松戸市にまたがる八柱霊園の開設を機に、名称が「多磨霊園」へと改められました。現在の正式名称は「多磨霊園」であり、「多摩霊園」という表記は誤りです。
+      </p>
+    </section>
+
+    <section aria-labelledby="history-scale-heading">
+      <h2 id="history-scale-heading">現在の規模</h2>
+      <p>
+        公式サイトによれば、開園面積は1,280,237平方メートル（約128ヘクタール）です。東京都は現在8か所の都立霊園を運営しており、多磨霊園はその中でも面積が大きい霊園として紹介されることが多く（参考情報、下記出典欄参照）、墓域は1区から26区までの「区」に分けられています（同、参考情報）。
+      </p>
+    </section>
+
+    <section aria-labelledby="history-sources-heading">
+      <h2 id="history-sources-heading">情報源</h2>
+      <ul class="article__sources">
+        {
+          tamaOfficial && (
+            <li>
+              <a href={tamaOfficial.url} rel="noopener" target="_blank">
+                {tamaOfficial.publisher}「{tamaOfficial.title}」
+              </a>
+              （最終確認日: {tamaOfficial.checked_at}） — 開設日、面積、日本初の公園墓地、ドイツの森林墓地を参考にした旨の記載元
+            </li>
+          )
+        }
+        <li>
+          <a href={GUIDE_SOURCES.tamaOverview.url} rel="noopener" target="_blank">
+            {GUIDE_SOURCES.tamaOverview.publisher}「{GUIDE_SOURCES.tamaOverview.title}」
+          </a>
+          （最終確認日: {GUIDE_SOURCES.tamaOverview.checkedAt}） — 開設の背景、名称変更の経緯の記載元
+        </li>
+        <li>
+          参考情報（都立霊園の中での規模、区の総数）: Wikipedia「多磨霊園」記事（同記事の出典欄記載の情報を参照。当サイトが独自に測定・断定したものではありません）
+        </li>
+      </ul>
+      <p><a href={ROUTES.about.path}>誤りに気づいた場合の訂正窓口はこちら</a></p>
+    </section>
+
+    <section aria-labelledby="history-related-heading">
+      <h2 id="history-related-heading">関連ページ</h2>
+      <ul>
+        <li><a href={ROUTES.guideFamousGraves.path}>多磨霊園に眠る著名人ガイドを見る</a></li>
+        <li><a href={ROUTES.access.path}>多磨霊園への行き方を見る</a></li>
+        <li><a href={ROUTES.guide.path}>多磨霊園ガイド一覧を見る</a></li>
+      </ul>
+    </section>
+  </article>
+</BaseLayout>
+
+<style>
+  .article {
+    max-width: 800px;
+    margin-inline: auto;
+  }
+
+  .article__eyebrow {
+    margin: 0 0 var(--space-2);
+    color: var(--color-stone-text, var(--color-text-muted));
+    font-size: var(--font-size-label, 0.9375rem);
+  }
+
+  .article__meta {
+    color: var(--color-text-muted);
+    font-size: var(--font-size-label, 0.9375rem);
+  }
+
+  .article__sources {
+    padding-left: 1.2em;
+  }
+</style>

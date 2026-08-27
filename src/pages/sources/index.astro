@@ -2,14 +2,36 @@
 /**
  * 情報源・最終確認日。
  * 正本: CLAUDE_CODE_HANDOFF.md 5章 / src/lib/routes.ts ROUTES.sources
+ *
+ * QA監査（2026-08-27、feature/content-guide-and-sponsored-results）対応:
+ * このページは元々sources.csv（事業者比較データの出典）だけを一覧していたが、
+ * /guide/**・/access/ 等のガイド記事が使う出典（東京都公園協会の公式ページ、
+ * 園内案内図PDF、公式墓所ナビ等、src/pages/_lib/guide-sources.tsで定義）が
+ * 一覧されておらず、情報源ページとして不完全という指摘を受けた。
+ * sources.csv（正本、内容を変更しない）はそのまま維持しつつ、
+ * ガイド記事の出典は別セクションとして追加する（各記事本文の「情報源」欄にも
+ * 個別掲載済みだが、この一覧ページからも横断的に確認できるようにする）。
  */
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import { ROUTES } from '../../lib/routes';
-import { getBusinesses, getSources } from '../../lib/data';
+import { getBusinesses, getSources, getSourceById } from '../../lib/data';
+import { GUIDE_SOURCES } from '../_lib/guide-sources';
 
 const sources = getSources();
 const businesses = getBusinesses();
 const businessNameById = new Map(businesses.map((b) => [b.id, b.name]));
+
+const tamaOfficial = getSourceById('SRC-TAMA-OFFICIAL');
+const tamaWorkNotice = getSourceById('SRC-TAMA-WORK-NOTICE');
+const fuchuReburial = getSourceById('SRC-FUCHU-REBURIAL');
+
+/** ガイド記事の出典一覧（sources.csvと重複しないもの）。 */
+const guideSourceList = [
+  { ...GUIDE_SOURCES.tamaOverview, usedIn: '多磨霊園の歴史' },
+  { ...GUIDE_SOURCES.tamaMapPdf, usedIn: '多磨霊園への行き方／著名人墓所ガイド' },
+  { ...GUIDE_SOURCES.tamaHakaNavi, usedIn: '多磨霊園への行き方／著名人墓所ガイド' },
+  { ...GUIDE_SOURCES.googleMapsTama, usedIn: '多磨霊園への行き方' },
+];
 
 const pageTitle = '情報源・最終確認日';
 const description = '掲載情報の出典（公式サイト・行政ページ等）と、それぞれの最終確認日の一覧です。';
@@ -56,6 +78,89 @@ const description = '掲載情報の出典（公式サイト・行政ページ�
       </tbody>
     </table>
   </div>
+
+  <section aria-labelledby="guide-sources-heading">
+    <h2 id="guide-sources-heading">多磨霊園ガイド記事の情報源</h2>
+    <p>
+      <a href={ROUTES.guide.path}>多磨霊園ガイド</a>（行き方・歴史・著名人墓所等）で使用している出典です。事業者比較データとは別に、東京都公園協会の公式ページ・案内図・墓所ナビを直接参照しています。
+    </p>
+    <div class="sources-table__scroll">
+      <table>
+        <caption>ガイド記事の情報源一覧（{guideSourceList.length + (tamaOfficial ? 1 : 0) + (tamaWorkNotice ? 1 : 0) + (fuchuReburial ? 1 : 0)}件）</caption>
+        <thead>
+          <tr>
+            <th scope="col">発行者</th>
+            <th scope="col">タイトル</th>
+            <th scope="col">使用記事</th>
+            <th scope="col">最終確認日</th>
+            <th scope="col">リンク</th>
+          </tr>
+        </thead>
+        <tbody>
+          {
+            tamaOfficial && (
+              <tr>
+                <td>{tamaOfficial.publisher}</td>
+                <td>{tamaOfficial.title}</td>
+                <td>多磨霊園への行き方／歴史</td>
+                <td>{tamaOfficial.checked_at}</td>
+                <td>
+                  <a href={tamaOfficial.url} rel="noopener" target="_blank">
+                    出典ページを開く
+                  </a>
+                </td>
+              </tr>
+            )
+          }
+          {
+            tamaWorkNotice && (
+              <tr>
+                <td>{tamaWorkNotice.publisher}</td>
+                <td>{tamaWorkNotice.title}</td>
+                <td>墓じまいと改葬の違い</td>
+                <td>{tamaWorkNotice.checked_at}</td>
+                <td>
+                  <a href={tamaWorkNotice.url} rel="noopener" target="_blank">
+                    出典ページを開く
+                  </a>
+                </td>
+              </tr>
+            )
+          }
+          {
+            fuchuReburial && (
+              <tr>
+                <td>{fuchuReburial.publisher}</td>
+                <td>{fuchuReburial.title}</td>
+                <td>墓じまいと改葬の違い</td>
+                <td>{fuchuReburial.checked_at}</td>
+                <td>
+                  <a href={fuchuReburial.url} rel="noopener" target="_blank">
+                    出典ページを開く
+                  </a>
+                </td>
+              </tr>
+            )
+          }
+          {
+            guideSourceList.map((source) => (
+              <tr>
+                <td>{source.publisher}</td>
+                <td>{source.title}</td>
+                <td>{source.usedIn}</td>
+                <td>{source.checkedAt}</td>
+                <td>
+                  <a href={source.url} rel="noopener" target="_blank">
+                    出典ページを開く
+                  </a>
+                </td>
+              </tr>
+            ))
+          }
+        </tbody>
+      </table>
+    </div>
+  </section>
 </BaseLayout>
 
 <style>

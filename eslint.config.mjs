@@ -5,7 +5,12 @@ import eslintPluginAstro from 'eslint-plugin-astro';
 
 export default tseslint.config(
   {
-    ignores: ['dist/**', '.astro/**', 'node_modules/**'],
+    // .claude/worktrees/** は並行実装エージェント用の一時worktree
+    // （WORKTREE_AGENT_PLAN.md）。各worktreeが自分のtsconfig.jsonを持つため、
+    // 除外しないとtypescript-eslintが「複数のtsconfigRootDir候補がある」
+    // として本体側の型定義ファイルまでパースエラーにすることを実機で確認した
+    // （2026-08-27、feature/content-guide-and-sponsored-results QA中に発見）。
+    ignores: ['dist/**', '.astro/**', 'node_modules/**', '.claude/worktrees/**'],
   },
   eslint.configs.recommended,
   ...tseslint.configs.recommended,

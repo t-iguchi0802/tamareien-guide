@@ -1,0 +1,81 @@
+---
+/**
+ * 墓じまい・お墓の手続き 総合案内（ハブページ）。
+ * 正本: src/lib/routes.ts ROUTES.guideProcedures（2026-08-27新設）。
+ *
+ * ヘッダー主要ナビ「墓じまい・手続き」の遷移先。既存の /hakajimai/
+ * （石材店の対応比較）、/kanri/（墓所管理の比較）、/tetsuzuki/
+ * （行政手続きと公式リンク）の内容は複製せず、ここから案内するだけに
+ * とどめる。今後追加予定の記事（改葬許可の手続き、墓所を返還する流れ、
+ * 承継、彫刻・修理・納骨、見積り比較のポイント等）は、リンクにはせず
+ * 「準備中」の見出しとしてのみ列挙し、内部リンク切れを作らない。
+ */
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import { ROUTES } from '../../../lib/routes';
+
+const pageTitle = '墓じまい・お墓の手続き 総合案内';
+const description =
+  '墓じまい・改葬・墓所返還など、多磨霊園に関わる手続きと石材店の対応比較をまとめた案内ページです。';
+
+const upcomingTopics = [
+  '墓じまいの手順',
+  '改葬許可の手続き',
+  '墓所を返還する流れ',
+  '名義人が亡くなった場合の承継',
+  '彫刻・修理・納骨を頼むとき',
+  '石材店の見積もりを比べるポイント',
+];
+---
+
+<BaseLayout title={pageTitle} description={description}>
+  <h1>{pageTitle}</h1>
+  <p>
+    墓じまい・改葬・墓所返還は、行政手続きと石材店への依頼の両方が関わります。当サイトでは、行政手続きは公式ページへのリンクで、石材店の対応状況は公開情報の比較で、それぞれ中立にご案内しています。
+  </p>
+
+  <section aria-labelledby="procedures-first-heading">
+    <h2 id="procedures-first-heading">まず読む記事</h2>
+    <ul>
+      <li><a href={ROUTES.guideProceduresHakajimaiVsKaisou.path}>墓じまいと改葬の違い｜多磨霊園で手続きを始める前に</a></li>
+    </ul>
+  </section>
+
+  <section aria-labelledby="procedures-official-heading">
+    <h2 id="procedures-official-heading">行政手続き・公式リンク</h2>
+    <p>改葬許可申請や墓所工事の届出など、行政手続きの詳細は公式ページへのリンクとともに案内しています。</p>
+    <ul>
+      <li><a href={ROUTES.tetsuzuki.path}>改葬・墓所返還・施設変更の違いと公式リンクを見る</a></li>
+    </ul>
+  </section>
+
+  <section aria-labelledby="procedures-compare-heading">
+    <h2 id="procedures-compare-heading">石材店の対応比較</h2>
+    <p>墓じまい・墓石撤去や、その後の墓所管理・清掃について、公開情報で確認できる事業者の対応状況を比較できます。</p>
+    <ul>
+      <li><a href={ROUTES.hakajimai.path}>墓じまい・墓石撤去の比較を見る</a></li>
+      <li><a href={ROUTES.kanri.path}>墓所管理・清掃・供花の比較を見る</a></li>
+    </ul>
+  </section>
+
+  <section aria-labelledby="procedures-upcoming-heading">
+    <h2 id="procedures-upcoming-heading">今後追加予定の記事</h2>
+    <p>以下のテーマは、一次資料での確認が取れ次第、記事として順次公開します（現時点ではリンク先はありません）。</p>
+    <ul class="procedures-upcoming">
+      {upcomingTopics.map((topic) => <li>{topic}</li>)}
+    </ul>
+  </section>
+
+  <section aria-labelledby="procedures-related-heading">
+    <h2 id="procedures-related-heading">関連ページ</h2>
+    <ul>
+      <li><a href={ROUTES.sekizaiten.path}>石材店の一覧・比較を見る</a></li>
+      <li><a href={ROUTES.guide.path}>多磨霊園ガイド一覧を見る</a></li>
+    </ul>
+  </section>
+</BaseLayout>
+
+<style>
+  .procedures-upcoming {
+    color: var(--color-stone-text, var(--color-text-muted));
+  }
+</style>

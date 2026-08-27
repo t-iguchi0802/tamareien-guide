@@ -26,6 +26,17 @@
  * - `data-service-keys`（カンマ区切り）を要素に持たせ、フィルタスクリプトが
  *   AND条件の一致判定に使う。ここでの判定ロジック自体は持たない
  *   （表示コンポーネントとしての責務にとどめる）。
+ *
+ * スポンサー条件付き上位表示（2026-08-27追加）:
+ * - `.business-card__sponsor-badge`（「広告・スポンサー掲載」）は常に
+ *   マークアップとして描画するが、既定では`hidden`にしておく。
+ *   ServiceFilter.astroのスクリプトが、「1つ以上の条件が選択され、
+ *   かつこの事業者がスポンサー契約中」の場合だけ`hidden`を外し、
+ *   同時にカードの表示順を先頭へ寄せる（CSSの`order`のみで行い、
+ *   DOM複製・重複表示はしない）。判定ロジック自体はここに持たせず、
+ *   このコンポーネントは表示の器（バッジのマークアップ）だけを提供する。
+ * - 条件未選択時・非スポンサー事業者・条件不一致時は常に非表示のままで、
+ *   通常掲載の事業者と見た目・情報量の差を作らない。
  */
 import '../../styles/tokens.css';
 import type { BusinessCardProps } from '../../types/components';
@@ -78,6 +89,8 @@ const showSeparateContact =
   data-business-id={business.id}
   data-service-keys={confirmedServiceKeys.join(',')}
 >
+  <p class="business-card__sponsor-badge" data-sponsor-badge hidden>広告・スポンサー掲載</p>
+
   <header class="business-card__header">
     <h3 class="business-card__name">{business.name}</h3>
     <p class="business-card__meta">
@@ -180,6 +193,22 @@ const showSeparateContact =
    * あったため、明示的に上書きする。
    */
   .business-card[hidden] {
+    display: none;
+  }
+
+  .business-card__sponsor-badge {
+    align-self: flex-start;
+    margin: 0;
+    padding: 0.2em 0.7em;
+    border-radius: var(--radius-tag);
+    background: var(--color-sponsor-bg);
+    border: 1px solid var(--color-sponsor-border);
+    color: var(--color-sponsor-fg);
+    font-size: var(--font-size-caption);
+    font-weight: 700;
+  }
+
+  .business-card__sponsor-badge[hidden] {
     display: none;
   }
 

@@ -2,6 +2,7 @@ import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { z } from 'zod';
 import type { Sponsor, SponsorDataset } from '../../types/sponsor';
+import { loadBusinessDataset } from './loadBusinesses';
 
 /**
  * src/data/sponsors.json の読み込み・検証・有効判定。
@@ -42,6 +43,7 @@ const sponsorSchema = z.object({
   periodStart: z.string().min(1),
   periodEnd: z.string().min(1).nullable(),
   active: z.boolean(),
+  linkedBusinessId: z.string().min(1).nullable(),
 });
 
 const sponsorDatasetSchema = z.object({
@@ -71,8 +73,39 @@ export function loadSponsorDataset(): SponsorDataset {
     throw new Error(`sponsors.json のスキーマ検証に失敗しました:\n${issues}`);
   }
 
+  validateSponsorBusinessLinks(result.data);
+
   cached = result.data as SponsorDataset;
   return cached;
+}
+
+/**
+ * linkedBusinessId が指定されている場合、businesses.json に実在する
+ * 事業者idであることを検証する（存在しないIDを追加しない、
+ * CLAUDE.md「businesses.json と sources.csv の対応関係を維持する」と
+ * 同じ考え方をスポンサー⇄事業者の関連付けにも適用する）。
+ * businesses.json 側のスキーマ検証（validateBusinessData）とは独立して
+ * 呼び出せるよう、ここでは直接 loadBusinessDataset() を参照する
+ * （index.ts 経由の循環importを避けるため）。
+ */
+function validateSponsorBusinessLinks(dataset: SponsorDataset): void {
+  const linkedIds = dataset.sponsors
+    .map((s) => s.linkedBusinessId)
+    .filter((id): id is string => id !== null);
+  if (linkedIds.length === 0) return;
+
+  const businessIds = new Set(loadBusinessDataset().businesses.map((b) => b.id));
+  const errors: string[] = [];
+  for (const sponsor of dataset.sponsors) {
+    if (sponsor.linkedBusinessId !== null && !businessIds.has(sponsor.linkedBusinessId)) {
+      errors.push(
+        `存在しない事業者idへの参照: sponsors.json ${sponsor.id}.linkedBusinessId -> ${sponsor.linkedBusinessId}`,
+      );
+    }
+  }
+  if (errors.length > 0) {
+    throw new Error(`sponsors.json の事業者ID参照検証に失敗しました:\n${errors.map((e) => `  - ${e}`).join('\n')}`);
+  }
 }
 
 /** テスト用途でキャッシュをリセットする。 */
