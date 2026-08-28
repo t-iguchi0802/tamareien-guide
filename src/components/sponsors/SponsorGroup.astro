@@ -11,6 +11,15 @@
  * （新しいスポンサー表示ロジックを増やさない）。
  *
  * 所有者: リード（src/layouts/**と同じ扱い）。
+ *
+ * QA監査Medium指摘対応（2026-08-28）: スポンサー枠が全ページ共通表示に
+ * なったことで、ルート要素が`<div aria-label="広告">`のままだと
+ * axeの`region`ルール（ページ上のすべてのコンテンツがランドマーク内に
+ * あるべき）に、全14ページで抵触するようになった（以前はTOPページだけの
+ * 問題だった）。ルート要素を`<aside>`にし、1ページにつき1つだけの
+ * 広告ランドマークにした（4枠それぞれをasideにすると同名ランドマークの
+ * 重複＝landmark-unique違反になるため、SponsorSlot.astro自身は
+ * 引き続き<div>のまま）。
  */
 import type { Sponsor } from '../../types/sponsor';
 import SponsorSlot from './SponsorSlot.astro';
@@ -23,7 +32,7 @@ interface Props {
 const { sponsorSlots, pageCategory } = Astro.props;
 ---
 
-<div class="sponsor-group" data-sponsor-root aria-label="広告">
+<aside class="sponsor-group" data-sponsor-root aria-label="広告">
   <div class="sponsor-rail sponsor-rail--left">
     <SponsorSlot sponsor={sponsorSlots[0]} position="left-1" pageCategory={pageCategory} />
     <SponsorSlot sponsor={sponsorSlots[1]} position="left-2" pageCategory={pageCategory} />
@@ -32,4 +41,4 @@ const { sponsorSlots, pageCategory } = Astro.props;
     <SponsorSlot sponsor={sponsorSlots[2]} position="right-1" pageCategory={pageCategory} />
     <SponsorSlot sponsor={sponsorSlots[3]} position="right-2" pageCategory={pageCategory} />
   </div>
-</div>
+</aside>
