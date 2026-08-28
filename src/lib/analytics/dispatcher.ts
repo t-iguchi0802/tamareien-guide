@@ -17,7 +17,8 @@
  *   comparison_filter_use   : data-filter-type, data-filter-value
  *   official_procedure_click: data-authority, data-topic
  *   correction_request_click: （追加属性なし）
- *   sponsor_click            : data-sponsor-id, data-campaign-id
+ *   sponsor_click            : data-sponsor-id, data-campaign-id, data-slot-position,
+ *                             data-page-category（2026-08-28、全ページ共通化に伴い追加）
  *
  * sponsor_impression（表示回数）はクリック/変更イベントで発火しないため、
  * このディスパッチャの対象外。表示検知（IntersectionObserver等）を行う
@@ -56,7 +57,7 @@ import {
   trackCorrectionRequestClick,
   trackSponsorClick,
 } from './events';
-import type { AnalyticsEventName, OutboundLinkType } from '../../types/analytics';
+import type { AnalyticsEventName, OutboundLinkType, SponsorSlotPosition } from '../../types/analytics';
 
 const EVENT_ATTR = 'data-event';
 
@@ -143,10 +144,18 @@ function dispatchFromElement(el: Element): void {
     case 'sponsor_click': {
       const sponsorId = el.getAttribute('data-sponsor-id');
       const campaignId = el.getAttribute('data-campaign-id');
-      if (!sponsorId || !campaignId) {
+      const slotPosition = el.getAttribute('data-slot-position') as SponsorSlotPosition | null;
+      const pageCategory = el.getAttribute('data-page-category');
+      if (!sponsorId || !campaignId || !slotPosition || !pageCategory) {
         return;
       }
-      trackSponsorClick({ sponsor_id: sponsorId, campaign_id: campaignId, page_path: pagePath });
+      trackSponsorClick({
+        sponsor_id: sponsorId,
+        campaign_id: campaignId,
+        page_path: pagePath,
+        slot_position: slotPosition,
+        page_category: pageCategory,
+      });
       return;
     }
     default:

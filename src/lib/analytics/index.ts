@@ -16,5 +16,9 @@ export {
   trackComparisonFilterUse,
   trackOfficialProcedureClick,
   trackCorrectionRequestClick,
+  trackSponsorImpression,
+  trackSponsorClick,
 } from './events';
 export { initAnalyticsDispatcher } from './dispatcher';
+export { resolvePageCategory } from './pageCategory';
+export type { PageCategory } from './pageCategory';
