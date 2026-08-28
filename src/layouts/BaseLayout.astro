@@ -107,6 +107,41 @@
  *   （left-1/left-2/right-1/right-2）と`page_category`
  *   （top/comparison/procedure/guide/policy/other、
  *   src/lib/analytics/pageCategory.ts）を追加した。
+ *
+ * 訂正（2026-08-28、同日中にサイト所有者から指摘・修正指示）: 上記の
+ * 初版実装では、TOPページのヒーロー写真自体を`.page-shell`の3列グリッドの
+ * 「main」列に含めてしまい、結果としてヒーロー写真の左右にもスポンサー枠が
+ * 並ぶ配置になっていた（写真を画面全幅から本文幅へ縮小する副作用も
+ * 発生していた）。これは意図した配置ではないという指摘を受け、
+ * 名前付きスロット`<slot name="pageTop" />`を`.page-shell`より前
+ * （ヘッダー直下）に追加した。TOPページはヒーロー写真をこの
+ * `pageTop`スロットへ渡すことで、ヒーローを3列グリッドの外側・
+ * スポンサー枠と無関係な単独の全幅セクションに戻している
+ * （src/pages/index.astro参照。ヒーローのフルブリードCSSも元の
+ * `width:100vw; margin-inline:calc(50% - 50vw)`に戻した）。
+ * `pageTop`スロットを使わないページ（TOP以外の大半のページ）は、
+ * 本文全体がそのまま`.page-shell`の3列（スポンサー付き）レイアウトに
+ * 収まる、という当初の挙動を維持している。
+ *
+ * 再訂正（2026-08-28、同日中）: TOPのスマートフォン表示について、
+ * 「ヒーロー→目的・条件選択→スポンサー枠→（当サイトについて等の）
+ * 残りのコンテンツ」という順序の指定を受けた。BaseLayoutは`<slot />`の
+ * 中身を1つの塊としてしか扱えないため、この順序を実現するには
+ * スポンサー枠を「本文の前半（目的・条件選択）」と「本文の後半
+ * （残り）」の間に置く必要がある。これに対応するため、`beforeSponsor`
+ * という2つ目の名前付きスロットを追加した。
+ * - `beforeSponsor`スロットにコンテンツがあるページ（今のところTOPのみ、
+ *   `Astro.slots.has('beforeSponsor')`で判定）は、
+ *   「beforeSponsorの中身 → スポンサー枠 → 既定スロット（残り）の中身」
+ *   の順で描画する（`.page-shell--split`）。PC幅では左右レールが
+ *   beforeSponsor・残りの両方の高さ分を通しで縦に並ぶ2行グリッドにし、
+ *   スマートフォン幅ではDOM順そのままの縦積みになる。
+ * - `beforeSponsor`を使わないページ（TOP以外のほぼ全ページ）は、
+ *   従来どおり「既定スロット（本文全体）→ スポンサー枠」の順
+ *   （`.page-shell`、1行グリッド）のままで、変更していない。
+ * - スポンサー枠自体のマークアップ（4枠、左右2枠ずつ）は
+ *   src/components/sponsors/SponsorGroup.astroへ切り出し、2つの分岐で
+ *   同じ実装を再利用している（ページごとに複製しているわけではない）。
  */
 import '../styles/tokens.css';
 import { siteConfig } from '../lib/siteConfig';
@@ -114,7 +149,7 @@ import { ROUTES } from '../lib/routes';
 import { getActiveSponsors } from '../lib/data';
 import { resolvePageCategory } from '../lib/analytics/pageCategory';
 import GaTag from '../lib/analytics/GaTag.astro';
-import SponsorSlot from '../components/sponsors/SponsorSlot.astro';
+import SponsorGroup from '../components/sponsors/SponsorGroup.astro';
 
 interface Props {
   title: string;
@@ -127,8 +162,14 @@ const { title, description, noindex = false } = Astro.props;
 const pageTitle = title === siteConfig.name ? title : `${title}｜${siteConfig.name}`;
 
 const sponsors = getActiveSponsors();
-const sponsorSlots = [sponsors[0] ?? null, sponsors[1] ?? null, sponsors[2] ?? null, sponsors[3] ?? null];
+const sponsorSlots: [
+  (typeof sponsors)[number] | null,
+  (typeof sponsors)[number] | null,
+  (typeof sponsors)[number] | null,
+  (typeof sponsors)[number] | null,
+] = [sponsors[0] ?? null, sponsors[1] ?? null, sponsors[2] ?? null, sponsors[3] ?? null];
 const pageCategory = resolvePageCategory(Astro.url.pathname);
+const hasBeforeSponsor = Astro.slots.has('beforeSponsor');
 ---
 
 <!doctype html>
@@ -165,22 +206,33 @@ const pageCategory = resolvePageCategory(Astro.url.pathname);
       </div>
     </header>
 
-    <div class="page-shell">
-      <main id="main-content" class="site-main">
-        <slot />
-      </main>
+    <slot name="pageTop" />
 
-      <div class="sponsor-group" data-sponsor-root aria-label="広告">
-        <div class="sponsor-rail sponsor-rail--left">
-          <SponsorSlot sponsor={sponsorSlots[0]} position="left-1" pageCategory={pageCategory} />
-          <SponsorSlot sponsor={sponsorSlots[1]} position="left-2" pageCategory={pageCategory} />
+    {
+      hasBeforeSponsor ? (
+        <div class="page-shell page-shell--split">
+          {/* 「本文」ランドマーク（<main>）はHTML上1つだけにする必要があるため、
+              スキップリンクの遷移先も含め、本文の先頭（beforeSponsorの中身）
+              側に<main id="main-content">を置く。後半（既定スロットの中身）は
+              同じ本文の続きだが、間に広告（.sponsor-group）を挟むDOM構造上、
+              単一の<main>で両方を囲めないため、意味的に紐づく<div>にしている。 */}
+          <main id="main-content" class="site-main site-main--before">
+            <slot name="beforeSponsor" />
+          </main>
+          <SponsorGroup sponsorSlots={sponsorSlots} pageCategory={pageCategory} />
+          <div class="site-main site-main--rest">
+            <slot />
+          </div>
         </div>
-        <div class="sponsor-rail sponsor-rail--right">
-          <SponsorSlot sponsor={sponsorSlots[2]} position="right-1" pageCategory={pageCategory} />
-          <SponsorSlot sponsor={sponsorSlots[3]} position="right-2" pageCategory={pageCategory} />
+      ) : (
+        <div class="page-shell">
+          <main id="main-content" class="site-main">
+            <slot />
+          </main>
+          <SponsorGroup sponsorSlots={sponsorSlots} pageCategory={pageCategory} />
         </div>
-      </div>
-    </div>
+      )
+    }
 
     <footer class="site-footer">
       <div class="site-footer__inner">
@@ -533,6 +585,28 @@ const pageCategory = resolvePageCategory(Astro.url.pathname);
       column-gap: clamp(28px, 2vw, 36px);
       justify-content: center;
       align-items: start;
+    }
+
+    .page-shell > .site-main {
+      grid-area: main;
+    }
+
+    /* --- 分割レイアウト（.page-shell--split、TOPのみ）。beforeSponsorの
+       中身と既定スロットの中身を2行に分け、左右レール（rail-left /
+       rail-right）はTOPページの本文全体の高さ（2行分）を通しで
+       縦に並ぶよう2行にまたがせる。PC幅でのスポンサーの視覚位置は、
+       「本文の左右」という意味では通常の.page-shellと同じである。 --- */
+    .page-shell--split {
+      grid-template-areas: 'rail-left before rail-right' 'rail-left rest rail-right';
+      row-gap: var(--space-6);
+    }
+
+    .page-shell--split .site-main--before {
+      grid-area: before;
+    }
+
+    .page-shell--split .site-main--rest {
+      grid-area: rest;
     }
 
     .sponsor-group {

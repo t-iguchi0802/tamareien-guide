@@ -110,34 +110,33 @@ const businesses = getBusinesses();
 ---
 
 <BaseLayout title={siteConfig.name} description={siteConfig.subtitle}>
-  <section class="hero" aria-labelledby="hero-heading">
-    <div class="hero__panel">
-      <h1 id="hero-heading" class="hero__heading">多磨霊園のお墓のことを、目的から探す</h1>
-      <p class="hero__lead">墓石建立、墓じまい、管理・清掃。公開情報を同じ基準で整理しました。</p>
-      <p class="hero__note">
-        掲載情報は、各社のWebサイト等で確認できた公開情報をもとに整理しています。事業者への確認で得た情報は、確認後に随時反映します。
-      </p>
-    </div>
-    <p class="hero__image-credit">画像はイメージです</p>
-  </section>
-
-  <hr class="masonry-rule masonry-rule--hero" />
-
-  <div class="top-layout">
-    <div class="top-layout__filter">
-      <ServiceFilter businesses={businesses} mode="link" targetPath={ROUTES.sekizaiten.path} openByDefault />
-      <hr class="masonry-rule" />
-    </div>
-
-    <section aria-labelledby="trust-heading" class="trust top-layout__trust">
-      <h2 id="trust-heading">当サイトについて</h2>
-      <p>
-        多磨霊園周辺の石材店・お墓関連事業者{businesses.length}社を、公開情報のみで中立に比較する民間の情報サイトです。掲載順は事業者の推奨順位ではありません。運営者情報・掲載基準・広告方針・訂正窓口は<a
-          href={ROUTES.about.path}>運営方針ページ</a
-        >を、情報源と最終確認日は<a href={ROUTES.sources.path}>情報源ページ</a>をご覧ください。
-      </p>
+  <Fragment slot="pageTop">
+    <section class="hero" aria-labelledby="hero-heading">
+      <div class="hero__panel">
+        <h1 id="hero-heading" class="hero__heading">多磨霊園のお墓のことを、目的から探す</h1>
+        <p class="hero__lead">墓石建立、墓じまい、管理・清掃。公開情報を同じ基準で整理しました。</p>
+        <p class="hero__note">
+          掲載情報は、各社のWebサイト等で確認できた公開情報をもとに整理しています。事業者への確認で得た情報は、確認後に随時反映します。
+        </p>
+      </div>
+      <p class="hero__image-credit">画像はイメージです</p>
     </section>
-  </div>
+  </Fragment>
+
+  <Fragment slot="beforeSponsor">
+    <ServiceFilter businesses={businesses} mode="link" targetPath={ROUTES.sekizaiten.path} openByDefault />
+  </Fragment>
+
+  <hr class="masonry-rule" />
+
+  <section aria-labelledby="trust-heading" class="trust">
+    <h2 id="trust-heading">当サイトについて</h2>
+    <p>
+      多磨霊園周辺の石材店・お墓関連事業者{businesses.length}社を、公開情報のみで中立に比較する民間の情報サイトです。掲載順は事業者の推奨順位ではありません。運営者情報・掲載基準・広告方針・訂正窓口は<a
+        href={ROUTES.about.path}>運営方針ページ</a
+      >を、情報源と最終確認日は<a href={ROUTES.sources.path}>情報源ページ</a>をご覧ください。
+    </p>
+  </section>
 
   <hr class="masonry-rule" />
 
@@ -162,32 +161,39 @@ const businesses = getBusinesses();
 </BaseLayout>
 
 <style>
-  /* --- ヒーロー（中央本文の幅に収める。写真そのまま、見出し周りだけ濃色パネル） ---
-     2026-08-28（スポンサー枠の全ページ共通化に伴う再修正）: 従来は
-     画面幅いっぱいに広がるフルブリード（100vw）だったが、スポンサー枠が
-     全ページ共通で本文の左右に表示されるようになったことで、
-     「中央のヒーロー写真を必要以上に狭くしない」「写真とスポンサー枠の
-     間に背景色が見える余白を設ける」という新しい要件と、
-     フルブリード（画面端まで写真を伸ばす＝隣に何も置けない）は両立しない。
-     ヒーローを.site-mainの通常の子要素に戻し、中央本文と同じ幅に収める
-     ことで、PC幅ではヒーローの左右にも生成り色の背景と広告レールが
-     自然に並ぶようにした（フルブリード用のcalc(50vw)ハックは廃止）。 */
+  /* --- ヒーロー（画面全幅、写真そのまま、見出し周りだけ濃色パネル） ---
+     2026-08-28再訂正: 同日中に一度「本文幅へ収める」構成へ変更したが
+     （スポンサー枠を全ページ共通化した際、ヒーローを誤って.page-shellの
+     3列グリッドの内側＝本文列に含めてしまったため）、ヒーローの左右にも
+     スポンサー枠が並ぶ配置は意図と異なるという指摘を受け、フルブリード
+     （画面全幅・単独表示）へ戻した。ヒーローはBaseLayout.astroの
+     `<slot name="pageTop" />`（.page-shellより前、3列グリッドの外）へ
+     渡しており、スポンサー枠とは完全に独立した領域になっている
+     （src/layouts/BaseLayout.astro参照）。
+     定番のフルブリード手法。.site-mainがmargin-inline:autoで中央寄せ
+     されている限り、ネストの深さに関わらず画面幅いっぱいに広がる。 */
   .hero {
     position: relative;
-    border-radius: var(--radius-card);
-    overflow: hidden;
+    isolation: isolate;
+    width: 100vw;
+    margin-inline: calc(50% - 50vw);
     display: flex;
     align-items: center;
     justify-content: center;
     /* 2026-08-27 再修正: 65vh・700pxまでの拡大は、条件選択UI（目的ボタン・
        くわしい条件）をスクロールなしの初期画面から押し出してしまう
        副作用が確認されたため縮小した。PC/スマートフォンとも、
-       写真はbackground-size: coverのまま維持し、高さだけを抑える。 */
+       写真は画面全幅・background-size: coverのまま維持し、高さだけを抑える。 */
     min-height: clamp(300px, 32vw, 420px);
     padding: var(--space-6);
+    overflow: hidden;
     background-image: url('/images/hero-cemetery-photo-v2.png');
     background-size: cover;
     background-position: center;
+    /* ヒーロー下端と、下のスポンサー付き比較エリアとの間に、
+       少しだけ縦の余白を設ける（8〜12px程度広げる指示に基づき、
+       目安値のclamp(28px,2vw,36px)を採用）。 */
+    margin-bottom: clamp(28px, 2vw, 36px);
   }
 
   @media (max-width: 767px) {
@@ -252,25 +258,11 @@ const businesses = getBusinesses();
     margin-block: var(--space-6);
   }
 
-  /* 2026-08-27追記: ヒーロー直下の区切り線だけは余白を詰める。
-     PC幅（1440x900等）で、標準の余白（space-6を上下＝計48px）のままだと
-     「詳しい条件から選ぶ」の見出し行がスクロールなしの初期画面から
-     わずかにはみ出すことを実機で確認したため、この区切り線に限り
-     margin-blockを0にした（他の.masonry-ruleの余白には影響しない）。 */
-  .masonry-rule--hero {
-    margin-block: 0;
-  }
-
-  /* --- 本文の縦積み（ヒーローは含まない）。スポンサー枠との左右配置は
-     src/layouts/BaseLayout.astroの.page-shellが全ページ共通で担当するため、
-     このページ自身はfilter/trustの縦積みだけを行う単純な構成に戻した
-     （2026-08-28、スポンサー枠の全ページ共通化）。 --- */
-  .top-layout {
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-6);
-  }
-
+  /* --- 「当サイトについて」。ServiceFilterはBaseLayout.astroの
+     beforeSponsorスロットへ渡しているため、このページ自身は個別の
+     セクションを縦に並べるだけの単純な構成になっている
+     （2026-08-28、スポンサー枠の全ページ共通化・TOPのスマートフォン
+     表示順修正）。 --- */
   .trust {
     color: var(--color-text);
   }

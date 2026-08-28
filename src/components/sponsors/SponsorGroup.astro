@@ -1,0 +1,35 @@
+---
+/**
+ * スポンサー枠4枠一式（左右2枠ずつ）の共通マークアップ。
+ *
+ * src/layouts/BaseLayout.astro が「pageTop/beforeSponsorスロットを使う
+ * ページ（TOP）」「使わないページ（それ以外）」の2通りの.page-shell構造を
+ * 出し分ける際、スポンサー枠のマークアップ自体をソースコード上で
+ * 二重に書かないためだけの小さな共通部品（2026-08-28新設）。
+ * データ取得・並び順の決定ロジックはBaseLayout.astro側に残し、
+ * このコンポーネントは「渡された4枠をそのまま描画する」責務だけを持つ
+ * （新しいスポンサー表示ロジックを増やさない）。
+ *
+ * 所有者: リード（src/layouts/**と同じ扱い）。
+ */
+import type { Sponsor } from '../../types/sponsor';
+import SponsorSlot from './SponsorSlot.astro';
+
+interface Props {
+  sponsorSlots: [Sponsor | null, Sponsor | null, Sponsor | null, Sponsor | null];
+  pageCategory: string;
+}
+
+const { sponsorSlots, pageCategory } = Astro.props;
+---
+
+<div class="sponsor-group" data-sponsor-root aria-label="広告">
+  <div class="sponsor-rail sponsor-rail--left">
+    <SponsorSlot sponsor={sponsorSlots[0]} position="left-1" pageCategory={pageCategory} />
+    <SponsorSlot sponsor={sponsorSlots[1]} position="left-2" pageCategory={pageCategory} />
+  </div>
+  <div class="sponsor-rail sponsor-rail--right">
+    <SponsorSlot sponsor={sponsorSlots[2]} position="right-1" pageCategory={pageCategory} />
+    <SponsorSlot sponsor={sponsorSlots[3]} position="right-2" pageCategory={pageCategory} />
+  </div>
+</div>
