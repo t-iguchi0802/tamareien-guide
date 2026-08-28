@@ -91,73 +91,52 @@
  *   propを追加。open属性の初期値だけを変え、絞り込みロジック・
  *   ServiceKey・チェックボックス・分析イベントには触れていない。
  *   ユーザーは表示後も任意に開閉できる）。
- * - スポンサーの左右レール化のしきい値を1280px→1500pxへ引き上げ、
- *   1280〜1499px幅でも中央本文（filter/trust）が880〜960px程度を
- *   確保できるようにした。ヒーローは元々`.top-layout`グリッドの外に
- *   あるためスポンサー枠の高さの影響を受けず、`.top-layout__filter`も
- *   グリッドの1行目に独立して配置されているためスポンサー枠（レール）の
- *   高さによって開始位置が下がることはない。
+ *
+ * スポンサー枠の全ページ共通化（2026-08-28）: 左右4枠のSponsorSlot呼び出し・
+ * 表示回数計測スクリプト・PC幅でのレール化（旧しきい値1500px）・
+ * `:global(.site-main)`の1650pxへの拡張は、すべてsrc/layouts/BaseLayout.astroへ
+ * 移設した。TOPページ固有の重複実装は廃止し、`.top-layout`は
+ * filter/trustの縦積みだけを担当する単純な構成に戻した
+ * （左右スポンサーとの位置関係はBaseLayout側の`.page-shell`が
+ * 全ページ共通で決める）。
  */
 import BaseLayout from '../layouts/BaseLayout.astro';
 import { siteConfig } from '../lib/siteConfig';
 import { ROUTES } from '../lib/routes';
-import { getBusinesses, getActiveSponsors } from '../lib/data';
+import { getBusinesses } from '../lib/data';
 import ServiceFilter from '../components/business/ServiceFilter.astro';
-import SponsorSlot from '../components/sponsors/SponsorSlot.astro';
 
 const businesses = getBusinesses();
-const sponsors = getActiveSponsors();
-const sponsorSlots = [sponsors[0] ?? null, sponsors[1] ?? null, sponsors[2] ?? null, sponsors[3] ?? null];
 ---
 
 <BaseLayout title={siteConfig.name} description={siteConfig.subtitle}>
-  <section class="hero" aria-labelledby="hero-heading">
-    <div class="hero__panel">
-      <h1 id="hero-heading" class="hero__heading">多磨霊園のお墓のことを、目的から探す</h1>
-      <p class="hero__lead">墓石建立、墓じまい、管理・清掃。公開情報を同じ基準で整理しました。</p>
-      <p class="hero__note">
-        掲載情報は、各社のWebサイト等で確認できた公開情報をもとに整理しています。事業者への確認で得た情報は、確認後に随時反映します。
-      </p>
-    </div>
-    <p class="hero__image-credit">画像はイメージです</p>
-  </section>
-
-  <hr class="masonry-rule masonry-rule--hero" />
-
-  <div class="top-layout">
-    <div class="top-layout__filter">
-      <ServiceFilter businesses={businesses} mode="link" targetPath={ROUTES.sekizaiten.path} openByDefault />
-      <hr class="masonry-rule" />
-    </div>
-
-    <!--
-      QA監査 M-1（2026-08-27）対応: このdivをfilterとtrustの間に置き、
-      1279px以下でのgrid-areaによる視覚順（検索条件の直後に広告）と
-      DOM順（＝キーボードのTab順）を一致させている。PC幅（1280px以上）
-      ではgrid-areaが左右レールへ配置し直すため、このDOM位置による
-      デスクトップ表示への影響はない（grid-areaによる配置はDOM順に
-      依存しない）。
-    -->
-    <div class="top-layout__rails" data-sponsor-root aria-label="広告">
-      <div class="sponsor-rail sponsor-rail--left">
-        <SponsorSlot sponsor={sponsorSlots[0]} />
-        <SponsorSlot sponsor={sponsorSlots[1]} />
+  <Fragment slot="pageTop">
+    <section class="hero" aria-labelledby="hero-heading">
+      <div class="hero__panel">
+        <h1 id="hero-heading" class="hero__heading">多磨霊園のお墓のことを、目的から探す</h1>
+        <p class="hero__lead">墓石建立、墓じまい、管理・清掃。公開情報を同じ基準で整理しました。</p>
+        <p class="hero__note">
+          掲載情報は、各社のWebサイト等で確認できた公開情報をもとに整理しています。事業者への確認で得た情報は、確認後に随時反映します。
+        </p>
       </div>
-      <div class="sponsor-rail sponsor-rail--right">
-        <SponsorSlot sponsor={sponsorSlots[2]} />
-        <SponsorSlot sponsor={sponsorSlots[3]} />
-      </div>
-    </div>
-
-    <section aria-labelledby="trust-heading" class="trust top-layout__trust">
-      <h2 id="trust-heading">当サイトについて</h2>
-      <p>
-        多磨霊園周辺の石材店・お墓関連事業者{businesses.length}社を、公開情報のみで中立に比較する民間の情報サイトです。掲載順は事業者の推奨順位ではありません。運営者情報・掲載基準・広告方針・訂正窓口は<a
-          href={ROUTES.about.path}>運営方針ページ</a
-        >を、情報源と最終確認日は<a href={ROUTES.sources.path}>情報源ページ</a>をご覧ください。
-      </p>
+      <p class="hero__image-credit">画像はイメージです</p>
     </section>
-  </div>
+  </Fragment>
+
+  <Fragment slot="beforeSponsor">
+    <ServiceFilter businesses={businesses} mode="link" targetPath={ROUTES.sekizaiten.path} openByDefault />
+  </Fragment>
+
+  <hr class="masonry-rule" />
+
+  <section aria-labelledby="trust-heading" class="trust">
+    <h2 id="trust-heading">当サイトについて</h2>
+    <p>
+      多磨霊園周辺の石材店・お墓関連事業者{businesses.length}社を、公開情報のみで中立に比較する民間の情報サイトです。掲載順は事業者の推奨順位ではありません。運営者情報・掲載基準・広告方針・訂正窓口は<a
+        href={ROUTES.about.path}>運営方針ページ</a
+      >を、情報源と最終確認日は<a href={ROUTES.sources.path}>情報源ページ</a>をご覧ください。
+    </p>
+  </section>
 
   <hr class="masonry-rule" />
 
@@ -179,62 +158,23 @@ const sponsorSlots = [sponsors[0] ?? null, sponsors[1] ?? null, sponsors[2] ?? n
       </a>
     </div>
   </section>
-
-  <script>
-    import { trackSponsorImpression } from '../lib/analytics/events';
-
-    (function initSponsorImpressions() {
-      const root = document.querySelector<HTMLElement>('[data-sponsor-root]');
-      if (!root) return;
-      if (typeof IntersectionObserver === 'undefined') return;
-
-      const slots = Array.from(root.querySelectorAll<HTMLElement>('[data-sponsor-id]'));
-      if (slots.length === 0) return;
-
-      const pagePath = window.location.pathname;
-      const seen = new Set<string>();
-
-      const observer = new IntersectionObserver(
-        (entries) => {
-          entries.forEach((entry) => {
-            if (!entry.isIntersecting) return;
-            const el = entry.target as HTMLElement;
-            const sponsorId = el.getAttribute('data-sponsor-id');
-            const campaignId = el.getAttribute('data-campaign-id');
-            if (!sponsorId || !campaignId || seen.has(sponsorId)) return;
-            seen.add(sponsorId);
-            trackSponsorImpression({ sponsor_id: sponsorId, campaign_id: campaignId, page_path: pagePath });
-            observer.unobserve(el);
-          });
-        },
-        { threshold: 0.5 },
-      );
-
-      slots.forEach((slot) => observer.observe(slot));
-    })();
-  </script>
 </BaseLayout>
 
 <style>
-  /*
-   * このページのCSSバンドルにのみ含まれる（Astroはコンポーネント単位で
-   * CSSを分割し、ページが実際にimportしたコンポーネントのCSSだけを
-   * そのページのバンドルに含める）ため、:global()を使っても
-   * 他ページの.site-mainには影響しない。TOPページだけ、左右の
-   * 広告枠ぶん本文コンテナを広げるための上書き。
-   */
-  :global(.site-main) {
-    max-width: 1650px;
-  }
-
-  /* --- ヒーロー（画面全幅、写真そのまま、見出し周りだけ濃色パネル） --- */
+  /* --- ヒーロー（画面全幅、写真そのまま、見出し周りだけ濃色パネル） ---
+     2026-08-28再訂正: 同日中に一度「本文幅へ収める」構成へ変更したが
+     （スポンサー枠を全ページ共通化した際、ヒーローを誤って.page-shellの
+     3列グリッドの内側＝本文列に含めてしまったため）、ヒーローの左右にも
+     スポンサー枠が並ぶ配置は意図と異なるという指摘を受け、フルブリード
+     （画面全幅・単独表示）へ戻した。ヒーローはBaseLayout.astroの
+     `<slot name="pageTop" />`（.page-shellより前、3列グリッドの外）へ
+     渡しており、スポンサー枠とは完全に独立した領域になっている
+     （src/layouts/BaseLayout.astro参照）。
+     定番のフルブリード手法。.site-mainがmargin-inline:autoで中央寄せ
+     されている限り、ネストの深さに関わらず画面幅いっぱいに広がる。 */
   .hero {
     position: relative;
     isolation: isolate;
-    /* 定番のフルブリード手法。.site-mainがmargin-inline:autoで中央寄せ
-       されている限り、ネストの深さに関わらず画面幅いっぱいに広がる
-       （.top-layoutの3列グリッドの外＝.site-main直下の通常要素として
-       置いているため、グリッドセル基準のpercentage計算に巻き込まれない）。 */
     width: 100vw;
     margin-inline: calc(50% - 50vw);
     display: flex;
@@ -243,14 +183,17 @@ const sponsorSlots = [sponsors[0] ?? null, sponsors[1] ?? null, sponsors[2] ?? n
     /* 2026-08-27 再修正: 65vh・700pxまでの拡大は、条件選択UI（目的ボタン・
        くわしい条件）をスクロールなしの初期画面から押し出してしまう
        副作用が確認されたため縮小した。PC/スマートフォンとも、
-       ヒーロー写真は画面全幅・background-size: coverのまま維持し、
-       高さだけを抑える。 */
+       写真は画面全幅・background-size: coverのまま維持し、高さだけを抑える。 */
     min-height: clamp(300px, 32vw, 420px);
     padding: var(--space-6);
     overflow: hidden;
     background-image: url('/images/hero-cemetery-photo-v2.png');
     background-size: cover;
     background-position: center;
+    /* ヒーロー下端と、下のスポンサー付き比較エリアとの間に、
+       少しだけ縦の余白を設ける（8〜12px程度広げる指示に基づき、
+       目安値のclamp(28px,2vw,36px)を採用）。 */
+    margin-bottom: clamp(28px, 2vw, 36px);
   }
 
   @media (max-width: 767px) {
@@ -315,109 +258,11 @@ const sponsorSlots = [sponsors[0] ?? null, sponsors[1] ?? null, sponsors[2] ?? n
     margin-block: var(--space-6);
   }
 
-  /* 2026-08-27追記: ヒーロー直下の区切り線だけは余白を詰める。
-     PC幅（1440x900等）で、標準の余白（space-6を上下＝計48px）のままだと
-     「詳しい条件から選ぶ」の見出し行がスクロールなしの初期画面から
-     わずかにはみ出すことを実機で確認したため、この区切り線に限り
-     margin-blockを0にした（他の.masonry-ruleの余白には影響しない）。 */
-  .masonry-rule--hero {
-    margin-block: 0;
-  }
-
-  /* --- 本文3列グリッド（ヒーローは含まない） --- */
-  .top-layout {
-    display: grid;
-    grid-template-columns: 1fr;
-    grid-template-areas:
-      'filter'
-      'sponsors'
-      'trust';
-    gap: var(--space-6);
-  }
-
-  .top-layout__filter {
-    grid-area: filter;
-  }
-
-  .top-layout__trust {
-    grid-area: trust;
-  }
-
-  /* --- スポンサー4枠: モバイル・タブレット（既定）は2列グリッド --- */
-  .top-layout__rails {
-    grid-area: sponsors;
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: var(--space-3);
-  }
-
-  .sponsor-rail {
-    /* モバイル・タブレットでは箱を持たせず、中の2枠を
-       .top-layout__rails の2列グリッドへ直接参加させる。 */
-    display: contents;
-  }
-
-  /* --- PC幅（1500px以上）: 左右2枠ずつの大きめサイドレールへ切り替え ---
-     2026-08-27再修正: しきい値を1280px→1500pxへ引き上げた。1280〜1499px幅では
-     左右レール（220px固定×2＋列間22px×2＝484px）を確保すると中央本文が
-     880〜960px程度を確保しにくくなるため、その帯では中央本文を狭めず
-     スポンサーを本文内（検索条件の後・関連コンテンツの前）配置のままにする。 */
-  @media (min-width: 1500px) {
-    .top-layout {
-      /* 左右レール220〜260px（clamp）・中央最大960px・列間22px。
-         全体はおよそ260+22+960+22+260=1524px前後（要件の「全体最大幅
-         1600px前後」の範囲内）で、justify-content: centerにより
-         画面中央に配置される。 */
-      grid-template-columns: clamp(220px, 14vw, 260px) minmax(0, 960px) clamp(220px, 14vw, 260px);
-      grid-template-areas: 'rail-left filter rail-right' 'rail-left trust rail-right';
-      column-gap: 22px;
-      justify-content: center;
-      align-items: start;
-    }
-
-    .top-layout__filter,
-    .top-layout__trust {
-      max-width: 960px;
-    }
-
-    /* ラップ用の2列グリッドを透過させ、左右レールを.top-layoutの
-       直接の子として配置し直す。 */
-    .top-layout__rails {
-      display: contents;
-    }
-
-    .sponsor-rail {
-      display: flex;
-      flex-direction: column;
-      gap: 22px;
-      position: sticky;
-      top: var(--space-4);
-      align-self: start;
-    }
-
-    .sponsor-rail--left {
-      grid-area: rail-left;
-    }
-
-    .sponsor-rail--right {
-      grid-area: rail-right;
-    }
-
-    /* スポンサー枠本体のサイズ（幅はレール＝グリッド列の幅にフレックスで
-       自然に追従するため高さのみ指定）。SponsorSlot.astro側の既定
-       min-height（モバイル・タブレット用）をこのページのPC表示でだけ
-       上書きする。
-       セレクタを`.top-layout__rails .sponsor-slot`と3段（クラス3つ）にして
-       いるのは、SponsorSlot.astro自身のスコープ済みルール
-       （Astroが付与するdata-astro-cid属性により`.sponsor-slot`単体より
-       詳細度が上がる）に確実に勝つため。単純な`:global(.sponsor-slot)`
-       （クラス1つ）では詳細度で負けて上書きされない不具合を実機で確認した
-       （ComparisonTable.astroの`.business-card[hidden]`と同種の問題）。 */
-    :global(.top-layout__rails .sponsor-slot) {
-      min-height: 320px;
-    }
-  }
-
+  /* --- 「当サイトについて」。ServiceFilterはBaseLayout.astroの
+     beforeSponsorスロットへ渡しているため、このページ自身は個別の
+     セクションを縦に並べるだけの単純な構成になっている
+     （2026-08-28、スポンサー枠の全ページ共通化・TOPのスマートフォン
+     表示順修正）。 --- */
   .trust {
     color: var(--color-text);
   }

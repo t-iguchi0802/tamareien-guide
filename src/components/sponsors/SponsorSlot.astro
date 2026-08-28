@@ -33,12 +33,20 @@
  * （このファイルの`min-height`はモバイル・タブレット時の既定値）。
  * 未契約時の「スポンサー枠」文言は、枠が縦に大きくなっても間延びして
  * 見えないよう、上部の「広告」ラベルを除いた残り領域の中央に表示する。
+ *
+ * 全ページ共通化（2026-08-28）: 枠サイズの上書きはBaseLayout.astro側の
+ * `.page-shell`（1500px以上のみ）が担当するようになった
+ * （src/pages/index.astro固有の上書きは廃止）。あわせて、分析イベント
+ * （sponsor_impression / sponsor_click）に含める`data-slot-position` /
+ * `data-page-category`をルート要素と外部リンクの両方に付与した
+ * （表示回数計測はBaseLayout.astro側のIntersectionObserverが
+ * ルート要素の`data-sponsor-id`を対象に行う）。
  */
 import '../../styles/tokens.css';
 import type { SponsorSlotProps } from '../../types/components';
 
 type Props = SponsorSlotProps;
-const { sponsor } = Astro.props;
+const { sponsor, position, pageCategory } = Astro.props;
 ---
 
 <div
@@ -46,6 +54,8 @@ const { sponsor } = Astro.props;
   data-sponsor-slot
   data-sponsor-id={sponsor?.id}
   data-campaign-id={sponsor?.campaignId}
+  data-slot-position={position}
+  data-page-category={pageCategory}
 >
   <p class="sponsor-slot__eyebrow">広告</p>
   {
@@ -64,6 +74,8 @@ const { sponsor } = Astro.props;
           data-event="sponsor_click"
           data-sponsor-id={sponsor.id}
           data-campaign-id={sponsor.campaignId}
+          data-slot-position={position}
+          data-page-category={pageCategory}
         >
           サイトを見る
           <span class="sr-only">（外部サイトを新しいタブで開きます）</span>

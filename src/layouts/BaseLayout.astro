@@ -69,11 +69,87 @@
  * このレイアウトでtokens.cssを直接importし、`.sr-only`・
  * `--font-family-heading`等のトークンをページ内容に関係なく
  * 常に利用可能にした。
+ *
+ * スポンサー枠の全ページ共通化（2026-08-28、サイト所有者判断）:
+ * - 従来 src/pages/index.astro だけが個別に呼び出していた4枠の
+ *   SponsorSlot（左右2枠ずつ）と、表示回数計測（IntersectionObserver）を
+ *   このレイアウトへ移設した。管理画面等は存在しないため、BaseLayoutを
+ *   使う通常の公開ページすべて（TOP・比較ページ・墓じまい・改葬手続き・
+ *   墓所管理・アクセス・ガイド記事・運営情報・プライバシー等）で
+ *   自動的に同じスポンサー枠が表示される。ページごとにスポンサー用
+ *   コードを複製する必要はない。
+ * - `<main id="main-content" class="site-main">`と2つの広告レール
+ *   （`.sponsor-rail--left` / `--right`）を`.page-shell`でまとめ、
+ *   src/pages/index.astro が元々使っていたのと同じ`display: contents`
+ *   の入れ子トリック（PC幅では実グリッド列、モバイル・タブレットでは
+ *   透過して`<main>`の直後の2×2グリッドへ合流）で、同じ4要素をCSSだけで
+ *   配置し直す。DOM複製はしない（表示回数計測の二重化・スクリーンリーダー
+ *   の重複読み上げを避けるため）。
+ * - DOM順は「main（本文）→ 広告」に固定している。記事タイトル・本文より
+ *   前に広告が来ることはない（`<slot />`の中身＝各ページの本文がDOM上も
+ *   視覚上も広告より必ず先に来る）。PC幅では`grid-area`により広告を
+ *   本文の左右へ視覚的に再配置するが、これはTab順には影響しない
+ *   （CSS Gridの配置はDOM順に依存しないため、キーボード操作は本文→広告の
+ *   順で変わらない）。
+ * - しきい値（1400px）・レール幅（`clamp(220px, 14vw, 260px)`）・
+ *   枠自体の高さ（PCで320px）は、元々TOPページで実機検証済みだった値を
+ *   そのまま踏襲した（サイト全体で見た目を統一するため）。
+ * - 列間（column-gap）だけ、`clamp(28px, 2vw, 36px)`へ広げた
+ *   （従来は22px固定。ヒーロー写真と広告レールの間が近すぎるという
+ *   指摘に対応。広げすぎないよう、指定の目安値をそのまま採用した）。
+ * - sticky表示は1400px以上、かつ画面の高さが700px以上のときだけ有効にする
+ *   （2枠分の高さ（320px×2＋列間22px≒662px）が収まらない低い画面では
+ *   stickyにしない）。`.page-shell`の縦幅を超えて追従することはなく
+ *   （sticky特有の挙動として、コンテナ＝`.page-shell`の下端で自然に
+ *   解除される）、フッター（`.page-shell`の外側にある独立した要素）まで
+ *   追従することはない。
+ * - `sponsor_impression` / `sponsor_click` イベントに`slot_position`
+ *   （left-1/left-2/right-1/right-2）と`page_category`
+ *   （top/comparison/procedure/guide/policy/other、
+ *   src/lib/analytics/pageCategory.ts）を追加した。
+ *
+ * 訂正（2026-08-28、同日中にサイト所有者から指摘・修正指示）: 上記の
+ * 初版実装では、TOPページのヒーロー写真自体を`.page-shell`の3列グリッドの
+ * 「main」列に含めてしまい、結果としてヒーロー写真の左右にもスポンサー枠が
+ * 並ぶ配置になっていた（写真を画面全幅から本文幅へ縮小する副作用も
+ * 発生していた）。これは意図した配置ではないという指摘を受け、
+ * 名前付きスロット`<slot name="pageTop" />`を`.page-shell`より前
+ * （ヘッダー直下）に追加した。TOPページはヒーロー写真をこの
+ * `pageTop`スロットへ渡すことで、ヒーローを3列グリッドの外側・
+ * スポンサー枠と無関係な単独の全幅セクションに戻している
+ * （src/pages/index.astro参照。ヒーローのフルブリードCSSも元の
+ * `width:100vw; margin-inline:calc(50% - 50vw)`に戻した）。
+ * `pageTop`スロットを使わないページ（TOP以外の大半のページ）は、
+ * 本文全体がそのまま`.page-shell`の3列（スポンサー付き）レイアウトに
+ * 収まる、という当初の挙動を維持している。
+ *
+ * 再訂正（2026-08-28、同日中）: TOPのスマートフォン表示について、
+ * 「ヒーロー→目的・条件選択→スポンサー枠→（当サイトについて等の）
+ * 残りのコンテンツ」という順序の指定を受けた。BaseLayoutは`<slot />`の
+ * 中身を1つの塊としてしか扱えないため、この順序を実現するには
+ * スポンサー枠を「本文の前半（目的・条件選択）」と「本文の後半
+ * （残り）」の間に置く必要がある。これに対応するため、`beforeSponsor`
+ * という2つ目の名前付きスロットを追加した。
+ * - `beforeSponsor`スロットにコンテンツがあるページ（今のところTOPのみ、
+ *   `Astro.slots.has('beforeSponsor')`で判定）は、
+ *   「beforeSponsorの中身 → スポンサー枠 → 既定スロット（残り）の中身」
+ *   の順で描画する（`.page-shell--split`）。PC幅では左右レールが
+ *   beforeSponsor・残りの両方の高さ分を通しで縦に並ぶ2行グリッドにし、
+ *   スマートフォン幅ではDOM順そのままの縦積みになる。
+ * - `beforeSponsor`を使わないページ（TOP以外のほぼ全ページ）は、
+ *   従来どおり「既定スロット（本文全体）→ スポンサー枠」の順
+ *   （`.page-shell`、1行グリッド）のままで、変更していない。
+ * - スポンサー枠自体のマークアップ（4枠、左右2枠ずつ）は
+ *   src/components/sponsors/SponsorGroup.astroへ切り出し、2つの分岐で
+ *   同じ実装を再利用している（ページごとに複製しているわけではない）。
  */
 import '../styles/tokens.css';
 import { siteConfig } from '../lib/siteConfig';
 import { ROUTES } from '../lib/routes';
+import { getActiveSponsors } from '../lib/data';
+import { resolvePageCategory } from '../lib/analytics/pageCategory';
 import GaTag from '../lib/analytics/GaTag.astro';
+import SponsorGroup from '../components/sponsors/SponsorGroup.astro';
 
 interface Props {
   title: string;
@@ -84,6 +160,16 @@ interface Props {
 
 const { title, description, noindex = false } = Astro.props;
 const pageTitle = title === siteConfig.name ? title : `${title}｜${siteConfig.name}`;
+
+const sponsors = getActiveSponsors();
+const sponsorSlots: [
+  (typeof sponsors)[number] | null,
+  (typeof sponsors)[number] | null,
+  (typeof sponsors)[number] | null,
+  (typeof sponsors)[number] | null,
+] = [sponsors[0] ?? null, sponsors[1] ?? null, sponsors[2] ?? null, sponsors[3] ?? null];
+const pageCategory = resolvePageCategory(Astro.url.pathname);
+const hasBeforeSponsor = Astro.slots.has('beforeSponsor');
 ---
 
 <!doctype html>
@@ -120,9 +206,33 @@ const pageTitle = title === siteConfig.name ? title : `${title}｜${siteConfig.n
       </div>
     </header>
 
-    <main id="main-content" class="site-main">
-      <slot />
-    </main>
+    <slot name="pageTop" />
+
+    {
+      hasBeforeSponsor ? (
+        <div class="page-shell page-shell--split">
+          {/* 「本文」ランドマーク（<main>）はHTML上1つだけにする必要があるため、
+              スキップリンクの遷移先も含め、本文の先頭（beforeSponsorの中身）
+              側に<main id="main-content">を置く。後半（既定スロットの中身）は
+              同じ本文の続きだが、間に広告（.sponsor-group）を挟むDOM構造上、
+              単一の<main>で両方を囲めないため、意味的に紐づく<div>にしている。 */}
+          <main id="main-content" class="site-main site-main--before">
+            <slot name="beforeSponsor" />
+          </main>
+          <SponsorGroup sponsorSlots={sponsorSlots} pageCategory={pageCategory} />
+          <div class="site-main site-main--rest">
+            <slot />
+          </div>
+        </div>
+      ) : (
+        <div class="page-shell">
+          <main id="main-content" class="site-main">
+            <slot />
+          </main>
+          <SponsorGroup sponsorSlots={sponsorSlots} pageCategory={pageCategory} />
+        </div>
+      )
+    }
 
     <footer class="site-footer">
       <div class="site-footer__inner">
@@ -165,6 +275,52 @@ const pageTitle = title === siteConfig.name ? title : `${title}｜${siteConfig.n
 
     <script>
       import '../lib/analytics/autoInit';
+    </script>
+
+    <script>
+      // スポンサー枠の表示回数計測（全ページ共通、2026-08-28に
+      // src/pages/index.astroから移設）。IntersectionObserverで
+      // 実際にビューポート内に入った枠だけを、1枠につき1回計測する。
+      import { trackSponsorImpression } from '../lib/analytics/events';
+      import type { SponsorSlotPosition } from '../types/analytics';
+
+      (function initSponsorImpressions() {
+        const root = document.querySelector<HTMLElement>('[data-sponsor-root]');
+        if (!root) return;
+        if (typeof IntersectionObserver === 'undefined') return;
+
+        const slots = Array.from(root.querySelectorAll<HTMLElement>('[data-sponsor-id]'));
+        if (slots.length === 0) return;
+
+        const pagePath = window.location.pathname;
+        const seen = new Set<string>();
+
+        const observer = new IntersectionObserver(
+          (entries) => {
+            entries.forEach((entry) => {
+              if (!entry.isIntersecting) return;
+              const el = entry.target as HTMLElement;
+              const sponsorId = el.getAttribute('data-sponsor-id');
+              const campaignId = el.getAttribute('data-campaign-id');
+              const slotPosition = el.getAttribute('data-slot-position') as SponsorSlotPosition | null;
+              const pageCategory = el.getAttribute('data-page-category');
+              if (!sponsorId || !campaignId || !slotPosition || !pageCategory || seen.has(sponsorId)) return;
+              seen.add(sponsorId);
+              trackSponsorImpression({
+                sponsor_id: sponsorId,
+                campaign_id: campaignId,
+                page_path: pagePath,
+                slot_position: slotPosition,
+                page_category: pageCategory,
+              });
+              observer.unobserve(el);
+            });
+          },
+          { threshold: 0.5 },
+        );
+
+        slots.forEach((slot) => observer.observe(slot));
+      })();
     </script>
   </body>
 </html>
@@ -374,6 +530,127 @@ const pageTitle = title === siteConfig.name ? title : `${title}｜${siteConfig.n
     margin-inline: auto;
     padding: var(--space-6);
     min-height: 40vh;
+  }
+
+  /* --- スポンサー枠（全ページ共通、2026-08-28）。src/pages/index.astroが
+     元々使っていた3列グリッド＋display:contents入れ子と同じ仕組みを
+     BaseLayout側へ移設し、サイト全体で共有する。
+     1499px以下ではCSS Gridを使わず通常フローのまま（DOM順が
+     main→sponsor-groupなので、それだけで正しい縦積み表示になる）。
+     グリッドアイテムには既定でmin-width:autoが働き、比較表・
+     アクセスページの表など横スクロール用のmin-widthを持つ子要素が
+     グリッドトラックごと押し広げてページが横スクロールする不具合を
+     実機で確認したため、min-width:0を上書きする対応を試みたが、
+     フレックス/グリッド固有のサイズ計算の絡みで確実に解消しなかった。
+     必要な帯（1400px以上の3列レイアウト）でだけgridを使うことで、
+     この問題を構造的に避けている。 --- */
+  .page-shell {
+    gap: var(--space-6);
+  }
+
+  .page-shell > .site-main {
+    margin-bottom: var(--space-6);
+  }
+
+  .sponsor-group {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--space-3);
+  }
+
+  .sponsor-rail {
+    /* モバイル・タブレットでは箱を持たせず、左右レール2つの中身
+       （計4枠）を.sponsor-groupの2列グリッドへ直接参加させ、
+       正しい読み順（1段目に2枠・2段目に2枠）の2×2にする。 */
+    display: contents;
+  }
+
+  @media (min-width: 1400px) {
+    .page-shell > .site-main {
+      margin-bottom: 0;
+    }
+
+    .page-shell {
+      display: grid;
+      /* 左右レール220〜260px（clamp）・中央最大960px（.site-main自身の
+         既定最大幅と合わせる。ページによりさらに狭い記事幅（800px等）を
+         使う場合も、この960pxの中で内側に自己中央寄せされる）・
+         列間はclamp(28px,2vw,36px)（従来22px固定から拡大）。
+         中央列をminmax(0,960px)と有限にすることで、グリッド全体の幅を
+         約260+36+960+36+260=1552px前後に収め、justify-content: centerで
+         画面中央に配置する（1frにすると超ワイド画面でレールが画面端まで
+         広がり、本文から大きく離れてしまうため採用しない）。 */
+      grid-template-columns: clamp(220px, 14vw, 260px) minmax(0, 960px) clamp(220px, 14vw, 260px);
+      grid-template-areas: 'rail-left main rail-right';
+      column-gap: clamp(28px, 2vw, 36px);
+      justify-content: center;
+      align-items: start;
+    }
+
+    .page-shell > .site-main {
+      grid-area: main;
+    }
+
+    /* --- 分割レイアウト（.page-shell--split、TOPのみ）。beforeSponsorの
+       中身と既定スロットの中身を2行に分け、左右レール（rail-left /
+       rail-right）はTOPページの本文全体の高さ（2行分）を通しで
+       縦に並ぶよう2行にまたがせる。PC幅でのスポンサーの視覚位置は、
+       「本文の左右」という意味では通常の.page-shellと同じである。 --- */
+    .page-shell--split {
+      grid-template-areas: 'rail-left before rail-right' 'rail-left rest rail-right';
+      row-gap: var(--space-6);
+    }
+
+    .page-shell--split .site-main--before {
+      grid-area: before;
+    }
+
+    .page-shell--split .site-main--rest {
+      grid-area: rest;
+    }
+
+    .sponsor-group {
+      display: contents;
+    }
+
+    .sponsor-rail {
+      display: flex;
+      flex-direction: column;
+      gap: 22px;
+      align-self: start;
+    }
+
+    /* 画面の高さが十分あるときだけstickyにする（2枠分の高さ
+       （320px×2＋列間22px≒662px）が収まらない低い画面ではstickyにしない）。 */
+    @media (min-height: 700px) {
+      .sponsor-rail {
+        position: sticky;
+        top: var(--space-4);
+      }
+    }
+
+    .sponsor-rail--left {
+      grid-area: rail-left;
+    }
+
+    .sponsor-rail--right {
+      grid-area: rail-right;
+    }
+
+    /* スポンサー枠本体のPCサイズ（高さのみ上書き。幅はレール＝グリッド列の
+       幅にフレックスで追従する）。SponsorSlot.astro自身のスコープ済み
+       ルール（Astroのdata-astro-cid属性で詳細度が上がる）に確実に勝つため、
+       セレクタをクラス3つにしている。
+       重要: このスタイルブロックは<style is:global>のため、Astroの
+       スコープ変換（:global()を素のセレクタへ展開する処理）自体が
+       走らない。したがって`:global(...)`は書いても外側に伝播せず、
+       ブラウザには理解できない疑似クラスとしてそのまま出力されて
+       死んだルールになる（実機・ビルド警告で確認）。ここでは
+       `:global()`を使わず、素のセレクタのままクラス3つの詳細度を
+       確保している。 */
+    .page-shell .sponsor-rail .sponsor-slot {
+      min-height: 320px;
+    }
   }
 
   .site-footer {

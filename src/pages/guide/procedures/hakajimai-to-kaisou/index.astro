@@ -5,16 +5,29 @@
  *
  * 出典: sources.csv 既存レコード（SRC-FUCHU-REBURIAL / SRC-TAMA-WORK-NOTICE /
  * SRC-TAMA-OFFICIAL）。tetsuzuki.astro が既に使っている出典と同じもので、
- * sources.csvへの追加・変更は行っていない。改葬の定義文は tetsuzuki.astro
- * と同じ出典に基づく同一の要約表現を用いている（重複した独自解釈を作らない）。
- * 行政手続きの詳細（必要書類・窓口の具体的な流れ等）は、当ページでは
- * 断定せず、公式ページへのリンクへ誘導する（tetsuzuki.astroと同方針）。
+ * sources.csvへの追加・変更は行っていない。行政手続きの詳細（必要書類・
+ * 窓口の具体的な流れ等）は、当ページでは断定せず、公式ページへのリンクへ
+ * 誘導する（tetsuzuki.astroと同方針）。
  *
  * 記事末尾のCTAは、既存のServiceFilter（/sekizaiten/側、mode="inline"）が
  * ?services= クエリを読み取って選択状態を復元する既存機構をそのまま使う
  * （ServiceFilter.astro自体は変更していない）。使用するServiceKeyは
  * 既存の 'grave_closure' と 'reburial_support' のみで、新しいキーは
  * 作っていない。
+ *
+ * 平易な日本語への書き直し（2026-08-28、サイト所有者判断）:
+ * - 「まず結論」のような記事作成上の内部的な見出しを使わず、利用者が
+ *   実際に知りたい順（これは何か→似た言葉との違い→どんなときに必要か→
+ *   手続きの流れ→誰へ相談するか→必要なもの→よくある疑問→石材店を探す→
+ *   情報源・更新日）にページ構成を組み直した。
+ * - 改葬・墓じまい・承継・墓所返還の説明文は、指定された簡潔な文章
+ *   （一文目で意味を説明し、1段落2〜3文程度）にそろえた。行政・法律上の
+ *   意味は変えていない（既存の出典・確認日はそのまま維持）。
+ * - 「手続きの流れ」は、既存の出典で確認できる事実（改葬許可が必要、
+ *   府中市が窓口、多磨霊園内の工事は着手届・完了届が必要）の範囲内で
+ *   一般的な順序を示す目安とし、正確な順序・必要書類は自治体・霊園により
+ *   異なる旨と公式ページへの案内を明記した。未確認の書類・費用・期間は
+ *   創作していない。
  */
 import '../../../../styles/guide-article.css';
 import BaseLayout from '../../../../layouts/BaseLayout.astro';
@@ -23,13 +36,13 @@ import { getSourceById } from '../../../../lib/data';
 
 const pageTitle = '墓じまいと改葬の違い｜多磨霊園で手続きを始める前に';
 const description =
-  '「墓じまい」と「改葬」の違いを、行政の公式情報をもとに整理しました。多磨霊園でお墓の整理を検討する際に、まず確認しておきたいポイントをまとめています。';
+  '「墓じまい」と「改葬」の違いを、中学生でも分かる言葉で説明します。行政の公式情報をもとに、手続きの流れや相談先もまとめました。';
 
 const fuchuReburial = getSourceById('SRC-FUCHU-REBURIAL');
 const tamaWorkNotice = getSourceById('SRC-TAMA-WORK-NOTICE');
 const tamaOfficial = getSourceById('SRC-TAMA-OFFICIAL');
 
-const checkedAt = '2026-08-27';
+const checkedAt = '2026-08-28';
 const closureServiceQuery = 'grave_closure,reburial_support';
 ---
 
@@ -37,27 +50,95 @@ const closureServiceQuery = 'grave_closure,reburial_support';
   <article class="article">
     <p class="article__eyebrow"><a href={ROUTES.guideProcedures.path}>墓じまい・お墓の手続き 総合案内</a></p>
     <h1>{pageTitle}</h1>
-    <p class="article__meta">確認日: {checkedAt} ／ 情報源: 府中市・東京都公園協会 公式ページ（本文末に一覧）</p>
+    <p class="article__meta">記事の最終更新日: {checkedAt} ／ 情報源: 府中市・東京都公園協会 公式ページ（各出典の確認日は本文末に一覧）</p>
 
-    <section aria-labelledby="hakajimai-kaisou-definition-heading">
-      <h2 id="hakajimai-kaisou-definition-heading">それぞれの意味</h2>
+    <section aria-labelledby="hakajimai-kaisou-what-heading">
+      <h2 id="hakajimai-kaisou-what-heading">これは何か</h2>
+      <p>改葬とは、遺骨を今のお墓から、別のお墓や納骨堂などへ移すことです。遺骨を移すには、原則として市区町村の許可が必要です。</p>
       <p>
-        <strong>墓じまい</strong>は、墓石を解体・撤去し、墓所を更地にして使用権を返還することを指す一般的な呼び方です。多磨霊園内での墓石の解体・撤去工事については、東京都公園協会の公式ページで案内が公開されています。
-      </p>
-      <p>
-        <strong>改葬</strong>とは、すでに納められているご遺骨を他のお墓や納骨堂などへ移すことをいいます。改葬には、市区町村が発行する改葬許可証が必要です。
+        墓じまいとは、今ある墓石を撤去し、墓地を管理者へ返すことです。中に遺骨がある場合は、先に新しい納骨先を決め、遺骨を移す手続き（改葬）も必要になります。
       </p>
     </section>
 
-    <section aria-labelledby="hakajimai-kaisou-relation-heading">
-      <h2 id="hakajimai-kaisou-relation-heading">墓じまいと改葬の関係</h2>
+    <section aria-labelledby="hakajimai-kaisou-diff-heading">
+      <h2 id="hakajimai-kaisou-diff-heading">似た言葉との違い</h2>
       <p>
-        お墓を閉じてご遺骨を別の場所へ移す場合、「墓石の解体・撤去（墓じまい）」と「ご遺骨の移動（改葬）」の両方が必要になることが一般的です。どちらか一方だけを指して「墓じまい」と呼ぶ場合もあり、言葉の使われ方には幅があります。行政手続きとして必要になるのは、遺骨を移す際の改葬許可申請です。具体的な要否・進め方は、必ず下記の公式ページでご確認ください。当サイトの記載内容は法律相談ではありません。
+        墓じまいは、墓石を撤去して墓地を返すことです。改葬は、遺骨を別の場所へ移すことです。多くの場合、墓じまいと改葬は一緒に進めます。ほかにも似た言葉があるので、まとめて違いを確認しましょう。
+      </p>
+      <div class="article__table-scroll" tabindex="0" role="region" aria-label="似た言葉の違いの表（横スクロールできます）">
+        <table>
+          <caption>お墓の整理に関する言葉の違い</caption>
+          <thead>
+            <tr>
+              <th scope="col">言葉</th>
+              <th scope="col">意味</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <th scope="row">墓じまい</th>
+              <td>墓石などを撤去し、墓地を管理者へ返すこと。</td>
+            </tr>
+            <tr>
+              <th scope="row">改葬（かいそう）</th>
+              <td>遺骨を、今のお墓から別のお墓や納骨堂などへ移すこと。</td>
+            </tr>
+            <tr>
+              <th scope="row">承継（しょうけい）</th>
+              <td>お墓を使う権利と管理する責任を、次の人へ引き継ぐこと。</td>
+            </tr>
+            <tr>
+              <th scope="row">墓所返還</th>
+              <td>墓石などを撤去し、使用していた区画を霊園へ返すこと（墓じまいとほぼ同じ意味で使われることが多い言葉）。</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section aria-labelledby="hakajimai-kaisou-when-heading">
+      <h2 id="hakajimai-kaisou-when-heading">どんなときに必要か</h2>
+      <p>次のような場合に、墓じまいや改葬を検討する方が多いようです。</p>
+      <ul>
+        <li>お墓を継ぐ人がいない、または今後いなくなる見込みがあるとき</li>
+        <li>遠方に住んでいて、お墓の管理やお参りが難しくなったとき</li>
+        <li>家族の近くなど、より通いやすい場所へお墓を移したいとき</li>
+      </ul>
+      <p>
+        どのような場合に手続きが必要かは、ご家族の事情やお墓の状況によって異なります。判断に迷う場合は、下記の相談先へお問い合わせください。
       </p>
     </section>
 
-    <section aria-labelledby="hakajimai-kaisou-official-heading">
-      <h2 id="hakajimai-kaisou-official-heading">公式ページで確認する</h2>
+    <section aria-labelledby="hakajimai-kaisou-flow-heading">
+      <h2 id="hakajimai-kaisou-flow-heading">手続きの流れ</h2>
+      <p>
+        公開されている公式情報から分かる範囲で、一般的な流れの目安を示します。実際の順序や必要な手続きは、墓地・霊園や自治体によって異なります。正確な手順は、必ず下記の公式ページ・窓口でご確認ください。
+      </p>
+      <ol>
+        <li>新しい納骨先（別のお墓や納骨堂など）を決める。</li>
+        <li>市区町村（多磨霊園の場合は府中市）へ改葬許可を申請する。</li>
+        <li>石材店などへ、墓石の解体・撤去を依頼する（多磨霊園内での工事は、着手届・完了届の提出が必要です）。</li>
+        <li>遺骨を新しい納骨先へ移す。</li>
+        <li>墓地の区画を、霊園の管理者へ返す。</li>
+      </ol>
+    </section>
+
+    <section aria-labelledby="hakajimai-kaisou-who-heading">
+      <h2 id="hakajimai-kaisou-who-heading">誰へ相談するか</h2>
+      <ul>
+        <li>墓石の解体・撤去、見積りについて: 石材店（下記のリンクから、対応を確認できた石材店を探せます）</li>
+        <li>改葬許可の申請について: 市区町村の窓口（多磨霊園の場合は府中市）</li>
+        <li>墓地の区画そのものについて: 霊園の管理者（多磨霊園の場合は東京都公園協会）</li>
+      </ul>
+    </section>
+
+    <section aria-labelledby="hakajimai-kaisou-needed-heading">
+      <h2 id="hakajimai-kaisou-needed-heading">必要なもの</h2>
+      <div class="article__callout">
+        <p>
+          遺骨を移す場合は、市区町村が発行する改葬許可証が必要です。それ以外に必要な書類は、お墓の状況や自治体によって異なるため、当サイトでは断定していません。正確な内容は、府中市の公式ページでご確認ください。
+        </p>
+      </div>
       {
         fuchuReburial && (
           <p>
@@ -95,12 +176,36 @@ const closureServiceQuery = 'grave_closure,reburial_support';
         )
       }
       <p>
-        より詳しい行政手続きの案内は<a href={ROUTES.tetsuzuki.path}>改葬・墓所返還・施設変更の違いと公式リンクのページ</a>にもまとめています。
+        より詳しい行政手続きの案内は<a href={ROUTES.tetsuzuki.path}>改葬・墓所返還・施設変更の違いと公式リンクのページ</a>にもまとめています。当サイトの記載内容は法律相談ではありません。
       </p>
     </section>
 
+    <section aria-labelledby="hakajimai-kaisou-faq-heading">
+      <h2 id="hakajimai-kaisou-faq-heading">よくある疑問</h2>
+      <dl class="article__faq">
+        <div>
+          <dt>墓じまいだけして、改葬はしないこともできますか。</dt>
+          <dd>
+            墓石の解体・撤去だけを行い、遺骨は別の場所へ移さない場合もあります。ただし、遺骨をどこかへ移す場合は、改葬の許可が必要です。
+          </dd>
+        </div>
+        <div>
+          <dt>お墓を継ぐ人がいない場合はどうすればよいですか。</dt>
+          <dd>
+            承継する人がいない場合、墓じまいをして区画を返すことも選択肢の一つです。まずは霊園の管理者（多磨霊園の場合は東京都公園協会）へご相談ください。
+          </dd>
+        </div>
+        <div>
+          <dt>費用はどれくらいかかりますか。</dt>
+          <dd>
+            墓石の広さや工事の内容によって金額は大きく変わります。正確な費用は、石材店に直接お見積りをご依頼ください。公開ページで確認できる価格の目安は、下記の比較ページに掲載しています。
+          </dd>
+        </div>
+      </dl>
+    </section>
+
     <section aria-labelledby="hakajimai-kaisou-cta-heading">
-      <h2 id="hakajimai-kaisou-cta-heading">石材店の対応を確認する</h2>
+      <h2 id="hakajimai-kaisou-cta-heading">関連する石材店を探す</h2>
       <p>
         墓石の解体・撤去や、改葬にともなう手続支援については、公開情報で対応状況を確認できた石材店を比較できます。
       </p>
@@ -112,7 +217,7 @@ const closureServiceQuery = 'grave_closure,reburial_support';
     </section>
 
     <section aria-labelledby="hakajimai-kaisou-sources-heading">
-      <h2 id="hakajimai-kaisou-sources-heading">情報源</h2>
+      <h2 id="hakajimai-kaisou-sources-heading">情報源・更新日</h2>
       <ul class="article__sources">
         {fuchuReburial && (
           <li>
@@ -144,3 +249,20 @@ const closureServiceQuery = 'grave_closure,reburial_support';
   </article>
 </BaseLayout>
 
+<style>
+  .article__faq {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+  }
+
+  .article__faq dt {
+    font-weight: 700;
+    margin-bottom: 0.3em;
+  }
+
+  .article__faq dd {
+    margin: 0;
+    color: var(--color-text);
+  }
+</style>

@@ -15,6 +15,12 @@
  * 追加した。スポンサー枠（src/components/sponsors/**）の表示回数・
  * クリックを計測するために必要な拡張であり、既存6イベントの意味は
  * 変更していない。
+ *
+ * 拡張（2026-08-28、スポンサー枠の全ページ共通化に伴う）: 全ページで
+ * スポンサー枠を表示するようになったため、どのページ・どの枠位置での
+ * 表示／クリックかを区別できるよう、`slot_position` と `page_category` を
+ * `SponsorImpressionParams` / `SponsorClickParams` へ追加した。
+ * 既存の `sponsor_id` / `campaign_id` / `page_path` は変更していない。
  */
 
 export type AnalyticsEventName =
@@ -61,11 +67,19 @@ export interface CorrectionRequestClickParams {
   page_path: string;
 }
 
+/**
+ * スポンサー枠4枠中のどの位置か。左右レール・上位表示のいずれでも、
+ * DOM上の物理的な枠位置（left-1が最上段）をそのまま使う。
+ */
+export type SponsorSlotPosition = 'left-1' | 'left-2' | 'right-1' | 'right-2';
+
 /** スポンサー枠がビューポート内に表示されたとき（1枠につき1ページで1回）。 */
 export interface SponsorImpressionParams {
   sponsor_id: string;
   campaign_id: string;
   page_path: string;
+  slot_position: SponsorSlotPosition;
+  page_category: string;
 }
 
 /** スポンサー枠の外部リンク（広告主サイト）のクリック。 */
@@ -73,6 +87,8 @@ export interface SponsorClickParams {
   sponsor_id: string;
   campaign_id: string;
   page_path: string;
+  slot_position: SponsorSlotPosition;
+  page_category: string;
 }
 
 export type AnalyticsEventParams =

@@ -10,7 +10,7 @@
  */
 
 import type { Business, ServiceKey, VerificationStatus } from './business';
-import type { OutboundLinkType } from './analytics';
+import type { OutboundLinkType, SponsorSlotPosition } from './analytics';
 import type { Sponsor } from './sponsor';
 
 export interface BusinessCardProps {
@@ -58,7 +58,15 @@ export interface CorrectionCtaProps {
  * 合わせ、`sponsor: Sponsor` から `sponsor: Sponsor | null` へ変更した
  * （契約が無い枠は`null`を渡し、「スポンサー枠」というプレースホルダーを
  * 表示する。4枠を常に同じ大きさ・同じ扱いで表示するための変更）。
+ *
+ * 全ページ共通化（2026-08-28）: スポンサー枠がBaseLayout側で全ページに
+ * 表示されるようになったため、分析イベント（sponsor_impression /
+ * sponsor_click）に含める `position` / `pageCategory` を追加した。
  */
 export interface SponsorSlotProps {
   sponsor: Sponsor | null;
+  /** 4枠中のどの位置か（分析イベント用）。 */
+  position: SponsorSlotPosition;
+  /** 表示しているページの分類（分析イベント用）。 */
+  pageCategory: string;
 }
