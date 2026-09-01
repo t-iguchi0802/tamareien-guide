@@ -159,15 +159,15 @@
   }
 }
 
+/* 2026-09-02（ミチの編集改善・SEO/AIO対応「写真」節）: AI生成の一般的な
+   風景写真であることを示す注記を、写真に重ねる大きめの帯から、写真の
+   すぐ下に置く小さなキャプションへ変更した。実在の人物・場所を誤認させる
+   意図はもとよりないが、「写真の上に大きく重ねる」表現が実際の写真であるかの
+   ような強い主張に見えないよう、控えめな表示に統一する。 */
 .article__hero-photo__credit {
-  position: absolute;
-  right: var(--space-3);
-  bottom: var(--space-3);
-  margin: 0;
-  padding: 0.15em 0.6em;
-  border-radius: var(--radius-tag, 6px);
-  background: rgba(255, 255, 255, 0.72);
-  color: #2b2926;
+  margin: var(--space-2) 0 0;
+  padding: 0;
+  color: var(--color-text-muted);
   font-size: var(--font-size-caption, 0.875rem);
 }
 

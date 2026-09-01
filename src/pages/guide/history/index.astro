@@ -38,6 +38,7 @@ import BaseLayout from '../../../layouts/BaseLayout.astro';
 import { ROUTES } from '../../../lib/routes';
 import { getSourceById } from '../../../lib/data';
 import { GUIDE_SOURCES } from '../../_lib/guide-sources';
+import { buildArticleJsonLd } from '../../../lib/seo';
 
 const historyFacts = [
   { label: '開設', value: '1923年4月1日' },
@@ -49,21 +50,37 @@ const historyFacts = [
 const pageTitle = '多磨霊園はなぜ造られた？1923年開園からの歴史';
 const description =
   '多磨霊園がなぜ、どのように造られたのかを、東京都公園協会の公式情報をもとに要約しました。開設の背景、日本初の公園墓地としての位置づけ、名称の変遷を紹介します。';
+const browserTitle = `${pageTitle}｜多磨霊園 お墓ガイド`;
 
 const tamaOfficial = getSourceById('SRC-TAMA-OFFICIAL');
-const checkedAt = '2026-08-27';
+// 更新日・出典表記の簡略化（2026-09-02、ミチの編集改善・SEO/AIO対応
+// 「更新日・出典」節）: 記事冒頭は「更新日：YYYY年M月D日」だけを表示し、
+// 出典一覧は記事末尾の「情報源」節へ一本化する（本文中の重要な数値には
+// 別途インラインの出典リンクを残す。下記history-scale-heading参照）。
+// 2026-09-02、「現在の規模」段落へインライン出典リンクを追加する本文修正を
+// 行ったため、更新日を2026年9月2日に更新した（ビルド日時での自動更新では
+// なく、実際の本文変更に伴う更新）。
+const checkedAtJa = '2026年9月2日';
+
+const articleJsonLd = buildArticleJsonLd({
+  path: ROUTES.guideHistory.path,
+  headline: pageTitle,
+  description,
+  datePublished: '2026-08-27',
+  dateModified: '2026-09-02',
+  image: '/images/hero-cemetery-v1.png',
+});
 ---
 
-<BaseLayout title={pageTitle} description={description}>
+<BaseLayout title={browserTitle} description={description} ogType="article" extraJsonLd={[articleJsonLd]}>
   <Fragment slot="beforeSponsor">
     <article class="article">
       <p class="article__eyebrow"><a href={ROUTES.guide.path}>多磨霊園ガイド</a> ／ 多磨霊園の歴史・著名人</p>
       <h1>{pageTitle}</h1>
-      <p class="article__meta">確認日: {checkedAt} ／ 情報源: 東京都公園協会公式サイト（本文末に一覧）</p>
+      <p class="article__meta">更新日：{checkedAtJa}</p>
 
-      <div class="article__hero-photo" style="background-image:url('/images/hero-cemetery-v1.png')">
-        <p class="article__hero-photo__credit">画像はイメージです</p>
-      </div>
+      <div class="article__hero-photo" style="background-image:url('/images/hero-cemetery-v1.png')"></div>
+      <p class="article__hero-photo__credit">イメージ写真</p>
 
       <section aria-labelledby="history-background-heading">
         <h2 id="history-background-heading">なぜ新しい墓地が必要だったのか</h2>
@@ -102,7 +119,11 @@ const checkedAt = '2026-08-27';
     <section aria-labelledby="history-scale-heading">
       <h2 id="history-scale-heading">現在の規模</h2>
       <p>
-        公式サイトによれば、開園面積は1,280,237平方メートル（約128ヘクタール）です。公式の園内案内図には「都立8霊園のなかで最も広い面積を有しています」と明記されており、墓域は園路によって1区から26区までの「区」に分けられています（出典は本文末「情報源」参照）。
+        公式サイトによれば、開園面積は1,280,237平方メートル（約128ヘクタール）です。
+        <a href={GUIDE_SOURCES.tamaMapPdf.url} rel="noopener" target="_blank">
+          公式の園内案内図（{GUIDE_SOURCES.tamaMapPdf.publisher}）
+        </a>
+        には「都立8霊園のなかで最も広い面積を有しています」と明記されており、墓域は園路によって1区から26区までの「区」に分けられています。
       </p>
     </section>
 

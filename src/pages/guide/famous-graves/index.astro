@@ -39,136 +39,127 @@
  * 見出し・本文・データは変更していない。
  *
  * H1分割・代表例の追加（2026-09-01、ミチのモバイル優先UI・文章校正対応
- * 「著名人ページ」節）:
- * - H1を「多磨霊園に眠る著名人」に短縮し、補足文「公式案内図で墓所を探す
- *   方法」を別の<p class="article__lead">に分けた（390pxで複合タイトルの
- *   「｜」が行頭に残る問題への対応）。<title>・descriptionは従来のまま。
- * - 記事冒頭の更新日表示を「更新日：2026年9月1日」のみに簡略化した
- *   （出典一覧は記事末尾の「情報源・確認日」のまま、削除していない）。
- * - 「著名人墓所一覧」の直前に、代表例6名を示すカードを追加した。
- *   選び方はFAMOUS_GRAVES配列（公式PDFの五十音順、当サイトは並べ替えて
- *   いない）の先頭から機械的に6件取っただけで、Claude独自の「有名かどうか」
- *   判断は加えていない（本文にもその旨を明記）。公式資料で確認できない
- *   人物は追加していない。人物写真は使用していない（権利確認できる
- *   写真がないため）。五十音一覧（143名・区画情報）は削除していない。
+ * 「著名人ページ」節）: H1を「多磨霊園に眠る著名人」に短縮した。
+ *
+ * 説明臭い文章の削除・名前から探すアコーディオンへの刷新（2026-09-02、
+ * ミチの編集改善・SEO/AIO対応「著名人ページ」節）:
+ * - 「このページで分かること」節と「一覧の入口（例、先頭6名）」を削除した。
+ *   前者はサイト制作側の説明（「このページでは…まとめています」）、
+ *   後者も一覧の代わりとなるサンプル紹介にすぎず、実際の利用者が
+ *   知りたい内容（誰が眠っているか、どう探すか）を直接書く方針へ変更した。
+ * - 補足文（.article__lead）は使わず、指定の冒頭文をH1直後の本文
+ *   段落にした（「補足は原則不要」の指定に合わせた）。
+ * - 見出しを「著名人墓所一覧」→「名前から探す」に変更し、旧
+ *   「『ア』から始まる方（○名）を見る」という表現を「ア行 ○人」（行・人数を
+ *   別スパンにし、CSSのgapで間隔を取る）へ改めた。人数は下記`groups`
+ *   （FAMOUS_GRAVES、正本データ）から実行時に算出しており、固定値ではない。
+ * - 開閉行は<details>/<summary>のまま、行全体タップ・cursor:pointer・
+ *   hover時の薄い緑地・右端の開閉矢印（開時に回転）・48px以上の高さ・
+ *   キーボード操作・明確なフォーカス表示を満たすCSSを追加した
+ *   （詳細は下記<style>の.kana-accordion__summary参照）。
+ * - 人物の並び順・掲載対象は変更していない（143名、公式PDFの五十音順の
+ *   まま、Claude独自の有名度判断・順位付けは行っていない。公式資料で
+ *   確認できない人物の追加、人物写真の使用もしていない）。
+ * - title/descriptionを「多磨霊園に眠る著名人｜名前から墓所を探す」に更新した。
  */
 import '../../../styles/guide-article.css';
 import BaseLayout from '../../../layouts/BaseLayout.astro';
 import { ROUTES } from '../../../lib/routes';
 import { GUIDE_SOURCES } from '../../_lib/guide-sources';
 import { FAMOUS_GRAVES } from '../../_lib/famous-graves-data';
+import { buildArticleJsonLd } from '../../../lib/seo';
 
-const pageTitle = '多磨霊園に眠る著名人｜公式案内図で巡る墓所ガイド';
+const pageTitle = '多磨霊園に眠る著名人｜名前から墓所を探す';
 const description =
-  '多磨霊園にある著名人の墓所を、東京都公園協会の公式案内図に掲載されている範囲でご案内します。氏名・分野・墓所の場所（区・種・側・番）は公式資料の表記のとおりです。';
+  '多磨霊園にある著名人の墓所を、名前の五十音順から探せます。氏名・分野・墓所の場所（区・種・側・番）は東京都公園協会の公式案内図の表記のとおりです。';
 
-const checkedAtJa = '2026年9月1日';
+// 2026-09-02、本文の刷新（「このページで分かること」節・代表例カードの削除、
+// 「名前から探す」アコーディオンへの変更）に伴い更新日を当日付へ更新した
+// （ビルド日時での自動更新ではなく、実際の本文変更に伴う更新）。
+const checkedAtJa = '2026年9月2日';
+
+const articleJsonLd = buildArticleJsonLd({
+  path: ROUTES.guideFamousGraves.path,
+  headline: '多磨霊園に眠る著名人',
+  description,
+  datePublished: '2026-08-27',
+  dateModified: '2026-09-02',
+  image: '/images/hero-cemetery-photo-v2.png',
+});
 
 // 公式PDF内の五十音インデックス（ア・カ・サ・タ・ナ・ハ・マ・ヤ・ワ）の順に
 // そのままグループ化する。当サイト独自の分類・並べ替えは行っていない。
+// 各グループの人数（entries.length）は正本データFAMOUS_GRAVESから
+// ビルド時に算出する（固定値をハードコードしない）。
 const kanaOrder = ['ア', 'カ', 'サ', 'タ', 'ナ', 'ハ', 'マ', 'ヤ', 'ワ'] as const;
 const groups = kanaOrder
   .map((kana) => ({ kana, entries: FAMOUS_GRAVES.filter((entry) => entry.kana === kana) }))
   .filter((group) => group.entries.length > 0);
-
-/**
- * 一覧への入口として示す「例」6名（2026-09-01、ミチのモバイル優先UI・
- * 文章校正対応「著名人ページ」節）。
- *
- * 「代表例を4〜6名、有名度で選ばず示す」という要望に対し、Claude独自の
- * 「有名かどうか」判断を一切加えない、機械的な選び方だけを採用した:
- * 公式PDFの並び順（五十音順、当サイトが独自に並べ替えていない）の
- * 先頭から単純に6件を取っただけで、経歴・知名度による選定は行っていない。
- * 本文にもその旨を明記し、「おすすめ」「有名」等の語は使わない。
- */
-const EXAMPLE_COUNT = 6;
-const exampleEntries = FAMOUS_GRAVES.slice(0, EXAMPLE_COUNT);
 
 function formatPlot(entry: (typeof FAMOUS_GRAVES)[number]): string {
   return `${entry.block}区 ${entry.section}種 ${entry.side}側 ${entry.number}番`;
 }
 ---
 
-<BaseLayout title={pageTitle} description={description}>
+<BaseLayout title={pageTitle} description={description} ogType="article" extraJsonLd={[articleJsonLd]}>
   <Fragment slot="beforeSponsor">
     <article class="article">
       <p class="article__eyebrow"><a href={ROUTES.guide.path}>多磨霊園ガイド</a> ／ 多磨霊園の歴史・著名人</p>
       <h1>多磨霊園に眠る著名人</h1>
-      <p class="article__lead">公式案内図で墓所を探す方法</p>
       <p class="article__meta">更新日：{checkedAtJa}</p>
 
-      <div class="article__hero-photo" style="background-image:url('/images/hero-cemetery-photo-v2.png');background-position:center 30%;">
-        <p class="article__hero-photo__credit">画像はイメージです</p>
-      </div>
+      <div class="article__hero-photo" style="background-image:url('/images/hero-cemetery-photo-v2.png');background-position:center 30%;"></div>
+      <p class="article__hero-photo__credit">イメージ写真</p>
 
-      <section aria-labelledby="famous-about-heading">
-        <h2 id="famous-about-heading">このページで分かること</h2>
-        <p>
-          多磨霊園には、政治・学問・文学・芸術・芸能などさまざまな分野で知られる方の墓所があります。このページでは、東京都公園協会が発行する公式案内図に掲載されている著名人{FAMOUS_GRAVES.length}名の氏名・主な分野・墓所の場所（区・種・側・番）を、公式案内図の表記のとおりにまとめています。
-        </p>
-        <p>
-          当サイトが独自に「有名かどうか」を判断して人選したものではなく、公式案内図に載っている方をそのまま掲載しています。公式案内図には、ご遺族の意向で掲載されていない墓所があることも公式サイトで案内されています（本文末「墓参時の注意」参照）。そのため、このページの一覧がすべての著名人を網羅しているわけではありません。
-        </p>
-      </section>
+      <p>
+        多磨霊園には、文学・政治・芸術など、さまざまな分野で足跡を残した人々が眠っています。名前から墓所を探せます。
+      </p>
     </article>
   </Fragment>
 
   <div class="article">
     <section aria-labelledby="famous-list-heading">
-      <h2 id="famous-list-heading">著名人墓所一覧</h2>
+      <h2 id="famous-list-heading">名前から探す</h2>
       <p>
-        公式案内図の五十音順のまま、{groups.length}のグループに分けています。見出しを選ぶと、その範囲の一覧が開きます。
+        五十音（読みの頭文字）ごとに分けています。見出しを選ぶと、その範囲の一覧が開きます。
       </p>
 
-      <div class="article__callout">
-        <p class="article__callout__eyebrow">一覧の入口（例）</p>
-        <p>
-          下は、一覧の並び順（五十音順）の先頭から機械的に{EXAMPLE_COUNT}名を示した例です。「有名」「おすすめ」等の当サイトの判断による選定ではありません。全{FAMOUS_GRAVES.length}名は、このすぐ下の一覧からご覧ください。
-        </p>
-        <ul class="article__related-grid">
-          {
-            exampleEntries.map((entry) => (
-              <li>
-                <span class="article__related-card famous-example-card">
-                  <span class="famous-example-card__name">{entry.name.replace(new RegExp('　', 'g'), ' ')}</span>
-                  <span class="famous-example-card__meta">
-                    {entry.career} ／ {formatPlot(entry)}
-                  </span>
-                </span>
-              </li>
-            ))
-          }
-        </ul>
-      </div>
-
-      {
-        groups.map((group) => (
-          <details class="detail-table">
-            <summary>「{group.kana}」から始まる方（{group.entries.length}名）を見る</summary>
-            <div class="article__table-scroll" tabindex="0" role="region" aria-label={`「${group.kana}」の著名人墓所一覧の表（横スクロールできます）`}>
-              <table>
-                <caption class="sr-only">「{group.kana}」から始まる著名人の墓所一覧</caption>
-                <thead>
-                  <tr>
-                    <th scope="col">氏名</th>
-                    <th scope="col">主な分野</th>
-                    <th scope="col">墓所の場所</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {group.entries.map((entry) => (
+      <div class="kana-accordion">
+        {
+          groups.map((group) => (
+            <details class="kana-accordion__item">
+              <summary class="kana-accordion__summary">
+                <span class="kana-accordion__label">{group.kana}行</span>
+                <span class="kana-accordion__count">{group.entries.length}人</span>
+                <svg class="kana-accordion__chevron" width="20" height="20" viewBox="0 0 20 20" aria-hidden="true" focusable="false">
+                  <path d="M5 7.5 L10 12.5 L15 7.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                </svg>
+              </summary>
+              <div class="article__table-scroll" tabindex="0" role="region" aria-label={`「${group.kana}」の著名人墓所一覧の表（横スクロールできます）`}>
+                <table>
+                  <caption class="sr-only">「{group.kana}」から始まる著名人の墓所一覧</caption>
+                  <thead>
                     <tr>
-                      <th scope="row">{entry.name.replace(new RegExp('　', 'g'), ' ')}</th>
-                      <td>{entry.career}</td>
-                      <td>{formatPlot(entry)}</td>
+                      <th scope="col">氏名</th>
+                      <th scope="col">主な分野</th>
+                      <th scope="col">墓所の場所</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </details>
-        ))
-      }
+                  </thead>
+                  <tbody>
+                    {group.entries.map((entry) => (
+                      <tr>
+                        <th scope="row">{entry.name.replace(new RegExp('　', 'g'), ' ')}</th>
+                        <td>{entry.career}</td>
+                        <td>{formatPlot(entry)}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </details>
+          ))
+        }
+      </div>
     </section>
 
     <section aria-labelledby="famous-howto-heading">
@@ -277,28 +268,93 @@ function formatPlot(entry: (typeof FAMOUS_GRAVES)[number]): string {
 </BaseLayout>
 
 <style>
-  /* 「一覧の入口（例）」カード。リンク先ページがあるわけではない
-     （個別の著名人ページは作らない方針のため）ので、.article__related-card
-     の「→」矢印は打ち消し、名前と分野・墓所の場所だけの小さな案内にする。 */
-  .famous-example-card {
+  /*
+   * 「名前から探す」五十音アコーディオン（2026-09-02、ミチの編集改善・
+   * SEO/AIO対応「著名人ページ」節）。
+   *
+   * <details>/<summary>のネイティブな開閉セマンティクスを維持したまま、
+   * 次の要件を満たすCSSだけを追加する:
+   * - 行全体がクリック/タップ可能（summaryをflexにして子要素はpointer-events
+   *   を変更しない。中の要素をクリックしても親のsummaryクリックとして
+   *   扱われるのがブラウザ標準の挙動）。
+   * - PCではcursor:pointer、ホバー時は薄い緑地（--color-tint-green-bg）。
+   * - 右端に開閉矢印（chevron）を置き、開いたときに180度回転させる
+   *   （矢印の絵文字を差し替えるのではなく、transformで回転させることで
+   *   「回転する」という指定に文字どおり対応する）。
+   * - 最小高さ48px、フォーカス時に明確な輪郭を表示、キーボード操作は
+   *   <summary>のネイティブな挙動でEnter/Spaceに対応済み。
+   */
+  .kana-accordion {
+    display: flex;
     flex-direction: column;
-    align-items: flex-start;
-    gap: 0.1em;
-    cursor: default;
+    gap: 0.5rem;
   }
 
-  .famous-example-card::after {
-    content: none;
+  .kana-accordion__item {
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-card);
+    background: var(--color-surface);
+    overflow: hidden;
   }
 
-  .famous-example-card__name {
+  .kana-accordion__summary {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    min-height: 48px;
+    padding: 0.75rem 1rem;
+    cursor: pointer;
+    list-style: none;
     font-weight: 700;
+    font-size: 1.0625rem;
     color: var(--color-text);
   }
 
-  .famous-example-card__meta {
+  .kana-accordion__summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .kana-accordion__summary::marker {
+    content: '';
+  }
+
+  .kana-accordion__summary:hover {
+    background: var(--color-tint-green-bg);
+  }
+
+  .kana-accordion__summary:focus-visible {
+    outline: 3px solid var(--color-accent);
+    outline-offset: -3px;
+  }
+
+  .kana-accordion__label {
+    font-family: var(--font-family-heading);
+  }
+
+  .kana-accordion__count {
+    color: var(--color-text-muted);
     font-weight: 400;
-    font-size: var(--font-size-caption, 0.875rem);
-    color: var(--color-stone-text);
+    font-size: var(--font-size-label);
+  }
+
+  .kana-accordion__chevron {
+    margin-left: auto;
+    flex-shrink: 0;
+    color: var(--color-text-muted);
+    transition: transform 0.15s ease;
+  }
+
+  .kana-accordion__item[open] > .kana-accordion__summary .kana-accordion__chevron {
+    transform: rotate(180deg);
+  }
+
+  .kana-accordion__item[open] > .kana-accordion__summary {
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .kana-accordion__chevron {
+      transition: none;
+    }
   }
 </style>

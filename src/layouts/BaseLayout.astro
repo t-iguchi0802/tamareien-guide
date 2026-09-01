@@ -160,18 +160,71 @@ import { siteConfig } from '../lib/siteConfig';
 import { ROUTES } from '../lib/routes';
 import { getActiveSponsors } from '../lib/data';
 import { resolvePageCategory } from '../lib/analytics/pageCategory';
+import { buildCanonicalUrl, buildOrganizationJsonLd, buildBreadcrumbListJsonLd } from '../lib/seo';
+import type { JsonLd } from '../lib/seo';
 import GaTag from '../lib/analytics/GaTag.astro';
 import SponsorGroup from '../components/sponsors/SponsorGroup.astro';
 
+/**
+ * title/OGP/構造化データの方針変更（2026-09-02、ミチの編集改善・SEO/AIO対応）:
+ * - 従来は`title`（各ページから渡す短い語句）へBaseLayoutが自動的に
+ *   `｜${siteConfig.name}`を付け足していたが、ページごとに固有の
+ *   <title>を明示的に設計する方針（CLAUDE_CODE_HANDOFF.md 8章）に合わせ、
+ *   自動付与をやめた。各ページの`title`propが、そのまま<title>の中身になる
+ *   （ブランド名を含めるかどうかもページ側の判断に委ねる）。
+ * - OGP（og:*、twitter:*）を追加した。画像は`ogImage`未指定時、
+ *   サイト全体で使っているヒーロー写真（TOP用）を既定値にする
+ *   （記事ごとに個別の画像を指定できるよう`ogImage`/`ogImageAlt`propを
+ *   追加）。
+ * - 構造化データ（JSON-LD）として、`Organization`（サイト運営主体、
+ *   全ページ共通）と、`breadcrumbs`propが渡された場合の`BreadcrumbList`を
+ *   追加した。どちらも画面に実際に表示されている内容（サイト名・
+ *   ヘッダーナビ／各記事の「〇〇ガイド／△△」というeyebrowリンクの
+ *   階層）と一致する範囲のみを出力し、画面にない文章・評価・実績等は
+ *   一切追加していない（src/lib/seo/structuredData.tsの既存の安全策を
+ *   そのまま利用）。
+ */
 interface Props {
   title: string;
   description: string;
   /** trueの場合、検索エンジンにインデックスさせない。 */
   noindex?: boolean;
+  /** OGP画像（サイトルートからの絶対パス、例: "/images/hero-cemetery-photo-v2.png"）。省略時は既定のTOP写真。 */
+  ogImage?: string;
+  /** OGP画像の代替テキスト（画面には出さないが、OGPの説明として使う）。 */
+  ogImageAlt?: string;
+  /** og:type。記事ページはBaseLayout呼び出し側で'article'を指定する。既定'website'。 */
+  ogType?: 'website' | 'article';
+  /** パンくず（JSON-LD BreadcrumbList用）。画面のeyebrowリンク・ヘッダーナビの
+   * 階層と一致するものだけを渡す。省略時はBreadcrumbListを出力しない。 */
+  breadcrumbs?: { name: string; path: string }[];
+  /**
+   * 追加のJSON-LD（2026-09-02、ミチの編集改善・SEO/AIO対応「構造化データ」節）。
+   * ガイド記事のArticle、/sekizaiten/のItemList等、ページ固有の構造化データを
+   * 呼び出し側（各pages/*.astro）で組み立てて渡す。Organization/BreadcrumbListは
+   * 既にBaseLayoutが共通発行するため、ここには含めない。捏造禁止の対象
+   * （偽レビュー・AggregateRating・架空の著者/組織等）は呼び出し側でも
+   * 発行しないこと。
+   */
+  extraJsonLd?: JsonLd[];
 }
 
-const { title, description, noindex = false } = Astro.props;
-const pageTitle = title === siteConfig.name ? title : `${title}｜${siteConfig.name}`;
+const {
+  title,
+  description,
+  noindex = false,
+  ogImage = '/images/hero-cemetery-photo-v2.png',
+  ogImageAlt = '多磨霊園の園路と緑（イメージ写真）',
+  ogType = 'website',
+  breadcrumbs,
+  extraJsonLd = [],
+} = Astro.props;
+const pageTitle = title;
+const canonicalUrl = buildCanonicalUrl(Astro.url.pathname);
+const ogImageUrl = buildCanonicalUrl(ogImage);
+
+const organizationJsonLd = buildOrganizationJsonLd();
+const breadcrumbJsonLd = breadcrumbs && breadcrumbs.length > 0 ? buildBreadcrumbListJsonLd(breadcrumbs) : null;
 
 const sponsors = getActiveSponsors();
 const sponsorSlots: [
@@ -192,7 +245,25 @@ const hasBeforeSponsor = Astro.slots.has('beforeSponsor');
     <title>{pageTitle}</title>
     <meta name="description" content={description} />
     {noindex && <meta name="robots" content="noindex, nofollow" />}
-    <link rel="canonical" href={Astro.url.pathname} />
+    <link rel="canonical" href={canonicalUrl} />
+
+    <meta property="og:site_name" content={siteConfig.name} />
+    <meta property="og:title" content={pageTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonicalUrl} />
+    <meta property="og:type" content={ogType} />
+    <meta property="og:image" content={ogImageUrl} />
+    <meta property="og:image:alt" content={ogImageAlt} />
+    <meta property="og:locale" content="ja_JP" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={pageTitle} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={ogImageUrl} />
+
+    <script type="application/ld+json" set:html={JSON.stringify(organizationJsonLd)} is:inline />
+    {breadcrumbJsonLd && <script type="application/ld+json" set:html={JSON.stringify(breadcrumbJsonLd)} is:inline />}
+    {extraJsonLd.map((jsonLd) => <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} is:inline />)}
+
     <GaTag />
   </head>
   <body>
@@ -313,6 +384,7 @@ const hasBeforeSponsor = Astro.slots.has('beforeSponsor');
             <summary class="site-footer__group-label">運営</summary>
             <nav class="site-footer__nav" aria-label="運営情報のページ">
               <a href={ROUTES.about.path}>運営方針・掲載基準・広告方針・訂正窓口</a>
+              <a href={`${ROUTES.about.path}#sponsor-info-heading`}>スポンサー掲載について</a>
               <a href={ROUTES.sources.path}>情報源・最終確認日</a>
               <a href={ROUTES.privacy.path}>プライバシーポリシー</a>
             </nav>
@@ -389,15 +461,22 @@ const hasBeforeSponsor = Astro.slots.has('beforeSponsor');
    */
   :root {
     /* CLAUDE_CODE_HANDOFF.md 9章: 白・深緑・石色を基調。東京都公式の外観は模倣しない。
-       editorial-redesign: 「温かい石色・生成り・深い緑・墨色」を中心に据え、
-       行政サイト/SaaS管理画面のような冷たいグレーを避けた（全ペアAA以上確認済み）。 */
-    --color-bg: #f7f2e7;
-    --color-surface: #fffdf8;
-    --color-text: #2b2926;
-    --color-text-muted: #6b6558;
-    --color-accent: #2f4b3c;
+       2026-09-02（ミチの編集改善・SEO/AIO対応「色と全体デザイン」節）:
+       全面ベージュ・グレーの印象を弱め、明るく清潔な地域ガイドへ更新した。
+       背景を#FBF9F4（ごく淡い生成り）、カード・本文面を純白#FFFFFFにし、
+       ベージュ（下記--color-stone-*）は注意欄・補足欄・一部の帯だけに限定する
+       （全面を同じベージュで塗らない）。本文文字#292C29・深緑#29483Aは
+       指定値をそのまま採用（計算上のコントラストは--color-textがbg比
+       13.4:1、--color-accentが白背景ボタン比10.1:1でいずれもAAAレベル）。
+       補助色#62747Dは、本文muted系（--color-text-muted）に採用
+       （bg比4.63:1、AA適合）。全ペアWCAG AA（4.5:1）以上を計算式で確認済み。 */
+    --color-bg: #fbf9f4;
+    --color-surface: #ffffff;
+    --color-text: #292c29;
+    --color-text-muted: #62747d;
+    --color-accent: #29483a;
     --color-accent-soft: #e4e9e0;
-    --color-border: #e1d9c6;
+    --color-border: #e4e2da;
 
     --font-family-base: 'Noto Sans JP', system-ui, -apple-system, 'Segoe UI', sans-serif;
 

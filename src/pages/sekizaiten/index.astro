@@ -49,25 +49,49 @@ import ServiceFilter from '../../components/business/ServiceFilter.astro';
 import BusinessGrid from '../../components/business/BusinessGrid.astro';
 import CorrectionCta from '../../components/common/CorrectionCta.astro';
 import { ALL_SERVICE_KEYS } from '../_lib/business-display';
+import { buildBusinessListItemListJsonLd } from '../../lib/seo';
 
 const businesses = getBusinesses();
 const sponsoredBusinessIds = getActiveSponsors()
   .map((sponsor) => sponsor.linkedBusinessId)
   .filter((id): id is string => id !== null);
-const pageTitle = '石材店一覧・比較';
+/*
+ * title/description/H1の更新（2026-09-02、ミチの編集改善・SEO/AIO対応
+ * 「title・description・H1」節）: BaseLayoutのタイトル自動サフィックスを
+ * 廃止したため、ページごとに完結した<title>文字列を用意する。H1は
+ * ブラウザタブのタイトルとは別に、画面表示用の短い見出し（heroHeading）
+ * として分ける（複合タイトルの「｜」がモバイル幅でH1として折り返される
+ * ことを避けるため）。
+ */
+const pageTitle = '多磨霊園の石材店一覧・比較｜目的から探せるお墓ガイド';
+const heroHeading = '多磨霊園の石材店一覧・比較';
 const description =
-  '多磨霊園周辺の石材店・お墓関連事業者14社を、公開情報のみで目的別に探せる一覧です。';
+  '多磨霊園周辺の石材店・お墓関連事業者14社を、墓石を建てる・直す、墓じまい、清掃・管理などの目的から比較できます。公開情報のみで中立に整理しています。';
+
+/*
+ * ItemList構造化データ（2026-09-02、ミチの編集改善・SEO/AIO対応
+ * 「構造化データ」節）: 14社の一覧であることを構造化データでも示す。
+ * itemListOrderをUnorderedにするbuildItemListJsonLd側の実装により、
+ * 「推奨順位のランキングではない」ことを明示している（displayOrderは
+ * あくまで管理用の安定表示順。data_dictionary.md・CLAUDE.md参照）。
+ * 各itemのURLは、個別事業者ページを作らない方針（CLAUDE.md「薄い個別
+ * ページを量産しない」）のため、本ページ内の該当カードへのアンカー
+ * （#business-{id}、BusinessCard.astroのid属性）を使う。
+ */
+const businessListJsonLd = buildBusinessListItemListJsonLd(
+  businesses.map((business) => ({ business, path: `${ROUTES.sekizaiten.path}#business-${business.id}` })),
+  { listPath: ROUTES.sekizaiten.path, name: heroHeading, description },
+);
 ---
 
-<BaseLayout title={pageTitle} description={description}>
+<BaseLayout title={pageTitle} description={description} extraJsonLd={[businessListJsonLd]}>
   <Fragment slot="beforeSponsor">
-    <h1>{pageTitle}</h1>
+    <h1>{heroHeading}</h1>
     <div
       class="article__hero-photo article__hero-photo--compact"
       style="background-image:url('/images/hero-cemetery-photo-v2.png');background-position:center 55%;"
-    >
-      <p class="article__hero-photo__credit">画像はイメージです</p>
-    </div>
+    ></div>
+    <p class="article__hero-photo__credit">イメージ写真</p>
     <p>
       掲載情報は、各社のWebサイト等で確認できた公開情報をもとに整理しています。事業者への確認で得た情報は、確認後に随時反映します。掲載順は事業者の推奨順位ではありません。詳しくは<a
         href={ROUTES.about.path}>運営方針・掲載基準</a

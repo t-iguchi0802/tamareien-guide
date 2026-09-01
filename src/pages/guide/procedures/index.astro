@@ -6,9 +6,13 @@
  * ヘッダー主要ナビ「墓じまい・手続き」の遷移先。既存の /hakajimai/
  * （石材店の対応比較）、/kanri/（墓所管理の比較）、/tetsuzuki/
  * （行政手続きと公式リンク）の内容は複製せず、ここから案内するだけに
- * とどめる。今後追加予定の記事（改葬許可の手続き、墓所を返還する流れ、
- * 承継、彫刻・修理・納骨、見積り比較のポイント等）は、リンクにはせず
- * 「準備中」の見出しとしてのみ列挙し、内部リンク切れを作らない。
+ * とどめる。
+ *
+ * 説明臭い文章の削除（2026-09-02、ミチの編集改善・SEO/AIO対応
+ * 「説明臭い文章の削除」節）: 「今後追加予定の記事」（準備中の見出し一覧、
+ * リンク先なし）を削除した。未公開の記事タイトルを公開画面に予告として
+ * 並べるのはやめ、優先テーマの検討は制作側の作業メモ（今回の作業報告）
+ * にとどめる方針へ変更した。
  */
 import BaseLayout from '../../../layouts/BaseLayout.astro';
 import { ROUTES } from '../../../lib/routes';
@@ -16,18 +20,10 @@ import { ROUTES } from '../../../lib/routes';
 const pageTitle = '墓じまい・お墓の手続き 総合案内';
 const description =
   '墓じまい・改葬・墓所返還など、多磨霊園に関わる手続きと石材店の対応比較をまとめた案内ページです。';
-
-const upcomingTopics = [
-  '墓じまいの手順',
-  '改葬許可の手続き',
-  '墓所を返還する流れ',
-  '名義人が亡くなった場合の承継',
-  '彫刻・修理・納骨を頼むとき',
-  '石材店の見積もりを比べるポイント',
-];
+const browserTitle = `${pageTitle}｜多磨霊園 お墓ガイド`;
 ---
 
-<BaseLayout title={pageTitle} description={description}>
+<BaseLayout title={browserTitle} description={description}>
   <h1>{pageTitle}</h1>
   <p>
     墓じまい・改葬・墓所返還は、行政手続きと石材店への依頼の両方が関わります。当サイトでは、行政手続きは公式ページへのリンクで、石材店の対応状況は公開情報の比較で、それぞれ中立にご案内しています。
@@ -57,14 +53,6 @@ const upcomingTopics = [
     </ul>
   </section>
 
-  <section aria-labelledby="procedures-upcoming-heading">
-    <h2 id="procedures-upcoming-heading">今後追加予定の記事</h2>
-    <p>以下のテーマは、一次資料での確認が取れ次第、記事として順次公開します（現時点ではリンク先はありません）。</p>
-    <ul class="procedures-upcoming">
-      {upcomingTopics.map((topic) => <li>{topic}</li>)}
-    </ul>
-  </section>
-
   <section aria-labelledby="procedures-related-heading">
     <h2 id="procedures-related-heading">関連ページ</h2>
     <ul>
@@ -74,8 +62,3 @@ const upcomingTopics = [
   </section>
 </BaseLayout>
 
-<style>
-  .procedures-upcoming {
-    color: var(--color-stone-text, var(--color-text-muted));
-  }
-</style>

@@ -1,0 +1,61 @@
+---
+/**
+ * 404ページ（2026-09-02、ミチの編集改善・SEO/AIO対応「sitemap・robots・
+ * AIクローラー」節で新規作成。従来は存在しなかった）。
+ *
+ * 検索エンジンにインデックスさせないため`noindex`を指定する。
+ * 主要ページへの案内リンクのみを置き、存在しないページの内容を
+ * 推測で埋めるようなことはしていない。
+ */
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { ROUTES } from '../lib/routes';
+
+const pageTitle = 'ページが見つかりません｜多磨霊園 お墓ガイド';
+const description = 'お探しのページが見つかりませんでした。トップページまたは主要ページからお探しください。';
+---
+
+<BaseLayout title={pageTitle} description={description} noindex>
+  <div class="not-found">
+    <h1>ページが見つかりません</h1>
+    <p>
+      URLが変更・削除されたか、入力に誤りがある可能性があります。以下のページからお探しください。
+    </p>
+    <ul class="not-found__links">
+      <li><a href={ROUTES.top.path}>トップページ</a></li>
+      <li><a href={ROUTES.sekizaiten.path}>石材店一覧・比較</a></li>
+      <li><a href={ROUTES.guide.path}>多磨霊園ガイド一覧</a></li>
+      <li><a href={ROUTES.about.path}>運営方針・お問い合わせ</a></li>
+    </ul>
+  </div>
+</BaseLayout>
+
+<style>
+  .not-found {
+    max-width: 640px;
+    margin: 0 auto;
+    padding: var(--space-8, 3rem) var(--space-4, 1rem);
+  }
+
+  .not-found__links {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2, 0.5rem);
+    margin-top: var(--space-4, 1rem);
+    padding: 0;
+    list-style: none;
+  }
+
+  .not-found__links a {
+    display: block;
+    padding: 0.75rem 1rem;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-card, 10px);
+    color: var(--color-accent);
+    text-decoration: none;
+    font-weight: 700;
+  }
+
+  .not-found__links a:hover {
+    background: var(--color-tint-green-bg, var(--color-accent-soft));
+  }
+</style>
