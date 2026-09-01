@@ -16,6 +16,13 @@
  * 運営者が東京都・多磨霊園・東京都公園協会のいずれとも異なる独立した
  * 民間の運営者であることを、この段落でのみ説明する（他ページへは
  * 繰り返し表示しない）。
+ *
+ * スポンサー枠の位置（2026-09-01、ミチのモバイル優先UI・文章校正対応
+ * 「スマートフォンのスポンサー枠」節）: 「最初の主要説明の後」にスポンサー
+ * 枠を置く指示のため、h1と「運営者について」セクションをBaseLayout.astroの
+ * `beforeSponsor`スロット（TOPページと同じ仕組み）へ渡し、「掲載基準」以降を
+ * 既定スロットへ渡した。PCの左右レール・見出し・本文・訂正窓口の内容は
+ * 変更していない。
  */
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import { siteConfig } from '../../lib/siteConfig';
@@ -31,19 +38,21 @@ const description =
 ---
 
 <BaseLayout title={pageTitle} description={description}>
-  <h1>{pageTitle}</h1>
+  <Fragment slot="beforeSponsor">
+    <h1>{pageTitle}</h1>
 
-  <section aria-labelledby="disclaimer-heading">
-    <h2 id="disclaimer-heading">運営者について</h2>
-    <p>
-      {siteConfig.name}は、多磨霊園周辺の石材店・お墓関連事業者を、公開情報のみで独自に調査・整理して紹介する民間の情報サイトです。運営者は、東京都・多磨霊園・東京都公園協会のいずれとも異なる独立した事業者であり、これらの機関からの委託や公認を受けたものではありません。
-    </p>
-    <p>
-      当サイトの名称・デザインは、東京都・多磨霊園・東京都公園協会の公式サイトを模倣したものではなく、ロゴ等の使用もしていません。制度・行政手続きに関する正確な情報は、必ず各公式ページでご確認ください（<a
-        href={ROUTES.tetsuzuki.path}>手続きの案内ページ</a
-      >からリンクしています）。
-    </p>
-  </section>
+    <section aria-labelledby="disclaimer-heading">
+      <h2 id="disclaimer-heading">運営者について</h2>
+      <p>
+        {siteConfig.name}は、多磨霊園周辺の石材店・お墓関連事業者を、公開情報のみで独自に調査・整理して紹介する民間の情報サイトです。運営者は、東京都・多磨霊園・東京都公園協会のいずれとも異なる独立した事業者であり、これらの機関からの委託や公認を受けたものではありません。
+      </p>
+      <p>
+        当サイトの名称・デザインは、東京都・多磨霊園・東京都公園協会の公式サイトを模倣したものではなく、ロゴ等の使用もしていません。制度・行政手続きに関する正確な情報は、必ず各公式ページでご確認ください（<a
+          href={ROUTES.tetsuzuki.path}>手続きの案内ページ</a
+        >からリンクしています）。
+      </p>
+    </section>
+  </Fragment>
 
   <section aria-labelledby="criteria-heading">
     <h2 id="criteria-heading">掲載基準</h2>

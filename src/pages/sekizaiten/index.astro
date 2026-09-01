@@ -28,6 +28,17 @@
  * さらに押し出されるため、低め高さ（article__hero-photo--compact、
  * guide-article.cssから再利用）に抑えている。「関連ページ」もカード化した。
  * ServiceFilter・ComparisonTable・絞り込みロジックは変更していない。
+ *
+ * スポンサー枠の位置とモバイル圧縮（2026-09-01、ミチのモバイル優先UI・
+ * 文章校正対応「スマートフォンのスポンサー枠」節）: 従来はページ末尾
+ * （比較表・関連ページの後）にあったスポンサー枠を、「結果件数の後、
+ * 事業者一覧の前」へ移動した。BaseLayout.astroの`beforeSponsor`スロット
+ * （TOPページと同じ仕組み）を使い、`<ServiceFilter externalGrid>`で
+ * グリッド自体はServiceFilterに描画させず、このページ側で
+ * `<BusinessGrid>`として「後半」に描画する（フィルタリングJSは
+ * document.querySelectorで探すよう変更済み、判定ロジックは無変更。
+ * 詳細はServiceFilter.astro・BusinessGrid.astroのコメント参照）。
+ * PCの左右2枠ずつのレイアウトは変更していない。
  */
 import '../../styles/guide-article.css';
 import BaseLayout from '../../layouts/BaseLayout.astro';
@@ -35,6 +46,7 @@ import { ROUTES } from '../../lib/routes';
 import { getBusinesses, getActiveSponsors } from '../../lib/data';
 import ComparisonTable from '../../components/business/ComparisonTable.astro';
 import ServiceFilter from '../../components/business/ServiceFilter.astro';
+import BusinessGrid from '../../components/business/BusinessGrid.astro';
 import CorrectionCta from '../../components/common/CorrectionCta.astro';
 import { ALL_SERVICE_KEYS } from '../_lib/business-display';
 
@@ -48,31 +60,42 @@ const description =
 ---
 
 <BaseLayout title={pageTitle} description={description}>
-  <h1>{pageTitle}</h1>
-  <div
-    class="article__hero-photo article__hero-photo--compact"
-    style="background-image:url('/images/hero-cemetery-photo-v2.png');background-position:center 55%;"
-  >
-    <p class="article__hero-photo__credit">画像はイメージです</p>
-  </div>
-  <p>
-    掲載情報は、各社のWebサイト等で確認できた公開情報をもとに整理しています。事業者への確認で得た情報は、確認後に随時反映します。掲載順は事業者の推奨順位ではありません。詳しくは<a
-      href={ROUTES.about.path}>運営方針・掲載基準</a
-    >をご覧ください。
-  </p>
-
-  <ServiceFilter businesses={businesses} mode="inline" sponsoredBusinessIds={sponsoredBusinessIds} />
-
-  <hr class="masonry-rule" />
-
-  <details class="detail-table">
-    <summary class="detail-table__summary">全事業者・全12サービスの詳しい比較表を見る</summary>
-    <p class="detail-table__note">
-      上のカードで表示しきれない、すべてのサービスの対応状況を1つの表にまとめたものです。「○
-      公開確認済み」以外は対応がないという意味ではなく、公開ページ上で確認できなかったことを示します。
+  <Fragment slot="beforeSponsor">
+    <h1>{pageTitle}</h1>
+    <div
+      class="article__hero-photo article__hero-photo--compact"
+      style="background-image:url('/images/hero-cemetery-photo-v2.png');background-position:center 55%;"
+    >
+      <p class="article__hero-photo__credit">画像はイメージです</p>
+    </div>
+    <p>
+      掲載情報は、各社のWebサイト等で確認できた公開情報をもとに整理しています。事業者への確認で得た情報は、確認後に随時反映します。掲載順は事業者の推奨順位ではありません。詳しくは<a
+        href={ROUTES.about.path}>運営方針・掲載基準</a
+      >をご覧ください。
     </p>
-    <ComparisonTable businesses={businesses} visibleServices={ALL_SERVICE_KEYS} />
-  </details>
+
+    <ServiceFilter
+      businesses={businesses}
+      mode="inline"
+      sponsoredBusinessIds={sponsoredBusinessIds}
+      externalGrid
+    />
+  </Fragment>
+
+  <section aria-label="事業者一覧・詳しい比較表">
+    <BusinessGrid businesses={businesses} />
+
+    <hr class="masonry-rule" />
+
+    <details class="detail-table">
+      <summary class="detail-table__summary">全事業者・全12サービスの詳しい比較表を見る</summary>
+      <p class="detail-table__note">
+        上のカードで表示しきれない、すべてのサービスの対応状況を1つの表にまとめたものです。「○
+        公開確認済み」以外は対応がないという意味ではなく、公開ページ上で確認できなかったことを示します。
+      </p>
+      <ComparisonTable businesses={businesses} visibleServices={ALL_SERVICE_KEYS} />
+    </details>
+  </section>
 
   <CorrectionCta />
 

@@ -88,6 +88,24 @@
   --color-callout-warm-border: #d9b98d;
   --color-callout-warm-fg: #6b4a1f; /* bg比 約6.98:1でAA適合（計算式: WCAG相対輝度式。eyebrow等の小さな文字にのみ使用） */
 
+  /* ページ別の少量アクセント色（2026-09-01、ミチのモバイル優先UI・文章校正
+     対応）。「基本は生成り・深緑・墨色」を崩さない範囲で、アクセスページと
+     歴史ページだけに、それぞれ1色ずつ小さな差し色を追加する。本文色は
+     常に--color-textを使うためAAは自動的に確保される。eyebrow等の小さな
+     文字にだけ専用fgトークンを使う場合も、bg比はいずれも5.9:1以上
+     （WCAG相対輝度式で計算済み）。 */
+
+  /* アクセスページ用の鈍い青（少量。交通・道のページであることを示す控えめな差し色）。 */
+  --color-tint-blue-bg: #e9eef2;
+  --color-tint-blue-border: #b9c9d3;
+  --color-tint-blue-fg: #39586b; /* bg比 約6.46:1 */
+
+  /* 歴史ページ用の淡い石灰色（少量。既存の生成り系--color-stone-*より
+     さらに彩度を落とし、落ち着いた古びた質感を示す差し色）。 */
+  --color-tint-limestone-bg: #eceae2;
+  --color-tint-limestone-border: #cfcabb;
+  --color-tint-limestone-fg: #5c584a; /* bg比 約5.91:1 */
+
   /* タップ領域の最小高さ */
   --tap-target-min: 44px;
 

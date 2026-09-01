@@ -55,7 +55,7 @@ const checkedAt = '2026-08-27';
 ---
 
 <BaseLayout title={pageTitle} description={description}>
-  <Fragment slot="articleIntro">
+  <Fragment slot="beforeSponsor">
     <article class="article">
       <p class="article__eyebrow"><a href={ROUTES.guide.path}>多磨霊園ガイド</a> ／ 多磨霊園の歴史・著名人</p>
       <h1>{pageTitle}</h1>
@@ -136,16 +136,14 @@ const checkedAt = '2026-08-27';
     </section>
   </div>
 
-  <Fragment slot="articleTail">
-    <div class="article">
-      <section aria-labelledby="history-related-heading">
-        <h2 id="history-related-heading">関連ページ</h2>
-        <ul class="article__related-grid">
-          <li><a class="article__related-card" href={ROUTES.guideFamousGraves.path}>多磨霊園に眠る著名人ガイドを見る</a></li>
-          <li><a class="article__related-card" href={ROUTES.access.path}>多磨霊園への行き方を見る</a></li>
-          <li><a class="article__related-card" href={ROUTES.guide.path}>多磨霊園ガイド一覧を見る</a></li>
-        </ul>
-      </section>
-    </div>
-  </Fragment>
+  <div class="article">
+    <section aria-labelledby="history-related-heading">
+      <h2 id="history-related-heading">関連ページ</h2>
+      <ul class="article__related-grid">
+        <li><a class="article__related-card article__related-card--limestone" href={ROUTES.guideFamousGraves.path}>多磨霊園に眠る著名人ガイドを見る</a></li>
+        <li><a class="article__related-card article__related-card--limestone" href={ROUTES.access.path}>多磨霊園への行き方を見る</a></li>
+        <li><a class="article__related-card article__related-card--limestone" href={ROUTES.guide.path}>多磨霊園ガイド一覧を見る</a></li>
+      </ul>
+    </section>
+  </div>
 </BaseLayout>

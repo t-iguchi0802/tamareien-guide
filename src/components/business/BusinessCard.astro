@@ -37,6 +37,25 @@
  *   このコンポーネントは表示の器（バッジのマークアップ）だけを提供する。
  * - 条件未選択時・非スポンサー事業者・条件不一致時は常に非表示のままで、
  *   通常掲載の事業者と見た目・情報量の差を作らない。
+ *
+ * カード内容の段階表示（2026-09-01、ミチのモバイル優先UI・文章校正対応
+ * 「石材店一覧のスマートフォン表示」節）: 390px幅でカードが縦に長く
+ * （14社合計 約13,228px相当）、店ごとの差を比較しにくい状態だったため、
+ * データを削除せず初期表示だけを絞った。
+ * - 初期表示: 店名／所在地域／選択条件と一致した項目（該当時のみ）／
+ *   確認できた主な対応（最大3件、残りは件数だけ表示）／電話／公式サイト
+ *   （副導線として地図も表示、問い合わせページは詳細側）。
+ * - `<details>`（JS不使用、ネイティブ開閉）「詳しい対応内容を見る」に、
+ *   残りの確認済みサービス全件・紹介文（4行までクランプ）・資格や特徴・
+ *   創業年・問い合わせページを格納する。
+ * - 「選択条件と一致した項目」ブロック（`data-match-block`）は、
+ *   ServiceFilter.astroのJSが「1つ以上の条件が選択され、かつこの事業者が
+ *   全条件を満たす」場合だけ`hidden`を外し、一致した語（selected配下の
+ *   `[data-service-word]`のテキストをそのまま複製、SERVICE_LABELSの
+ *   二重管理をしない）を`data-match-list`へ書き込む。スポンサー限定の
+ *   `.business-card__sponsor-badge`とは別物（一致すれば全事業者に出る）。
+ * - not_confirmedの扱い・データ自体は一切変更していない
+ *   （「詳しい対応内容を見る」に移動しただけで、削除・「非対応」化はしていない）。
  */
 import '../../styles/tokens.css';
 import type { BusinessCardProps } from '../../types/components';
@@ -50,10 +69,13 @@ type Props = BusinessCardProps;
 const { business } = Astro.props;
 
 const UNCONFIRMED_TEXT = '公開情報では未確認';
+const INITIAL_SERVICE_COUNT = 3;
 
 const confirmedServiceKeys = (Object.keys(SERVICE_LABELS) as ServiceKey[]).filter(
   (key) => business.services[key] === 'confirmed',
 );
+const primaryServiceKeys = confirmedServiceKeys.slice(0, INITIAL_SERVICE_COUNT);
+const restServiceKeys = confirmedServiceKeys.slice(INITIAL_SERVICE_COUNT);
 
 const addressText = [
   business.location.prefecture,
@@ -100,15 +122,19 @@ const showSeparateContact =
           <>・{business.location.nearestGate}</>
         )
       }
-      {business.founded && <>・創業 {business.founded}</>}
     </p>
   </header>
+
+  <div class="business-card__match" data-match-block hidden>
+    <p class="business-card__match-label">選択条件と一致</p>
+    <p class="business-card__match-list" data-match-list />
+  </div>
 
   {
     confirmedServiceKeys.length > 0 ? (
       <p class="business-card__services">
         <span data-service-prefix>対応を確認できるサービス:</span>{' '}
-        {confirmedServiceKeys.map((key, i) => (
+        {primaryServiceKeys.map((key, i) => (
           <>
             {i > 0 && '、'}
             <span class="service-word" data-service-word={key}>
@@ -116,23 +142,14 @@ const showSeparateContact =
             </span>
           </>
         ))}
+        {restServiceKeys.length > 0 && (
+          <span class="business-card__services-more">（ほか{restServiceKeys.length}件）</span>
+        )}
       </p>
     ) : (
       <p class="business-card__services business-card__services--none">
         公開ページ上で対応を確認できたサービスは、現時点でありません（掲載情報は随時更新します）。
       </p>
-    )
-  }
-
-  <p class="business-card__summary">{business.summary}</p>
-
-  {
-    business.credentials.length > 0 && (
-      <ul class="business-card__credentials">
-        {business.credentials.map((credential) => (
-          <li>{credential}</li>
-        ))}
-      </ul>
     )
   }
 
@@ -157,20 +174,57 @@ const showSeparateContact =
         />
       )
     }
-    <MapLink businessId={business.id} href={mapHref} />
-    {
-      showSeparateContact && business.contact.contactUrl && (
-        <span class="business-card__secondary-cta">
-          <OutboundLink
-            businessId={business.id}
-            linkType="contact"
-            href={business.contact.contactUrl}
-            label="問い合わせページを見る"
-          />
-        </span>
-      )
-    }
+    <span class="business-card__secondary-cta">
+      <MapLink businessId={business.id} href={mapHref} />
+    </span>
   </footer>
+
+  <details class="business-card__detail">
+    <summary class="business-card__detail-summary">詳しい対応内容を見る</summary>
+    <div class="business-card__detail-body">
+      {
+        restServiceKeys.length > 0 && (
+          <p class="business-card__services business-card__services--rest">
+            <span data-service-prefix>そのほかの確認できるサービス:</span>{' '}
+            {restServiceKeys.map((key, i) => (
+              <>
+                {i > 0 && '、'}
+                <span class="service-word" data-service-word={key}>
+                  {SERVICE_LABELS[key]}
+                </span>
+              </>
+            ))}
+          </p>
+        )
+      }
+
+      <p class="business-card__summary">{business.summary}</p>
+
+      {
+        (business.credentials.length > 0 || business.founded) && (
+          <ul class="business-card__credentials">
+            {business.founded && <li>創業 {business.founded}</li>}
+            {business.credentials.map((credential) => (
+              <li>{credential}</li>
+            ))}
+          </ul>
+        )
+      }
+
+      {
+        showSeparateContact && business.contact.contactUrl && (
+          <p class="business-card__secondary-cta">
+            <OutboundLink
+              businessId={business.id}
+              linkType="contact"
+              href={business.contact.contactUrl}
+              label="問い合わせページを見る"
+            />
+          </p>
+        )
+      }
+    </div>
+  </details>
 </article>
 
 <style>
@@ -233,6 +287,35 @@ const showSeparateContact =
     font-size: var(--font-size-label);
   }
 
+  /* 選択条件と一致した項目（2026-09-01追加）。ServiceFilter.astroのJSが
+     hidden属性とdata-match-listの中身を切り替える。既定では非表示。
+     スポンサーバッジ（金色系）とは別系統の緑を使い、「広告」ではなく
+     「あなたの条件に合っている」ことを示す。 */
+  .business-card__match {
+    margin: 0;
+    padding: var(--space-2) var(--space-3);
+    border-radius: var(--radius-card, 10px);
+    background: var(--color-tint-green-bg);
+    border: 1px solid var(--color-tint-green-border);
+  }
+
+  .business-card__match[hidden] {
+    display: none;
+  }
+
+  .business-card__match-label {
+    margin: 0 0 0.2em;
+    font-size: var(--font-size-caption);
+    font-weight: 700;
+    color: var(--color-accent-deep);
+  }
+
+  .business-card__match-list {
+    margin: 0;
+    color: var(--color-text);
+    font-size: var(--font-size-label);
+  }
+
   .business-card__services {
     margin: 0;
     color: var(--color-stone-text);
@@ -242,6 +325,10 @@ const showSeparateContact =
 
   .business-card__services--none {
     font-style: normal;
+  }
+
+  .business-card__services-more {
+    color: var(--color-text-muted);
   }
 
   [data-service-prefix] {
@@ -272,6 +359,14 @@ const showSeparateContact =
   .business-card__summary {
     margin: 0;
     color: var(--color-text);
+    /* 「紹介文はスマホでは3〜4行まで」対応。詳細側（<details>展開後）でも、
+       極端に長い紹介文でカードが際限なく伸びないよう4行にクランプする。
+       line-clampは主要ブラウザで広くサポートされている。 */
+    display: -webkit-box;
+    -webkit-line-clamp: 4;
+    line-clamp: 4;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
   }
 
   .business-card__credentials {
@@ -287,21 +382,86 @@ const showSeparateContact =
     font-size: var(--font-size-label);
   }
 
+  .business-card__contact-row {
+    display: flex;
+  }
+
   .business-card__cta-row {
     display: flex;
     flex-wrap: wrap;
+    align-items: center;
     gap: var(--space-3);
     padding-top: var(--space-2);
     border-top: 1px solid var(--color-stone-line-soft);
   }
 
+  /* 電話・公式サイトを主導線、地図・問い合わせを副導線にする
+     （2026-09-01）。副導線は文字だけの控えめなリンクにし、視覚的な重みを
+     主導線（ボタン形状のOutboundLink/PhoneLink）より弱くする。 */
+  .business-card__secondary-cta {
+    display: inline-flex;
+  }
+
   .business-card__secondary-cta :global(.outbound-link) {
     background: transparent;
     color: var(--color-accent);
+    padding-inline: 0.3em;
   }
 
   .business-card__secondary-cta :global(.outbound-link:hover) {
     background: var(--color-accent-soft);
     border-color: var(--color-accent);
+  }
+
+  /* 「詳しい対応内容を見る」（2026-09-01追加）。ネイティブ<details>、
+     JS不使用。開閉の目印はテキスト（▸/▾）で示し、タップ領域は
+     var(--tap-target-min)を確保する。 */
+  .business-card__detail {
+    border-top: 1px solid var(--color-stone-line-soft);
+    padding-top: var(--space-2);
+  }
+
+  .business-card__detail-summary {
+    cursor: pointer;
+    list-style: none;
+    display: flex;
+    align-items: center;
+    gap: 0.4em;
+    min-height: var(--tap-target-min);
+    font-weight: 700;
+    color: var(--color-accent);
+  }
+
+  .business-card__detail-summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .business-card__detail-summary::marker {
+    content: '';
+  }
+
+  .business-card__detail-summary::before {
+    content: '▸';
+    color: var(--color-text-muted);
+  }
+
+  .business-card__detail[open] .business-card__detail-summary::before {
+    content: '▾';
+  }
+
+  .business-card__detail-summary:focus-visible {
+    outline: 3px solid var(--color-accent);
+    outline-offset: 2px;
+  }
+
+  .business-card__detail-body {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+    padding-top: var(--space-3);
+  }
+
+  .business-card__detail-body .business-card__secondary-cta {
+    display: inline-flex;
   }
 </style>
