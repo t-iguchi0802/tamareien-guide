@@ -55,11 +55,35 @@
  * （hero-cemetery-v1.png、既存プロジェクト内画像を別クロップ・低め高さ
  * article__hero-photo--compactで再利用。新規取得はしていない）を追加した。
  * 見出し・本文は変更していない。
+ *
+ * H1分割・表のスマホ対応・誤読対応（2026-09-01、ミチのモバイル優先UI・
+ * 文章校正対応）:
+ * - H1を「墓じまいと改葬の違い」（要点の名詞句）に短縮し、補足文
+ *   「多磨霊園で手続きを始める前に」を別の<p class="article__lead">に
+ *   分けた（390pxで複合タイトルの「｜」が行頭に残り3〜4行になる問題への
+ *   対応）。<title>・descriptionは従来の複合タイトルのまま維持している。
+ * - 記事冒頭の更新日表示を「更新日：2026年8月28日」のみに簡略化し、
+ *   出典一覧は記事末尾の「情報源・更新日」セクションへ統一した
+ *   （出典・確認日・訂正窓口・公的機関へのリンクは削除していない）。
+ * - 「お墓の整理に関する言葉の違い」の表に、640px未満で使う
+ *   <dl>ベースの縦積み版（.article__table-mobile-cards--stacked、
+ *   guide-article.css）を追加した。横スクロールなしで全項目を読める
+ *   （表の内容・出典は変更していない）。
+ * - 「よくある疑問」内の「墓じまいだけして、改葬はしないこともできますか」
+ *   の回答が、遺骨を残したまま墓地だけを返せると読める可能性があったため、
+ *   東京都公園協会の公式FAQ（GUIDE_SOURCES.tamaFaq、2026-09-01確認）で
+ *   再確認して書き直した。同FAQには「移転先の霊園が決まったら改葬手続きを
+ *   とっていただき、ご遺骨を改葬し、使用されていた墓所を東京都に
+ *   返還していただく」と明記されており、遺骨がある墓所を返還する場合は
+ *   先に改葬（遺骨を移す）ことが前提と分かる。この記載に基づき、
+ *   「遺骨を残したまま墓地だけを返せる」と読める表現をやめた。
+ *   行政手続き・必要書類・費用・期間は推測で追加していない。
  */
 import '../../../../styles/guide-article.css';
 import BaseLayout from '../../../../layouts/BaseLayout.astro';
 import { ROUTES } from '../../../../lib/routes';
 import { getSourceById } from '../../../../lib/data';
+import { GUIDE_SOURCES } from '../../../_lib/guide-sources';
 
 const pageTitle = '墓じまいと改葬の違い｜多磨霊園で手続きを始める前に';
 const description =
@@ -69,16 +93,17 @@ const fuchuReburial = getSourceById('SRC-FUCHU-REBURIAL');
 const tamaWorkNotice = getSourceById('SRC-TAMA-WORK-NOTICE');
 const tamaOfficial = getSourceById('SRC-TAMA-OFFICIAL');
 
-const checkedAt = '2026-08-28';
+const checkedAtJa = '2026年8月28日';
 const closureServiceQuery = 'grave_closure,reburial_support';
 ---
 
 <BaseLayout title={pageTitle} description={description}>
-  <Fragment slot="articleIntro">
+  <Fragment slot="beforeSponsor">
     <article class="article">
       <p class="article__eyebrow"><a href={ROUTES.guideProcedures.path}>墓じまい・お墓の手続き 総合案内</a></p>
-      <h1>{pageTitle}</h1>
-      <p class="article__meta">記事の最終更新日: {checkedAt} ／ 情報源: 府中市・東京都公園協会 公式ページ（各出典の確認日は本文末に一覧）</p>
+      <h1>墓じまいと改葬の違い</h1>
+      <p class="article__lead">多磨霊園で手続きを始める前に</p>
+      <p class="article__meta">更新日：{checkedAtJa}</p>
 
       <div
         class="article__hero-photo article__hero-photo--compact"
@@ -103,7 +128,12 @@ const closureServiceQuery = 'grave_closure,reburial_support';
       <p>
         墓じまいは、墓石を撤去して墓地を返すことです。改葬は、遺骨を別の場所へ移すことです。多くの場合、墓じまいと改葬は一緒に進めます。この2つを中心に、関連の深い「承継」「墓所返還」も含めてまとめて確認しましょう。
       </p>
-      <div class="article__table-scroll" tabindex="0" role="region" aria-label="似た言葉の違いの表（横スクロールできます）">
+      <div
+        class="article__table-scroll article__table-scroll--responsive"
+        tabindex="0"
+        role="region"
+        aria-label="似た言葉の違いの表（横スクロールできます）"
+      >
         <table>
           <caption>お墓の整理に関する言葉の違い</caption>
           <thead>
@@ -132,6 +162,42 @@ const closureServiceQuery = 'grave_closure,reburial_support';
           </tbody>
         </table>
       </div>
+
+      {/* 640px未満で表示する縦積み版（表と同じ内容。横スクロールなし）。 */}
+      <ul class="article__table-mobile-cards article__table-mobile-cards--stacked">
+        <li>
+          <dl>
+            <div>
+              <dt>墓じまい</dt>
+              <dd>墓石などを撤去し、墓地を管理者へ返すこと。</dd>
+            </div>
+          </dl>
+        </li>
+        <li>
+          <dl>
+            <div>
+              <dt>改葬（かいそう）</dt>
+              <dd>遺骨を、今のお墓から別のお墓や納骨堂などへ移すこと。</dd>
+            </div>
+          </dl>
+        </li>
+        <li>
+          <dl>
+            <div>
+              <dt>承継（しょうけい）</dt>
+              <dd>お墓を使う権利と管理する責任を、次の人へ引き継ぐこと。</dd>
+            </div>
+          </dl>
+        </li>
+        <li>
+          <dl>
+            <div>
+              <dt>墓所返還</dt>
+              <dd>墓石などを撤去し、使用していた区画を霊園へ返すこと（墓じまいとほぼ同じ意味で使われることが多い言葉）。</dd>
+            </div>
+          </dl>
+        </li>
+      </ul>
     </section>
 
     <section aria-labelledby="hakajimai-kaisou-when-heading">
@@ -224,7 +290,15 @@ const closureServiceQuery = 'grave_closure,reburial_support';
         <div>
           <dt>墓じまいだけして、改葬はしないこともできますか。</dt>
           <dd>
-            墓石の解体・撤去だけを行い、遺骨は別の場所へ移さない場合もあります。ただし、遺骨をどこかへ移す場合は、改葬の許可が必要です。
+            墓石だけがあり、遺骨がまだ納められていない場合は、解体・撤去だけで済むこともあります。一方、遺骨が納められているお墓を墓じまいする場合は、先に遺骨の移し先を決め、改葬の手続きを進めます。遺骨を残したまま墓地だけを返すことは、通常できません（
+            <a
+              href={GUIDE_SOURCES.tamaFaq.url}
+              rel="noopener"
+              target="_blank"
+              data-event="official_procedure_click"
+              data-authority="tokyo_park_association"
+              data-topic="hakajimai_faq_reburial_order">東京都公園協会の公式FAQ</a
+            >参照）。
           </dd>
         </div>
         <div>
@@ -255,9 +329,8 @@ const closureServiceQuery = 'grave_closure,reburial_support';
     </section>
   </div>
 
-  <Fragment slot="articleTail">
-    <div class="article">
-      <section aria-labelledby="hakajimai-kaisou-sources-heading">
+  <div class="article">
+    <section aria-labelledby="hakajimai-kaisou-sources-heading">
         <h2 id="hakajimai-kaisou-sources-heading">情報源・更新日</h2>
         <ul class="article__sources">
           {fuchuReburial && (
@@ -284,11 +357,16 @@ const closureServiceQuery = 'grave_closure,reburial_support';
               （最終確認日: {tamaOfficial.checked_at}）
             </li>
           )}
+          <li>
+            <a href={GUIDE_SOURCES.tamaFaq.url} rel="noopener" target="_blank">
+              {GUIDE_SOURCES.tamaFaq.publisher}「{GUIDE_SOURCES.tamaFaq.title}」
+            </a>
+            （最終確認日: {GUIDE_SOURCES.tamaFaq.checkedAt}） — 「よくある疑問」の遺骨がある場合の返還順序の出典
+          </li>
         </ul>
         <p><a href={ROUTES.about.path}>誤りに気づいた場合の訂正窓口はこちら</a></p>
       </section>
     </div>
-  </Fragment>
 </BaseLayout>
 
 <style>

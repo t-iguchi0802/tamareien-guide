@@ -43,7 +43,7 @@
 import type { Business, ServiceKey } from '../../types/business';
 import { PURPOSE_GROUPS, SERVICE_LABELS } from './serviceLabels';
 import { isFilterableStatus } from '../../lib/data/verificationStatus';
-import BusinessCard from './BusinessCard.astro';
+import BusinessGrid from './BusinessGrid.astro';
 
 interface Props {
   businesses: Business[];
@@ -65,9 +65,33 @@ interface Props {
    * （通常掲載データと広告契約データの読み込み経路を分離したまま保つ）。
    */
   sponsoredBusinessIds?: string[];
+  /**
+   * true の場合、mode="inline" でも事業者カードのグリッド（`.business-grid`）と
+   * 0件メッセージをこのコンポーネント自身では描画しない（呼び出し側が
+   * 別途 `<BusinessCard>` を使って自分で描画する）。
+   *
+   * 用途（2026-09-01、ミチのモバイル優先UI・文章校正対応「スマートフォンの
+   * スポンサー枠」節）: /sekizaiten/ で「結果件数の後、事業者一覧の前」に
+   * スポンサー枠を1箇所だけ挟むため。BaseLayout.astroの`beforeSponsor`
+   * スロット（本文前半→スポンサー枠1組→本文後半、TOPページと同じ仕組み）を
+   * 使うには、ServiceFilterの出力を「目的選択〜結果件数」までと
+   * 「事業者グリッド以降」とに分ける必要があるが、フィルタリングJSは
+   * 変更しない（`root.querySelector`ではなく`document.querySelector`で
+   * グリッド・0件メッセージを探すようにするだけで、判定ロジック自体は
+   * 一切変えていない。1ページに`mode="inline"`のServiceFilterは
+   * 同時に1つしか存在しないため、documentスコープでも衝突しない）。
+   */
+  externalGrid?: boolean;
 }
 
-const { businesses, mode, targetPath, openByDefault = false, sponsoredBusinessIds = [] } = Astro.props;
+const {
+  businesses,
+  mode,
+  targetPath,
+  openByDefault = false,
+  sponsoredBusinessIds = [],
+  externalGrid = false,
+} = Astro.props;
 
 /** クライアント側のAND判定用データ（confirmedなserviceKeyのみを持たせる）。 */
 const businessFilterData = businesses.map((business) => ({
@@ -173,21 +197,7 @@ const businessFilterData = businesses.map((business) => ({
     </p>
   </noscript>
 
-  {
-    mode === 'inline' && (
-      <>
-        <p class="service-filter__empty" data-filter-empty hidden>
-          この条件をすべて満たす事業者は、公開情報の範囲では見つかりませんでした。条件を減らすか、
-          「条件をクリア」からやり直してください。詳しい対応状況は各事業者へ直接ご確認ください。
-        </p>
-        <div class="business-grid" data-business-grid>
-          {businesses.map((business) => (
-            <BusinessCard business={business} />
-          ))}
-        </div>
-      </>
-    )
-  }
+  {mode === 'inline' && !externalGrid && <BusinessGrid businesses={businesses} />}
 
   <script
     type="application/json"
@@ -218,11 +228,18 @@ const businessFilterData = businesses.map((business) => ({
       );
       const clearButton = root.querySelector<HTMLButtonElement>('[data-filter-clear]');
       const resultCountEl = root.querySelector('[data-result-count]');
-      const emptyEl = root.querySelector<HTMLElement>('[data-filter-empty]');
       const mode = root.getAttribute('data-filter-mode');
       const targetPath = root.getAttribute('data-filter-target') || '';
       const ctaLink = root.querySelector('[data-filter-cta]');
-      const grid = root.querySelector<HTMLElement>('[data-business-grid]');
+      // 0件メッセージ・事業者グリッドは、externalGrid（ServiceFilter.astro
+      // 側のprops参照）が使われるページ（/sekizaiten/）では、この
+      // <section>の外（BaseLayout.astroの`beforeSponsor`分割の「後半」側）
+      // に置かれる。1ページに mode="inline" のServiceFilterは同時に1つ
+      // しか存在しないため、documentスコープで探しても衝突しない
+      // （root.querySelectorから変更。AND判定・非表示判定・スポンサー
+      // 上位表示のロジック自体は変更していない）。
+      const emptyEl = document.querySelector<HTMLElement>('[data-filter-empty]');
+      const grid = document.querySelector<HTMLElement>('[data-business-grid]');
 
       function getSelected(): Set<string> {
         return new Set(checkboxes.filter((cb) => cb.checked).map((cb) => cb.value));
@@ -262,11 +279,31 @@ const businessFilterData = businesses.map((business) => ({
                 ? '選んだ条件と一致する対応:'
                 : '対応を確認できるサービス:';
             }
-            const words = card.querySelectorAll('[data-service-word]');
+            const words = card.querySelectorAll<HTMLElement>('[data-service-word]');
             words.forEach((word) => {
               const key = word.getAttribute('data-service-word') || '';
               word.classList.toggle('service-word--matched', hasSelection && selected.has(key));
             });
+
+            // 選択条件と一致した項目のカード上部表示（2026-09-01追加）。
+            // 一致した[data-service-word]（初期表示・詳細側の両方を含む）の
+            // テキストをそのまま複製する（SERVICE_LABELSをJS側で
+            // 二重管理しない）。スポンサー上位表示とは独立して、
+            // 一致するカードすべてに表示する。
+            const matchBlock = card.querySelector<HTMLElement>('[data-match-block]');
+            const matchListEl = card.querySelector<HTMLElement>('[data-match-list]');
+            if (matchBlock && matchListEl) {
+              if (hasSelection && isMatch) {
+                const matchedLabels = Array.from(words)
+                  .filter((word) => selected.has(word.getAttribute('data-service-word') || ''))
+                  .map((word) => word.textContent || '');
+                matchListEl.textContent = matchedLabels.join('、');
+                matchBlock.hidden = false;
+              } else {
+                matchBlock.hidden = true;
+                matchListEl.textContent = '';
+              }
+            }
 
             // スポンサー条件付き上位表示: 条件が選択され、かつ一致し、
             // かつスポンサー契約中の事業者だけを結果の先頭へ寄せる。
@@ -535,25 +572,5 @@ const businessFilterData = businesses.map((business) => ({
   .service-filter__noscript {
     color: var(--color-stone-text);
     font-size: var(--font-size-label);
-  }
-
-  .service-filter__empty {
-    background: var(--color-stone-surface);
-    border: 1px solid var(--color-stone-line);
-    border-radius: var(--radius-card);
-    padding: var(--space-4);
-    color: var(--color-text);
-  }
-
-  .business-grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: var(--space-4);
-  }
-
-  @media (max-width: 767px) {
-    .business-grid {
-      grid-template-columns: 1fr;
-    }
   }
 </style>

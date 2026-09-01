@@ -1,0 +1,61 @@
+---
+/**
+ * 事業者カードのグリッド＋0件メッセージ（mode="inline"のServiceFilterが
+ * 内部で使う部品）。
+ *
+ * 2026-09-01（ミチのモバイル優先UI・文章校正対応「スマートフォンの
+ * スポンサー枠」節）に、ServiceFilter.astroから切り出した。理由:
+ * /sekizaiten/ で「結果件数の後、事業者一覧の前」にスポンサー枠を
+ * 挟むため、BaseLayout.astroの`beforeSponsor`分割を使う必要があるが、
+ * このグリッド部分だけはServiceFilterの外（ページ側）で描画する
+ * 必要がある。CSS（.business-grid等）はAstroのコンポーネントスコープが
+ * 付くため、ServiceFilter.astro内の<style>のままではページ側で
+ * 再利用できない。独立した部品にすることで、ServiceFilter.astro
+ * （内部描画、mode="inline" かつ externalGrid未指定）と
+ * /sekizaiten/index.astro（外部描画、externalGrid指定時）の両方から
+ * 同じマークアップ・スタイルを再利用できるようにした。
+ *
+ * data属性（data-filter-empty / data-business-grid / data-business-id）は
+ * 変更していない。ServiceFilter.astroのフィルタリングJSは
+ * document.querySelectorでこれらを探す（1ページに mode="inline" の
+ * ServiceFilterは同時に1つしかないため衝突しない）。
+ */
+import type { Business } from '../../types/business';
+import BusinessCard from './BusinessCard.astro';
+
+interface Props {
+  businesses: Business[];
+}
+
+const { businesses } = Astro.props;
+---
+
+<p class="service-filter__empty" data-filter-empty hidden>
+  この条件をすべて満たす事業者は、公開情報の範囲では見つかりませんでした。条件を減らすか、
+  「条件をクリア」からやり直してください。詳しい対応状況は各事業者へ直接ご確認ください。
+</p>
+<div class="business-grid" data-business-grid>
+  {businesses.map((business) => <BusinessCard business={business} />)}
+</div>
+
+<style>
+  .service-filter__empty {
+    background: var(--color-stone-surface);
+    border: 1px solid var(--color-stone-line);
+    border-radius: var(--radius-card);
+    padding: var(--space-4);
+    color: var(--color-text);
+  }
+
+  .business-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--space-4);
+  }
+
+  @media (max-width: 767px) {
+    .business-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

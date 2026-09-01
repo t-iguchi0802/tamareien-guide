@@ -269,3 +269,151 @@
   color: var(--color-accent);
   font-weight: 700;
 }
+
+/* ページ別アクセント色の修飾子（2026-09-01、ミチのモバイル優先UI・
+   文章校正対応）。.article__facts / .article__related-card の既定は
+   緑系（--color-tint-green-*）のまま、アクセスページ・歴史ページだけ
+   ここで色を差し替える。 */
+.article__facts--blue li {
+  background: var(--color-tint-blue-bg);
+  border-color: var(--color-tint-blue-border);
+}
+
+.article__facts--limestone li {
+  background: var(--color-tint-limestone-bg);
+  border-color: var(--color-tint-limestone-border);
+}
+
+.article__related-card--blue {
+  background: var(--color-tint-blue-bg);
+  border-color: var(--color-tint-blue-border);
+}
+
+.article__related-card--limestone {
+  background: var(--color-tint-limestone-bg);
+  border-color: var(--color-tint-limestone-border);
+}
+
+/* --- 記事タイトルの分割表示（2026-09-01）。従来「H1｜補足」という
+   複合タイトルをH1にそのまま入れていたため、390px幅で「｜」が行頭に
+   残って3〜4行になる問題があった。H1は要点の名詞句だけにし、補足は
+   別の<p>（.article__lead）に分離する。ブラウザタブ・SEO用の複合
+   タイトルは<title>側（BaseLayoutのtitle prop）でこれまでどおり維持する。 --- */
+.article h1 {
+  text-wrap: balance;
+}
+
+.article__lead {
+  margin: var(--space-2) 0 0;
+  color: var(--color-stone-text, var(--color-text-muted));
+  font-size: 1.05rem;
+}
+
+/* --- スマートフォンで横スクロールさせない表（2026-09-01）。
+   「入口の開閉時間」「お墓の整理に関する言葉の違い」のような小さな表で使う。
+   既存の.article__table-scroll（PC〜タブレット、横スクロール可）は
+   640px以上でだけ表示し、640px未満では<table>の代わりに
+   .article__table-mobile-cards（<dl>ベースの縦積み表示）を表示する。
+   見出しと値の関係は、PC側は<table><th scope="row">、モバイル側は
+   <dt>/<dd>で、どちらも実際のマークアップとして持たせる
+   （CSSでtableの表示形式だけを崩す方法は使わない。JS不要・
+   スクリーンリーダーは表示中の側だけを読み上げる）。 */
+.article__table-scroll--responsive {
+  display: none;
+}
+
+@media (min-width: 640px) {
+  .article__table-scroll--responsive {
+    display: block;
+  }
+}
+
+/* マークアップは各行を<li><dl><div><dt>見出し</dt><dd>値</dd></div>...</dl></li>
+   の形にする（<div>でdt/ddの組を包むのはHTML仕様上有効）。1つ目のdiv
+   （行の主見出し、例:「正門・小金井門」）だけ.article__table-mobile-cards__heading
+   を付け、大きめの小見出しとして表示する。 */
+.article__table-mobile-cards {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.article__table-mobile-cards > li {
+  border: 1px solid var(--color-stone-line);
+  border-radius: var(--radius-card, 10px);
+  background: var(--color-surface);
+  padding: var(--space-3) var(--space-4);
+}
+
+.article__table-mobile-cards dl {
+  margin: 0;
+}
+
+.article__table-mobile-cards dl > div {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: var(--space-3);
+  padding: var(--space-2) 0;
+  border-top: 1px solid var(--color-stone-line-soft);
+}
+
+.article__table-mobile-cards dl > div:first-child {
+  border-top: none;
+  padding-top: 0;
+}
+
+.article__table-mobile-cards dt {
+  margin: 0;
+  color: var(--color-stone-text);
+  flex: none;
+}
+
+.article__table-mobile-cards dd {
+  margin: 0;
+  color: var(--color-text);
+  text-align: right;
+}
+
+/* 行の主見出し（例:「正門・小金井門」）は、通常のdt/ddの組ではなく
+   独立した小見出しとして大きく表示する。 */
+.article__table-mobile-cards__heading {
+  font-weight: 700;
+  font-family: var(--font-family-heading);
+  font-size: 1.05rem;
+  color: var(--color-text);
+  margin: 0 0 var(--space-2);
+}
+
+/* 値が短い数値・時間ではなく、意味の説明文のように長い場合の修飾子
+   （例:「お墓の整理に関する言葉の違い」）。dt/ddを左右に並べず、
+   dtを小見出し、ddを地の文として縦に積む。 */
+.article__table-mobile-cards--stacked dl > div {
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0.2em;
+}
+
+.article__table-mobile-cards--stacked dt {
+  font-weight: 700;
+  color: var(--color-text);
+}
+
+.article__table-mobile-cards--stacked dd {
+  text-align: left;
+  line-height: 1.6;
+}
+
+/* 640px以上では縦積み版を隠す（表側を表示する）。この宣言は
+   .article__table-mobile-cardsの基本スタイル（display:flex、上記）より
+   ソース順で後にする必要がある（同じ詳細度のクラス1つのため、
+   後に書いた宣言が勝つ。以前この宣言を基本スタイルより前に置いていたため、
+   640px以上でも縦積み版が消えない不具合があり、実機確認で修正した）。 */
+@media (min-width: 640px) {
+  .article__table-mobile-cards {
+    display: none;
+  }
+}

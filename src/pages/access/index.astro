@@ -90,6 +90,34 @@
  * `.article__callout--warm`（薄い暖色、guide-article.css）へ統一し、
  * 「注意事項は薄い暖色」という色の意味づけをサイト全体でそろえた。
  * 見出し・本文・出典は変更していない。
+ *
+ * H1分割・構成の並び替え・表のスマホ対応・文章校正（2026-09-01、ミチの
+ * モバイル優先UI・文章校正対応「アクセスページ」節）:
+ * - H1を「多磨霊園への行き方」に短縮し、補足文「電車・バス・車と入口の
+ *   選び方」を別の<p class="article__lead">に分けた（390pxで複合タイトルの
+ *   「｜」が行頭に残る問題への対応）。<title>・descriptionは従来のまま。
+ * - 構成を「1.墓所の場所に合う入口を選ぶ→2.3駅からの行き方→3.車で行く場合→
+ *   4.開門時間→5.駐車について→6.地図で入口を確認する→7.出発前に確認する
+ *   こと→8.情報源・確認日」の順に組み替えた。従来「車で行く」1つに
+ *   まとまっていた「車の出入口」と「開門時間の表・臨時情報」を、
+ *   3と4の別セクションに分けた（内容は変更していない）。
+ * - 「入口の開閉時間」の表に、640px未満で使う縦積み版
+ *   （.article__table-mobile-cards、guide-article.css）を追加した。
+ *   横スクロールなしで全項目を読める（表の内容・出典は変更していない）。
+ * - 「公式墓所ナビ」への言及・リンクをページから削除した（地図の導線を
+ *   「公式園内案内図を見る」「Googleマップで経路を調べる」の2つだけに
+ *   する指示のため）。区画確認の案内は、公式園内案内図PDFへの言及に
+ *   置き換えた（区画ごとの検索機能自体は失われるが、案内図PDFでも
+ *   区の位置関係は確認できる。墓所ナビが必要な場合は著名人墓所ページ
+ *   ・情報源ページなど、他ページのリンクは変更していないため、
+ *   そちらから引き続き利用できる）。
+ * - 記事冒頭の更新日表示を「更新日：2026年9月1日」のみに簡略化し、
+ *   出典一覧は記事末尾の「情報源・確認日」セクションへ統一した
+ *   （出典・確認日・訂正窓口・公式リンクは削除していない）。
+ * - 文章を「短い答え→補足→例外や注意」の順に整理し、1文が長い箇所は
+ *   40〜60字程度を目安に分割した（事実関係・出典は変更していない）。
+ * - 関連ガイドのカード色を、他ページと共通の緑系から、このページ専用の
+ *   鈍い青（--color-tint-blue-*、少量の差し色）に変更した。
  */
 import '../../styles/guide-article.css';
 import BaseLayout from '../../layouts/BaseLayout.astro';
@@ -102,7 +130,7 @@ const description =
   '多磨霊園への行き方を、電車・バス・車のルート別に公式情報をもとに整理しました。門ごとの開閉時間、駐車場について公式ページで確認できる範囲、地図へのリンクを掲載しています。';
 
 const tamaOfficial = getSourceById('SRC-TAMA-OFFICIAL');
-const checkedAt = '2026-09-01';
+const checkedAtJa = '2026年9月1日';
 
 /**
  * 2026年9月お彼岸期間の臨時開閉門時間（GUIDE_SOURCES.tamaHiganNotice2026Sep、
@@ -189,11 +217,12 @@ const transportCards: TransportCard[] = [
 ---
 
 <BaseLayout title={pageTitle} description={description}>
-  <Fragment slot="articleIntro">
+  <Fragment slot="beforeSponsor">
     <article class="article">
       <p class="article__eyebrow"><a href={ROUTES.guide.path}>多磨霊園ガイド</a> ／ 墓参り・アクセス</p>
-      <h1>{pageTitle}</h1>
-      <p class="article__meta">確認日: {checkedAt} ／ 情報源: 東京都公園協会公式サイト（本文末に一覧）</p>
+      <h1>多磨霊園への行き方</h1>
+      <p class="article__lead">電車・バス・車と入口の選び方</p>
+      <p class="article__meta">更新日：{checkedAtJa}</p>
 
       <div class="access-hero">
         <p class="access-hero__credit">画像はイメージです</p>
@@ -202,14 +231,18 @@ const transportCards: TransportCard[] = [
       <section aria-labelledby="access-entry-heading">
         <h2 id="access-entry-heading">墓所の場所に合う入口を選ぶ</h2>
         <p>
-          多磨霊園は広く、墓所の位置によって便利な入口が異なります。墓所の区画と利用する門を確認してから、経路を選びましょう。区画がわかっている場合は、<a
-            href={GUIDE_SOURCES.tamaHakaNavi.url}
+          多磨霊園には複数の入口があります。墓所の位置によって、便利な入口が異なります。
+        </p>
+        <p>
+          墓所の区画（区・種・側・番）がわかる場合は、
+          <a
+            href={GUIDE_SOURCES.tamaMapPdf.url}
             rel="noopener"
             target="_blank"
             data-event="official_procedure_click"
             data-authority="tokyo_park_association"
-            data-topic="access_haka_navi">公式墓所ナビ</a
-          >で「区・種・側・番」を確認すると、より近い入口を選べます。
+            data-topic="access_map_pdf_entry">公式園内案内図</a
+          >で位置を確認してから、下の4つから近い経路を選びましょう。
         </p>
 
         <div class="transport-grid">
@@ -243,7 +276,7 @@ const transportCards: TransportCard[] = [
 
   <div class="article">
     <section aria-labelledby="access-transit-heading">
-      <h2 id="access-transit-heading">電車・バスで行く</h2>
+      <h2 id="access-transit-heading">3駅からの行き方</h2>
 
       <div class="transit-route" id="route-jr">
         <h3>JR中央線方面から（武蔵小金井駅）</h3>
@@ -290,9 +323,20 @@ const transportCards: TransportCard[] = [
     </section>
 
     <section aria-labelledby="access-car-heading" id="by-car">
-      <h2 id="access-car-heading">車で行く</h2>
-      <p>公式ページには、車両が出入りできる入口として正門・小金井門・バス通り車止めの開閉時間が掲載されています。</p>
-      <div class="article__table-scroll" tabindex="0" role="region" aria-label="入口の開閉時間の表（横スクロールできます）">
+      <h2 id="access-car-heading">車で行く場合</h2>
+      <p>車では、正門・小金井門・バス通り車止めの3か所から出入りできます。</p>
+      <p>この3か所は、公式ページに車両の出入口として掲載されています。ほかの入口からは、車で入れません。</p>
+    </section>
+
+    <section aria-labelledby="access-hours-heading">
+      <h2 id="access-hours-heading">開門時間</h2>
+      <p>入口ごとの開門時間は、下の表のとおりです。夏期と冬期で時間が変わります。</p>
+      <div
+        class="article__table-scroll article__table-scroll--responsive"
+        tabindex="0"
+        role="region"
+        aria-label="入口の開閉時間の表（横スクロールできます）"
+      >
         <table>
           <caption>入口の開閉時間（東京都公園協会公式ページより）</caption>
           <thead>
@@ -315,8 +359,39 @@ const transportCards: TransportCard[] = [
           </tbody>
         </table>
       </div>
+
+      {/* 640px未満で表示する縦積み版（表と同じ内容。横スクロールなし）。 */}
+      <ul class="article__table-mobile-cards">
+        <li>
+          <p class="article__table-mobile-cards__heading">正門・小金井門</p>
+          <dl>
+            <div>
+              <dt>夏期</dt>
+              <dd>8:00〜18:30</dd>
+            </div>
+            <div>
+              <dt>冬期</dt>
+              <dd>8:30〜17:30</dd>
+            </div>
+          </dl>
+        </li>
+        <li>
+          <p class="article__table-mobile-cards__heading">バス通り車止め</p>
+          <dl>
+            <div>
+              <dt>夏期</dt>
+              <dd>8:30〜17:30</dd>
+            </div>
+            <div>
+              <dt>冬期</dt>
+              <dd>8:30〜17:30</dd>
+            </div>
+          </dl>
+        </li>
+      </ul>
+
       <p>
-        お彼岸等の時期には、早朝に開園時間が変わる場合があると公式ページに記載されています。正確な当日の時間は、訪問前に公式ページでご確認ください。
+        お彼岸等の時期には、開門時間が変わることがあります。訪問前に、必ず公式ページでご確認ください。
       </p>
 
       {
@@ -355,7 +430,7 @@ const transportCards: TransportCard[] = [
       <h2 id="access-parking-heading">駐車について</h2>
       <div class="article__callout">
         <p>
-          東京都公園協会の
+          車は、園内の道路や駐車場に停められます。東京都公園協会の
           <a
             href={GUIDE_SOURCES.tamaFaq.url}
             rel="noopener"
@@ -363,11 +438,14 @@ const transportCards: TransportCard[] = [
             data-event="official_procedure_click"
             data-authority="tokyo_park_association"
             data-topic="access_parking_faq">公式FAQ</a
-          >では、「多磨霊園、小平霊園、八王子霊園、八柱霊園は、園内の道路や駐車場に停めていただけます」と案内されています。台数や料金など駐車場の規模についての具体的な記載は公式ページに見当たらないため、当サイトでは「無料駐車場が十分にある」といった断定はしていません。お彼岸等、来園者が多い時期は通常より停めにくくなることがあります。
+          >に、そう案内されています。
         </p>
         <p>
-          みたま堂前に障害者用駐車スペースが2台ある旨は、公式の園内案内図に明記されています。一般車の駐車方法や当日の混雑状況については、管理事務所（受付時間
-          8:30〜17:30、書類受付は〜16:30）へのお問い合わせ、または現地でのご確認をおすすめします。石材店のサイト等に掲載されている駐車案内は、当サイトでは転載していません。
+          ただし、台数や料金など駐車場の規模は、公式ページに記載がありません。そのため「駐車場が十分にある」とは断定しません。お彼岸等、来園者が多い時期は、いつもより停めにくくなることがあります。
+        </p>
+        <p>
+          みたま堂前には、障害者用駐車スペースが2台あります。これは公式の園内案内図に明記されています。一般車の駐車方法や当日の混雑状況は、管理事務所（受付時間
+          8:30〜17:30、書類受付は〜16:30）へお問い合わせいただくか、現地でご確認ください。石材店のサイト等に載っている駐車案内は、当サイトでは転載していません。
         </p>
       </div>
     </section>
@@ -421,13 +499,13 @@ const transportCards: TransportCard[] = [
       <h2 id="access-checklist-heading">出発前に確認すること</h2>
       <ul>
         <li>
-          墓所の「区・種・側・番」を<a
-            href={GUIDE_SOURCES.tamaHakaNavi.url}
+          墓所の区画（区・種・側・番）を<a
+            href={GUIDE_SOURCES.tamaMapPdf.url}
             rel="noopener"
             target="_blank"
             data-event="official_procedure_click"
             data-authority="tokyo_park_association"
-            data-topic="access_checklist_haka_navi">公式墓所ナビ</a
+            data-topic="access_checklist_map_pdf">公式園内案内図</a
           >で確認し、近い入口を把握しておきましょう。
         </li>
         <li>お彼岸等の時期は開閉時間が通常と異なる場合があるため、訪問前に公式ページでご確認ください。</li>
@@ -448,12 +526,6 @@ const transportCards: TransportCard[] = [
             </li>
           )
         }
-        <li>
-          <a href={GUIDE_SOURCES.tamaHakaNavi.url} rel="noopener" target="_blank">
-            {GUIDE_SOURCES.tamaHakaNavi.publisher}「{GUIDE_SOURCES.tamaHakaNavi.title}」
-          </a>
-          （最終確認日: {GUIDE_SOURCES.tamaHakaNavi.checkedAt}）
-        </li>
         <li>
           <a href={GUIDE_SOURCES.tamaMapPdf.url} rel="noopener" target="_blank">
             {GUIDE_SOURCES.tamaMapPdf.publisher}「{GUIDE_SOURCES.tamaMapPdf.title}」
@@ -479,18 +551,16 @@ const transportCards: TransportCard[] = [
     </section>
   </div>
 
-  <Fragment slot="articleTail">
-    <div class="article">
-      <section aria-labelledby="access-related-heading">
-        <h2 id="access-related-heading">関連ガイド</h2>
-        <ul class="article__related-grid">
-          <li><a class="article__related-card" href={ROUTES.guide.path}>多磨霊園ガイド一覧を見る</a></li>
-          <li><a class="article__related-card" href={ROUTES.guideProcedures.path}>墓じまい・お墓の手続き 総合案内を見る</a></li>
-          <li><a class="article__related-card" href={ROUTES.sekizaiten.path}>石材店の一覧・比較を見る</a></li>
-        </ul>
-      </section>
-    </div>
-  </Fragment>
+  <div class="article">
+    <section aria-labelledby="access-related-heading">
+      <h2 id="access-related-heading">関連ガイド</h2>
+      <ul class="article__related-grid">
+        <li><a class="article__related-card article__related-card--blue" href={ROUTES.guide.path}>多磨霊園ガイド一覧を見る</a></li>
+        <li><a class="article__related-card article__related-card--blue" href={ROUTES.guideProcedures.path}>墓じまい・お墓の手続き 総合案内を見る</a></li>
+        <li><a class="article__related-card article__related-card--blue" href={ROUTES.sekizaiten.path}>石材店の一覧・比較を見る</a></li>
+      </ul>
+    </section>
+  </div>
 </BaseLayout>
 
 <style>

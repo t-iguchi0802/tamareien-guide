@@ -37,6 +37,20 @@
  * 新規取得はしていない）を追加し、「墓参時の注意」を薄い暖色の注意欄
  * （.article__callout--warm）にし、関連ページをカード化した。
  * 見出し・本文・データは変更していない。
+ *
+ * H1分割・代表例の追加（2026-09-01、ミチのモバイル優先UI・文章校正対応
+ * 「著名人ページ」節）:
+ * - H1を「多磨霊園に眠る著名人」に短縮し、補足文「公式案内図で墓所を探す
+ *   方法」を別の<p class="article__lead">に分けた（390pxで複合タイトルの
+ *   「｜」が行頭に残る問題への対応）。<title>・descriptionは従来のまま。
+ * - 記事冒頭の更新日表示を「更新日：2026年9月1日」のみに簡略化した
+ *   （出典一覧は記事末尾の「情報源・確認日」のまま、削除していない）。
+ * - 「著名人墓所一覧」の直前に、代表例6名を示すカードを追加した。
+ *   選び方はFAMOUS_GRAVES配列（公式PDFの五十音順、当サイトは並べ替えて
+ *   いない）の先頭から機械的に6件取っただけで、Claude独自の「有名かどうか」
+ *   判断は加えていない（本文にもその旨を明記）。公式資料で確認できない
+ *   人物は追加していない。人物写真は使用していない（権利確認できる
+ *   写真がないため）。五十音一覧（143名・区画情報）は削除していない。
  */
 import '../../../styles/guide-article.css';
 import BaseLayout from '../../../layouts/BaseLayout.astro';
@@ -48,7 +62,7 @@ const pageTitle = '多磨霊園に眠る著名人｜公式案内図で巡る墓�
 const description =
   '多磨霊園にある著名人の墓所を、東京都公園協会の公式案内図に掲載されている範囲でご案内します。氏名・分野・墓所の場所（区・種・側・番）は公式資料の表記のとおりです。';
 
-const checkedAt = '2026-09-01';
+const checkedAtJa = '2026年9月1日';
 
 // 公式PDF内の五十音インデックス（ア・カ・サ・タ・ナ・ハ・マ・ヤ・ワ）の順に
 // そのままグループ化する。当サイト独自の分類・並べ替えは行っていない。
@@ -57,17 +71,31 @@ const groups = kanaOrder
   .map((kana) => ({ kana, entries: FAMOUS_GRAVES.filter((entry) => entry.kana === kana) }))
   .filter((group) => group.entries.length > 0);
 
+/**
+ * 一覧への入口として示す「例」6名（2026-09-01、ミチのモバイル優先UI・
+ * 文章校正対応「著名人ページ」節）。
+ *
+ * 「代表例を4〜6名、有名度で選ばず示す」という要望に対し、Claude独自の
+ * 「有名かどうか」判断を一切加えない、機械的な選び方だけを採用した:
+ * 公式PDFの並び順（五十音順、当サイトが独自に並べ替えていない）の
+ * 先頭から単純に6件を取っただけで、経歴・知名度による選定は行っていない。
+ * 本文にもその旨を明記し、「おすすめ」「有名」等の語は使わない。
+ */
+const EXAMPLE_COUNT = 6;
+const exampleEntries = FAMOUS_GRAVES.slice(0, EXAMPLE_COUNT);
+
 function formatPlot(entry: (typeof FAMOUS_GRAVES)[number]): string {
   return `${entry.block}区 ${entry.section}種 ${entry.side}側 ${entry.number}番`;
 }
 ---
 
 <BaseLayout title={pageTitle} description={description}>
-  <Fragment slot="articleIntro">
+  <Fragment slot="beforeSponsor">
     <article class="article">
       <p class="article__eyebrow"><a href={ROUTES.guide.path}>多磨霊園ガイド</a> ／ 多磨霊園の歴史・著名人</p>
-      <h1>{pageTitle}</h1>
-      <p class="article__meta">確認日: {checkedAt} ／ 情報源: 東京都公園協会公式サイト（本文末に一覧）</p>
+      <h1>多磨霊園に眠る著名人</h1>
+      <p class="article__lead">公式案内図で墓所を探す方法</p>
+      <p class="article__meta">更新日：{checkedAtJa}</p>
 
       <div class="article__hero-photo" style="background-image:url('/images/hero-cemetery-photo-v2.png');background-position:center 30%;">
         <p class="article__hero-photo__credit">画像はイメージです</p>
@@ -91,6 +119,28 @@ function formatPlot(entry: (typeof FAMOUS_GRAVES)[number]): string {
       <p>
         公式案内図の五十音順のまま、{groups.length}のグループに分けています。見出しを選ぶと、その範囲の一覧が開きます。
       </p>
+
+      <div class="article__callout">
+        <p class="article__callout__eyebrow">一覧の入口（例）</p>
+        <p>
+          下は、一覧の並び順（五十音順）の先頭から機械的に{EXAMPLE_COUNT}名を示した例です。「有名」「おすすめ」等の当サイトの判断による選定ではありません。全{FAMOUS_GRAVES.length}名は、このすぐ下の一覧からご覧ください。
+        </p>
+        <ul class="article__related-grid">
+          {
+            exampleEntries.map((entry) => (
+              <li>
+                <span class="article__related-card famous-example-card">
+                  <span class="famous-example-card__name">{entry.name.replace(new RegExp('　', 'g'), ' ')}</span>
+                  <span class="famous-example-card__meta">
+                    {entry.career} ／ {formatPlot(entry)}
+                  </span>
+                </span>
+              </li>
+            ))
+          }
+        </ul>
+      </div>
+
       {
         groups.map((group) => (
           <details class="detail-table">
@@ -214,16 +264,41 @@ function formatPlot(entry: (typeof FAMOUS_GRAVES)[number]): string {
     </section>
   </div>
 
-  <Fragment slot="articleTail">
-    <div class="article">
-      <section aria-labelledby="famous-related-heading">
-        <h2 id="famous-related-heading">関連ページ</h2>
-        <ul class="article__related-grid">
-          <li><a class="article__related-card" href={ROUTES.guideHistory.path}>多磨霊園の歴史を見る</a></li>
-          <li><a class="article__related-card" href={ROUTES.access.path}>多磨霊園への行き方を見る</a></li>
-          <li><a class="article__related-card" href={ROUTES.guide.path}>多磨霊園ガイド一覧を見る</a></li>
-        </ul>
-      </section>
-    </div>
-  </Fragment>
+  <div class="article">
+    <section aria-labelledby="famous-related-heading">
+      <h2 id="famous-related-heading">関連ページ</h2>
+      <ul class="article__related-grid">
+        <li><a class="article__related-card" href={ROUTES.guideHistory.path}>多磨霊園の歴史を見る</a></li>
+        <li><a class="article__related-card" href={ROUTES.access.path}>多磨霊園への行き方を見る</a></li>
+        <li><a class="article__related-card" href={ROUTES.guide.path}>多磨霊園ガイド一覧を見る</a></li>
+      </ul>
+    </section>
+  </div>
 </BaseLayout>
+
+<style>
+  /* 「一覧の入口（例）」カード。リンク先ページがあるわけではない
+     （個別の著名人ページは作らない方針のため）ので、.article__related-card
+     の「→」矢印は打ち消し、名前と分野・墓所の場所だけの小さな案内にする。 */
+  .famous-example-card {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.1em;
+    cursor: default;
+  }
+
+  .famous-example-card::after {
+    content: none;
+  }
+
+  .famous-example-card__name {
+    font-weight: 700;
+    color: var(--color-text);
+  }
+
+  .famous-example-card__meta {
+    font-weight: 400;
+    font-size: var(--font-size-caption, 0.875rem);
+    color: var(--color-stone-text);
+  }
+</style>

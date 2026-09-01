@@ -142,6 +142,18 @@
  * - スポンサー枠自体のマークアップ（4枠、左右2枠ずつ）は
  *   src/components/sponsors/SponsorGroup.astroへ切り出し、2つの分岐で
  *   同じ実装を再利用している（ページごとに複製しているわけではない）。
+ *
+ * スポンサー配置の一本化とモバイル圧縮（2026-09-01、ミチのモバイル優先UI・
+ * 文章校正対応・「スマートフォンのスポンサー枠」節）: 前回（2026-09-01）
+ * 追加した「記事本文を3分割し、広告4枠を2枠ずつ2箇所に分ける」
+ * page-shell--article / SponsorPair は、今回のミチの指摘（「本文の途中に
+ * 2枠、ページ末尾に2枠という分割配置をやめる」）により廃止した。
+ * 全ページ共通で、広告4枠は常に1箇所（`beforeSponsor`使用時はその直後、
+ * 未使用時はページ末尾）にまとめる。SponsorPair.astroは使用しなくなった
+ * ため削除した（src/components/sponsors/SponsorGroup.astroのみ使用）。
+ * モバイル・タブレット幅（1399px以下）では、枠1つあたりの最小高さを
+ * 180px→110px（約39%減）に圧縮した（下記`.sponsor-slot`の上書き参照）。
+ * PC幅（1400px以上）の左右レール・枠サイズ（320px）は変更していない。
  */
 import '../styles/tokens.css';
 import { siteConfig } from '../lib/siteConfig';
@@ -150,7 +162,6 @@ import { getActiveSponsors } from '../lib/data';
 import { resolvePageCategory } from '../lib/analytics/pageCategory';
 import GaTag from '../lib/analytics/GaTag.astro';
 import SponsorGroup from '../components/sponsors/SponsorGroup.astro';
-import SponsorPair from '../components/sponsors/SponsorPair.astro';
 
 interface Props {
   title: string;
@@ -171,17 +182,6 @@ const sponsorSlots: [
 ] = [sponsors[0] ?? null, sponsors[1] ?? null, sponsors[2] ?? null, sponsors[3] ?? null];
 const pageCategory = resolvePageCategory(Astro.url.pathname);
 const hasBeforeSponsor = Astro.slots.has('beforeSponsor');
-/**
- * 記事ページ用のスポンサー分散レイアウト（ミチの全体校正・指摘3対応、
- * 2026-09-01）。`articleIntro`（タイトル・導入・最初の内容ブロック）と
- * `articleTail`（関連ページ等、記事の締めくくり）の両方のスロットに
- * 中身を渡しているページだけ、この3分割モードになる
- * （/access/、/guide/history/、/guide/famous-graves/、
- * /guide/procedures/hakajimai-to-kaisou/ の4記事ページのみ使用）。
- * 片方だけ渡された場合は既存の非分割モードにフォールバックする
- * （意図しない半端な分割を防ぐため）。
- */
-const hasArticleSplit = Astro.slots.has('articleIntro') && Astro.slots.has('articleTail');
 ---
 
 <!doctype html>
@@ -221,41 +221,7 @@ const hasArticleSplit = Astro.slots.has('articleIntro') && Astro.slots.has('arti
     <slot name="pageTop" />
 
     {
-      hasArticleSplit ? (
-        <div class="page-shell page-shell--article">
-          {/* 「本文」ランドマーク（<main>）はHTML上1つだけにする必要があるため、
-              本文の先頭（articleIntroの中身）側に<main id="main-content">を置く。
-              残り2つの区切り（rest／articleTail）は同じ本文の続きだが、間に
-              広告（.sponsor-pair）を挟むDOM構造上、単一の<main>で3つとも
-              囲めないため、意味的に紐づく<div>にしている
-              （page-shell--splitと同じ考え方）。 */}
-          <main id="main-content" class="site-main site-main--article-intro">
-            <slot name="articleIntro" />
-          </main>
-          <SponsorPair
-            left={sponsorSlots[0]}
-            right={sponsorSlots[2]}
-            leftPosition="left-1"
-            rightPosition="right-1"
-            pageCategory={pageCategory}
-            label="広告（記事前半）"
-          />
-          <div class="site-main site-main--article-rest">
-            <slot />
-          </div>
-          <SponsorPair
-            left={sponsorSlots[1]}
-            right={sponsorSlots[3]}
-            leftPosition="left-2"
-            rightPosition="right-2"
-            pageCategory={pageCategory}
-            label="広告（記事後半）"
-          />
-          <div class="site-main site-main--article-tail">
-            <slot name="articleTail" />
-          </div>
-        </div>
-      ) : hasBeforeSponsor ? (
+      hasBeforeSponsor ? (
         <div class="page-shell page-shell--split">
           {/* 「本文」ランドマーク（<main>）はHTML上1つだけにする必要があるため、
               スキップリンクの遷移先も含め、本文の先頭（beforeSponsorの中身）
@@ -282,19 +248,57 @@ const hasArticleSplit = Astro.slots.has('articleIntro') && Astro.slots.has('arti
 
     <footer class="site-footer">
       <div class="site-footer__inner">
+        {/* 主要リンクの優先表示（2026-09-01、ミチのモバイル優先UI・文章校正
+            対応「フッター」節）。スマートフォンで縦に長く並ぶ問題に対し、
+            最もよく使われる4本（トップ・石材店一覧・墓じまい手続き・
+            運営方針）だけは、開閉に関係なく常時見える形でここへ出す。
+            下の3グループ（details）は、この4本と重複しても構わない
+            （「主要リンクの優先表示」と「全リンクの分類別一覧」という
+            別の役割のため）。
+
+            技術的な制約の記録（実機検証で判明）: 当初は「モバイルでは
+            既定で閉じておき、769px以上でだけCSSで常時展開に見せる」
+            設計を試みたが、Chromiumで実測したところ、<details>が
+            閉じている間の中身は`display: none`相当のCSSカスケードでは
+            なく、ブラウザ内部の専用の仕組み（新しい`::details-content`
+            疑似要素によるアニメーション対応の折りたたみ）で隠されており、
+            著者スタイルシート側で`display`をどれだけ強い詳細度・
+            `!important`で上書きしても、閉じている間は中身が
+            表示されないことを確認した（`getComputedStyle`上は
+            block/flex等に見えても、実際の描画・innerTextには含まれない）。
+            この制約により「モバイルは既定で閉じる／PCは既定で開く」を
+            CSSだけで両立することはできなかったため、3グループとも
+            `open`属性を付けて既定で開いた状態にし、スマートフォンを含む
+            すべての幅でネイティブな開閉操作ができるようにした
+            （「開閉可能にする」という要件は満たすが、「モバイルで
+            初期状態から折りたたまれている」わけではない。この設計判断は
+            最終報告に記載する）。 */}
+        <nav class="site-footer__primary" aria-label="主要リンク">
+          <a href={ROUTES.top.path}>トップ</a>
+          <a href={ROUTES.sekizaiten.path}>石材店一覧・比較</a>
+          <a href={ROUTES.guideProcedures.path}>墓じまい・手続き</a>
+          <a href={ROUTES.about.path}>運営方針</a>
+        </nav>
+
+        {/* 「比較する」「ガイド」「運営」の3グループ（details/summary、
+            2026-09-01）。スマートフォン・タブレット幅ではネイティブの
+            開閉機能（JS不使用）で折りたたみ、PC幅（769px以上）では
+            CSSだけで常時展開表示に切り替える（`open`属性そのものは
+            付与せず、`display`の上書きだけで見た目を変える。詳細は
+            下記CSSの`.site-footer__groups details > nav`参照）。 */}
         <div class="site-footer__groups">
-          <div class="site-footer__group">
-            <p class="site-footer__group-label">比較する</p>
+          <details class="site-footer__group" open>
+            <summary class="site-footer__group-label">比較する</summary>
             <nav class="site-footer__nav" aria-label="石材店比較のページ">
               <a href={ROUTES.top.path}>トップ</a>
               <a href={ROUTES.sekizaiten.path}>石材店一覧・比較</a>
               <a href={ROUTES.hakajimai.path}>墓じまいの比較</a>
               <a href={ROUTES.kanri.path}>墓所管理の比較</a>
             </nav>
-          </div>
+          </details>
 
-          <div class="site-footer__group">
-            <p class="site-footer__group-label">ガイド</p>
+          <details class="site-footer__group" open>
+            <summary class="site-footer__group-label">ガイド</summary>
             <nav class="site-footer__nav" aria-label="多磨霊園ガイドのページ">
               <a href={ROUTES.guide.path}>多磨霊園を知る</a>
               <a href={ROUTES.access.path}>行き方・園内案内</a>
@@ -303,16 +307,16 @@ const hasArticleSplit = Astro.slots.has('articleIntro') && Astro.slots.has('arti
               <a href={ROUTES.guideHistory.path}>歴史</a>
               <a href={ROUTES.guideFamousGraves.path}>著名人墓所</a>
             </nav>
-          </div>
+          </details>
 
-          <div class="site-footer__group">
-            <p class="site-footer__group-label">運営</p>
+          <details class="site-footer__group" open>
+            <summary class="site-footer__group-label">運営</summary>
             <nav class="site-footer__nav" aria-label="運営情報のページ">
               <a href={ROUTES.about.path}>運営方針・掲載基準・広告方針・訂正窓口</a>
               <a href={ROUTES.sources.path}>情報源・最終確認日</a>
               <a href={ROUTES.privacy.path}>プライバシーポリシー</a>
             </nav>
-          </div>
+          </details>
         </div>
 
         <p class="site-footer__copyright">&copy; {new Date().getFullYear()} {siteConfig.name}</p>
@@ -327,13 +331,9 @@ const hasArticleSplit = Astro.slots.has('articleIntro') && Astro.slots.has('arti
       // スポンサー枠の表示回数計測（全ページ共通、2026-08-28に
       // src/pages/index.astroから移設）。IntersectionObserverで
       // 実際にビューポート内に入った枠だけを、1枠につき1回計測する。
-      //
-      // 2026-09-01（ミチの全体校正・指摘3対応）: 記事ページのスポンサー分散
-      // レイアウト（page-shell--article）では、1ページに`[data-sponsor-root]`
-      // （SponsorPair）が2個並ぶようになった。querySelector（単数形）のままだと
-      // 最初の1個しか計測対象にならず、後半の広告2枠の表示回数が
-      // 計測されなくなるため、querySelectorAll（複数形）に変更し、
-      // 見つかったすべてのルート配下の枠をまとめて監視する。
+      // querySelectorAll（複数形）にしているのは、`[data-sponsor-root]`が
+      // 将来複数になっても計測漏れが起きないようにするための保険
+      // （2026-09-01時点では1ページにつき常に1個＝SponsorGroup 1回のみ）。
       import { trackSponsorImpression } from '../lib/analytics/events';
       import type { SponsorSlotPosition } from '../types/analytics';
 
@@ -545,6 +545,27 @@ const hasArticleSplit = Astro.slots.has('articleIntro') && Astro.slots.has('arti
     }
   }
 
+  /* 主要リンクの優先表示（2026-09-01）。フッター最上部に常時見える
+     横並び（折り返し）のリンク。下の.site-footer__groupsとは別物。 */
+  .site-footer__primary {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: var(--space-2) var(--space-4);
+    padding-bottom: var(--space-4);
+    margin-bottom: var(--space-4);
+    border-bottom: 1px solid var(--color-border);
+    width: 100%;
+  }
+
+  .site-footer__primary a {
+    font-weight: 700;
+    min-height: var(--tap-target-min);
+    display: inline-flex;
+    align-items: center;
+    padding: 0.2em 0.4em;
+  }
+
   .site-footer__groups {
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -560,16 +581,68 @@ const hasArticleSplit = Astro.slots.has('articleIntro') && Astro.slots.has('arti
     }
   }
 
+  /* .site-footer__group は<details>要素（2026-09-01、モバイル最優先
+     レビュー対応「フッター」節）。768px以下ではネイティブの開閉動作
+     （JS不使用）をそのまま使う。769px以上では、<summary>を見出し風に、
+     <nav>を常時展開表示に上書きし、従来（<div><p>見出し</p><nav>...）と
+     同じ見た目に戻す。`open`属性そのものは付与しない
+     （UA既定の`details:not([open]) > *:not(summary){display:none}`より
+     author側のこの`display`宣言のほうがカスケード優先度が高いため、
+     `open`属性がなくても769px以上ではnavを表示できる）。 */
+  .site-footer__group {
+    border: none;
+    margin: 0;
+    padding: 0;
+  }
+
   .site-footer__group-label {
     margin: 0 0 var(--space-2);
     font-weight: 700;
     color: var(--color-text);
+    cursor: pointer;
+    list-style: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4em;
+    min-height: var(--tap-target-min);
+  }
+
+  @media (min-width: 769px) {
+    .site-footer__group-label {
+      justify-content: flex-start;
+    }
+  }
+
+  .site-footer__group-label::-webkit-details-marker {
+    display: none;
+  }
+
+  .site-footer__group-label::marker {
+    content: '';
+  }
+
+  /* 開閉の目印（▸/▾）。 */
+  .site-footer__group-label::after {
+    content: '▸';
+    font-size: 0.8em;
+    color: var(--color-text-muted);
+  }
+
+  .site-footer__group[open] > .site-footer__group-label::after {
+    content: '▾';
+  }
+
+  .site-footer__group-label:focus-visible {
+    outline: 3px solid var(--color-accent);
+    outline-offset: 2px;
   }
 
   .site-footer__nav {
     display: flex;
     flex-direction: column;
     gap: var(--space-2);
+    padding-top: var(--space-2);
   }
 
   @media (max-width: 640px) {
@@ -616,6 +689,21 @@ const hasArticleSplit = Astro.slots.has('articleIntro') && Astro.slots.has('arti
        （計4枠）を.sponsor-groupの2列グリッドへ直接参加させ、
        正しい読み順（1段目に2枠・2段目に2枠）の2×2にする。 */
     display: contents;
+  }
+
+  /* スマートフォン・タブレット幅（1399px以下）でのスポンサー枠の圧縮
+     （2026-09-01、ミチのモバイル優先UI・文章校正対応「スマートフォンの
+     スポンサー枠」節）。SponsorSlot.astro自身の既定値（180px、モバイル・
+     タブレット向け）から約39%減の110pxにする。この宣言は下の
+     `@media (min-width: 1400px)`ブロックより前（source順で先）に
+     置いているため、1400px以上では同ブロック内の
+     `.page-shell .sponsor-rail .sponsor-slot { min-height: 320px; }`
+     （詳細度は同じクラス3つだが、source順で後にあるため優先される）が
+     正しく上書きし、320pxのまま変わらない。セレクタをクラス3つにしている
+     理由は、SponsorSlot.astro自身のスコープ済みルールに確実に勝つため
+     （下の1400px以上のルールと同じ理由）。 */
+  .page-shell .sponsor-group .sponsor-slot {
+    min-height: 110px;
   }
 
   @media (min-width: 1400px) {
@@ -703,73 +791,6 @@ const hasArticleSplit = Astro.slots.has('articleIntro') && Astro.slots.has('arti
        確保している。 */
     .page-shell .sponsor-rail .sponsor-slot {
       min-height: 320px;
-    }
-
-    /* --- 記事スポンサー分散レイアウト（.page-shell--article、
-       ミチの全体校正・指摘3対応、2026-09-01）。/access/ /guide/history/
-       /guide/famous-graves/ /guide/procedures/hakajimai-to-kaisou/ の
-       4記事ページのみで使用する。1400px以上ではPC側の「左スポンサー／
-       本文／右スポンサー」という見た目・幅・高さ・sticky挙動を変えず、
-       本文（intro→rest→tail）を縦に3分割して、広告4枠を「前半2枠
-       （railA、introの高さ分だけ）」「後半2枠（railB、rest＋tailの
-       高さ分）」の2組に分けて左右レールへ振り分ける。
-       スマートフォン・タブレット幅（1399px以下）では、.sponsor-pairが
-       .sponsor-groupと同じクラスを持つため、既存の2列グリッドCSSが
-       そのまま適用され、DOM順（intro→広告2枠→rest→広告2枠→tail）が
-       そのまま縦積みの表示順になる（JSによるDOM移動はしていない）。 --- */
-    .page-shell--article {
-      grid-template-areas:
-        'rail-a-left intro rail-a-right'
-        'rail-b-left rest rail-b-right'
-        'rail-b-left tail rail-b-right';
-      row-gap: var(--space-6);
-    }
-
-    .page-shell--article .site-main--article-intro {
-      grid-area: intro;
-    }
-
-    .page-shell--article .site-main--article-rest {
-      grid-area: rest;
-    }
-
-    .page-shell--article .site-main--article-tail {
-      grid-area: tail;
-    }
-
-    /* .sponsor-pairは.sponsor-groupと同じクラスのため、この帯（1400px以上）
-       では既に上で定義した`.sponsor-group { display: contents; }`が効き、
-       2枠のSponsorSlotが.page-shell--articleの直接の子（グリッドアイテム）
-       として展開される。ここでは、その2枠をどのレール位置へ配置するかだけを
-       data-slot-position属性で指定する（新しいコンポーネント階層は増やさない）。 */
-    .page-shell--article .sponsor-slot[data-slot-position='left-1'] {
-      grid-area: rail-a-left;
-    }
-
-    .page-shell--article .sponsor-slot[data-slot-position='right-1'] {
-      grid-area: rail-a-right;
-    }
-
-    .page-shell--article .sponsor-slot[data-slot-position='left-2'] {
-      grid-area: rail-b-left;
-    }
-
-    .page-shell--article .sponsor-slot[data-slot-position='right-2'] {
-      grid-area: rail-b-right;
-    }
-
-    .page-shell--article .sponsor-slot {
-      min-height: 320px;
-    }
-
-    /* 既存の.sponsor-rail（page-shell / page-shell--split用）と同じく、
-       画面の高さが十分あるときだけstickyにする。ここでは1枠だけの
-       レールのため、枠自体（320px＋少しの余白）が収まる600pxを目安にした。 */
-    @media (min-height: 600px) {
-      .page-shell--article .sponsor-slot {
-        position: sticky;
-        top: var(--space-4);
-      }
     }
   }
 
