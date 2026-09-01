@@ -10,6 +10,7 @@ export type {
   BreadcrumbItemInput,
   ItemListEntryInput,
   BusinessJsonLdOptions,
+  ArticleJsonLdInput,
 } from './structuredData';
 export {
   buildOrganizationJsonLd,
@@ -17,6 +18,7 @@ export {
   buildItemListJsonLd,
   buildBusinessListItemListJsonLd,
   buildBusinessJsonLd,
+  buildArticleJsonLd,
 } from './structuredData';
 export type { PageMetaEntry, MetaIssue } from './meta';
 export { buildPageTitle, truncateDescription, findMetaIssues } from './meta';

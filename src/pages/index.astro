@@ -107,32 +107,88 @@
  * 不透明度を0.78→0.68へ下げて写真をより見せた。文字にはtext-shadowを
  * 強めて対応し、写真上のコントラストを維持している。TOP全体の構造
  * （写真→余白→3列の目的選択・条件選択エリア）は変更していない。
+ *
+ * 編集改善・ブランド表示の短縮（2026-09-02、ミチの編集改善・SEO/AIO対応）:
+ * - H1・補足文を指定の文言へ変更した（H1「多磨霊園のお墓のこと、目的から
+ *   探す」、補足「墓石を建てる、直す、墓じまい、清掃・管理。必要なことから
+ *   相談先を探せます。」）。「公開情報を同じ基準で整理しています」という
+ *   制作側の事情を説明する文はヒーローから外し、代わりに「掲載方針・
+ *   情報源」という小さなリンク1つ（/about/、運営方針ページ）を
+ *   ヒーロー直下に置いた。データの取得方法・事業者確認の予定・制作方法の
+ *   説明は、従来どおり/about/側にのみ置く（このページへは複製しない）。
+ * - <title>はブラウザタブ・検索結果向けの複合タイトルを別途指定し
+ *   （BaseLayoutが自動でsiteConfig.nameを付け足す処理をやめたため）、
+ *   画面上のH1とは独立させた。descriptionもTOP専用の文言にした。
+ * - ヒーローのPC側サイズ（.hero、min-height）・スポンサーとの位置関係
+ *   （pageTopスロット→page-shell外）は変更していない。
  */
 import BaseLayout from '../layouts/BaseLayout.astro';
-import { siteConfig } from '../lib/siteConfig';
 import { ROUTES } from '../lib/routes';
 import { getBusinesses } from '../lib/data';
 import ServiceFilter from '../components/business/ServiceFilter.astro';
+import { getActiveTamaNewsItems } from './_lib/tama-news';
 
 const businesses = getBusinesses();
+const tamaNewsItems = getActiveTamaNewsItems();
+
+function formatJaDate(iso: string): string {
+  const [y, m, d] = iso.split('-').map(Number);
+  return `${y}年${m}月${d}日`;
+}
+const pageTitle = '多磨霊園 お墓ガイド｜石材店・墓じまい・清掃を目的から探す';
+const description =
+  '多磨霊園周辺の石材店・お墓関連事業者を、墓石を建てる・直す、墓じまい、清掃・管理といった目的から探せる地域ガイドです。公開情報のみで中立に比較しています。';
 ---
 
-<BaseLayout title={siteConfig.name} description={siteConfig.subtitle}>
+<BaseLayout title={pageTitle} description={description}>
   <Fragment slot="pageTop">
     <section class="hero" aria-labelledby="hero-heading">
       <div class="hero__panel">
-        <h1 id="hero-heading" class="hero__heading">多磨霊園のお墓のことを、目的から探す</h1>
+        <h1 id="hero-heading" class="hero__heading">多磨霊園のお墓のこと、目的から探す</h1>
         <p class="hero__lead">
-          墓石建立、墓じまい、管理・清掃について、公開情報を同じ基準で整理しています。
+          墓石を建てる、直す、墓じまい、清掃・管理。必要なことから相談先を探せます。
         </p>
       </div>
-      <p class="hero__image-credit">画像はイメージです</p>
+      <p class="hero__image-credit">イメージ写真</p>
     </section>
+    <p class="top-policy-link">
+      <a href={ROUTES.about.path}>掲載方針・情報源</a>
+    </p>
   </Fragment>
 
   <Fragment slot="beforeSponsor">
     <ServiceFilter businesses={businesses} mode="link" targetPath={ROUTES.sekizaiten.path} openByDefault />
   </Fragment>
+
+  <hr class="masonry-rule" />
+
+  {
+    tamaNewsItems.length > 0 && (
+      <section aria-labelledby="tama-news-heading" class="tama-news">
+        <h2 id="tama-news-heading">いまの多磨霊園</h2>
+        <ul class="tama-news__list">
+          {tamaNewsItems.map((item) => (
+            <li class="tama-news__item">
+              <a
+                class="tama-news__link"
+                href={item.sourceUrl}
+                rel="noopener"
+                target="_blank"
+                data-event="official_procedure_click"
+                data-authority="tokyo_park_association"
+                data-topic="top_tama_news"
+              >
+                {item.title}
+              </a>
+              <p class="tama-news__meta">
+                {item.sourceName}（公開日: {formatJaDate(item.publishedAt)}）
+              </p>
+            </li>
+          ))}
+        </ul>
+      </section>
+    )
+  }
 
   <hr class="masonry-rule" />
 
@@ -254,6 +310,23 @@ const businesses = getBusinesses();
     text-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
   }
 
+  /* 「掲載方針・情報源」への小さなリンク（2026-09-02追加）。ヒーロー写真の
+     すぐ下、3列（左スポンサー／中央フィルター／右スポンサー）が始まる前の
+     余白部分に収める、控えめな1行リンク。写真下の余白自体はそのまま
+     残し、その中に小さく文字を置くだけにとどめる。 */
+  .top-policy-link {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 0 var(--space-6);
+    text-align: right;
+    font-size: var(--font-size-caption, 0.875rem);
+  }
+
+  .top-policy-link a {
+    color: var(--color-text-muted);
+    text-decoration: underline;
+  }
+
   .hero__image-credit {
     position: absolute;
     z-index: 1;
@@ -269,6 +342,59 @@ const businesses = getBusinesses();
 
   .masonry-rule {
     margin-block: var(--space-6);
+  }
+
+  /* 「いまの多磨霊園」（2026-09-02追加）。条件選択・石材店への主導線の後、
+     「当サイトについて」の前に置く、最大3件のコンパクトなお知らせ一覧。
+     検索・フィルターUIの邪魔にならないよう、写真やタグを使わず、
+     リンク＋出典・公開日の2行だけの控えめなカードにとどめる。 */
+  .tama-news {
+    color: var(--color-text);
+  }
+
+  .tama-news h2 {
+    font-family: var(--font-family-heading);
+    margin: 0 0 var(--space-4);
+  }
+
+  .tama-news__list {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--space-3);
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  @media (max-width: 767px) {
+    .tama-news__list {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  .tama-news__item {
+    padding: var(--space-4);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-card, 10px);
+    background: var(--color-surface);
+  }
+
+  .tama-news__link {
+    display: block;
+    font-weight: 700;
+    color: var(--color-accent);
+    text-decoration: none;
+    line-height: 1.5;
+  }
+
+  .tama-news__link:hover {
+    text-decoration: underline;
+  }
+
+  .tama-news__meta {
+    margin: var(--space-2) 0 0;
+    color: var(--color-text-muted);
+    font-size: var(--font-size-caption, 0.875rem);
   }
 
   /* --- 「当サイトについて」。ServiceFilterはBaseLayout.astroの

@@ -14,6 +14,7 @@ import { ROUTES } from '../../lib/routes';
 const pageTitle = '多磨霊園ガイド';
 const description =
   '多磨霊園への行き方、墓じまい・お墓の手続き、歴史・著名人について、公開情報をもとに整理したガイド記事の一覧です。';
+const browserTitle = `${pageTitle}｜行き方・手続き・歴史のまとめ`;
 
 const categories = [
   {
@@ -40,13 +41,13 @@ const categories = [
     description: '1923年の開園からの歴史と、著名人の墓所についてのご案内です。',
     links: [
       { href: ROUTES.guideHistory.path, label: '多磨霊園はなぜ造られた？1923年開園からの歴史' },
-      { href: ROUTES.guideFamousGraves.path, label: '多磨霊園に眠る著名人｜公式案内図で巡る墓所ガイド' },
+      { href: ROUTES.guideFamousGraves.path, label: '多磨霊園に眠る著名人｜名前から墓所を探す' },
     ],
   },
 ] as const;
 ---
 
-<BaseLayout title={pageTitle} description={description}>
+<BaseLayout title={browserTitle} description={description}>
   <h1>{pageTitle}</h1>
   <p>
     多磨霊園にお参り・お墓相談で訪れる方向けに、行き方・手続き・歴史についての記事をまとめています。石材店の比較は<a

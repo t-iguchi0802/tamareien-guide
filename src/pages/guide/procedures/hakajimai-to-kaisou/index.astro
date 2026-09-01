@@ -84,6 +84,7 @@ import BaseLayout from '../../../../layouts/BaseLayout.astro';
 import { ROUTES } from '../../../../lib/routes';
 import { getSourceById } from '../../../../lib/data';
 import { GUIDE_SOURCES } from '../../../_lib/guide-sources';
+import { buildArticleJsonLd } from '../../../../lib/seo';
 
 const pageTitle = '墓じまいと改葬の違い｜多磨霊園で手続きを始める前に';
 const description =
@@ -95,9 +96,18 @@ const tamaOfficial = getSourceById('SRC-TAMA-OFFICIAL');
 
 const checkedAtJa = '2026年8月28日';
 const closureServiceQuery = 'grave_closure,reburial_support';
+
+const articleJsonLd = buildArticleJsonLd({
+  path: ROUTES.guideProceduresHakajimaiVsKaisou.path,
+  headline: '墓じまいと改葬の違い',
+  description,
+  datePublished: '2026-08-27',
+  dateModified: '2026-08-28',
+  image: '/images/hero-cemetery-v1.png',
+});
 ---
 
-<BaseLayout title={pageTitle} description={description}>
+<BaseLayout title={pageTitle} description={description} ogType="article" extraJsonLd={[articleJsonLd]}>
   <Fragment slot="beforeSponsor">
     <article class="article">
       <p class="article__eyebrow"><a href={ROUTES.guideProcedures.path}>墓じまい・お墓の手続き 総合案内</a></p>
@@ -108,9 +118,8 @@ const closureServiceQuery = 'grave_closure,reburial_support';
       <div
         class="article__hero-photo article__hero-photo--compact"
         style="background-image:url('/images/hero-cemetery-v1.png');background-position:center 65%;"
-      >
-        <p class="article__hero-photo__credit">画像はイメージです</p>
-      </div>
+      ></div>
+      <p class="article__hero-photo__credit">イメージ写真</p>
 
       <section aria-labelledby="hakajimai-kaisou-what-heading">
         <h2 id="hakajimai-kaisou-what-heading">墓じまいと改葬とは</h2>

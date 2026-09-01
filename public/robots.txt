@@ -1,13 +1,28 @@
 # 多磨霊園のお墓相談比較ガイド
 # 公開情報の比較ガイドとして、主要ページのクロールを妨げない方針。
 # 管理用パス等は現時点で存在しないため、個別のDisallowは設定していない。
-# OAI-SearchBotを含め、特定クローラーを意図的にブロックしていない。
 
 User-agent: *
 Allow: /
 
-# 実際のsitemap生成はPhase 1のスコープ外（@astrojs/sitemap等が未導入）。
-# QA監査D-3（2026-08-26）: 未生成のsitemap-index.xmlをSitemap:行で参照すると
-# 本番公開時に404となりクロールエラーの原因になるため、生成されるまでの間は
-# 行自体を記載しない。sitemap生成を導入する際に本行を復活させ、
-# 本番origin確定後の絶対URLへ更新すること。
+# OAI-SearchBot（ChatGPTの検索機能が参照するクローラー）を明示的に許可する
+# （2026-09-02、ミチの編集改善・SEO/AIO対応「sitemap・robots・AIクローラー」節）。
+# 上のUser-agent: *の Allow: / により実質的にはすでに許可されているが、
+# ChatGPT検索での発見可能性を意図して妨げていないことを明示するために
+# 個別ブロックとしても記載する。
+User-agent: OAI-SearchBot
+Allow: /
+
+# GPTBot（AIモデルの学習データ収集用の別クローラー。OAI-SearchBotとは別物）
+# については、今回の作業では現状の設定（個別ブロックなし＝上のUser-agent: *
+# のAllow: /が適用される）を変更していない。学習データ収集の可否は
+# サイト所有者の判断事項であり、当エージェントの判断だけでは変更しない。
+
+# sitemap.xml（src/pages/sitemap.xml.ts、2026-09-02追加）は生成されるように
+# なったが、本番originが未確定（siteConfig.productionOrigin = null）のため、
+# 現状は<loc>が相対パスのまま出力され、sitemap.xmlの仕様上は無効な状態にある。
+# QA監査D-3（2026-08-26）の指摘どおり、無効・存在しないsitemapをSitemap:行で
+# 参照するとクロールエラーの原因になるため、本番ドメインが確定し
+# siteConfig.productionOriginを設定するまでは、この行を記載しない。
+# 本番ドメイン確定後、次の行のコメントを外すこと:
+# Sitemap: https://（本番ドメイン）/sitemap.xml

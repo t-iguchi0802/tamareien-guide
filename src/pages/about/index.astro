@@ -35,9 +35,10 @@ const { editorialPolicy } = dataset;
 const pageTitle = '運営方針・掲載基準・広告方針・訂正窓口';
 const description =
   '当サイトの運営者情報、掲載基準、広告・スポンサー方針、掲載情報の訂正窓口について説明します。';
+const browserTitle = `${pageTitle}｜多磨霊園 お墓ガイド`;
 ---
 
-<BaseLayout title={pageTitle} description={description}>
+<BaseLayout title={browserTitle} description={description}>
   <Fragment slot="beforeSponsor">
     <h1>{pageTitle}</h1>
 
@@ -78,6 +79,21 @@ const description =
     <p>
       口コミ点数・星評価・独自ランキングや、「おすすめ」「人気」「優良」等の主観的な表現は使用していません。スポンサー枠を設ける場合は、比較データとは別に管理し、「スポンサー」または「広告」であることを明示します。
     </p>
+    <div id="sponsor-info-heading" class="article__callout">
+      <p class="article__callout__eyebrow">スポンサー掲載について（2026-09-02追記）</p>
+      <p>
+        現時点で当サイトが提供できる仕組みは、確認できている次の範囲にとどまります。実績件数・効果・掲載後の集客数などは確認できていないため、断定的な数値は掲載していません。
+      </p>
+      <ul>
+        <li>
+          条件付き上位表示: 利用者が石材店一覧で1つ以上の条件を選び、絞り込み結果にスポンサー事業者が含まれる場合に限り、その事業者を結果の上位に表示します。「広告・スポンサー掲載」の表示を必ず添え、通常の掲載順（推奨順位ではありません）を販売するものではないことを明示します。
+        </li>
+        <li>永続的な掲載順の販売は行いません。条件を選ばない・条件に合致しない場合は、他の事業者と同じ通常順で表示されます。</li>
+        <li>スポンサー枠のクリック数・表示回数は、当サイトの計測の仕組み上、集計できる設計にしています（現時点で集計値そのものを外部提供する運用は開始していません）。</li>
+        <li>関連するガイド記事（墓じまい・管理等）から、該当サービスに対応する石材店一覧への案内リンクを設けています。</li>
+      </ul>
+      <p>掲載を希望される事業者の方は、下記の訂正窓口と同じ連絡先までお問い合わせください。</p>
+    </div>
   </section>
 
   <section aria-labelledby="correction-heading">

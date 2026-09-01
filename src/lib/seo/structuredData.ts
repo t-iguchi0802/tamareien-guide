@@ -81,6 +81,12 @@ export function buildItemListJsonLd(
   const data: JsonLd = {
     '@context': 'https://schema.org',
     '@type': 'ItemList',
+    // 「ランキングではなく順不同の一覧」であることをJSON-LD上でも明確にする
+    // （2026-09-02追加、ミチの編集改善・SEO/AIO対応「構造化データ」節）。
+    // positionは配列の並び順（displayOrder＝管理用の安定表示順）を機械的に
+    // 反映しているだけで、推奨順位ではないことに変わりはない
+    // （data_dictionary.md・CLAUDE.md「displayOrderは推奨順位ではない」参照）。
+    itemListOrder: 'https://schema.org/ItemListUnordered',
     numberOfItems: entries.length,
     itemListElement: entries.map((entry, index) => ({
       '@type': 'ListItem',
@@ -173,5 +179,52 @@ export function buildBusinessJsonLd(business: Business, options: BusinessJsonLdO
     data.areaServed = business.location.nearestGate;
   }
 
+  return data;
+}
+
+export interface ArticleJsonLdInput {
+  path: string;
+  headline: string;
+  description: string;
+  /** 記事本文が事実として最後に更新された日（YYYY-MM-DD）。ビルド日ではない。 */
+  datePublished: string;
+  dateModified: string;
+  /** OGP同様、サイトルートからの絶対パス。 */
+  image?: string;
+}
+
+/**
+ * ガイド記事用の`Article`。
+ *
+ * `datePublished`/`dateModified`は、ビルドを実行した日ではなく、
+ * 本文を実際に確認・更新した日（各ページの`checkedAt`相当の値）を
+ * 呼び出し側から渡す（2026-09-02追加、ミチの編集改善・SEO/AIO対応
+ * 「更新日と情報源」節「dateModifiedは実際に本文を更新した場合だけ
+ * 変更する」に対応。`new Date()`等でビルド時刻を自動的に入れない）。
+ * `author`は個人名を持たないため、`publisher`（サイト運営主体、
+ * Organization）のみを設定する。
+ */
+export function buildArticleJsonLd(input: ArticleJsonLdInput): JsonLd {
+  const pageUrl = buildCanonicalUrl(input.path);
+  const data: JsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'Article',
+    headline: input.headline,
+    description: input.description,
+    datePublished: input.datePublished,
+    dateModified: input.dateModified,
+    mainEntityOfPage: {
+      '@type': 'WebPage',
+      '@id': pageUrl,
+    },
+    publisher: {
+      '@type': 'Organization',
+      name: siteConfig.name,
+      url: buildCanonicalUrl('/'),
+    },
+  };
+  if (input.image) {
+    data.image = buildCanonicalUrl(input.image);
+  }
   return data;
 }

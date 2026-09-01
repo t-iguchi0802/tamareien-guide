@@ -41,13 +41,14 @@ import { getSourceById } from '../../lib/data';
 const pageTitle = '改葬・墓所返還・施設変更の手続き';
 const description =
   '改葬許可申請や墓所工事の届出など、多磨霊園に関わる行政手続きについて、公式ページへのリンクとともに中立に案内します。';
+const browserTitle = `${pageTitle}｜多磨霊園 お墓ガイド`;
 
 const fuchuReburial = getSourceById('SRC-FUCHU-REBURIAL');
 const tamaWorkNotice = getSourceById('SRC-TAMA-WORK-NOTICE');
 const tamaOfficial = getSourceById('SRC-TAMA-OFFICIAL');
 ---
 
-<BaseLayout title={pageTitle} description={description}>
+<BaseLayout title={browserTitle} description={description}>
   <h1>{pageTitle}</h1>
   <p>
     このページは特定の事業者を比較するページではありません。多磨霊園に関わる行政手続きについて、公開されている公式ページへの案内を中心にまとめています。手続きの正式な流れ・必要書類・受付窓口は、必ず下記の公式ページでご確認ください。当サイトの記載内容は法律相談ではありません。
