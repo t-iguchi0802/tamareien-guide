@@ -17,10 +17,32 @@
  *   見当たらなかったため、そのような経路があるとは書いていない
  *   （未確認情報を断定しないという編集方針を、事業者データだけでなく
  *   このガイド記事にも適用している）。
- * - 一般来園者向けの駐車場については、公式ページ上に「駐車場あり」という
- *   案内自体が見当たらなかった。「無料駐車場あり」等の断定はしていない。
+ * - 一般来園者向けの駐車場については、当時参照した公式ページ上に「駐車場あり」
+ *   という案内自体が見当たらなかった。「無料駐車場あり」等の断定はしていない。
  *   みたま堂前の障害者用駐車スペース2台は、公式ページに明記があるため
- *   確認済みとして記載する。
+ *   確認済みとして記載する。（2026-09-01追記: 別ページである公式FAQに
+ *   「多磨霊園は園内の道路や駐車場に停めていただけます」という具体的な
+ *   案内があることを新たに確認した。下記「最新情報の確認・修正」参照）
+ *
+ * 最新情報の確認・修正（2026-09-01、ミチの全体校正・指摘2対応）:
+ * - 「駐車について」を、東京都公園協会公式FAQ（GUIDE_SOURCES.tamaFaq）で
+ *   再確認して書き直した。同FAQには「多磨霊園、小平霊園、八王子霊園、
+ *   八柱霊園は、園内の道路や駐車場に停めていただけます。」という記載が
+ *   あるため、これをそのまま案内する。台数・料金等の具体的な規模は
+ *   公式ページに記載がないため、「十分ある」「無料」等の断定はしない。
+ *   また、同FAQで彼岸等の混雑時の駐車制限が明記されているのは区部4霊園
+ *   （青山・雑司ケ谷・谷中・染井）のみであり、多磨霊園について同じ制限が
+ *   明記されているわけではないため、多磨霊園にも同じ制限があるとは書かず、
+ *   「混雑時は停めにくくなることがある」という一般的な注意にとどめる
+ *   （「必ず駐車できる」「いつでも空いている」等、公式情報にない保証表現は
+ *   使用しない）。
+ * - 2026年9月のお彼岸期間（令和8年9月12日〜9月25日、公式お知らせ
+ *   GUIDE_SOURCES.tamaHiganNotice2026Sep、掲載日2026-08-19）の臨時開閉門
+ *   時間を、通常の開閉時間表とは別の小さな案内として追加した。
+ *   `HIGAN_NOTICE_2026_SEP.end` を過ぎたら自動的に非表示にする
+ *   （ビルド時点の日付で判定する。静的サイトのため、期間終了後に
+ *   サイトを再ビルドするまでは表示が残る点はビルド運用上の制約として
+ *   最終報告で申し送る）。
  *
  * UX/UI見直し（2026-08-28、ミチのレビュー対応）:
  * - 「まず結論」という記事作成上の内部表現をやめ、利用者向けの見出し
@@ -49,6 +71,25 @@
  * - ガイド記事共通のCSS（.article、.article__button等）は
  *   src/styles/guide-article.cssへ切り出し、他のガイド記事
  *   （/guide/history/ 等）と共通化した（詳細は同CSSファイルのコメント参照）。
+ *
+ * スポンサー分散レイアウト対応（2026-09-01、ミチの全体校正・指摘3対応）:
+ * 本文を3つに分け、BaseLayout.astroの`articleIntro`／既定／`articleTail`
+ * スロットへ渡すようにした（詳細な仕組みはsrc/layouts/BaseLayout.astro
+ * 該当コメント参照）。
+ * - articleIntro: タイトル・導入・ヒーロー写真・「墓所の場所に合う入口を
+ *   選ぶ」（最初の内容ブロック）
+ * - 既定スロット: 「電車・バスで行く」〜「更新日・情報源」（残りの本文）
+ * - articleTail: 「関連ガイド」
+ * 見出し・本文・出典・確認日はいずれも変更していない（`<article class="article">`
+ * を分割点で2〜3個に分けただけで、本文の増減はない）。
+ *
+ * モバイル最優先レビュー対応（2026-09-01）: 「関連ガイド」をリンク一覧から
+ * タップしやすいカード（.article__related-grid、guide-article.css）に
+ * 変更した。「現在の臨時開閉門情報」の見た目も、このページ専用だった
+ * `.article__callout--notice`（深緑の左帯）から、他の記事ページと共通の
+ * `.article__callout--warm`（薄い暖色、guide-article.css）へ統一し、
+ * 「注意事項は薄い暖色」という色の意味づけをサイト全体でそろえた。
+ * 見出し・本文・出典は変更していない。
  */
 import '../../styles/guide-article.css';
 import BaseLayout from '../../layouts/BaseLayout.astro';
@@ -61,7 +102,25 @@ const description =
   '多磨霊園への行き方を、電車・バス・車のルート別に公式情報をもとに整理しました。門ごとの開閉時間、駐車場について公式ページで確認できる範囲、地図へのリンクを掲載しています。';
 
 const tamaOfficial = getSourceById('SRC-TAMA-OFFICIAL');
-const checkedAt = '2026-08-27';
+const checkedAt = '2026-09-01';
+
+/**
+ * 2026年9月お彼岸期間の臨時開閉門時間（GUIDE_SOURCES.tamaHiganNotice2026Sep、
+ * 掲載日2026-08-19、確認日2026-09-01）。期間終了後は自動的に案内を隠す
+ * （ビルド時点の日付で判定。静的サイトのため、期間終了後に再ビルドするまでは
+ * 表示が残る）。
+ */
+const HIGAN_NOTICE_2026_SEP = {
+  start: '2026-09-12',
+  end: '2026-09-25',
+  gateHours: [
+    { gate: '正門・小金井門', hours: '6:30〜19:00' },
+    { gate: 'バス通り', hours: '6:30〜18:30' },
+    { gate: '北門・東門・西門', hours: '9:00〜17:00' },
+  ],
+} as const;
+const higanNoticeEnd = new Date(`${HIGAN_NOTICE_2026_SEP.end}T23:59:59+09:00`);
+const showHiganNotice = new Date() <= higanNoticeEnd;
 
 /**
  * 線画アイコン（最小限の自作インラインSVG。外部アイコンライブラリは追加していない）。
@@ -130,55 +189,59 @@ const transportCards: TransportCard[] = [
 ---
 
 <BaseLayout title={pageTitle} description={description}>
-  <article class="article">
-    <p class="article__eyebrow"><a href={ROUTES.guide.path}>多磨霊園ガイド</a> ／ 墓参り・アクセス</p>
-    <h1>{pageTitle}</h1>
-    <p class="article__meta">確認日: {checkedAt} ／ 情報源: 東京都公園協会公式サイト（本文末に一覧）</p>
+  <Fragment slot="articleIntro">
+    <article class="article">
+      <p class="article__eyebrow"><a href={ROUTES.guide.path}>多磨霊園ガイド</a> ／ 墓参り・アクセス</p>
+      <h1>{pageTitle}</h1>
+      <p class="article__meta">確認日: {checkedAt} ／ 情報源: 東京都公園協会公式サイト（本文末に一覧）</p>
 
-    <div class="access-hero">
-      <p class="access-hero__credit">画像はイメージです</p>
-    </div>
-
-    <section aria-labelledby="access-entry-heading">
-      <h2 id="access-entry-heading">墓所の場所に合う入口を選ぶ</h2>
-      <p>
-        多磨霊園は広く、墓所の位置によって便利な入口が異なります。墓所の区画と利用する門を確認してから、経路を選びましょう。区画がわかっている場合は、<a
-          href={GUIDE_SOURCES.tamaHakaNavi.url}
-          rel="noopener"
-          target="_blank"
-          data-event="official_procedure_click"
-          data-authority="tokyo_park_association"
-          data-topic="access_haka_navi">公式墓所ナビ</a
-        >で「区・種・側・番」を確認すると、より近い入口を選べます。
-      </p>
-
-      <div class="transport-grid">
-        {
-          transportCards.map((card) => (
-            <a class="transport-card" href={card.anchor}>
-              <span class="transport-card__icon" set:html={ICONS[card.icon]} />
-              <span class="transport-card__body">
-                <span class="transport-card__mode">{card.mode}</span>
-                <span class="transport-card__row">
-                  <span class="transport-card__label">出発</span>
-                  {card.departure}
-                </span>
-                <span class="transport-card__row">
-                  <span class="transport-card__label">利用</span>
-                  {card.connection}
-                </span>
-                <span class="transport-card__row">
-                  <span class="transport-card__label">方面</span>
-                  {card.arrival}
-                </span>
-                <span class="transport-card__link">{card.linkLabel}</span>
-              </span>
-            </a>
-          ))
-        }
+      <div class="access-hero">
+        <p class="access-hero__credit">画像はイメージです</p>
       </div>
-    </section>
 
+      <section aria-labelledby="access-entry-heading">
+        <h2 id="access-entry-heading">墓所の場所に合う入口を選ぶ</h2>
+        <p>
+          多磨霊園は広く、墓所の位置によって便利な入口が異なります。墓所の区画と利用する門を確認してから、経路を選びましょう。区画がわかっている場合は、<a
+            href={GUIDE_SOURCES.tamaHakaNavi.url}
+            rel="noopener"
+            target="_blank"
+            data-event="official_procedure_click"
+            data-authority="tokyo_park_association"
+            data-topic="access_haka_navi">公式墓所ナビ</a
+          >で「区・種・側・番」を確認すると、より近い入口を選べます。
+        </p>
+
+        <div class="transport-grid">
+          {
+            transportCards.map((card) => (
+              <a class="transport-card" href={card.anchor}>
+                <span class="transport-card__icon" set:html={ICONS[card.icon]} />
+                <span class="transport-card__body">
+                  <span class="transport-card__mode">{card.mode}</span>
+                  <span class="transport-card__row">
+                    <span class="transport-card__label">出発</span>
+                    {card.departure}
+                  </span>
+                  <span class="transport-card__row">
+                    <span class="transport-card__label">利用</span>
+                    {card.connection}
+                  </span>
+                  <span class="transport-card__row">
+                    <span class="transport-card__label">方面</span>
+                    {card.arrival}
+                  </span>
+                  <span class="transport-card__link">{card.linkLabel}</span>
+                </span>
+              </a>
+            ))
+          }
+        </div>
+      </section>
+    </article>
+  </Fragment>
+
+  <div class="article">
     <section aria-labelledby="access-transit-heading">
       <h2 id="access-transit-heading">電車・バスで行く</h2>
 
@@ -255,16 +318,55 @@ const transportCards: TransportCard[] = [
       <p>
         お彼岸等の時期には、早朝に開園時間が変わる場合があると公式ページに記載されています。正確な当日の時間は、訪問前に公式ページでご確認ください。
       </p>
+
+      {
+        showHiganNotice && (
+          <div class="article__callout article__callout--warm">
+            <p class="article__callout__eyebrow">現在の臨時開閉門情報（{HIGAN_NOTICE_2026_SEP.start}〜{HIGAN_NOTICE_2026_SEP.end}）</p>
+            <p>
+              9月のお彼岸期間は、上記の通常の開閉時間とは別に、次の時間へ変更されると公式に案内されています。
+            </p>
+            <ul>
+              {HIGAN_NOTICE_2026_SEP.gateHours.map((row) => (
+                <li>
+                  {row.gate}: {row.hours}
+                </li>
+              ))}
+            </ul>
+            <p>
+              <a
+                href={GUIDE_SOURCES.tamaHiganNotice2026Sep.url}
+                rel="noopener"
+                target="_blank"
+                data-event="official_procedure_click"
+                data-authority="tokyo_park_association"
+                data-topic="access_higan_notice_2026_09"
+              >
+                公式のお知らせで詳しく見る
+              </a>
+              （掲載日: 2026-08-19／確認日: {GUIDE_SOURCES.tamaHiganNotice2026Sep.checkedAt}）
+            </p>
+          </div>
+        )
+      }
     </section>
 
     <section aria-labelledby="access-parking-heading">
       <h2 id="access-parking-heading">駐車について</h2>
       <div class="article__callout">
         <p>
-          公式ページ上には、一般来園者向けのまとまった駐車場についての案内が見当たりませんでした。そのため、「無料駐車場あり」といった断定はしていません。
+          東京都公園協会の
+          <a
+            href={GUIDE_SOURCES.tamaFaq.url}
+            rel="noopener"
+            target="_blank"
+            data-event="official_procedure_click"
+            data-authority="tokyo_park_association"
+            data-topic="access_parking_faq">公式FAQ</a
+          >では、「多磨霊園、小平霊園、八王子霊園、八柱霊園は、園内の道路や駐車場に停めていただけます」と案内されています。台数や料金など駐車場の規模についての具体的な記載は公式ページに見当たらないため、当サイトでは「無料駐車場が十分にある」といった断定はしていません。お彼岸等、来園者が多い時期は通常より停めにくくなることがあります。
         </p>
         <p>
-          みたま堂前に障害者用駐車スペースが2台ある旨は、公式ページに明記されています。一般車の駐車方法については、管理事務所（受付時間
+          みたま堂前に障害者用駐車スペースが2台ある旨は、公式の園内案内図に明記されています。一般車の駐車方法や当日の混雑状況については、管理事務所（受付時間
           8:30〜17:30、書類受付は〜16:30）へのお問い合わせ、または現地でのご確認をおすすめします。石材店のサイト等に掲載されている駐車案内は、当サイトでは転載していません。
         </p>
       </div>
@@ -329,7 +431,7 @@ const transportCards: TransportCard[] = [
           >で確認し、近い入口を把握しておきましょう。
         </li>
         <li>お彼岸等の時期は開閉時間が通常と異なる場合があるため、訪問前に公式ページでご確認ください。</li>
-        <li>車で向かう場合、一般来園者向けの駐車場は公式ページで確認できていないため、事前に管理事務所へお問い合わせください。</li>
+        <li>車で向かう場合、園内の道路・駐車場に停められますが、台数や当日の混雑状況は公式ページに記載がないため、事前に管理事務所へお問い合わせください。</li>
       </ul>
     </section>
 
@@ -358,21 +460,37 @@ const transportCards: TransportCard[] = [
           </a>
           （最終確認日: {GUIDE_SOURCES.tamaMapPdf.checkedAt}）
         </li>
+        <li>
+          <a href={GUIDE_SOURCES.tamaFaq.url} rel="noopener" target="_blank">
+            {GUIDE_SOURCES.tamaFaq.publisher}「{GUIDE_SOURCES.tamaFaq.title}」
+          </a>
+          （最終確認日: {GUIDE_SOURCES.tamaFaq.checkedAt}） — 「駐車について」の出典
+        </li>
+        <li>
+          <a href={GUIDE_SOURCES.tamaHiganNotice2026Sep.url} rel="noopener" target="_blank">
+            {GUIDE_SOURCES.tamaHiganNotice2026Sep.publisher}「{GUIDE_SOURCES.tamaHiganNotice2026Sep.title}」
+          </a>
+          （掲載日: 2026-08-19／最終確認日: {GUIDE_SOURCES.tamaHiganNotice2026Sep.checkedAt}） — 「現在の臨時開閉門情報」の出典（{HIGAN_NOTICE_2026_SEP.end}まで掲載）
+        </li>
       </ul>
       <p>
         <a href={ROUTES.about.path}>誤りに気づいた場合の訂正窓口はこちら</a>
       </p>
     </section>
+  </div>
 
-    <section aria-labelledby="access-related-heading">
-      <h2 id="access-related-heading">関連ガイド</h2>
-      <ul>
-        <li><a href={ROUTES.guide.path}>多磨霊園ガイド一覧を見る</a></li>
-        <li><a href={ROUTES.guideProcedures.path}>墓じまい・お墓の手続き 総合案内を見る</a></li>
-        <li><a href={ROUTES.sekizaiten.path}>石材店の一覧・比較を見る</a></li>
-      </ul>
-    </section>
-  </article>
+  <Fragment slot="articleTail">
+    <div class="article">
+      <section aria-labelledby="access-related-heading">
+        <h2 id="access-related-heading">関連ガイド</h2>
+        <ul class="article__related-grid">
+          <li><a class="article__related-card" href={ROUTES.guide.path}>多磨霊園ガイド一覧を見る</a></li>
+          <li><a class="article__related-card" href={ROUTES.guideProcedures.path}>墓じまい・お墓の手続き 総合案内を見る</a></li>
+          <li><a class="article__related-card" href={ROUTES.sekizaiten.path}>石材店の一覧・比較を見る</a></li>
+        </ul>
+      </section>
+    </div>
+  </Fragment>
 </BaseLayout>
 
 <style>

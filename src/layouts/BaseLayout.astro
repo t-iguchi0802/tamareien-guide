@@ -150,6 +150,7 @@ import { getActiveSponsors } from '../lib/data';
 import { resolvePageCategory } from '../lib/analytics/pageCategory';
 import GaTag from '../lib/analytics/GaTag.astro';
 import SponsorGroup from '../components/sponsors/SponsorGroup.astro';
+import SponsorPair from '../components/sponsors/SponsorPair.astro';
 
 interface Props {
   title: string;
@@ -170,6 +171,17 @@ const sponsorSlots: [
 ] = [sponsors[0] ?? null, sponsors[1] ?? null, sponsors[2] ?? null, sponsors[3] ?? null];
 const pageCategory = resolvePageCategory(Astro.url.pathname);
 const hasBeforeSponsor = Astro.slots.has('beforeSponsor');
+/**
+ * 記事ページ用のスポンサー分散レイアウト（ミチの全体校正・指摘3対応、
+ * 2026-09-01）。`articleIntro`（タイトル・導入・最初の内容ブロック）と
+ * `articleTail`（関連ページ等、記事の締めくくり）の両方のスロットに
+ * 中身を渡しているページだけ、この3分割モードになる
+ * （/access/、/guide/history/、/guide/famous-graves/、
+ * /guide/procedures/hakajimai-to-kaisou/ の4記事ページのみ使用）。
+ * 片方だけ渡された場合は既存の非分割モードにフォールバックする
+ * （意図しない半端な分割を防ぐため）。
+ */
+const hasArticleSplit = Astro.slots.has('articleIntro') && Astro.slots.has('articleTail');
 ---
 
 <!doctype html>
@@ -209,7 +221,41 @@ const hasBeforeSponsor = Astro.slots.has('beforeSponsor');
     <slot name="pageTop" />
 
     {
-      hasBeforeSponsor ? (
+      hasArticleSplit ? (
+        <div class="page-shell page-shell--article">
+          {/* 「本文」ランドマーク（<main>）はHTML上1つだけにする必要があるため、
+              本文の先頭（articleIntroの中身）側に<main id="main-content">を置く。
+              残り2つの区切り（rest／articleTail）は同じ本文の続きだが、間に
+              広告（.sponsor-pair）を挟むDOM構造上、単一の<main>で3つとも
+              囲めないため、意味的に紐づく<div>にしている
+              （page-shell--splitと同じ考え方）。 */}
+          <main id="main-content" class="site-main site-main--article-intro">
+            <slot name="articleIntro" />
+          </main>
+          <SponsorPair
+            left={sponsorSlots[0]}
+            right={sponsorSlots[2]}
+            leftPosition="left-1"
+            rightPosition="right-1"
+            pageCategory={pageCategory}
+            label="広告（記事前半）"
+          />
+          <div class="site-main site-main--article-rest">
+            <slot />
+          </div>
+          <SponsorPair
+            left={sponsorSlots[1]}
+            right={sponsorSlots[3]}
+            leftPosition="left-2"
+            rightPosition="right-2"
+            pageCategory={pageCategory}
+            label="広告（記事後半）"
+          />
+          <div class="site-main site-main--article-tail">
+            <slot name="articleTail" />
+          </div>
+        </div>
+      ) : hasBeforeSponsor ? (
         <div class="page-shell page-shell--split">
           {/* 「本文」ランドマーク（<main>）はHTML上1つだけにする必要があるため、
               スキップリンクの遷移先も含め、本文の先頭（beforeSponsorの中身）
@@ -281,15 +327,22 @@ const hasBeforeSponsor = Astro.slots.has('beforeSponsor');
       // スポンサー枠の表示回数計測（全ページ共通、2026-08-28に
       // src/pages/index.astroから移設）。IntersectionObserverで
       // 実際にビューポート内に入った枠だけを、1枠につき1回計測する。
+      //
+      // 2026-09-01（ミチの全体校正・指摘3対応）: 記事ページのスポンサー分散
+      // レイアウト（page-shell--article）では、1ページに`[data-sponsor-root]`
+      // （SponsorPair）が2個並ぶようになった。querySelector（単数形）のままだと
+      // 最初の1個しか計測対象にならず、後半の広告2枠の表示回数が
+      // 計測されなくなるため、querySelectorAll（複数形）に変更し、
+      // 見つかったすべてのルート配下の枠をまとめて監視する。
       import { trackSponsorImpression } from '../lib/analytics/events';
       import type { SponsorSlotPosition } from '../types/analytics';
 
       (function initSponsorImpressions() {
-        const root = document.querySelector<HTMLElement>('[data-sponsor-root]');
-        if (!root) return;
+        const roots = Array.from(document.querySelectorAll<HTMLElement>('[data-sponsor-root]'));
+        if (roots.length === 0) return;
         if (typeof IntersectionObserver === 'undefined') return;
 
-        const slots = Array.from(root.querySelectorAll<HTMLElement>('[data-sponsor-id]'));
+        const slots = roots.flatMap((root) => Array.from(root.querySelectorAll<HTMLElement>('[data-sponsor-id]')));
         if (slots.length === 0) return;
 
         const pagePath = window.location.pathname;
@@ -650,6 +703,73 @@ const hasBeforeSponsor = Astro.slots.has('beforeSponsor');
        確保している。 */
     .page-shell .sponsor-rail .sponsor-slot {
       min-height: 320px;
+    }
+
+    /* --- 記事スポンサー分散レイアウト（.page-shell--article、
+       ミチの全体校正・指摘3対応、2026-09-01）。/access/ /guide/history/
+       /guide/famous-graves/ /guide/procedures/hakajimai-to-kaisou/ の
+       4記事ページのみで使用する。1400px以上ではPC側の「左スポンサー／
+       本文／右スポンサー」という見た目・幅・高さ・sticky挙動を変えず、
+       本文（intro→rest→tail）を縦に3分割して、広告4枠を「前半2枠
+       （railA、introの高さ分だけ）」「後半2枠（railB、rest＋tailの
+       高さ分）」の2組に分けて左右レールへ振り分ける。
+       スマートフォン・タブレット幅（1399px以下）では、.sponsor-pairが
+       .sponsor-groupと同じクラスを持つため、既存の2列グリッドCSSが
+       そのまま適用され、DOM順（intro→広告2枠→rest→広告2枠→tail）が
+       そのまま縦積みの表示順になる（JSによるDOM移動はしていない）。 --- */
+    .page-shell--article {
+      grid-template-areas:
+        'rail-a-left intro rail-a-right'
+        'rail-b-left rest rail-b-right'
+        'rail-b-left tail rail-b-right';
+      row-gap: var(--space-6);
+    }
+
+    .page-shell--article .site-main--article-intro {
+      grid-area: intro;
+    }
+
+    .page-shell--article .site-main--article-rest {
+      grid-area: rest;
+    }
+
+    .page-shell--article .site-main--article-tail {
+      grid-area: tail;
+    }
+
+    /* .sponsor-pairは.sponsor-groupと同じクラスのため、この帯（1400px以上）
+       では既に上で定義した`.sponsor-group { display: contents; }`が効き、
+       2枠のSponsorSlotが.page-shell--articleの直接の子（グリッドアイテム）
+       として展開される。ここでは、その2枠をどのレール位置へ配置するかだけを
+       data-slot-position属性で指定する（新しいコンポーネント階層は増やさない）。 */
+    .page-shell--article .sponsor-slot[data-slot-position='left-1'] {
+      grid-area: rail-a-left;
+    }
+
+    .page-shell--article .sponsor-slot[data-slot-position='right-1'] {
+      grid-area: rail-a-right;
+    }
+
+    .page-shell--article .sponsor-slot[data-slot-position='left-2'] {
+      grid-area: rail-b-left;
+    }
+
+    .page-shell--article .sponsor-slot[data-slot-position='right-2'] {
+      grid-area: rail-b-right;
+    }
+
+    .page-shell--article .sponsor-slot {
+      min-height: 320px;
+    }
+
+    /* 既存の.sponsor-rail（page-shell / page-shell--split用）と同じく、
+       画面の高さが十分あるときだけstickyにする。ここでは1枠だけの
+       レールのため、枠自体（320px＋少しの余白）が収まる600pxを目安にした。 */
+    @media (min-height: 600px) {
+      .page-shell--article .sponsor-slot {
+        position: sticky;
+        top: var(--space-4);
+      }
     }
   }
 

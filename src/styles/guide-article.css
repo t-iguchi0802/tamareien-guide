@@ -121,3 +121,151 @@
   background: var(--color-accent);
   border-radius: 2px;
 }
+
+/* --- モバイル最優先レビュー対応（2026-09-01）。記事ページ4本
+   （/access/ /guide/history/ /guide/famous-graves/
+   /guide/procedures/hakajimai-to-kaisou/）で共通して使う部品を
+   ここへ集約する（「共通化できる部分は共通化する」方針）。 --- */
+
+/* 記事上部の写真バナー（各記事の<Fragment slot="articleIntro">内で使用）。
+   背景画像URLはページごとに異なるため、クラスはレイアウト・サイズだけを
+   担当し、実際のbackground-imageは呼び出し側でstyle属性を使って指定する
+   （既存の/access/の.access-heroと同じ考え方。写真が画面を占有しすぎない
+   よう、access-heroよりやや低い200〜260pxに抑える）。 */
+.article__hero-photo {
+  position: relative;
+  height: 200px;
+  border-radius: var(--radius-card, 10px);
+  overflow: hidden;
+  margin-block: var(--space-4) var(--space-6);
+  background-size: cover;
+  background-position: center;
+}
+
+@media (min-width: 640px) {
+  .article__hero-photo {
+    height: 260px;
+  }
+}
+
+/* 手続き記事のようにテキスト量が多いページでは、さらに低い高さを使う。 */
+.article__hero-photo--compact {
+  height: 150px;
+}
+
+@media (min-width: 640px) {
+  .article__hero-photo--compact {
+    height: 190px;
+  }
+}
+
+.article__hero-photo__credit {
+  position: absolute;
+  right: var(--space-3);
+  bottom: var(--space-3);
+  margin: 0;
+  padding: 0.15em 0.6em;
+  border-radius: var(--radius-tag, 6px);
+  background: rgba(255, 255, 255, 0.72);
+  color: #2b2926;
+  font-size: var(--font-size-caption, 0.875rem);
+}
+
+/* 注意事項用の.article__callout修飾子（薄い暖色。黄色い注意帯にはしない）。 */
+.article__callout--warm {
+  background: var(--color-callout-warm-bg);
+  border-color: var(--color-callout-warm-border);
+}
+
+.article__callout__eyebrow {
+  margin: 0 0 var(--space-2);
+  font-weight: 700;
+  font-size: var(--font-size-caption, 0.875rem);
+  letter-spacing: 0.06em;
+  color: var(--color-callout-warm-fg);
+}
+
+/* 要点カード（見出し直下の「この記事で分かること」的な数値の要約）。
+   本文をすべてカード化するのではなく、要点が多いページだけで使う
+   （現状は/guide/history/のみ）。 */
+.article__facts {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-3);
+  margin: var(--space-4) 0 var(--space-6);
+  padding: 0;
+  list-style: none;
+}
+
+@media (min-width: 640px) {
+  .article__facts {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+.article__facts li {
+  background: var(--color-tint-green-bg);
+  border: 1px solid var(--color-tint-green-border);
+  border-radius: var(--radius-card, 10px);
+  padding: var(--space-3);
+}
+
+.article__facts-label {
+  margin: 0 0 0.2em;
+  font-size: var(--font-size-caption, 0.875rem);
+  color: var(--color-stone-text);
+}
+
+.article__facts-value {
+  margin: 0;
+  font-family: var(--font-family-heading);
+  font-weight: 700;
+  font-size: 1.05rem;
+  color: var(--color-accent-deep, var(--color-accent));
+  line-height: 1.4;
+}
+
+/* 関連ページ・関連ガイドを、単純なリンク一覧からタップしやすいカードへ。
+   （/access/ /guide/history/ /guide/famous-graves/ の各末尾セクションで使用。
+   TOPページの.top-guide__entryと同じ考え方だが、記事ページ側で独立して
+   持たせる方が依存関係が単純なため、あえて共有コンポーネント化はしない）。 */
+.article__related-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-3);
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+@media (min-width: 480px) {
+  .article__related-grid {
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  }
+}
+
+.article__related-card {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: var(--tap-target-min);
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--color-tint-green-border);
+  border-radius: var(--radius-card, 10px);
+  background: var(--color-tint-green-bg);
+  color: var(--color-text);
+  text-decoration: none;
+  font-weight: 700;
+}
+
+.article__related-card:hover {
+  border-color: var(--color-accent);
+  background: var(--color-accent-soft);
+}
+
+.article__related-card::after {
+  content: '→';
+  margin-left: auto;
+  color: var(--color-accent);
+  font-weight: 700;
+}

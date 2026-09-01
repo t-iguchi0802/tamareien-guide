@@ -20,7 +20,16 @@
  * のidをここで計算し、ServiceFilterへ渡す。実際の並べ替え・バッジ表示は
  * ServiceFilter.astro側で行う（判定ロジックの置き場所を1箇所にする）。
  * sponsors.json/businesses.jsonの内容自体はここでも変更しない。
+ *
+ * モバイル最優先レビュー対応（2026-09-01）: ページ上部に小さめの写真
+ * （hero-cemetery-photo-v2.png、既存プロジェクト内画像を別クロップで再利用。
+ * 新規取得はしていない）を追加し、「石材店を比較している」ことが一目で
+ * 伝わるようにした。ServiceFilterより前に置くと絞り込みUIが初期画面から
+ * さらに押し出されるため、低め高さ（article__hero-photo--compact、
+ * guide-article.cssから再利用）に抑えている。「関連ページ」もカード化した。
+ * ServiceFilter・ComparisonTable・絞り込みロジックは変更していない。
  */
+import '../../styles/guide-article.css';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import { ROUTES } from '../../lib/routes';
 import { getBusinesses, getActiveSponsors } from '../../lib/data';
@@ -40,6 +49,12 @@ const description =
 
 <BaseLayout title={pageTitle} description={description}>
   <h1>{pageTitle}</h1>
+  <div
+    class="article__hero-photo article__hero-photo--compact"
+    style="background-image:url('/images/hero-cemetery-photo-v2.png');background-position:center 55%;"
+  >
+    <p class="article__hero-photo__credit">画像はイメージです</p>
+  </div>
   <p>
     掲載情報は、各社のWebサイト等で確認できた公開情報をもとに整理しています。事業者への確認で得た情報は、確認後に随時反映します。掲載順は事業者の推奨順位ではありません。詳しくは<a
       href={ROUTES.about.path}>運営方針・掲載基準</a
@@ -63,12 +78,12 @@ const description =
 
   <section aria-labelledby="links-heading">
     <h2 id="links-heading">関連ページ</h2>
-    <ul>
-      <li><a href={ROUTES.hakajimai.path}>墓じまい・墓石撤去の比較を見る</a></li>
-      <li><a href={ROUTES.kanri.path}>墓所管理・清掃・供花の比較を見る</a></li>
-      <li><a href={ROUTES.tetsuzuki.path}>改葬・墓所返還などの手続きを見る</a></li>
-      <li><a href={ROUTES.guideProcedures.path}>墓じまい・お墓の手続き 総合案内を見る</a></li>
-      <li><a href={ROUTES.sources.path}>情報源・最終確認日を見る</a></li>
+    <ul class="article__related-grid">
+      <li><a class="article__related-card" href={ROUTES.hakajimai.path}>墓じまい・墓石撤去の比較を見る</a></li>
+      <li><a class="article__related-card" href={ROUTES.kanri.path}>墓所管理・清掃・供花の比較を見る</a></li>
+      <li><a class="article__related-card" href={ROUTES.tetsuzuki.path}>改葬・墓所返還などの手続きを見る</a></li>
+      <li><a class="article__related-card" href={ROUTES.guideProcedures.path}>墓じまい・お墓の手続き 総合案内を見る</a></li>
+      <li><a class="article__related-card" href={ROUTES.sources.path}>情報源・最終確認日を見る</a></li>
     </ul>
   </section>
 </BaseLayout>

@@ -7,17 +7,44 @@
  * および src/pages/_lib/guide-sources.ts の tamaOverview）。
  * 開設年月日・面積・「日本初の公園墓地」「ドイツの森林墓地を参考」は
  * 公式ページの記載を要約したもの（本文の転載はしていない）。
- * 「都立霊園の中で最大規模」「区画は26区」は、東京都公園協会の
- * 公式ページ本文には数値としての明記が見当たらなかったため、
- * 実装時（2026-08-27）にWikipedia「多磨霊園」記事で補強確認した
- * 参考情報として、情報源欄に別掲したうえで記載している
- * （公式ページの記載と参考情報の出典を混同しないようにする）。
+ * 「都立霊園の中で最大規模」「区画は26区」は、2026-08-27時点では東京都
+ * 公園協会の公式ページ本文に数値としての明記が見当たらなかったため、
+ * Wikipedia「多磨霊園」記事で補強確認した参考情報として別掲していた。
+ *
+ * 出典の格上げ（2026-09-01、ミチの全体校正・著名人墓所ページ実装時に
+ * 副次的に確認）: 著名人墓所データの取得のためGUIDE_SOURCES.tamaMapPdf
+ * （公式園内案内図PDF）をPyMuPDFで直接読み取った際、同PDF本文に
+ * 「現在は約128万㎡（およそ39万坪）と都立8霊園のなかで最も広い面積を
+ * 有しています」「墓域は園路によって26区の区域に分けられ」という記載を
+ * 直接確認できた。これにより、この2点は公式一次資料で裏付けが取れたため、
+ * Wikipedia参考情報からGUIDE_SOURCES.tamaMapPdfの直接引用へ格上げした
+ * （Wikipediaを行政・霊園情報の根拠にしないという方針にも合致する）。
+ *
+ * スポンサー分散レイアウト対応（2026-09-01、ミチの全体校正・指摘3対応）:
+ * 本文を3つに分け、BaseLayout.astroの`articleIntro`／既定／`articleTail`
+ * スロットへ渡すようにした（詳細はsrc/layouts/BaseLayout.astro該当コメント
+ * 参照）。articleIntro=「なぜ新しい墓地が必要だったのか」（最初の内容
+ * ブロック）、既定スロット=「日本で最初の『公園墓地』」〜「情報源」、
+ * articleTail=「関連ページ」。
+ *
+ * モバイル最優先レビュー対応（2026-09-01）: 導入直後に要点カード
+ * （開設日・面積・区数・名称変更年）を追加し、関連ページをカード化した。
+ * 写真（hero-cemetery-v1.png、既存プロジェクト内画像を別クロップで再利用。
+ * 新規取得はしていない）を導入部に追加した。見出し・本文の事実関係は
+ * 上記の出典格上げ箇所を除き変更していない。
  */
 import '../../../styles/guide-article.css';
 import BaseLayout from '../../../layouts/BaseLayout.astro';
 import { ROUTES } from '../../../lib/routes';
 import { getSourceById } from '../../../lib/data';
 import { GUIDE_SOURCES } from '../../_lib/guide-sources';
+
+const historyFacts = [
+  { label: '開設', value: '1923年4月1日' },
+  { label: '面積', value: '約128万㎡' },
+  { label: '区画', value: '全26区' },
+  { label: '改名', value: '1935年' },
+] as const;
 
 const pageTitle = '多磨霊園はなぜ造られた？1923年開園からの歴史';
 const description =
@@ -28,18 +55,36 @@ const checkedAt = '2026-08-27';
 ---
 
 <BaseLayout title={pageTitle} description={description}>
-  <article class="article">
-    <p class="article__eyebrow"><a href={ROUTES.guide.path}>多磨霊園ガイド</a> ／ 多磨霊園の歴史・著名人</p>
-    <h1>{pageTitle}</h1>
-    <p class="article__meta">確認日: {checkedAt} ／ 情報源: 東京都公園協会公式サイト（本文末に一覧）</p>
+  <Fragment slot="articleIntro">
+    <article class="article">
+      <p class="article__eyebrow"><a href={ROUTES.guide.path}>多磨霊園ガイド</a> ／ 多磨霊園の歴史・著名人</p>
+      <h1>{pageTitle}</h1>
+      <p class="article__meta">確認日: {checkedAt} ／ 情報源: 東京都公園協会公式サイト（本文末に一覧）</p>
 
-    <section aria-labelledby="history-background-heading">
-      <h2 id="history-background-heading">なぜ新しい墓地が必要だったのか</h2>
-      <p>
-        明治から大正にかけて東京市街地は急激に発展し、それまであった市内の墓地の多くが使用許可済みとなっていました。新しい墓地用地を郊外に確保する必要から計画されたのが多磨霊園です。1923年（大正12年）4月1日に開設され、当初は「多磨墓地」という名称でした。
-      </p>
-    </section>
+      <div class="article__hero-photo" style="background-image:url('/images/hero-cemetery-v1.png')">
+        <p class="article__hero-photo__credit">画像はイメージです</p>
+      </div>
 
+      <section aria-labelledby="history-background-heading">
+        <h2 id="history-background-heading">なぜ新しい墓地が必要だったのか</h2>
+        <p>
+          明治から大正にかけて東京市街地は急激に発展し、それまであった市内の墓地の多くが使用許可済みとなっていました。新しい墓地用地を郊外に確保する必要から計画されたのが多磨霊園です。1923年（大正12年）4月1日に開設され、当初は「多磨墓地」という名称でした。
+        </p>
+        <ul class="article__facts">
+          {
+            historyFacts.map((fact) => (
+              <li>
+                <p class="article__facts-label">{fact.label}</p>
+                <p class="article__facts-value">{fact.value}</p>
+              </li>
+            ))
+          }
+        </ul>
+      </section>
+    </article>
+  </Fragment>
+
+  <div class="article">
     <section aria-labelledby="history-parkcemetery-heading">
       <h2 id="history-parkcemetery-heading">日本で最初の「公園墓地」</h2>
       <p>
@@ -57,7 +102,7 @@ const checkedAt = '2026-08-27';
     <section aria-labelledby="history-scale-heading">
       <h2 id="history-scale-heading">現在の規模</h2>
       <p>
-        公式サイトによれば、開園面積は1,280,237平方メートル（約128ヘクタール）です。東京都は現在8か所の都立霊園を運営しており、多磨霊園はその中でも面積が大きい霊園として紹介されることが多く（参考情報、下記出典欄参照）、墓域は1区から26区までの「区」に分けられています（同、参考情報）。
+        公式サイトによれば、開園面積は1,280,237平方メートル（約128ヘクタール）です。公式の園内案内図には「都立8霊園のなかで最も広い面積を有しています」と明記されており、墓域は園路によって1区から26区までの「区」に分けられています（出典は本文末「情報源」参照）。
       </p>
     </section>
 
@@ -81,19 +126,26 @@ const checkedAt = '2026-08-27';
           （最終確認日: {GUIDE_SOURCES.tamaOverview.checkedAt}） — 開設の背景、名称変更の経緯の記載元
         </li>
         <li>
-          参考情報（都立霊園の中での規模、区の総数）: Wikipedia「多磨霊園」記事（同記事の出典欄記載の情報を参照。当サイトが独自に測定・断定したものではありません）
+          <a href={GUIDE_SOURCES.tamaMapPdf.url} rel="noopener" target="_blank">
+            {GUIDE_SOURCES.tamaMapPdf.publisher}「{GUIDE_SOURCES.tamaMapPdf.title}」
+          </a>
+          （最終確認日: {GUIDE_SOURCES.tamaMapPdf.checkedAt}） — 「都立8霊園のなかで最も広い面積」「26区」の記載元
         </li>
       </ul>
       <p><a href={ROUTES.about.path}>誤りに気づいた場合の訂正窓口はこちら</a></p>
     </section>
+  </div>
 
-    <section aria-labelledby="history-related-heading">
-      <h2 id="history-related-heading">関連ページ</h2>
-      <ul>
-        <li><a href={ROUTES.guideFamousGraves.path}>多磨霊園に眠る著名人ガイドを見る</a></li>
-        <li><a href={ROUTES.access.path}>多磨霊園への行き方を見る</a></li>
-        <li><a href={ROUTES.guide.path}>多磨霊園ガイド一覧を見る</a></li>
-      </ul>
-    </section>
-  </article>
+  <Fragment slot="articleTail">
+    <div class="article">
+      <section aria-labelledby="history-related-heading">
+        <h2 id="history-related-heading">関連ページ</h2>
+        <ul class="article__related-grid">
+          <li><a class="article__related-card" href={ROUTES.guideFamousGraves.path}>多磨霊園に眠る著名人ガイドを見る</a></li>
+          <li><a class="article__related-card" href={ROUTES.access.path}>多磨霊園への行き方を見る</a></li>
+          <li><a class="article__related-card" href={ROUTES.guide.path}>多磨霊園ガイド一覧を見る</a></li>
+        </ul>
+      </section>
+    </div>
+  </Fragment>
 </BaseLayout>

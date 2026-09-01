@@ -253,11 +253,20 @@ const showSeparateContact =
   }
 
   /* ServiceFilter.astroのスクリプトが、選択中の条件と一致する語にだけ付与する。
-     背景色・枠線は付けず、太字と深緑への文字色変化だけで示す
-     （タグ／バッジ的なUI部品にしないため）。 */
+     太字と深緑への文字色変化に加え、モバイル最優先レビュー対応（2026-09-01）
+     として、色だけに頼らず「チェックマーク＋ごく薄い緑地」でも一致を示す
+     （色覚特性に配慮し、色以外の手がかりを持たせる）。タグの壁にならないよう、
+     地の文の中に収まる控えめなインライン装飾にとどめる。 */
   .service-word--matched {
     color: var(--color-accent-deep);
     font-weight: 700;
+    background: var(--color-tint-green-bg);
+    border-radius: var(--radius-tag, 6px);
+    padding: 0.05em 0.4em;
+  }
+
+  .service-word--matched::before {
+    content: '✓ ';
   }
 
   .business-card__summary {

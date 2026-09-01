@@ -28,6 +28,33 @@
  *   一般的な順序を示す目安とし、正確な順序・必要書類は自治体・霊園により
  *   異なる旨と公式ページへの案内を明記した。未確認の書類・費用・期間は
  *   創作していない。
+ *
+ * 見出しの言い換え（2026-09-01、ミチの全体校正・指摘4対応）:
+ * - 「これは何か」→「墓じまいと改葬とは」、「似た言葉との違い」→
+ *   「墓じまいと改葬の違い」、「どんなときに必要か」→
+ *   「墓じまい・改葬を考える主な場面」に変更した（3見出しとも記事内容を
+ *   直接表す語へ言い換えただけで、本文の事実関係・出典・確認日は
+ *   変更していない）。
+ * - 「墓じまいと改葬の違い」セクションのみ、新しい見出し（墓じまい・改葬の
+ *   2語に限定した見出し）と、表に含む4つの言葉（墓じまい・改葬・承継・
+ *   墓所返還）との間に軽いズレが生じるため、導入文だけを「この2つを中心に、
+ *   関連の深い『承継』『墓所返還』も含めて確認しましょう」という趣旨に
+ *   調整した。表の内容・並び順・各語の説明文は変更していない。
+ *
+ * スポンサー分散レイアウト対応（2026-09-01、ミチの全体校正・指摘3対応）:
+ * 本文を3つに分け、BaseLayout.astroの`articleIntro`／既定／`articleTail`
+ * スロットへ渡すようにした（詳細はsrc/layouts/BaseLayout.astro該当コメント
+ * 参照）。articleIntro=「墓じまいと改葬とは」（最初の内容ブロック）、
+ * 既定スロット=「墓じまいと改葬の違い」〜「関連する石材店を探す」、
+ * articleTail=「情報源・更新日」（このページには他記事のような独立した
+ * 「関連ページ」節が無いため、記事の締めくくりとなる最後のセクションを
+ * articleTailとした。新しい関連リンク節は追加していない）。
+ * 見出し・本文・出典は変更していない。
+ *
+ * モバイル最優先レビュー対応（2026-09-01）: 導入部に小さめの写真
+ * （hero-cemetery-v1.png、既存プロジェクト内画像を別クロップ・低め高さ
+ * article__hero-photo--compactで再利用。新規取得はしていない）を追加した。
+ * 見出し・本文は変更していない。
  */
 import '../../../../styles/guide-article.css';
 import BaseLayout from '../../../../layouts/BaseLayout.astro';
@@ -47,23 +74,34 @@ const closureServiceQuery = 'grave_closure,reburial_support';
 ---
 
 <BaseLayout title={pageTitle} description={description}>
-  <article class="article">
-    <p class="article__eyebrow"><a href={ROUTES.guideProcedures.path}>墓じまい・お墓の手続き 総合案内</a></p>
-    <h1>{pageTitle}</h1>
-    <p class="article__meta">記事の最終更新日: {checkedAt} ／ 情報源: 府中市・東京都公園協会 公式ページ（各出典の確認日は本文末に一覧）</p>
+  <Fragment slot="articleIntro">
+    <article class="article">
+      <p class="article__eyebrow"><a href={ROUTES.guideProcedures.path}>墓じまい・お墓の手続き 総合案内</a></p>
+      <h1>{pageTitle}</h1>
+      <p class="article__meta">記事の最終更新日: {checkedAt} ／ 情報源: 府中市・東京都公園協会 公式ページ（各出典の確認日は本文末に一覧）</p>
 
-    <section aria-labelledby="hakajimai-kaisou-what-heading">
-      <h2 id="hakajimai-kaisou-what-heading">これは何か</h2>
-      <p>改葬とは、遺骨を今のお墓から、別のお墓や納骨堂などへ移すことです。遺骨を移すには、原則として市区町村の許可が必要です。</p>
-      <p>
-        墓じまいとは、今ある墓石を撤去し、墓地を管理者へ返すことです。中に遺骨がある場合は、先に新しい納骨先を決め、遺骨を移す手続き（改葬）も必要になります。
-      </p>
-    </section>
+      <div
+        class="article__hero-photo article__hero-photo--compact"
+        style="background-image:url('/images/hero-cemetery-v1.png');background-position:center 65%;"
+      >
+        <p class="article__hero-photo__credit">画像はイメージです</p>
+      </div>
 
+      <section aria-labelledby="hakajimai-kaisou-what-heading">
+        <h2 id="hakajimai-kaisou-what-heading">墓じまいと改葬とは</h2>
+        <p>改葬とは、遺骨を今のお墓から、別のお墓や納骨堂などへ移すことです。遺骨を移すには、原則として市区町村の許可が必要です。</p>
+        <p>
+          墓じまいとは、今ある墓石を撤去し、墓地を管理者へ返すことです。中に遺骨がある場合は、先に新しい納骨先を決め、遺骨を移す手続き（改葬）も必要になります。
+        </p>
+      </section>
+    </article>
+  </Fragment>
+
+  <div class="article">
     <section aria-labelledby="hakajimai-kaisou-diff-heading">
-      <h2 id="hakajimai-kaisou-diff-heading">似た言葉との違い</h2>
+      <h2 id="hakajimai-kaisou-diff-heading">墓じまいと改葬の違い</h2>
       <p>
-        墓じまいは、墓石を撤去して墓地を返すことです。改葬は、遺骨を別の場所へ移すことです。多くの場合、墓じまいと改葬は一緒に進めます。ほかにも似た言葉があるので、まとめて違いを確認しましょう。
+        墓じまいは、墓石を撤去して墓地を返すことです。改葬は、遺骨を別の場所へ移すことです。多くの場合、墓じまいと改葬は一緒に進めます。この2つを中心に、関連の深い「承継」「墓所返還」も含めてまとめて確認しましょう。
       </p>
       <div class="article__table-scroll" tabindex="0" role="region" aria-label="似た言葉の違いの表（横スクロールできます）">
         <table>
@@ -97,7 +135,7 @@ const closureServiceQuery = 'grave_closure,reburial_support';
     </section>
 
     <section aria-labelledby="hakajimai-kaisou-when-heading">
-      <h2 id="hakajimai-kaisou-when-heading">どんなときに必要か</h2>
+      <h2 id="hakajimai-kaisou-when-heading">墓じまい・改葬を考える主な場面</h2>
       <p>次のような場合に、墓じまいや改葬を検討する方が多いようです。</p>
       <ul>
         <li>お墓を継ぐ人がいない、または今後いなくなる見込みがあるとき</li>
@@ -215,38 +253,42 @@ const closureServiceQuery = 'grave_closure,reburial_support';
         </a>
       </p>
     </section>
+  </div>
 
-    <section aria-labelledby="hakajimai-kaisou-sources-heading">
-      <h2 id="hakajimai-kaisou-sources-heading">情報源・更新日</h2>
-      <ul class="article__sources">
-        {fuchuReburial && (
-          <li>
-            <a href={fuchuReburial.url} rel="noopener" target="_blank">
-              {fuchuReburial.publisher}「{fuchuReburial.title}」
-            </a>
-            （最終確認日: {fuchuReburial.checked_at}）
-          </li>
-        )}
-        {tamaWorkNotice && (
-          <li>
-            <a href={tamaWorkNotice.url} rel="noopener" target="_blank">
-              {tamaWorkNotice.publisher}「{tamaWorkNotice.title}」
-            </a>
-            （最終確認日: {tamaWorkNotice.checked_at}）
-          </li>
-        )}
-        {tamaOfficial && (
-          <li>
-            <a href={tamaOfficial.url} rel="noopener" target="_blank">
-              {tamaOfficial.publisher}「{tamaOfficial.title}」
-            </a>
-            （最終確認日: {tamaOfficial.checked_at}）
-          </li>
-        )}
-      </ul>
-      <p><a href={ROUTES.about.path}>誤りに気づいた場合の訂正窓口はこちら</a></p>
-    </section>
-  </article>
+  <Fragment slot="articleTail">
+    <div class="article">
+      <section aria-labelledby="hakajimai-kaisou-sources-heading">
+        <h2 id="hakajimai-kaisou-sources-heading">情報源・更新日</h2>
+        <ul class="article__sources">
+          {fuchuReburial && (
+            <li>
+              <a href={fuchuReburial.url} rel="noopener" target="_blank">
+                {fuchuReburial.publisher}「{fuchuReburial.title}」
+              </a>
+              （最終確認日: {fuchuReburial.checked_at}）
+            </li>
+          )}
+          {tamaWorkNotice && (
+            <li>
+              <a href={tamaWorkNotice.url} rel="noopener" target="_blank">
+                {tamaWorkNotice.publisher}「{tamaWorkNotice.title}」
+              </a>
+              （最終確認日: {tamaWorkNotice.checked_at}）
+            </li>
+          )}
+          {tamaOfficial && (
+            <li>
+              <a href={tamaOfficial.url} rel="noopener" target="_blank">
+                {tamaOfficial.publisher}「{tamaOfficial.title}」
+              </a>
+              （最終確認日: {tamaOfficial.checked_at}）
+            </li>
+          )}
+        </ul>
+        <p><a href={ROUTES.about.path}>誤りに気づいた場合の訂正窓口はこちら</a></p>
+      </section>
+    </div>
+  </Fragment>
 </BaseLayout>
 
 <style>

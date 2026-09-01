@@ -3,62 +3,168 @@
  * 多磨霊園に眠る著名人｜公式案内図で巡る墓所ガイド。
  * 正本: src/lib/routes.ts ROUTES.guideFamousGraves（2026-08-27新設）。
  *
- * 【重要・意図的な範囲縮小について】
- * ユーザー指示では「公開済みの公式案内図に掲載されている著名人だけを対象に、
- * 12人程度・区画（区・種・側・番）まで表示する」ことが求められていた。
- * 実装時（2026-08-27）に以下を確認した:
- * - 東京都公園協会公式サイトの多磨霊園ページに、著名人一覧のHTMLページは
- *   見当たらなかった（園内案内図PDFの裏面に掲載がある旨はFAQで示唆されて
- *   いるが、そのPDF自体はこの実行環境でテキスト抽出・画像レンダリングが
- *   できず、内容を直接確認できなかった＝pdftoppm等が未導入）。
- * - Wikipedia「多磨霊園」記事には、区画番号付きの著名人一覧が存在した。
- *   しかしWikipediaは二次（三次）資料であり、ユーザー指示の
- *   「公式案内図や信頼できる一次資料で確認」という基準を満たさない。
- *   区画番号を誤って転記した場合、実在する（八柱・多磨霊園に縁のある）
- *   歴史上の人物の埋葬情報を誤って公開することになり、
- *   本サイト全体の「未確認情報を断定しない」という編集方針に反する。
+ * 完成化（2026-09-01、ミチの全体校正・指摘1対応）:
+ * 2026-08-27時点では、公式案内図PDFがこの実行環境でテキスト抽出できず、
+ * 個別の氏名・区画を掲載できなかった（下記「旧・意図的な範囲縮小について」
+ * 参照）。2026-09-01、Pythonの PyMuPDF ライブラリでPDFの単語座標を
+ * 直接読み取る方法に切り替えたところ、公式PDF内の「■著名人墓所」表
+ * （氏名・主要経歴・区・種・側・番）を機械的に抽出できることを確認したため、
+ * 本ページを完成させた。
  *
- * 上記の理由により、このページでは個別の氏名・区画番号を掲載せず、
- * 公式案内図・公式墓所ナビへの案内と、ページの構成（カテゴリー・
- * モデルコースの入れ物）だけを用意した。個別記事は、公式資料または
- * 信頼できる一次資料での確認が取れ次第、追記する。
+ * データの出典・検証方法・訂正箇所の詳細は
+ * src/pages/_lib/famous-graves-data.ts の先頭コメントを参照
+ * （143名全員を公式PDFのとおり収録しており、Claude独自の「有名度」による
+ * 取捨選択は行っていない。新旧2版のPDFを機械的に突き合わせ、一致しない
+ * 2件だけを個別に検証・記録した）。
+ *
+ * 旧・意図的な範囲縮小について（2026-08-27、参考として残す）:
+ * ユーザー指示では「公開済みの公式案内図に掲載されている著名人だけを対象に、
+ * 区画（区・種・側・番）まで表示する」ことが求められていた。実装時
+ * （2026-08-27）はPDFのテキスト抽出・画像レンダリングがこの実行環境で
+ * できず、内容を直接確認できなかったため、氏名・区画を掲載せず案内図への
+ * リンクだけを置いていた。Wikipediaの著名人一覧は二次資料であるため、
+ * 区画番号の転記には使わなかった。
+ *
+ * スポンサー分散レイアウト対応（2026-09-01、ミチの全体校正・指摘3対応）:
+ * 本文を3つに分け、BaseLayout.astroの`articleIntro`／既定／`articleTail`
+ * スロットへ渡すようにした（詳細はsrc/layouts/BaseLayout.astro該当コメント
+ * 参照）。articleIntro=「このページで分かること」（最初の内容ブロック）、
+ * 既定スロット=「著名人墓所一覧」〜「情報源・確認日」、articleTail=
+ * 「関連ページ」。見出し・本文・データは変更していない。
+ *
+ * モバイル最優先レビュー対応（2026-09-01）: 導入部に写真
+ * （hero-cemetery-photo-v2.png、/access/とは異なるクロップで再利用。
+ * 新規取得はしていない）を追加し、「墓参時の注意」を薄い暖色の注意欄
+ * （.article__callout--warm）にし、関連ページをカード化した。
+ * 見出し・本文・データは変更していない。
  */
 import '../../../styles/guide-article.css';
 import BaseLayout from '../../../layouts/BaseLayout.astro';
 import { ROUTES } from '../../../lib/routes';
 import { GUIDE_SOURCES } from '../../_lib/guide-sources';
+import { FAMOUS_GRAVES } from '../../_lib/famous-graves-data';
 
 const pageTitle = '多磨霊園に眠る著名人｜公式案内図で巡る墓所ガイド';
 const description =
-  '多磨霊園に墓所がある著名人について、公式案内図・公式墓所ナビで確認できる範囲をご案内します。個別の氏名・区画は、一次資料での確認が取れたものから順次掲載します。';
+  '多磨霊園にある著名人の墓所を、東京都公園協会の公式案内図に掲載されている範囲でご案内します。氏名・分野・墓所の場所（区・種・側・番）は公式資料の表記のとおりです。';
 
-const checkedAt = '2026-08-27';
+const checkedAt = '2026-09-01';
 
-const categories = [
-  { id: 'literature', heading: '文学者' },
-  { id: 'politics', heading: '政治家・歴史上の人物' },
-  { id: 'arts', heading: '芸術家・芸能関係' },
-  { id: 'science', heading: '科学者・教育者' },
-] as const;
+// 公式PDF内の五十音インデックス（ア・カ・サ・タ・ナ・ハ・マ・ヤ・ワ）の順に
+// そのままグループ化する。当サイト独自の分類・並べ替えは行っていない。
+const kanaOrder = ['ア', 'カ', 'サ', 'タ', 'ナ', 'ハ', 'マ', 'ヤ', 'ワ'] as const;
+const groups = kanaOrder
+  .map((kana) => ({ kana, entries: FAMOUS_GRAVES.filter((entry) => entry.kana === kana) }))
+  .filter((group) => group.entries.length > 0);
+
+function formatPlot(entry: (typeof FAMOUS_GRAVES)[number]): string {
+  return `${entry.block}区 ${entry.section}種 ${entry.side}側 ${entry.number}番`;
+}
 ---
 
 <BaseLayout title={pageTitle} description={description}>
-  <article class="article">
-    <p class="article__eyebrow"><a href={ROUTES.guide.path}>多磨霊園ガイド</a> ／ 多磨霊園の歴史・著名人</p>
-    <h1>{pageTitle}</h1>
-    <p class="article__meta">確認日: {checkedAt}</p>
+  <Fragment slot="articleIntro">
+    <article class="article">
+      <p class="article__eyebrow"><a href={ROUTES.guide.path}>多磨霊園ガイド</a> ／ 多磨霊園の歴史・著名人</p>
+      <h1>{pageTitle}</h1>
+      <p class="article__meta">確認日: {checkedAt} ／ 情報源: 東京都公園協会公式サイト（本文末に一覧）</p>
 
-    <section aria-labelledby="famous-status-heading">
-      <h2 id="famous-status-heading">このページについて（確認状況）</h2>
+      <div class="article__hero-photo" style="background-image:url('/images/hero-cemetery-photo-v2.png');background-position:center 30%;">
+        <p class="article__hero-photo__credit">画像はイメージです</p>
+      </div>
+
+      <section aria-labelledby="famous-about-heading">
+        <h2 id="famous-about-heading">このページで分かること</h2>
+        <p>
+          多磨霊園には、政治・学問・文学・芸術・芸能などさまざまな分野で知られる方の墓所があります。このページでは、東京都公園協会が発行する公式案内図に掲載されている著名人{FAMOUS_GRAVES.length}名の氏名・主な分野・墓所の場所（区・種・側・番）を、公式案内図の表記のとおりにまとめています。
+        </p>
+        <p>
+          当サイトが独自に「有名かどうか」を判断して人選したものではなく、公式案内図に載っている方をそのまま掲載しています。公式案内図には、ご遺族の意向で掲載されていない墓所があることも公式サイトで案内されています（本文末「墓参時の注意」参照）。そのため、このページの一覧がすべての著名人を網羅しているわけではありません。
+        </p>
+      </section>
+    </article>
+  </Fragment>
+
+  <div class="article">
+    <section aria-labelledby="famous-list-heading">
+      <h2 id="famous-list-heading">著名人墓所一覧</h2>
       <p>
-        多磨霊園には、文学・政治・芸術・学術などさまざまな分野で知られる方の墓所があることが広く知られています。ただし当サイトでは、個別の氏名・墓所の区画（区・種・側・番）について、公式案内図または信頼できる一次資料で確認が取れたものだけを掲載する方針です。
+        公式案内図の五十音順のまま、{groups.length}のグループに分けています。見出しを選ぶと、その範囲の一覧が開きます。
       </p>
+      {
+        groups.map((group) => (
+          <details class="detail-table">
+            <summary>「{group.kana}」から始まる方（{group.entries.length}名）を見る</summary>
+            <div class="article__table-scroll" tabindex="0" role="region" aria-label={`「${group.kana}」の著名人墓所一覧の表（横スクロールできます）`}>
+              <table>
+                <caption class="sr-only">「{group.kana}」から始まる著名人の墓所一覧</caption>
+                <thead>
+                  <tr>
+                    <th scope="col">氏名</th>
+                    <th scope="col">主な分野</th>
+                    <th scope="col">墓所の場所</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {group.entries.map((entry) => (
+                    <tr>
+                      <th scope="row">{entry.name.replace(new RegExp('　', 'g'), ' ')}</th>
+                      <td>{entry.career}</td>
+                      <td>{formatPlot(entry)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </details>
+        ))
+      }
+    </section>
+
+    <section aria-labelledby="famous-howto-heading">
+      <h2 id="famous-howto-heading">墓所の探し方</h2>
       <p>
-        東京都公園協会の公式ページ・FAQでは、園内案内図に著名人の墓所案内が掲載されている旨が示されていますが、当サイトの制作時点ではPDF形式の案内図の内容を直接確認できなかったため、個別の氏名・区画はまだ掲載していません。確認が取れ次第、このページに追記します。
+        上の一覧にある「区・種・側・番」は、墓所の場所を表す公式の住所のようなものです。控えてから、次のいずれかの方法で場所を確認できます。
       </p>
-      <p>
-        今すぐ特定の方の墓所を探したい場合は、下記の公式案内図・公式墓所ナビをご利用ください。
-      </p>
+      <ul>
+        <li>
+          <a
+            href={GUIDE_SOURCES.tamaHakaNavi.url}
+            rel="noopener"
+            target="_blank"
+            data-event="official_procedure_click"
+            data-authority="tokyo_park_association"
+            data-topic="famous_graves_haka_navi_howto">公式墓所ナビ</a
+          >で「区・種・側・番」を入力すると、園内の地図上で位置を確認できます。
+        </li>
+        <li>
+          下記の公式園内案内図（PDF）でも、区の位置関係を確認できます。園内の案内所（正門を入ってすぐ右側の管理事務所）でも紙の案内図を確認できます。
+        </li>
+      </ul>
+    </section>
+
+    <section aria-labelledby="famous-manner-heading">
+      <h2 id="famous-manner-heading">墓参時の注意</h2>
+      <div class="article__callout article__callout--warm">
+        <p class="article__callout__eyebrow">お出かけ前に</p>
+        <p>
+          東京都公園協会の公式ページでは、霊園を訪れる際のマナーとして次のような点が案内されています。
+        </p>
+        <ul>
+          <li>霊園は慰霊の場所であり、節度をもって静かに散策すること。</li>
+          <li>許可なく他人の墓所に立ち入らないこと。</li>
+          <li>園内道路を横断するときは、車に注意すること（一般車両も通行します）。</li>
+          <li>ごみは持ち帰り、草花や生き物を採ったり、生き物にえさを与えたりしないこと。</li>
+          <li>貴重品の管理など、防犯にも注意すること。</li>
+        </ul>
+        <p>
+          また、一部の墓所はご遺族の意向により公式案内図に掲載されていないことも、公式ページで案内されています。掲載されている場合でも、個人のお墓であることに変わりはないため、静かに見学しましょう。
+        </p>
+      </div>
+    </section>
+
+    <section aria-labelledby="famous-map-heading">
+      <h2 id="famous-map-heading">公式案内図</h2>
       <div class="article__button-row">
         <a
           class="article__button"
@@ -79,31 +185,17 @@ const categories = [
           data-topic="famous_graves_haka_navi">公式墓所ナビを開く</a
         >
       </div>
-    </section>
-
-    <section aria-labelledby="famous-categories-heading">
-      <h2 id="famous-categories-heading">カテゴリー（準備中）</h2>
-      <p>今後、確認が取れた方から順にカテゴリーごとへ追記していきます。</p>
-      <ul class="article__category-list">
-        {categories.map((category) => <li>{category.heading} — 確認中</li>)}
-      </ul>
-    </section>
-
-    <section aria-labelledby="famous-course-heading">
-      <h2 id="famous-course-heading">モデルコースについて</h2>
-      <p>
-        「文学者を巡るコース」「歴史上の人物を巡るコース」のようなモデルコースも用意する予定です。徒歩時間・経路は当サイトで推測せず、公式墓所ナビでの経路検索結果、または現地での確認に基づいて作成します。
-      </p>
+      <p class="article__note">地図・案内図はいずれも公式サイトへのリンクです。画像としての保存・転載はしていません。</p>
     </section>
 
     <section aria-labelledby="famous-sources-heading">
-      <h2 id="famous-sources-heading">情報源</h2>
+      <h2 id="famous-sources-heading">情報源・確認日</h2>
       <ul class="article__sources">
         <li>
           <a href={GUIDE_SOURCES.tamaMapPdf.url} rel="noopener" target="_blank">
             {GUIDE_SOURCES.tamaMapPdf.publisher}「{GUIDE_SOURCES.tamaMapPdf.title}」
           </a>
-          （最終確認日: {GUIDE_SOURCES.tamaMapPdf.checkedAt}）
+          （最終確認日: {GUIDE_SOURCES.tamaMapPdf.checkedAt}） — 著名人墓所一覧（氏名・主要経歴・区・種・側・番）の出典
         </li>
         <li>
           <a href={GUIDE_SOURCES.tamaHakaNavi.url} rel="noopener" target="_blank">
@@ -111,24 +203,27 @@ const categories = [
           </a>
           （最終確認日: {GUIDE_SOURCES.tamaHakaNavi.checkedAt}）
         </li>
+        <li>
+          <a href={GUIDE_SOURCES.tamaTourManner.url} rel="noopener" target="_blank">
+            {GUIDE_SOURCES.tamaTourManner.publisher}「{GUIDE_SOURCES.tamaTourManner.title}」
+          </a>
+          （最終確認日: {GUIDE_SOURCES.tamaTourManner.checkedAt}） — 「墓参時の注意」の出典
+        </li>
       </ul>
       <p><a href={ROUTES.about.path}>掲載してほしい情報・訂正のご連絡はこちら</a></p>
     </section>
+  </div>
 
-    <section aria-labelledby="famous-related-heading">
-      <h2 id="famous-related-heading">関連ページ</h2>
-      <ul>
-        <li><a href={ROUTES.guideHistory.path}>多磨霊園の歴史を見る</a></li>
-        <li><a href={ROUTES.access.path}>多磨霊園への行き方を見る</a></li>
-        <li><a href={ROUTES.guide.path}>多磨霊園ガイド一覧を見る</a></li>
-      </ul>
-    </section>
-  </article>
+  <Fragment slot="articleTail">
+    <div class="article">
+      <section aria-labelledby="famous-related-heading">
+        <h2 id="famous-related-heading">関連ページ</h2>
+        <ul class="article__related-grid">
+          <li><a class="article__related-card" href={ROUTES.guideHistory.path}>多磨霊園の歴史を見る</a></li>
+          <li><a class="article__related-card" href={ROUTES.access.path}>多磨霊園への行き方を見る</a></li>
+          <li><a class="article__related-card" href={ROUTES.guide.path}>多磨霊園ガイド一覧を見る</a></li>
+        </ul>
+      </section>
+    </div>
+  </Fragment>
 </BaseLayout>
-
-<style>
-  .article__category-list {
-    padding-left: 1.2em;
-    color: var(--color-stone-text, var(--color-text-muted));
-  }
-</style>

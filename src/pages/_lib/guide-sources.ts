@@ -29,13 +29,31 @@ export const GUIDE_SOURCES = {
     publisher: '公益財団法人東京都公園協会',
     title: '多磨霊園 園内マップ（日本語）PDF',
     url: 'https://www.tokyo-park.or.jp/reien/tama/assets/%E5%9C%92%E5%86%85%E3%83%9E%E3%83%83%E3%83%97%EF%BC%88%E6%97%A5%E6%9C%AC%E8%AA%9E%EF%BC%89_2.pdf',
-    checkedAt: '2026-08-27',
+    checkedAt: '2026-09-01',
   },
   tamaHakaNavi: {
     publisher: '公益財団法人東京都公園協会',
     title: '多磨霊園 墓所ナビ（経路案内）',
     url: 'https://boshu.tokyo-park-reien.jp/map/tamareien',
-    checkedAt: '2026-08-27',
+    checkedAt: '2026-09-01',
+  },
+  tamaTourManner: {
+    publisher: '公益財団法人東京都公園協会',
+    title: '霊園めぐりのおすすめとマナー',
+    url: 'https://www.tokyo-park.or.jp/reien/tour/index.html',
+    checkedAt: '2026-09-01',
+  },
+  tamaFaq: {
+    publisher: '公益財団法人東京都公園協会',
+    title: 'よくあるご質問 - ご利用について',
+    url: 'https://www.tokyo-park.or.jp/reien/faq/',
+    checkedAt: '2026-09-01',
+  },
+  tamaHiganNotice2026Sep: {
+    publisher: '公益財団法人東京都公園協会',
+    title: '多磨霊園「９月お彼岸期間の開閉門時間とみたま堂（献花台）について」',
+    url: 'https://www.tokyo-park.or.jp/reien/tama/news/2026/park_info_1_1_2.html',
+    checkedAt: '2026-09-01',
   },
   googleMapsTama: {
     publisher: 'Google マップ',
