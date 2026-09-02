@@ -67,6 +67,23 @@
  * 既存イベント名のまま分析できるようにした（新しいイベント名は
  * 追加していない）。
  *
+ * グループ見出しの構造的な整列修正・表記見直し（2026-09-02、「説明文の
+ * 簡素化とTOP条件選択UIの位置ずれ」対応）:
+ * - <fieldset>/<legend>のブラウザ既定スタイル（fieldsetのborder・padding・
+ *   min-inline-size、legendが枠線に重なる特殊配置）が原因で、3つの
+ *   グループ見出しの左端・上下位置がそろわず、見出しが枠線に食い込んで
+ *   見える不具合があった。数値の微調整ではなく、fieldset自体は
+ *   border:0・padding:0・min-width:0で完全にリセットして透明な箱に戻し、
+ *   背景色・枠線は見出し（legend）の下に置く別要素
+ *   （.service-filter__checks、選択肢コンテナ）へ移す構造に変更した
+ *   （詳細は下記CSSコメント参照）。
+ * - チェック項目のグリッドを、ラベルの文字数で列数が変わるauto-fillから、
+ *   769px以上3列・481〜768px2列・480px以下1列の共通グリッドに変更した。
+ * - 見出し文言「くわしい条件から選ぶ」→「さらに条件を選ぶ」に変更した
+ *   （TOP上部の「お墓について、何をご希望ですか？」との重複感・
+ *   操作説明的な響きを減らすため）。絞り込みロジック・ServiceKey・
+ *   チェックボックスの構造・GA4イベントは変更していない。
+ *
  * スポンサー条件付き上位表示（2026-08-27追加、mode="inline"のみ対象）:
  * - 「以前確定した仕様」に基づく。条件未選択時は通常掲載順を完全に維持し、
  *   スポンサーだからといって無条件で上位表示しない。
@@ -191,7 +208,7 @@ const businessFilterData = businesses.map((business) => ({
   <hr class="masonry-rule" />
 
   <details class="service-filter__detail" open={mode === 'inline' || openByDefault}>
-    <summary class="service-filter__detail-summary">くわしい条件から選ぶ</summary>
+    <summary class="service-filter__detail-summary">さらに条件を選ぶ</summary>
     <div class="service-filter__groups">
       {
         PURPOSE_GROUPS.map((group) => (
@@ -584,36 +601,75 @@ const businessFilterData = businesses.map((business) => ({
     padding-top: var(--space-3);
   }
 
-  /* モバイル最優先レビュー対応（2026-09-01）: 12項目が単調なチェックボックス
-     一覧に見えないよう、3つの目的（PURPOSE_GROUPS）ごとに薄い緑地の
-     グループ枠で区切る。絞り込みロジック・チェックボックスの構造・
-     data属性は変更していない（見た目の区切りを追加しただけ）。 */
+  /*
+   * グループ見出し（fieldset/legend）の構造的な修正（2026-09-02、
+   * 「TOP条件選択のグループ見出しを整列」節）。
+   *
+   * 原因: <fieldset>にはブラウザ既定のborder（groove等）・padding・
+   * min-inline-size: min-contentがあり、<legend>には既定でその境界線に
+   * 重ねて配置される特殊なレンダリングがある。従来はfieldset自体に
+   * 背景色・枠線・paddingを与えていたため、legendがその枠線に食い込み、
+   * 左端・上下位置がブラウザ依存でずれていた。
+   *
+   * 修正方針: fieldset自体の既定スタイルを完全にリセットして「意味付け
+   * だけを持つ透明な箱」に戻し、背景色・枠線は見出し（legend）の下に
+   * 置く別要素（.service-filter__checks、選択肢コンテナ）へ移した。
+   * これにより「見出し→選択肢の枠→次の見出し→次の枠」という順序が
+   * 構造的に（数値の微調整ではなく）明確になる。
+   */
   .service-filter__group {
+    /* グループ間の余白は、親.service-filter__groups（flex column）の
+       gapだけで統一する（marginを併用すると値が二重になるため使わない）。 */
     margin: 0;
-    padding: var(--space-3) var(--space-4) var(--space-4);
-    border: 1px solid var(--color-tint-green-border);
-    border-radius: var(--radius-card, 10px);
-    background: var(--color-tint-green-bg);
+    padding: 0;
+    border: 0;
+    min-width: 0;
   }
 
   .service-filter__group-legend {
-    padding: 0 0 var(--space-2);
+    display: block;
+    float: none;
+    width: 100%;
+    padding: 0;
+    /* 見出しから選択肢コンテナまでの間隔を3グループとも同じ値にする。 */
+    margin: 0 0 var(--space-3);
     font-family: var(--font-family-heading);
     font-weight: 700;
     color: var(--color-text);
     font-size: 1rem;
   }
 
+  /* 選択肢コンテナ（背景色・枠線はfieldsetからここへ移した）。
+     チェック項目は768px超で3列、481〜768pxで2列、480px以下で1列の
+     共通グリッドを使う（文字数に応じたauto-fill等の可変列数はやめ、
+     3グループで列数がそろうようにする）。 */
   .service-filter__checks {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    grid-template-columns: 1fr;
     gap: var(--space-2);
+    padding: var(--space-4);
+    border: 1px solid var(--color-tint-green-border);
+    border-radius: var(--radius-card, 10px);
+    background: var(--color-tint-green-bg);
+  }
+
+  @media (min-width: 481px) {
+    .service-filter__checks {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  @media (min-width: 769px) {
+    .service-filter__checks {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
   }
 
   .service-check {
     display: flex;
     align-items: center;
     gap: var(--space-2);
+    height: 100%;
     min-height: var(--tap-target-min);
     padding: 0.6em var(--space-3);
     border: 1px solid var(--color-border);

@@ -19,6 +19,17 @@
  * 同じ連絡先へのご案内にとどまる）。そのため現時点では特定商取引法上の
  * 表示義務の対象外と考えられるが、法的判断そのものはこのページで断定せず、
  * 該当性の要否は別途最終報告で申し送る。
+ *
+ * 説明文の簡素化（2026-09-02、「説明文の簡素化とTOP条件選択UIの位置ずれ」
+ * 対応）: 「サイトの目的」は、東京都・多磨霊園・東京都公園協会との関係を
+ * 説明する長い段落（委託や公認を受けていない・公式サイトを模倣していない・
+ * ロゴを使用していない等の説明）をやめ、指定の簡潔な1文へ置き換えた。
+ * これらの事実関係そのものは削除しておらず、/about/（掲載方針ページ）の
+ * 「運営者について」に1回だけ残している（CLAUDE.md 2章「表記・信頼性」の
+ * 誤認防止方針は維持し、同じ説明をこのページとフッターで繰り返さない）。
+ * 下部のリンクも「掲載方針・情報源」「訂正・お問い合わせ」
+ * 「プライバシーポリシー」の3つに絞った（このページ自身への
+ * 「運営者情報」リンクは含めない）。
  */
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import { siteConfig } from '../../lib/siteConfig';
@@ -58,16 +69,12 @@ const browserTitle = `${pageTitle}｜多磨霊園 お墓ガイド`;
   <section aria-labelledby="operator-purpose-heading">
     <h2 id="operator-purpose-heading">サイトの目的</h2>
     <p>
-      {siteConfig.name}は、多磨霊園周辺の石材店・お墓関連事業者を、公開情報のみで独自に調査・整理して紹介する民間の情報サイトです。運営者（{siteConfig.operator.name}）は、東京都・多磨霊園・東京都公園協会のいずれとも異なる独立した事業者であり、これらの機関からの委託や公認を受けたものではありません。当サイトの名称・デザインは、これらの機関の公式サイトを模倣したものではなく、ロゴ等の使用もしていません。
+      多磨霊園 お墓ガイドは、墓石の建立・修理、墓じまい、清掃・管理など、必要な情報と相談先を探せる地域ガイドです。株式会社サンアローズが運営しています。
     </p>
-  </section>
-
-  <section aria-labelledby="operator-links-heading">
-    <h2 id="operator-links-heading">関連ページ</h2>
     <ul class="article__related-grid">
-      <li><a class="article__related-card" href={ROUTES.about.path}>掲載基準・広告方針を見る</a></li>
-      <li><a class="article__related-card" href={ROUTES.about.path}>掲載情報の訂正・お問い合わせ</a></li>
-      <li><a class="article__related-card" href={ROUTES.privacy.path}>プライバシーポリシーを見る</a></li>
+      <li><a class="article__related-card" href={ROUTES.about.path}>掲載方針・情報源</a></li>
+      <li><a class="article__related-card" href={`${ROUTES.about.path}#correction-heading`}>訂正・お問い合わせ</a></li>
+      <li><a class="article__related-card" href={ROUTES.privacy.path}>プライバシーポリシー</a></li>
     </ul>
   </section>
 </BaseLayout>
