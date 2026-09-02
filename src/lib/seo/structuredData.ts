@@ -27,17 +27,49 @@ import { buildCanonicalUrl } from './canonical';
 export type JsonLd = Record<string, unknown>;
 
 /**
- * サイト運営主体（比較サイトそのもの）を表す`Organization`。
- * 個別事業者（掲載事業者）とは別エンティティであることを明確にするため、
- * 掲載事業者の構造化データとは常に別オブジェクトとして生成する。
+ * サイトの運営法人を表す`Organization`。
+ *
+ * 2026-09-02（ナビゲーション・運営者表示・SEO/AIO監査対応）: 従来は
+ * サイトのブランド名（siteConfig.name＝「多磨霊園 お墓ガイド」）を
+ * `Organization`の`name`に使っていたが、これは「サイト」と「運営法人」を
+ * 混同する実装だった。ユーザーから確定情報として示された運営法人
+ * （`siteConfig.operator`＝株式会社サンアローズ、会社公式URL）を
+ * `Organization`として発行し、サイトそのものは別途`buildWebSiteJsonLd()`
+ * （`WebSite`、`publisher`でこの`Organization`を参照）として発行する
+ * 構成に変更した。所在地・代表者名・電話番号・法人番号等、確認できない
+ * 情報は追加しない。
+ *
+ * 個別事業者（掲載事業者、`LocalBusiness`）とは別エンティティであることを
+ * 明確にするため、掲載事業者の構造化データとは常に別オブジェクトとして
+ * 生成する。
  */
 export function buildOrganizationJsonLd(): JsonLd {
   return {
     '@context': 'https://schema.org',
     '@type': 'Organization',
+    name: siteConfig.operator.name,
+    url: siteConfig.operator.url,
+  };
+}
+
+/**
+ * サイトそのものを表す`WebSite`（2026-09-02追加）。
+ * `publisher`として運営法人（`Organization`）を参照する。`potentialAction`
+ * （サイト内検索のSearchAction等）は、サイト内検索機能が実際には存在
+ * しないため追加しない（画面にない機能を構造化データにだけ書かない）。
+ */
+export function buildWebSiteJsonLd(): JsonLd {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'WebSite',
     name: siteConfig.name,
     url: buildCanonicalUrl('/'),
     description: siteConfig.subtitle,
+    publisher: {
+      '@type': 'Organization',
+      name: siteConfig.operator.name,
+      url: siteConfig.operator.url,
+    },
   };
 }
 
@@ -219,8 +251,8 @@ export function buildArticleJsonLd(input: ArticleJsonLdInput): JsonLd {
     },
     publisher: {
       '@type': 'Organization',
-      name: siteConfig.name,
-      url: buildCanonicalUrl('/'),
+      name: siteConfig.operator.name,
+      url: siteConfig.operator.url,
     },
   };
   if (input.image) {

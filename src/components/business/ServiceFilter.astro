@@ -24,6 +24,49 @@
  * JS無効でも「選べる」こと自体は壊れないが、実際の絞り込み・件数更新・
  * グリッドの表示切替はJS前提であるため<noscript>で明示する。
  *
+ * 見出し文言・目的カードのUI強化（2026-09-02、ナビゲーション・運営者
+ * 表示・SEO/AIO監査対応「TOPの目的選択の言葉」「3つの目的カードを
+ * 選択UIとして明確にする」節）:
+ * - 見出しを「まず、近いものを選んでください」→「お墓について、
+ *   何をご希望ですか？」、補足を「選ぶと、下の『くわしい条件』が
+ *   自動でチェックされます。あとから条件を追加・変更することもできます。」
+ *   →「当てはまる内容を選ぶと、関連する条件が表示されます。あとから
+ *   詳しい条件を追加できます。」に変更した（画面の構造を説明する
+ *   表現をやめ、利用者の目的を尋ねる文言にした）。この文言はTOP
+ *   （mode="link"）・/sekizaiten/（mode="inline"）の両方で共有される。
+ * - 目的カード（.purpose-card）はもともと<button type="button">実装
+ *   だったため、「カード全体をbuttonにする」「PCでcursor:pointer」は
+ *   既存のまま満たしていた。今回追加したのは、(1)カード下部に
+ *   「この内容から探す →」という操作文（.purpose-card__cta）、
+ *   (2)選択状態をチェックボックスとの同期で判定し、aria-pressed・
+ *   `.is-selected`（背景色・枠線・チェックマーク）で示す仕組み、
+ *   (3)hover時の枠線・影・矢印の変化。カードはgrid直下の子要素のため、
+ *   同じ行の高さはCSS Grid既定のalign-items:stretchで既にそろっている
+ *   （追加のCSSは不要）。
+ * - 「選択状態の判定」は、そのグループのserviceKeysが1つでもチェック
+ *   されていれば「選択中」とみなす（複数目的の同時選択を維持するため、
+ *   AND一致ではなくOR一致で判定する）。チェックボックスを直接操作した
+ *   場合も、この判定を再計算してカードの見た目に反映する（目的カードと
+ *   詳細条件チェックボックスの状態を常に同期させる）。
+ *
+ * GA4イベント重複送信の修正（2026-09-02、同対応「GA4実装監査」節）:
+ * 従来、チェックボックス自体に`data-event="comparison_filter_use"`を
+ * 付けていたため、1回のクリックで「click」「change」の両方のイベントを
+ * 拾う汎用ディスパッチャ（src/lib/analytics/dispatcher.ts）が同じ内容の
+ * イベントを2回送信していた（チェックボックスはクリックで
+ * checked状態が変わるとclick・changeの両方が発火するため）。
+ * 目的ボタン・クリアボタンは<button>要素でchangeイベントを持たないため
+ * この問題は起きないが、挙動を統一するため、3つの操作すべてで
+ * 汎用ディスパッチャに頼らず、このコンポーネント自身のJSから
+ * `trackComparisonFilterUse()`を直接1回だけ呼び出す方式に統一した
+ * （チェックボックス・目的ボタン・クリアボタンいずれの
+ * `data-event`/`data-filter-type`/`data-filter-value`属性も削除した）。
+ * 併せて、`selected_count`（送信時点で選択中の詳細条件数）・
+ * `result_count`（絞り込み後の該当件数）をパラメータへ追加し、
+ * 「絞り込み後の該当件数」「0件になった検索（result_count===0）」を
+ * 既存イベント名のまま分析できるようにした（新しいイベント名は
+ * 追加していない）。
+ *
  * スポンサー条件付き上位表示（2026-08-27追加、mode="inline"のみ対象）:
  * - 「以前確定した仕様」に基づく。条件未選択時は通常掲載順を完全に維持し、
  *   スポンサーだからといって無条件で上位表示しない。
@@ -111,10 +154,10 @@ const businessFilterData = businesses.map((business) => ({
 >
   <div class="service-filter__purpose">
     <h2 id="service-filter-heading" class="service-filter__heading">
-      まず、近いものを選んでください
+      お墓について、何をご希望ですか？
     </h2>
     <p class="service-filter__hint">
-      選ぶと、下の「くわしい条件」が自動でチェックされます。あとから条件を追加・変更することもできます。
+      当てはまる内容を選ぶと、関連する条件が表示されます。あとから詳しい条件を追加できます。
     </p>
     <div class="service-filter__purpose-grid">
       {
@@ -123,13 +166,22 @@ const businessFilterData = businesses.map((business) => ({
             type="button"
             class="purpose-card"
             data-purpose-button
+            data-purpose-id={group.id}
             data-purpose-services={group.serviceKeys.join(',')}
-            data-event="comparison_filter_use"
-            data-filter-type="purpose"
-            data-filter-value={group.id}
+            aria-pressed="false"
           >
             <span class="purpose-card__heading">{group.heading}</span>
             <span class="purpose-card__description">{group.description}</span>
+            <span class="purpose-card__cta" aria-hidden="true">
+              この内容から探す
+              <svg width="14" height="14" viewBox="0 0 20 20" focusable="false">
+                <path d="M5 3 L14 10 L5 17" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" />
+              </svg>
+            </span>
+            <svg class="purpose-card__check" width="20" height="20" viewBox="0 0 20 20" aria-hidden="true" focusable="false">
+              <circle cx="10" cy="10" r="9" fill="currentColor" />
+              <path d="M6 10.5 L8.7 13 L14 7" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+            </svg>
           </button>
         ))
       }
@@ -148,15 +200,7 @@ const businessFilterData = businesses.map((business) => ({
             <div class="service-filter__checks">
               {group.serviceKeys.map((key) => (
                 <label class="service-check" data-service-check>
-                  <input
-                    type="checkbox"
-                    name="service"
-                    value={key}
-                    data-filter-checkbox
-                    data-event="comparison_filter_use"
-                    data-filter-type="service"
-                    data-filter-value={key}
-                  />
+                  <input type="checkbox" name="service" value={key} data-filter-checkbox />
                   <span class="service-check__label">{SERVICE_LABELS[key]}</span>
                 </label>
               ))}
@@ -172,14 +216,7 @@ const businessFilterData = businesses.map((business) => ({
       選んだ条件について対応を確認できた石材店 <strong data-result-count>{businesses.length}</strong
       >件
     </p>
-    <button
-      type="button"
-      class="service-filter__clear"
-      data-filter-clear
-      data-event="comparison_filter_use"
-      data-filter-type="clear"
-      data-filter-value="all"
-    >
+    <button type="button" class="service-filter__clear" data-filter-clear>
       条件をクリア
     </button>
     {
@@ -207,6 +244,8 @@ const businessFilterData = businesses.map((business) => ({
   />
 
   <script>
+    import { trackComparisonFilterUse } from '../../lib/analytics/events';
+
     interface FilterBusiness {
       id: string;
       services: string[];
@@ -231,6 +270,32 @@ const businessFilterData = businesses.map((business) => ({
       const mode = root.getAttribute('data-filter-mode');
       const targetPath = root.getAttribute('data-filter-target') || '';
       const ctaLink = root.querySelector('[data-filter-cta]');
+      const pagePath = window.location.pathname;
+
+      function track(filterType: string, filterValue: string, selectedCount: number, resultCount: number): void {
+        trackComparisonFilterUse({
+          filter_type: filterType,
+          filter_value: filterValue,
+          page_path: pagePath,
+          selected_count: selectedCount,
+          result_count: resultCount,
+        });
+      }
+
+      // 目的カード（.purpose-card）の選択状態表示（2026-09-02追加）。
+      // そのグループのserviceKeysのうち1つでも選択中ならカードを
+      // 「選択中」として示す（OR一致。AND一致にすると、目的カードが
+      // 対応する複数キーの一部だけを個別チェックボックスで選んだ場合に
+      // 見た目が一切変化せず分かりにくいため）。目的カード経由の選択・
+      // チェックボックス直接操作のどちらの後でも呼び出し、常に同期させる。
+      function syncPurposeButtons(selected: Set<string>): void {
+        purposeButtons.forEach((btn) => {
+          const keys = (btn.getAttribute('data-purpose-services') || '').split(',').filter(Boolean);
+          const isSelected = keys.some((key) => selected.has(key));
+          btn.classList.toggle('is-selected', isSelected);
+          btn.setAttribute('aria-pressed', String(isSelected));
+        });
+      }
       // 0件メッセージ・事業者グリッドは、externalGrid（ServiceFilter.astro
       // 側のprops参照）が使われるページ（/sekizaiten/）では、この
       // <section>の外（BaseLayout.astroの`beforeSponsor`分割の「後半」側）
@@ -245,7 +310,7 @@ const businessFilterData = businesses.map((business) => ({
         return new Set(checkboxes.filter((cb) => cb.checked).map((cb) => cb.value));
       }
 
-      function applyFilter(): void {
+      function applyFilter(): number {
         const selected = getSelected();
         const hasSelection = selected.size > 0;
 
@@ -253,6 +318,8 @@ const businessFilterData = businesses.map((business) => ({
           const label = cb.closest('[data-service-check]');
           if (label) label.classList.toggle('is-selected', cb.checked);
         });
+
+        syncPurposeButtons(selected);
 
         const matchIds: Set<string> = !hasSelection
           ? new Set(businessData.map((b) => b.id))
@@ -325,9 +392,20 @@ const businessFilterData = businesses.map((business) => ({
             ctaLink.setAttribute('href', targetPath);
           }
         }
+
+        return matchIds.size;
       }
 
-      checkboxes.forEach((cb) => cb.addEventListener('change', applyFilter));
+      // GA4イベントは、汎用ディスパッチャ（data-event属性・click/change委譲）
+      // には委ねず、ここで明示的に1操作につき1回だけ送信する
+      // （チェックボックスの場合、data-event属性を付けるとclick/changeの
+      // 両方から二重送信されるバグがあったため。上記コメント参照）。
+      checkboxes.forEach((cb) =>
+        cb.addEventListener('change', () => {
+          const resultCount = applyFilter();
+          track('service', cb.value, getSelected().size, resultCount);
+        }),
+      );
 
       purposeButtons.forEach((btn) => {
         btn.addEventListener('click', () => {
@@ -335,7 +413,8 @@ const businessFilterData = businesses.map((business) => ({
           checkboxes.forEach((cb) => {
             cb.checked = keys.includes(cb.value);
           });
-          applyFilter();
+          const resultCount = applyFilter();
+          track('purpose', btn.getAttribute('data-purpose-id') || '', getSelected().size, resultCount);
         });
       });
 
@@ -344,7 +423,8 @@ const businessFilterData = businesses.map((business) => ({
           checkboxes.forEach((cb) => {
             cb.checked = false;
           });
-          applyFilter();
+          const resultCount = applyFilter();
+          track('clear', 'all', 0, resultCount);
         });
       }
 
@@ -397,6 +477,7 @@ const businessFilterData = businesses.map((business) => ({
   }
 
   .purpose-card {
+    position: relative;
     display: flex;
     flex-direction: column;
     gap: var(--space-2);
@@ -411,12 +492,18 @@ const businessFilterData = businesses.map((business) => ({
     min-height: var(--tap-target-min);
     transition:
       background-color 0.15s ease,
-      border-color 0.15s ease;
+      border-color 0.15s ease,
+      box-shadow 0.15s ease;
   }
 
   .purpose-card:hover {
     background: var(--color-surface);
     border-color: var(--color-accent);
+    box-shadow: 0 2px 8px rgba(41, 44, 41, 0.1);
+  }
+
+  .purpose-card:hover .purpose-card__cta svg {
+    transform: translateX(3px);
   }
 
   .purpose-card:focus-visible {
@@ -424,16 +511,55 @@ const businessFilterData = businesses.map((business) => ({
     outline-offset: 2px;
   }
 
+  /* 選択状態（2026-09-02追加）。チェックマーク（右上）・背景色・枠線で示す。
+     aria-pressedと連動させ、スクリーンリーダーにも選択状態を伝える。 */
+  .purpose-card.is-selected {
+    background: var(--color-accent-soft);
+    border-color: var(--color-accent);
+    border-width: 2px;
+  }
+
+  .purpose-card__check {
+    display: none;
+    position: absolute;
+    top: var(--space-3);
+    right: var(--space-3);
+    color: var(--color-accent);
+  }
+
+  .purpose-card.is-selected .purpose-card__check {
+    display: block;
+  }
+
   .purpose-card__heading {
     font-family: var(--font-family-heading);
     font-weight: 700;
     font-size: 1.1rem;
+    padding-right: var(--space-6);
   }
 
   .purpose-card__description {
     color: var(--color-stone-text);
     font-size: var(--font-size-label);
     line-height: 1.6;
+    flex: 1;
+  }
+
+  /* 「この内容から探す →」（2026-09-02追加）。カードが「説明の書かれた箱」
+     ではなく検索を始められる選択肢であることを示す操作文。 */
+  .purpose-card__cta {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3em;
+    margin-top: auto;
+    padding-top: var(--space-2);
+    color: var(--color-accent);
+    font-weight: 700;
+    font-size: var(--font-size-label);
+  }
+
+  .purpose-card__cta svg {
+    transition: transform 0.15s ease;
   }
 
   .service-filter__detail {

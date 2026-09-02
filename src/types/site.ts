@@ -23,6 +23,18 @@ export interface SiteConfig {
     correctionUrl: SiteRoute['path'];
     contactEmail: string | null;
   };
+  /**
+   * サイトの運営法人（2026-09-02、ナビゲーション・運営者表示・SEO/AIO監査
+   * 対応で追加）。「サイト名（多磨霊園 お墓ガイド）」とは別に、運営主体である
+   * 法人そのものを表す。フッター表示・運営者情報ページ・構造化データ
+   * （Organization）で使う。所在地・代表者名・電話番号・法人番号・
+   * メールアドレス等、リポジトリ内に正本がない情報はここに含めない
+   * （確認できた名称とURLだけを保持する）。
+   */
+  operator: {
+    name: string;
+    url: string;
+  };
   /** 本番URLはデプロイ確定後にリードが設定する。sitemap/canonical生成に使用。 */
   productionOrigin: string | null;
 }

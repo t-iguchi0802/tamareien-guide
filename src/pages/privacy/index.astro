@@ -17,6 +17,13 @@
  * 非公式表記の定型文（siteConfig.officialDisclaimer）は削除した。運営者情報は
  * `/about/` にまとめてあるため、このページでは本来の論点（個人情報の取り扱い）
  * だけを扱う。
+ *
+ * GA4開示内容の具体化（2026-09-02、ナビゲーション・運営者表示・SEO/AIO
+ * 監査対応「プライバシーポリシー」節）: 「Google側での情報の取扱いへの
+ * 案内」（Googleのプライバシーポリシーへのリンク）と「無効化方法への
+ * 案内」（ブラウザ設定・Google公式のオプトアウトアドオンへのリンク）を
+ * 追加した。法律文・Googleの規約文の転載はしていない（リンクの案内のみ）。
+ * 個人を特定できる情報を計測目的で送信していない旨も明記した。
  */
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import { siteConfig } from '../../lib/siteConfig';
@@ -24,7 +31,7 @@ import { ROUTES } from '../../lib/routes';
 
 const pageTitle = 'プライバシーポリシー';
 const description = '当サイトにおけるアクセス解析・個人情報の取り扱いについての一般的な方針です。';
-const lastUpdated = '2026-08-26';
+const lastUpdated = '2026-09-02';
 const browserTitle = `${pageTitle}｜多磨霊園 お墓ガイド`;
 ---
 
@@ -44,10 +51,18 @@ const browserTitle = `${pageTitle}｜多磨霊園 お墓ガイド`;
   <section aria-labelledby="privacy-analytics-heading">
     <h2 id="privacy-analytics-heading">アクセス解析について</h2>
     <p>
-      当サイトでは、サイトの利用状況を把握する目的で、Googleアナリティクス4（GA4）等のアクセス解析ツールを導入する場合があります。導入する場合、閲覧ページ、参照元、おおよその地域、使用端末の種類など、個人を特定しない形式の情報がツール提供元（Google等）に送信されることがあります。これらのツールはCookie等の技術を利用する場合があります。
+      当サイトでは、サイトの利用状況を把握する目的で、Googleアナリティクス4（GA4）等のアクセス解析ツールを導入する場合があります。導入する場合、閲覧ページ、参照元、おおよその地域、使用端末の種類、比較条件の絞り込み操作など、個人を特定しない形式の情報がツール提供元（Google等）に送信されることがあります。これらのツールはCookie等の技術を利用する場合があります。氏名・電話番号・メールアドレス等、個人を特定できる情報を計測目的で送信することはありません。
     </p>
     <p>
-      アクセス解析の具体的な設定状況（有効・無効、計測項目）は、サイトの運用状況により変わることがあります。ブラウザの設定により、Cookieの利用を制限・拒否することも可能です。
+      Googleにおける情報の取り扱いについては、Googleの<a href="https://policies.google.com/privacy" rel="noopener" target="_blank">プライバシーポリシー<span class="sr-only">（外部サイトを新しいタブで開きます）</span></a
+      >をご確認ください。ブラウザの設定によりCookieの利用を制限・拒否できるほか、Google公式の<a
+        href="https://tools.google.com/dlpage/gaoptout"
+        rel="noopener"
+        target="_blank">Googleアナリティクス オプトアウト アドオン<span class="sr-only">（外部サイトを新しいタブで開きます）</span></a
+      >を使うことで、Googleアナリティクスによる計測を無効化することもできます。
+    </p>
+    <p>
+      アクセス解析の具体的な設定状況（有効・無効、計測項目）は、サイトの運用状況により変わることがあります。
     </p>
   </section>
 

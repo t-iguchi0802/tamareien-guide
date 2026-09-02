@@ -47,10 +47,24 @@ const historyFacts = [
   { label: '改名', value: '1935年' },
 ] as const;
 
-const pageTitle = '多磨霊園はなぜ造られた？1923年開園からの歴史';
+/*
+ * title・H1の見直し（2026-09-02、ナビゲーション・運営者表示・SEO/AIO
+ * 監査対応「ページタイトルと検索意図」節）: 従来はH1と<title>に同じ
+ * 疑問形の複合タイトル（「多磨霊園はなぜ造られた？1923年開園からの歴史」）を
+ * 使っていたが、より自然で検索意図に合う「多磨霊園の歴史｜日本初の
+ * 公園墓地ができるまで」へ変更する。ただし複合タイトルをそのままH1に
+ * 使うと、他の記事ページ（access/famous-graves/hakajimai-to-kaisou）と
+ * 同じ理由（390px幅で「｜」が行頭に残り複数行になる）でモバイル表示が
+ * 崩れるため、H1は要点の名詞句「多磨霊園の歴史」に短縮し、補足を
+ * 別の<p class="article__lead">「日本初の公園墓地ができるまで」に分けた。
+ * <title>は複合タイトルのまま（ブランド名の付加は行わない。他の記事
+ * ページと同じ、内容descriptiveな複合タイトルのみで完結させる方針）。
+ */
+const heroHeading = '多磨霊園の歴史';
+const heroLead = '日本初の公園墓地ができるまで';
+const pageTitle = '多磨霊園の歴史｜日本初の公園墓地ができるまで';
 const description =
   '多磨霊園がなぜ、どのように造られたのかを、東京都公園協会の公式情報をもとに要約しました。開設の背景、日本初の公園墓地としての位置づけ、名称の変遷を紹介します。';
-const browserTitle = `${pageTitle}｜多磨霊園 お墓ガイド`;
 
 const tamaOfficial = getSourceById('SRC-TAMA-OFFICIAL');
 // 更新日・出典表記の簡略化（2026-09-02、ミチの編集改善・SEO/AIO対応
@@ -64,7 +78,7 @@ const checkedAtJa = '2026年9月2日';
 
 const articleJsonLd = buildArticleJsonLd({
   path: ROUTES.guideHistory.path,
-  headline: pageTitle,
+  headline: heroHeading,
   description,
   datePublished: '2026-08-27',
   dateModified: '2026-09-02',
@@ -72,11 +86,12 @@ const articleJsonLd = buildArticleJsonLd({
 });
 ---
 
-<BaseLayout title={browserTitle} description={description} ogType="article" extraJsonLd={[articleJsonLd]}>
+<BaseLayout title={pageTitle} description={description} ogType="article" extraJsonLd={[articleJsonLd]}>
   <Fragment slot="beforeSponsor">
     <article class="article">
       <p class="article__eyebrow"><a href={ROUTES.guide.path}>多磨霊園ガイド</a> ／ 多磨霊園の歴史・著名人</p>
-      <h1>{pageTitle}</h1>
+      <h1>{heroHeading}</h1>
+      <p class="article__lead">{heroLead}</p>
       <p class="article__meta">更新日：{checkedAtJa}</p>
 
       <div class="article__hero-photo" style="background-image:url('/images/hero-cemetery-v1.png')"></div>
@@ -161,9 +176,9 @@ const articleJsonLd = buildArticleJsonLd({
     <section aria-labelledby="history-related-heading">
       <h2 id="history-related-heading">関連ページ</h2>
       <ul class="article__related-grid">
-        <li><a class="article__related-card article__related-card--limestone" href={ROUTES.guideFamousGraves.path}>多磨霊園に眠る著名人ガイドを見る</a></li>
-        <li><a class="article__related-card article__related-card--limestone" href={ROUTES.access.path}>多磨霊園への行き方を見る</a></li>
-        <li><a class="article__related-card article__related-card--limestone" href={ROUTES.guide.path}>多磨霊園ガイド一覧を見る</a></li>
+        <li><a class="article__related-card article__related-card--limestone" href={ROUTES.guideFamousGraves.path} data-event="internal_guide_link_click" data-destination="famous_graves">多磨霊園に眠る著名人ガイドを見る</a></li>
+        <li><a class="article__related-card article__related-card--limestone" href={ROUTES.access.path} data-event="internal_guide_link_click" data-destination="access">多磨霊園への行き方を見る</a></li>
+        <li><a class="article__related-card article__related-card--limestone" href={ROUTES.guide.path} data-event="internal_guide_link_click" data-destination="guide_index">多磨霊園ガイド一覧を見る</a></li>
       </ul>
     </section>
   </div>

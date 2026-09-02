@@ -61,6 +61,16 @@
  *   まま、Claude独自の有名度判断・順位付けは行っていない。公式資料で
  *   確認できない人物の追加、人物写真の使用もしていない）。
  * - title/descriptionを「多磨霊園に眠る著名人｜名前から墓所を探す」に更新した。
+ *
+ * 「公式墓所ナビ」導線の削除（2026-09-02、ナビゲーション・運営者表示・
+ * SEO/AIO監査対応「不要な『公式墓所ナビ』を削除」節）: 「墓所の探し方」
+ * 「公式案内図」「情報源・確認日」の3箇所にあった公式墓所ナビ
+ * （GUIDE_SOURCES.tamaHakaNavi）への言及・リンクを削除し、地図の導線を
+ * 「公式園内案内図を開く（PDF）」の1つに整理した（この方針は前回の
+ * ミチの校正で/access/には既に適用済みだったが、当ページには未反映
+ * だったため今回そろえた）。GUIDE_SOURCES.tamaHakaNaviの定義自体は
+ * src/pages/_lib/guide-sources.tsに残しているが、公開画面のどこからも
+ * 参照しなくなった。
  */
 import '../../../styles/guide-article.css';
 import BaseLayout from '../../../layouts/BaseLayout.astro';
@@ -165,23 +175,8 @@ function formatPlot(entry: (typeof FAMOUS_GRAVES)[number]): string {
     <section aria-labelledby="famous-howto-heading">
       <h2 id="famous-howto-heading">墓所の探し方</h2>
       <p>
-        上の一覧にある「区・種・側・番」は、墓所の場所を表す公式の住所のようなものです。控えてから、次のいずれかの方法で場所を確認できます。
+        上の一覧にある「区・種・側・番」は、墓所の場所を表す公式の住所のようなものです。控えてから、下記の公式園内案内図（PDF）で区の位置関係を確認できます。園内の案内所（正門を入ってすぐ右側の管理事務所）でも紙の案内図を確認できます。
       </p>
-      <ul>
-        <li>
-          <a
-            href={GUIDE_SOURCES.tamaHakaNavi.url}
-            rel="noopener"
-            target="_blank"
-            data-event="official_procedure_click"
-            data-authority="tokyo_park_association"
-            data-topic="famous_graves_haka_navi_howto">公式墓所ナビ</a
-          >で「区・種・側・番」を入力すると、園内の地図上で位置を確認できます。
-        </li>
-        <li>
-          下記の公式園内案内図（PDF）でも、区の位置関係を確認できます。園内の案内所（正門を入ってすぐ右側の管理事務所）でも紙の案内図を確認できます。
-        </li>
-      </ul>
     </section>
 
     <section aria-labelledby="famous-manner-heading">
@@ -216,17 +211,8 @@ function formatPlot(entry: (typeof FAMOUS_GRAVES)[number]): string {
           data-authority="tokyo_park_association"
           data-topic="famous_graves_map_pdf">公式園内案内図を開く（PDF）</a
         >
-        <a
-          class="article__button article__button--secondary"
-          href={GUIDE_SOURCES.tamaHakaNavi.url}
-          rel="noopener"
-          target="_blank"
-          data-event="official_procedure_click"
-          data-authority="tokyo_park_association"
-          data-topic="famous_graves_haka_navi">公式墓所ナビを開く</a
-        >
       </div>
-      <p class="article__note">地図・案内図はいずれも公式サイトへのリンクです。画像としての保存・転載はしていません。</p>
+      <p class="article__note">案内図は公式サイトへのリンクです。画像としての保存・転載はしていません。</p>
     </section>
 
     <section aria-labelledby="famous-sources-heading">
@@ -236,13 +222,7 @@ function formatPlot(entry: (typeof FAMOUS_GRAVES)[number]): string {
           <a href={GUIDE_SOURCES.tamaMapPdf.url} rel="noopener" target="_blank">
             {GUIDE_SOURCES.tamaMapPdf.publisher}「{GUIDE_SOURCES.tamaMapPdf.title}」
           </a>
-          （最終確認日: {GUIDE_SOURCES.tamaMapPdf.checkedAt}） — 著名人墓所一覧（氏名・主要経歴・区・種・側・番）の出典
-        </li>
-        <li>
-          <a href={GUIDE_SOURCES.tamaHakaNavi.url} rel="noopener" target="_blank">
-            {GUIDE_SOURCES.tamaHakaNavi.publisher}「{GUIDE_SOURCES.tamaHakaNavi.title}」
-          </a>
-          （最終確認日: {GUIDE_SOURCES.tamaHakaNavi.checkedAt}）
+          （最終確認日: {GUIDE_SOURCES.tamaMapPdf.checkedAt}） — 著名人墓所一覧（氏名・主要経歴・区・種・側・番）、墓所の場所の確認方法の出典
         </li>
         <li>
           <a href={GUIDE_SOURCES.tamaTourManner.url} rel="noopener" target="_blank">
@@ -259,9 +239,9 @@ function formatPlot(entry: (typeof FAMOUS_GRAVES)[number]): string {
     <section aria-labelledby="famous-related-heading">
       <h2 id="famous-related-heading">関連ページ</h2>
       <ul class="article__related-grid">
-        <li><a class="article__related-card" href={ROUTES.guideHistory.path}>多磨霊園の歴史を見る</a></li>
-        <li><a class="article__related-card" href={ROUTES.access.path}>多磨霊園への行き方を見る</a></li>
-        <li><a class="article__related-card" href={ROUTES.guide.path}>多磨霊園ガイド一覧を見る</a></li>
+        <li><a class="article__related-card" href={ROUTES.guideHistory.path} data-event="internal_guide_link_click" data-destination="history">多磨霊園の歴史を見る</a></li>
+        <li><a class="article__related-card" href={ROUTES.access.path} data-event="internal_guide_link_click" data-destination="access">多磨霊園への行き方を見る</a></li>
+        <li><a class="article__related-card" href={ROUTES.guide.path} data-event="internal_guide_link_click" data-destination="guide_index">多磨霊園ガイド一覧を見る</a></li>
       </ul>
     </section>
   </div>

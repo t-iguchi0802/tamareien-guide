@@ -28,6 +28,14 @@ export const siteConfig: SiteConfig = {
     correctionUrl: '/about/',
     contactEmail: null,
   },
+  // 運営法人（2026-09-02、ナビゲーション・運営者表示・SEO/AIO監査対応で追加）。
+  // ユーザーから明示された確定情報のみを保持する（社名・会社公式サイトURL）。
+  // 所在地・代表者名・電話番号・法人番号・メールアドレス等はリポジトリ内に
+  // 正本がないため記載しない（不足情報は最終報告で列挙する）。
+  operator: {
+    name: '株式会社サンアローズ',
+    url: 'https://sunarrows-tky.co.jp/',
+  },
   // 本番originはCloudflare Pagesのデプロイ確定後にリードが設定する。
   productionOrigin: null,
 };

@@ -21,6 +21,22 @@
  * 表示／クリックかを区別できるよう、`slot_position` と `page_category` を
  * `SponsorImpressionParams` / `SponsorClickParams` へ追加した。
  * 既存の `sponsor_id` / `campaign_id` / `page_path` は変更していない。
+ *
+ * 拡張（2026-09-02、ナビゲーション・運営者表示・SEO/AIO監査対応
+ * 「GA4で確認するイベント」節）:
+ * - `ComparisonFilterUseParams`に`selected_count`（送信時点で選択中の
+ *   詳細条件数）・`result_count`（絞り込み後の該当事業者数）を追加した。
+ *   「絞り込み後の該当件数」「0件になった検索（result_count===0）」を、
+ *   新しいイベント名を増やさずに既存の`comparison_filter_use`だけで
+ *   分析できるようにするため。既存の`filter_type`/`filter_value`/
+ *   `page_path`の意味は変更していない。
+ * - `internal_guide_link_click`を追加した。TOPの「多磨霊園ガイド」入口、
+ *   ヘッダーの「多磨霊園を知る」ドロップダウン、各記事末尾の「関連ページ」
+ *   カードなど、サイト内のガイド記事（アクセス・墓じまい手続き・
+ *   著名人墓所・歴史等）への遷移を計測するための、既存6+2イベントとは
+ *   意味が重ならない新規イベント（事業者の外部リンク・電話・地図
+ *   クリックを表す`business_*`とは異なり、サイト内のガイド記事間の
+ *   移動を表す）。
  */
 
 export type AnalyticsEventName =
@@ -31,7 +47,8 @@ export type AnalyticsEventName =
   | 'official_procedure_click'
   | 'correction_request_click'
   | 'sponsor_impression'
-  | 'sponsor_click';
+  | 'sponsor_click'
+  | 'internal_guide_link_click';
 
 export type OutboundLinkType = 'official_site' | 'contact' | 'directory';
 
@@ -54,6 +71,17 @@ export interface BusinessMapClickParams {
 export interface ComparisonFilterUseParams {
   filter_type: string;
   filter_value: string;
+  page_path: string;
+  /** 送信時点で選択中の詳細条件（チェックボックス）数。 */
+  selected_count?: number;
+  /** 絞り込み後に対応を確認できた事業者数（0件検索の判定にも使う）。 */
+  result_count?: number;
+}
+
+/** サイト内のガイド記事（アクセス・手続き・著名人墓所・歴史等）への遷移。 */
+export interface InternalGuideLinkClickParams {
+  /** 遷移先を表す短い識別子（例: "access" | "history" | "famous_graves"）。 */
+  destination: string;
   page_path: string;
 }
 
@@ -99,4 +127,5 @@ export type AnalyticsEventParams =
   | { name: 'official_procedure_click'; params: OfficialProcedureClickParams }
   | { name: 'correction_request_click'; params: CorrectionRequestClickParams }
   | { name: 'sponsor_impression'; params: SponsorImpressionParams }
-  | { name: 'sponsor_click'; params: SponsorClickParams };
+  | { name: 'sponsor_click'; params: SponsorClickParams }
+  | { name: 'internal_guide_link_click'; params: InternalGuideLinkClickParams };
