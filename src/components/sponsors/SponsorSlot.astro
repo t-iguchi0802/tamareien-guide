@@ -41,6 +41,12 @@
  * `data-page-category`をルート要素と外部リンクの両方に付与した
  * （表示回数計測はBaseLayout.astro側のIntersectionObserverが
  * ルート要素の`data-sponsor-id`を対象に行う）。
+ *
+ * ボタン文言のカスタマイズ（2026-09-02、初の実スポンサー掲載対応）:
+ * `sponsor.ctaLabel`が指定されている場合はそれを、なければ既定の
+ * 「サイトを見る」を表示する（広告主のサービス性質に合わせた文言
+ * （例:「相談窓口を見る」）を、仮の推薦文・実績を創作せずに
+ * 表現できるようにするための最小限の拡張）。
  */
 import '../../styles/tokens.css';
 import type { SponsorSlotProps } from '../../types/components';
@@ -77,7 +83,7 @@ const { sponsor, position, pageCategory } = Astro.props;
           data-slot-position={position}
           data-page-category={pageCategory}
         >
-          サイトを見る
+          {sponsor.ctaLabel ?? 'サイトを見る'}
           <span class="sr-only">（外部サイトを新しいタブで開きます）</span>
         </a>
       </div>
