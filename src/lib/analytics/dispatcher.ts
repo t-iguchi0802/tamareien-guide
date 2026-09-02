@@ -25,6 +25,8 @@
  *                             このディスパッチャの対象外＝チェックボックスの
  *                             click/change二重発火を避けるため。詳細は
  *                             src/components/business/ServiceFilter.astro参照）
+ *   sponsor_inquiry_click    : （追加属性なし。2026-09-02追加。/about/の
+ *                             「スポンサー掲載を問い合わせる」mailto CTA用）
  *
  * sponsor_impression（表示回数）はクリック/変更イベントで発火しないため、
  * このディスパッチャの対象外。表示検知（IntersectionObserver等）を行う
@@ -63,6 +65,7 @@ import {
   trackCorrectionRequestClick,
   trackSponsorClick,
   trackInternalGuideLinkClick,
+  trackSponsorInquiryClick,
 } from './events';
 import type { AnalyticsEventName, OutboundLinkType, SponsorSlotPosition } from '../../types/analytics';
 
@@ -171,6 +174,10 @@ function dispatchFromElement(el: Element): void {
         return;
       }
       trackInternalGuideLinkClick({ destination, page_path: pagePath });
+      return;
+    }
+    case 'sponsor_inquiry_click': {
+      trackSponsorInquiryClick({ page_path: pagePath });
       return;
     }
     default:

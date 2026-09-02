@@ -37,6 +37,22 @@
  *   意味が重ならない新規イベント（事業者の外部リンク・電話・地図
  *   クリックを表す`business_*`とは異なり、サイト内のガイド記事間の
  *   移動を表す）。
+ *
+ * 拡張（2026-09-02、「スポンサー掲載ページと訂正窓口の文章」対応）:
+ * - `sponsor_inquiry_click`を追加した。/about/の「スポンサー掲載を
+ *   問い合わせる」CTA（mailtoリンク）のクリックを計測する。既存の
+ *   `sponsor_click`（契約中スポンサー自身の外部リンククリック、
+ *   sponsor_id/campaign_id必須）とは意味が異なる（こちらは「まだ
+ *   契約していない事業者からの掲載問い合わせ」であり、紐づく
+ *   sponsor_id自体が存在しない）ため、新規イベントとした。
+ * - 「掲載情報の訂正を依頼する」CTA（/about/、mailtoリンク）は、
+ *   既存の`correction_request_click`（CorrectionCta.astro等で使用中の
+ *   「訂正・非掲載を依頼する」導線と同じ意味＝訂正依頼の開始）を
+ *   そのまま再利用し、新しいイベント名は追加していない。
+ * - どちらのイベントもパラメータは`page_path`のみ。メールアドレス・
+ *   氏名・電話番号・入力内容等の個人情報はGA4へ送信しない
+ *   （mailtoのsubject/bodyはブラウザのメールアプリ側で組み立てられ、
+ *   GA4送信とは別経路のため、実装上も個人情報が混ざりようがない）。
  */
 
 export type AnalyticsEventName =
@@ -48,7 +64,8 @@ export type AnalyticsEventName =
   | 'correction_request_click'
   | 'sponsor_impression'
   | 'sponsor_click'
-  | 'internal_guide_link_click';
+  | 'internal_guide_link_click'
+  | 'sponsor_inquiry_click';
 
 export type OutboundLinkType = 'official_site' | 'contact' | 'directory';
 
@@ -95,6 +112,11 @@ export interface CorrectionRequestClickParams {
   page_path: string;
 }
 
+/** スポンサー掲載の問い合わせCTA（/about/、mailtoリンク）のクリック。 */
+export interface SponsorInquiryClickParams {
+  page_path: string;
+}
+
 /**
  * スポンサー枠4枠中のどの位置か。左右レール・上位表示のいずれでも、
  * DOM上の物理的な枠位置（left-1が最上段）をそのまま使う。
@@ -128,4 +150,5 @@ export type AnalyticsEventParams =
   | { name: 'correction_request_click'; params: CorrectionRequestClickParams }
   | { name: 'sponsor_impression'; params: SponsorImpressionParams }
   | { name: 'sponsor_click'; params: SponsorClickParams }
-  | { name: 'internal_guide_link_click'; params: InternalGuideLinkClickParams };
+  | { name: 'internal_guide_link_click'; params: InternalGuideLinkClickParams }
+  | { name: 'sponsor_inquiry_click'; params: SponsorInquiryClickParams };
