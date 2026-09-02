@@ -4,9 +4,19 @@
  * 正本: CLAUDE_CODE_HANDOFF.md 5章・6章 / src/lib/routes.ts ROUTES.about
  *
  * editorialPolicy（businesses.json）を根拠として方針を説明する。
- * siteConfig.contact.contactEmail が現時点で null のため、
- * メールアドレスを断定表示せず、準備中である旨を明示する
- * （未確認・未設定の連絡先を推測で作らない）。
+ *
+ * スポンサー掲載・訂正窓口の文章刷新とmailto化（2026-09-02、「スポンサー
+ * 掲載ページと訂正窓口の文章」対応）: siteConfig.contact.contactEmailが
+ * 確定したため、「準備中」表示をやめ、実際のメールアドレスへのmailto
+ * リンクへ置き換えた。あわせて、未完成・言い訳に見える文章
+ * （「当サイトの計測の仕組み上、集計できる設計にしています」
+ * 「現時点で集計値そのものを外部提供する運用は開始していません」
+ * 「下記の訂正窓口と同じ連絡先までお問い合わせください」等）を削除し、
+ * 指定の簡潔な文章へ差し替えた。スポンサー掲載・訂正依頼は同じ
+ * メールアドレスを使うが、mailtoのsubject/bodyを用途ごとに変えて区別する
+ * （件名・本文の入力項目はGA4へは送信しない。GA4が送信するのは
+ * ボタンのクリックそのもの＝`sponsor_inquiry_click`/
+ * `correction_request_click`のpage_pathのみ）。
  *
  * 運営者情報の記載方針変更（2026-08-27、サイト所有者判断）: 従来ここに
  * 表示していた非公式表記の定型文（siteConfig.officialDisclaimer）は
@@ -36,6 +46,39 @@ const pageTitle = '運営方針・掲載基準・広告方針・訂正窓口';
 const description =
   '当サイトの運営者情報、掲載基準、広告・スポンサー方針、掲載情報の訂正窓口について説明します。';
 const browserTitle = `${pageTitle}｜多磨霊園 お墓ガイド`;
+
+/**
+ * mailtoリンクの組み立て（2026-09-02追加）。スポンサー掲載・訂正依頼は
+ * 同じメールアドレス（siteConfig.contact.contactEmail）を使うが、
+ * subject/bodyを用途ごとに分け、件名だけでも区別できるようにする。
+ * bodyの各項目は入力を促すラベルのみで、値は空欄のまま送信者に
+ * 埋めてもらう（当サイト側で個人情報を事前入力・保持することはない）。
+ */
+function buildMailtoHref(email: string, subject: string, bodyLines: string[]): string {
+  const params = new URLSearchParams({ subject, body: bodyLines.join('\n') });
+  return `mailto:${email}?${params.toString().replace(/\+/g, '%20')}`;
+}
+
+const contactEmail = siteConfig.contact.contactEmail;
+
+const sponsorInquirySubject = '多磨霊園 お墓ガイドのスポンサー掲載について';
+const sponsorInquiryBodyLines = [
+  '会社名：',
+  'ご担当者名：',
+  '電話番号：',
+  '公式サイト：',
+  '掲載を希望するサービス：',
+  'ご質問：',
+];
+const sponsorInquiryHref = contactEmail
+  ? buildMailtoHref(contactEmail, sponsorInquirySubject, sponsorInquiryBodyLines)
+  : null;
+
+const correctionSubject = '多磨霊園 お墓ガイドの掲載情報訂正について';
+const correctionBodyLines = ['事業者名：', '訂正箇所：', '正しい情報：', '確認できるURL：', 'その他：'];
+const correctionHref = contactEmail
+  ? buildMailtoHref(contactEmail, correctionSubject, correctionBodyLines)
+  : null;
 ---
 
 <BaseLayout title={browserTitle} description={description}>
@@ -78,45 +121,104 @@ const browserTitle = `${pageTitle}｜多磨霊園 お墓ガイド`;
     <p>
       口コミ点数・星評価・独自ランキングや、「おすすめ」「人気」「優良」等の主観的な表現は使用していません。スポンサー枠を設ける場合は、比較データとは別に管理し、「スポンサー」または「広告」であることを明示します。
     </p>
-    <div id="sponsor-info-heading" class="article__callout">
-      <p class="article__callout__eyebrow">スポンサー掲載について（2026-09-02追記）</p>
-      <p>
-        現時点で当サイトが提供できる仕組みは、確認できている次の範囲にとどまります。実績件数・効果・掲載後の集客数などは確認できていないため、断定的な数値は掲載していません。
+    <div id="sponsor-info-heading" class="contact-block">
+      <h3 class="contact-block__heading">スポンサー掲載について</h3>
+      <p class="contact-block__body">
+        スポンサー枠は4枠です。表示回数とクリック数を計測し、掲載事業者へ月1回ご報告します。墓じまい・管理などのガイド記事からも、関連する石材店一覧へ案内します。
       </p>
-      <ul>
-        <li>
-          条件付き上位表示: 利用者が石材店一覧で1つ以上の条件を選び、絞り込み結果にスポンサー事業者が含まれる場合に限り、その事業者を結果の上位に表示します。「広告・スポンサー掲載」の表示を必ず添え、通常の掲載順（推奨順位ではありません）を販売するものではないことを明示します。
-        </li>
-        <li>永続的な掲載順の販売は行いません。条件を選ばない・条件に合致しない場合は、他の事業者と同じ通常順で表示されます。</li>
-        <li>スポンサー枠のクリック数・表示回数は、当サイトの計測の仕組み上、集計できる設計にしています（現時点で集計値そのものを外部提供する運用は開始していません）。</li>
-        <li>関連するガイド記事（墓じまい・管理等）から、該当サービスに対応する石材店一覧への案内リンクを設けています。</li>
-      </ul>
-      <p>掲載を希望される事業者の方は、下記の訂正窓口と同じ連絡先までお問い合わせください。</p>
+      {
+        sponsorInquiryHref && (
+          <>
+            <a class="contact-block__cta" href={sponsorInquiryHref} data-event="sponsor_inquiry_click">
+              スポンサー掲載を問い合わせる
+            </a>
+            <p class="contact-block__email-fallback">
+              メールが開かない場合：<a href={`mailto:${contactEmail}`}>{contactEmail}</a>
+            </p>
+          </>
+        )
+      }
     </div>
   </section>
 
   <section aria-labelledby="correction-heading">
-    <h2 id="correction-heading">掲載情報の訂正窓口</h2>
+    <h2 id="correction-heading">掲載情報の訂正</h2>
     <p>
-      掲載内容に誤りがある場合、スポンサー契約の有無にかかわらず訂正のご連絡を受け付けます。ご連絡の際は、次の内容をできるだけ添えてお伝えください。
+      掲載内容に誤りがありましたら、事業者名、訂正箇所、正しい情報、確認できる公式サイト等のURLをお知らせください。
     </p>
-    <ul>
-      <li>対象の事業者名</li>
-      <li>訂正してほしい項目</li>
-      <li>正しい情報の内容</li>
-      <li>正しい情報の根拠となるURL（公式サイト等）</li>
-      <li>ご連絡先（返信が必要な場合）</li>
-    </ul>
     {
-      siteConfig.contact.contactEmail ? (
-        <p>
-          <a href={`mailto:${siteConfig.contact.contactEmail}`}>{siteConfig.contact.contactEmail}</a> 宛にご連絡ください。
-        </p>
-      ) : (
-        <p>
-          現在、専用の問い合わせ窓口（メールアドレス等）を準備中です。窓口が確定次第、このページに掲載します。
-        </p>
+      correctionHref && (
+        <>
+          <a class="contact-block__cta" href={correctionHref} data-event="correction_request_click">
+            訂正を依頼する
+          </a>
+          <p class="contact-block__email-fallback">
+            メールが開かない場合：<a href={`mailto:${contactEmail}`}>{contactEmail}</a>
+          </p>
+        </>
       )
     }
   </section>
 </BaseLayout>
+
+<style>
+  /*
+   * スポンサー掲載・訂正依頼の問い合わせブロック（2026-09-02追加）。
+   * ボタン全体がクリック可能な単一の<a>（mailtoリンク）で、
+   * PCではcursor:pointer（アンカー既定）・focus-visibleで明確な
+   * フォーカス表示・スマートフォンでも押しやすい高さ（48px以上）を
+   * 満たす。メールアプリが開かない場合に備え、ボタン下に
+   * メールアドレス自体へのリンクも表示する。
+   */
+  .contact-block {
+    margin-top: var(--space-4);
+    padding: var(--space-4);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-card, 10px);
+    background: var(--color-surface);
+  }
+
+  .contact-block__heading {
+    margin: 0 0 var(--space-2);
+    font-family: var(--font-family-heading);
+    font-weight: 700;
+    font-size: 1.05rem;
+    color: var(--color-text);
+  }
+
+  .contact-block__body {
+    margin: 0 0 var(--space-4);
+    color: var(--color-text);
+    line-height: 1.7;
+  }
+
+  .contact-block__cta {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 48px;
+    padding: 0.6em 1.5em;
+    border-radius: var(--radius-pill, 999px);
+    background: var(--color-accent);
+    color: #fff;
+    font-weight: 700;
+    text-decoration: none;
+    cursor: pointer;
+    transition: background-color 0.15s ease;
+  }
+
+  .contact-block__cta:hover {
+    background: var(--color-accent-deep, var(--color-accent));
+  }
+
+  .contact-block__cta:focus-visible {
+    outline: 3px solid var(--color-accent);
+    outline-offset: 2px;
+  }
+
+  .contact-block__email-fallback {
+    margin: var(--space-3) 0 0;
+    color: var(--color-text-muted);
+    font-size: var(--font-size-caption, 0.875rem);
+  }
+</style>

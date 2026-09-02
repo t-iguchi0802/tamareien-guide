@@ -19,6 +19,12 @@ import type { SiteConfig } from '../types/site';
  * 各ページのtitle定数側で、必要に応じてブランド名を含める）。
  * subtitleは画面表示用の短い補足（ヘッダー直下）専用とし、
  * meta descriptionには使わない（各ページが個別に用意する）。
+ *
+ * 問い合わせ窓口の確定（2026-09-02、「スポンサー掲載ページと訂正窓口の
+ * 文章」対応）: `contactEmail`が確定したため、null（「準備中」表示）から
+ * 実際のアドレスへ更新した。スポンサー掲載・訂正依頼とも同じアドレスを
+ * 使うが、`src/pages/about/index.astro`側でmailtoのsubject/bodyを
+ * 用途ごとに変えて区別する。
  */
 export const siteConfig: SiteConfig = {
   name: '多磨霊園 お墓ガイド',
@@ -26,7 +32,7 @@ export const siteConfig: SiteConfig = {
   locale: 'ja-JP',
   contact: {
     correctionUrl: '/about/',
-    contactEmail: null,
+    contactEmail: 't.iguchi@sunarrows-tky.co.jp',
   },
   // 運営法人（2026-09-02、ナビゲーション・運営者表示・SEO/AIO監査対応で追加）。
   // ユーザーから明示された確定情報のみを保持する（社名・会社公式サイトURL）。

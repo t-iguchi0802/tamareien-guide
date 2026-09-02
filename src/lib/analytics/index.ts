@@ -18,6 +18,8 @@ export {
   trackCorrectionRequestClick,
   trackSponsorImpression,
   trackSponsorClick,
+  trackInternalGuideLinkClick,
+  trackSponsorInquiryClick,
 } from './events';
 export { initAnalyticsDispatcher } from './dispatcher';
 export { resolvePageCategory } from './pageCategory';

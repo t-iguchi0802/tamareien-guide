@@ -20,6 +20,7 @@ import type {
   SponsorImpressionParams,
   SponsorClickParams,
   InternalGuideLinkClickParams,
+  SponsorInquiryClickParams,
 } from '../../types/analytics';
 
 /** 事業者の外部リンク（公式サイト・問い合わせ・ディレクトリ）クリック。 */
@@ -65,4 +66,9 @@ export function trackSponsorClick(params: SponsorClickParams): void {
 /** サイト内のガイド記事（アクセス・手続き・著名人墓所・歴史等）への遷移。 */
 export function trackInternalGuideLinkClick(params: InternalGuideLinkClickParams): void {
   sendGaEvent('internal_guide_link_click', params);
+}
+
+/** スポンサー掲載の問い合わせCTA（/about/、mailtoリンク）のクリック。 */
+export function trackSponsorInquiryClick(params: SponsorInquiryClickParams): void {
+  sendGaEvent('sponsor_inquiry_click', params);
 }
