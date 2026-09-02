@@ -1,0 +1,146 @@
+---
+/**
+ * 運営者情報。
+ * 正本: src/lib/routes.ts ROUTES.operator（2026-09-02新設）。
+ *
+ * /about/（掲載基準・広告方針・訂正窓口）とは役割を分け、「誰が運営して
+ * いるか」だけをこのページで扱う。掲載項目は次のとおり:
+ * サイト名・運営者（会社名・会社公式サイトへのリンク）・サイトの目的・
+ * 掲載方針/広告方針ページへのリンク・訂正依頼/問い合わせへの導線・
+ * プライバシーポリシーへのリンク。
+ *
+ * 所在地・代表者名・電話番号・法人番号・メールアドレス等、リポジトリ内に
+ * 正本がない情報は記載しない（「未確認」「仮」等の表示もしない。追加掲載に
+ * 必要な情報として最終報告へ列挙する）。
+ *
+ * 特定商取引法に基づく表示について: 当サイトは、サイト上で有料サービス・
+ * スポンサー契約を直接申し込める仕組み（決済・契約フォーム等）を
+ * 提供していない（スポンサー掲載のお問い合わせは/about/の訂正窓口と
+ * 同じ連絡先へのご案内にとどまる）。そのため現時点では特定商取引法上の
+ * 表示義務の対象外と考えられるが、法的判断そのものはこのページで断定せず、
+ * 該当性の要否は別途最終報告で申し送る。
+ */
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { siteConfig } from '../../lib/siteConfig';
+import { ROUTES } from '../../lib/routes';
+
+const pageTitle = '運営者情報';
+const description = `${siteConfig.name}の運営者情報です。運営法人、サイトの目的、掲載方針・訂正窓口へのリンクを掲載しています。`;
+const browserTitle = `${pageTitle}｜多磨霊園 お墓ガイド`;
+---
+
+<BaseLayout title={browserTitle} description={description}>
+  <h1>{pageTitle}</h1>
+
+  <section aria-labelledby="operator-basic-heading">
+    <h2 id="operator-basic-heading">基本情報</h2>
+    <dl class="operator-info">
+      <div class="operator-info__row">
+        <dt>サイト名</dt>
+        <dd>{siteConfig.name}</dd>
+      </div>
+      <div class="operator-info__row">
+        <dt>運営者</dt>
+        <dd>{siteConfig.operator.name}</dd>
+      </div>
+      <div class="operator-info__row">
+        <dt>運営会社の公式サイト</dt>
+        <dd>
+          <a href={siteConfig.operator.url} rel="noopener" target="_blank">
+            {siteConfig.operator.url}
+            <span class="sr-only">（外部サイトを新しいタブで開きます）</span>
+          </a>
+        </dd>
+      </div>
+    </dl>
+  </section>
+
+  <section aria-labelledby="operator-purpose-heading">
+    <h2 id="operator-purpose-heading">サイトの目的</h2>
+    <p>
+      {siteConfig.name}は、多磨霊園周辺の石材店・お墓関連事業者を、公開情報のみで独自に調査・整理して紹介する民間の情報サイトです。運営者（{siteConfig.operator.name}）は、東京都・多磨霊園・東京都公園協会のいずれとも異なる独立した事業者であり、これらの機関からの委託や公認を受けたものではありません。当サイトの名称・デザインは、これらの機関の公式サイトを模倣したものではなく、ロゴ等の使用もしていません。
+    </p>
+  </section>
+
+  <section aria-labelledby="operator-links-heading">
+    <h2 id="operator-links-heading">関連ページ</h2>
+    <ul class="article__related-grid">
+      <li><a class="article__related-card" href={ROUTES.about.path}>掲載基準・広告方針を見る</a></li>
+      <li><a class="article__related-card" href={ROUTES.about.path}>掲載情報の訂正・お問い合わせ</a></li>
+      <li><a class="article__related-card" href={ROUTES.privacy.path}>プライバシーポリシーを見る</a></li>
+    </ul>
+  </section>
+</BaseLayout>
+
+<style>
+  .operator-info {
+    margin: 0;
+  }
+
+  .operator-info__row {
+    display: grid;
+    grid-template-columns: minmax(140px, 200px) 1fr;
+    gap: var(--space-3);
+    padding: var(--space-3) 0;
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  .operator-info__row dt {
+    font-weight: 700;
+    color: var(--color-text);
+  }
+
+  .operator-info__row dd {
+    margin: 0;
+    color: var(--color-text);
+  }
+
+  @media (max-width: 480px) {
+    .operator-info__row {
+      grid-template-columns: 1fr;
+      gap: var(--space-1, 0.25rem);
+    }
+  }
+
+  .article__related-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--space-3);
+    list-style: none;
+    margin: var(--space-4) 0 0;
+    padding: 0;
+  }
+
+  @media (min-width: 480px) {
+    .article__related-grid {
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    }
+  }
+
+  .article__related-card {
+    display: flex;
+    align-items: center;
+    height: 100%;
+    gap: var(--space-2);
+    min-height: var(--tap-target-min);
+    padding: var(--space-3) var(--space-4);
+    border: 1px solid var(--color-tint-green-border);
+    border-radius: var(--radius-card, 10px);
+    background: var(--color-tint-green-bg);
+    color: var(--color-text);
+    text-decoration: none;
+    font-weight: 700;
+  }
+
+  .article__related-card:hover {
+    border-color: var(--color-accent);
+    background: var(--color-accent-soft);
+  }
+
+  .article__related-card::after {
+    content: '→';
+    margin-left: auto;
+    color: var(--color-accent);
+    font-weight: 700;
+  }
+</style>

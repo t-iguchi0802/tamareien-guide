@@ -126,7 +126,12 @@ import { getSourceById } from '../../lib/data';
 import { GUIDE_SOURCES } from '../_lib/guide-sources';
 import { buildArticleJsonLd } from '../../lib/seo';
 
-const pageTitle = '多磨霊園への行き方｜電車・バス・車と入口の選び方';
+// title更新（2026-09-02、ナビゲーション・運営者表示・SEO/AIO監査対応
+// 「ページタイトルと検索意図」節）: 「駐車場」を明示し、アクセス関連の
+// 検索意図（交通・駐車場）により合う文言へ変更した。H1「多磨霊園への
+// 行き方」・補足「電車・バス・車と入口の選び方」（<h1>/.article__lead、
+// 前回の複合タイトル分割対応）は変更していない。
+const pageTitle = '多磨霊園へのアクセス・交通・駐車場案内｜多磨霊園 お墓ガイド';
 const description =
   '多磨霊園への行き方を、電車・バス・車のルート別に公式情報をもとに整理しました。門ごとの開閉時間、駐車場について公式ページで確認できる範囲、地図へのリンクを掲載しています。';
 
@@ -564,8 +569,8 @@ const transportCards: TransportCard[] = [
     <section aria-labelledby="access-related-heading">
       <h2 id="access-related-heading">関連ガイド</h2>
       <ul class="article__related-grid">
-        <li><a class="article__related-card article__related-card--blue" href={ROUTES.guide.path}>多磨霊園ガイド一覧を見る</a></li>
-        <li><a class="article__related-card article__related-card--blue" href={ROUTES.guideProcedures.path}>墓じまい・お墓の手続き 総合案内を見る</a></li>
+        <li><a class="article__related-card article__related-card--blue" href={ROUTES.guide.path} data-event="internal_guide_link_click" data-destination="guide_index">多磨霊園ガイド一覧を見る</a></li>
+        <li><a class="article__related-card article__related-card--blue" href={ROUTES.guideProcedures.path} data-event="internal_guide_link_click" data-destination="guide_procedures">墓じまい・お墓の手続き 総合案内を見る</a></li>
         <li><a class="article__related-card article__related-card--blue" href={ROUTES.sekizaiten.path}>石材店の一覧・比較を見る</a></li>
       </ul>
     </section>

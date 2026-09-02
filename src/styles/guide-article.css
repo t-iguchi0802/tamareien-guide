@@ -244,9 +244,19 @@
   }
 }
 
+/* 2026-09-02（ナビゲーション・運営者表示・SEO/AIO監査対応「関連ページ
+   カードの大きさを統一」節）: `.article__related-grid`（grid）の直接の
+   子は`<li>`であり、grid既定のalign-items:stretchは`<li>`自体の高さは
+   そろえるが、その中の`<a>`（display:flexだが高さは内容依存）までは
+   自動でそろわなかったため、1行タイトルと2行タイトルが混在する行で
+   カードの見た目の高さが一致しない不具合があった。`height: 100%`を
+   追加し、`<a>`が親`<li>`の（stretchされた）高さいっぱいに広がるようにした
+   （固定pxの高さ指定ではないため、最も背の高いカードに合わせて
+   全カードが伸びる。文章を切り詰めることはない）。 */
 .article__related-card {
   display: flex;
   align-items: center;
+  height: 100%;
   gap: var(--space-2);
   min-height: var(--tap-target-min);
   padding: var(--space-3) var(--space-4);

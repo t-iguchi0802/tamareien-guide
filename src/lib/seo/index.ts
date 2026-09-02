@@ -14,6 +14,7 @@ export type {
 } from './structuredData';
 export {
   buildOrganizationJsonLd,
+  buildWebSiteJsonLd,
   buildBreadcrumbListJsonLd,
   buildItemListJsonLd,
   buildBusinessListItemListJsonLd,

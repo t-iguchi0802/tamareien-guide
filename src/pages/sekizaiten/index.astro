@@ -63,7 +63,10 @@ const sponsoredBusinessIds = getActiveSponsors()
  * として分ける（複合タイトルの「｜」がモバイル幅でH1として折り返される
  * ことを避けるため）。
  */
-const pageTitle = '多磨霊園の石材店一覧・比較｜目的から探せるお墓ガイド';
+// title更新（2026-09-02、ナビゲーション・運営者表示・SEO/AIO監査対応
+// 「ページタイトルと検索意図」節）: 「条件で探す」という実際の操作
+// （絞り込みチェックボックス）をより直接的に表す文言へ変更した。
+const pageTitle = '多磨霊園周辺の石材店を条件で探す｜多磨霊園 お墓ガイド';
 const heroHeading = '多磨霊園の石材店一覧・比較';
 const description =
   '多磨霊園周辺の石材店・お墓関連事業者14社を、墓石を建てる・直す、墓じまい、清掃・管理などの目的から比較できます。公開情報のみで中立に整理しています。';
@@ -129,7 +132,7 @@ const businessListJsonLd = buildBusinessListItemListJsonLd(
       <li><a class="article__related-card" href={ROUTES.hakajimai.path}>墓じまい・墓石撤去の比較を見る</a></li>
       <li><a class="article__related-card" href={ROUTES.kanri.path}>墓所管理・清掃・供花の比較を見る</a></li>
       <li><a class="article__related-card" href={ROUTES.tetsuzuki.path}>改葬・墓所返還などの手続きを見る</a></li>
-      <li><a class="article__related-card" href={ROUTES.guideProcedures.path}>墓じまい・お墓の手続き 総合案内を見る</a></li>
+      <li><a class="article__related-card" href={ROUTES.guideProcedures.path} data-event="internal_guide_link_click" data-destination="guide_procedures">墓じまい・お墓の手続き 総合案内を見る</a></li>
       <li><a class="article__related-card" href={ROUTES.sources.path}>情報源・最終確認日を見る</a></li>
     </ul>
   </section>

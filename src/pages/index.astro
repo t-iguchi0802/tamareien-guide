@@ -135,7 +135,10 @@ function formatJaDate(iso: string): string {
   const [y, m, d] = iso.split('-').map(Number);
   return `${y}年${m}月${d}日`;
 }
-const pageTitle = '多磨霊園 お墓ガイド｜石材店・墓じまい・清掃を目的から探す';
+// title更新（2026-09-02、ナビゲーション・運営者表示・SEO/AIO監査対応
+// 「ページタイトルと検索意図」節）: 「多磨霊園のお墓・石材店を目的から探す」を
+// 前半に置き、内容（お墓・石材店を目的から探せること）をより明確にした。
+const pageTitle = '多磨霊園のお墓・石材店を目的から探す｜多磨霊園 お墓ガイド';
 const description =
   '多磨霊園周辺の石材店・お墓関連事業者を、墓石を建てる・直す、墓じまい、清掃・管理といった目的から探せる地域ガイドです。公開情報のみで中立に比較しています。';
 ---
@@ -207,15 +210,30 @@ const description =
     <h2 id="top-guide-heading">多磨霊園ガイド</h2>
     <p class="top-guide__lead">お参り・お墓の手続き・歴史について、公開情報をもとにまとめた記事です。</p>
     <div class="top-guide__entries">
-      <a class="top-guide__entry" href={ROUTES.access.path}>
+      <a
+        class="top-guide__entry"
+        href={ROUTES.access.path}
+        data-event="internal_guide_link_click"
+        data-destination="access"
+      >
         <span class="top-guide__entry-heading">行き方・園内案内</span>
         <span class="top-guide__entry-description">電車・バス・車での行き方と、門ごとの開閉時間です。</span>
       </a>
-      <a class="top-guide__entry" href={ROUTES.guideProcedures.path}>
+      <a
+        class="top-guide__entry"
+        href={ROUTES.guideProcedures.path}
+        data-event="internal_guide_link_click"
+        data-destination="guide_procedures"
+      >
         <span class="top-guide__entry-heading">墓じまい・各種手続き</span>
         <span class="top-guide__entry-description">墓じまいと改葬の違いや、行政手続きの公式リンクです。</span>
       </a>
-      <a class="top-guide__entry" href={ROUTES.guideHistory.path}>
+      <a
+        class="top-guide__entry"
+        href={ROUTES.guideHistory.path}
+        data-event="internal_guide_link_click"
+        data-destination="history"
+      >
         <span class="top-guide__entry-heading">歴史・著名人の墓所</span>
         <span class="top-guide__entry-description">1923年開園の経緯と、著名人の墓所についてです。</span>
       </a>

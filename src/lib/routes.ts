@@ -17,6 +17,10 @@ export const ROUTES = {
   about: { path: '/about/', description: '運営方針、掲載基準、広告方針、訂正窓口' },
   sources: { path: '/sources/', description: '情報源・最終確認日' },
   privacy: { path: '/privacy/', description: 'プライバシーポリシー' },
+  // 2026-09-02、ナビゲーション・運営者表示・SEO/AIO監査対応で追加。
+  // 運営法人（株式会社サンアローズ）を明示する専用ページ。
+  // /about/（掲載基準・広告方針）とは役割を分け、運営者情報だけを扱う。
+  operator: { path: '/operator/', description: '運営者情報（運営法人・サイトの目的）' },
 
   // feature/content-guide-and-sponsored-results（2026-08-27）で追加。
   // 石材店比較（既存ページ、URL不変）とは別枠の「多磨霊園ガイド」情報記事群。

@@ -160,8 +160,20 @@ import { siteConfig } from '../lib/siteConfig';
 import { ROUTES } from '../lib/routes';
 import { getActiveSponsors } from '../lib/data';
 import { resolvePageCategory } from '../lib/analytics/pageCategory';
-import { buildCanonicalUrl, buildOrganizationJsonLd, buildBreadcrumbListJsonLd } from '../lib/seo';
+import {
+  buildCanonicalUrl,
+  buildOrganizationJsonLd,
+  buildWebSiteJsonLd,
+  buildBreadcrumbListJsonLd,
+} from '../lib/seo';
 import type { JsonLd } from '../lib/seo';
+import {
+  PRIMARY_NAV,
+  OPERATOR_NAV,
+  FOOTER_PRIMARY_LINKS,
+  FOOTER_NAV_GROUPS,
+  isCurrentPath,
+} from '../lib/navigation';
 import GaTag from '../lib/analytics/GaTag.astro';
 import SponsorGroup from '../components/sponsors/SponsorGroup.astro';
 
@@ -224,7 +236,9 @@ const canonicalUrl = buildCanonicalUrl(Astro.url.pathname);
 const ogImageUrl = buildCanonicalUrl(ogImage);
 
 const organizationJsonLd = buildOrganizationJsonLd();
+const webSiteJsonLd = buildWebSiteJsonLd();
 const breadcrumbJsonLd = breadcrumbs && breadcrumbs.length > 0 ? buildBreadcrumbListJsonLd(breadcrumbs) : null;
+const currentPathname = Astro.url.pathname;
 
 const sponsors = getActiveSponsors();
 const sponsorSlots: [
@@ -261,6 +275,7 @@ const hasBeforeSponsor = Astro.slots.has('beforeSponsor');
     <meta name="twitter:image" content={ogImageUrl} />
 
     <script type="application/ld+json" set:html={JSON.stringify(organizationJsonLd)} is:inline />
+    <script type="application/ld+json" set:html={JSON.stringify(webSiteJsonLd)} is:inline />
     {breadcrumbJsonLd && <script type="application/ld+json" set:html={JSON.stringify(breadcrumbJsonLd)} is:inline />}
     {extraJsonLd.map((jsonLd) => <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} is:inline />)}
 
@@ -280,11 +295,76 @@ const hasBeforeSponsor = Astro.slots.has('beforeSponsor');
           <span aria-hidden="true">メニュー</span>
           <span class="sr-only">主要メニューを開く・閉じる</span>
         </label>
+        {/*
+          主要ナビゲーション（2026-09-02、ナビゲーション監査・共通化対応）。
+          src/lib/navigation.ts の PRIMARY_NAV（正本）をそのまま描画する。
+          「多磨霊園を知る」はドロップダウン（ガイド一覧・歴史・著名人墓所）にし、
+          フッターを見なければ到達できなかった主要コンテンツへヘッダーから
+          直接たどれるようにした。
+
+          ドロップダウンの開閉自体はhoverに依存せず、下記<script>（クリック・
+          Enter/Space・Escape・外側クリックで開閉）で制御する。<button>要素の
+          ネイティブな挙動により、Enter/Spaceでの開閉・タブ移動は追加コード
+          なしで機能する。768px以下（モバイルメニュー内）では、CSS側で
+          ドロップダウンの中身を常時展開表示にし（`.site-header__dropdown-menu`
+          のmax-width:640pxのメディアクエリ上書き参照）、開閉ボタンの操作に
+          関係なく全リンクが見える1本のリストとして扱う。
+        */}
         <nav class="site-header__nav" aria-label="主要メニュー">
-          <a href={ROUTES.sekizaiten.path}>石材店を探す</a>
-          <a href={ROUTES.guideProcedures.path}>墓じまい・手続き</a>
-          <a href={ROUTES.access.path}>墓参り・アクセス</a>
-          <a href={ROUTES.guide.path}>多磨霊園を知る</a>
+          {
+            PRIMARY_NAV.map((entry) =>
+              entry.kind === 'link' ? (
+                <a href={entry.path} aria-current={isCurrentPath(currentPathname, entry.path) ? 'page' : undefined}>
+                  {entry.label}
+                </a>
+              ) : (
+                <div class="site-header__dropdown site-header__dropdown--align-right" data-nav-dropdown>
+                  <button
+                    type="button"
+                    class="site-header__dropdown-trigger"
+                    aria-expanded="false"
+                    aria-haspopup="true"
+                    aria-controls={entry.id}
+                    data-nav-dropdown-trigger
+                  >
+                    {entry.label}
+                    <svg class="site-header__dropdown-chevron" width="14" height="14" viewBox="0 0 20 20" aria-hidden="true" focusable="false">
+                      <path d="M5 7.5 L10 12.5 L15 7.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                    </svg>
+                  </button>
+                  <div class="site-header__dropdown-menu" id={entry.id} data-nav-dropdown-menu>
+                    {entry.items.map((item) => (
+                      <a
+                        href={item.path}
+                        aria-current={isCurrentPath(currentPathname, item.path) ? 'page' : undefined}
+                        data-event="internal_guide_link_click"
+                        data-destination={item.path}
+                      >
+                        {item.label}
+                      </a>
+                    ))}
+                  </div>
+                </div>
+              ),
+            )
+          }
+          {/*
+            モバイルメニュー内の運営系ページ（2026-09-02追加）。「スマート
+            フォンではハンバーガーメニュー等の中に、主要ページと運営系
+            ページを整理して表示する」という要件に対応する。640px超では
+            `.site-header__nav-mobile-extra`をCSSで非表示にし、PCヘッダーの
+            見た目（主要4項目のみ）は変えない。
+          */}
+          <div class="site-header__nav-mobile-extra">
+            <p class="site-header__nav-mobile-label">サイトについて</p>
+            {
+              OPERATOR_NAV.map((item) => (
+                <a href={item.path} aria-current={isCurrentPath(currentPathname, item.path) ? 'page' : undefined}>
+                  {item.label}
+                </a>
+              ))
+            }
+          </div>
         </nav>
       </div>
     </header>
@@ -344,11 +424,17 @@ const hasBeforeSponsor = Astro.slots.has('beforeSponsor');
             （「開閉可能にする」という要件は満たすが、「モバイルで
             初期状態から折りたたまれている」わけではない。この設計判断は
             最終報告に記載する）。 */}
+        {/* 2026-09-02、ナビゲーション監査・共通化対応: ヘッダー同様、
+            src/lib/navigation.ts（FOOTER_PRIMARY_LINKS / FOOTER_NAV_GROUPS）を
+            正本として描画する。直書きのリンク一覧は廃止した。 */}
         <nav class="site-footer__primary" aria-label="主要リンク">
-          <a href={ROUTES.top.path}>トップ</a>
-          <a href={ROUTES.sekizaiten.path}>石材店一覧・比較</a>
-          <a href={ROUTES.guideProcedures.path}>墓じまい・手続き</a>
-          <a href={ROUTES.about.path}>運営方針</a>
+          {
+            FOOTER_PRIMARY_LINKS.map((item) => (
+              <a href={item.path} aria-current={isCurrentPath(currentPathname, item.path) ? 'page' : undefined}>
+                {item.label}
+              </a>
+            ))
+          }
         </nav>
 
         {/* 「比較する」「ガイド」「運営」の3グループ（details/summary、
@@ -358,45 +444,96 @@ const hasBeforeSponsor = Astro.slots.has('beforeSponsor');
             付与せず、`display`の上書きだけで見た目を変える。詳細は
             下記CSSの`.site-footer__groups details > nav`参照）。 */}
         <div class="site-footer__groups">
-          <details class="site-footer__group" open>
-            <summary class="site-footer__group-label">比較する</summary>
-            <nav class="site-footer__nav" aria-label="石材店比較のページ">
-              <a href={ROUTES.top.path}>トップ</a>
-              <a href={ROUTES.sekizaiten.path}>石材店一覧・比較</a>
-              <a href={ROUTES.hakajimai.path}>墓じまいの比較</a>
-              <a href={ROUTES.kanri.path}>墓所管理の比較</a>
-            </nav>
-          </details>
-
-          <details class="site-footer__group" open>
-            <summary class="site-footer__group-label">ガイド</summary>
-            <nav class="site-footer__nav" aria-label="多磨霊園ガイドのページ">
-              <a href={ROUTES.guide.path}>多磨霊園を知る</a>
-              <a href={ROUTES.access.path}>行き方・園内案内</a>
-              <a href={ROUTES.guideProcedures.path}>墓じまい・手続き総合案内</a>
-              <a href={ROUTES.tetsuzuki.path}>改葬・手続きの公式リンク</a>
-              <a href={ROUTES.guideHistory.path}>歴史</a>
-              <a href={ROUTES.guideFamousGraves.path}>著名人墓所</a>
-            </nav>
-          </details>
-
-          <details class="site-footer__group" open>
-            <summary class="site-footer__group-label">運営</summary>
-            <nav class="site-footer__nav" aria-label="運営情報のページ">
-              <a href={ROUTES.about.path}>運営方針・掲載基準・広告方針・訂正窓口</a>
-              <a href={`${ROUTES.about.path}#sponsor-info-heading`}>スポンサー掲載について</a>
-              <a href={ROUTES.sources.path}>情報源・最終確認日</a>
-              <a href={ROUTES.privacy.path}>プライバシーポリシー</a>
-            </nav>
-          </details>
+          {
+            FOOTER_NAV_GROUPS.map((group) => (
+              <details class="site-footer__group" open>
+                <summary class="site-footer__group-label">{group.label}</summary>
+                <nav class="site-footer__nav" aria-label={`${group.label}のページ`}>
+                  {group.items.map((item) => (
+                    <a href={item.path} aria-current={isCurrentPath(currentPathname, item.path) ? 'page' : undefined}>
+                      {item.label}
+                    </a>
+                  ))}
+                </nav>
+              </details>
+            ))
+          }
         </div>
 
-        <p class="site-footer__copyright">&copy; {new Date().getFullYear()} {siteConfig.name}</p>
+        {/* 運営者表示（2026-09-02追加）。サイト名（ブランド）と運営法人を
+            分けて表示し、法人名は運営者情報ページへのリンクにする。 */}
+        <p class="site-footer__operator">
+          <span class="site-footer__site-name">{siteConfig.name}</span>
+          <br />
+          運営：<a href={ROUTES.operator.path}>{siteConfig.operator.name}</a>
+        </p>
+        <p class="site-footer__copyright">&copy; {new Date().getFullYear()} {siteConfig.operator.name}</p>
       </div>
     </footer>
 
     <script>
       import '../lib/analytics/autoInit';
+    </script>
+
+    <script>
+      // ヘッダー「多磨霊園を知る」ドロップダウンの開閉制御（2026-09-02、
+      // ナビゲーション監査対応「ヘッダーを増やしすぎない」節）。
+      // hoverには依存せず、クリック・Enter/Space（<button>のネイティブ挙動）・
+      // Escape・メニュー外クリックで開閉する。1ページに複数のドロップダウンが
+      // あってもよいよう、data-nav-dropdown単位で独立して動く。
+      (function initNavDropdowns() {
+        const dropdowns = Array.from(document.querySelectorAll<HTMLElement>('[data-nav-dropdown]'));
+        if (dropdowns.length === 0) return;
+
+        function closeDropdown(dropdown: HTMLElement): void {
+          dropdown.removeAttribute('data-open');
+          const trigger = dropdown.querySelector<HTMLButtonElement>('[data-nav-dropdown-trigger]');
+          if (trigger) trigger.setAttribute('aria-expanded', 'false');
+        }
+
+        function openDropdown(dropdown: HTMLElement): void {
+          dropdowns.forEach((other) => {
+            if (other !== dropdown) closeDropdown(other);
+          });
+          dropdown.setAttribute('data-open', '');
+          const trigger = dropdown.querySelector<HTMLButtonElement>('[data-nav-dropdown-trigger]');
+          if (trigger) trigger.setAttribute('aria-expanded', 'true');
+        }
+
+        dropdowns.forEach((dropdown) => {
+          const trigger = dropdown.querySelector<HTMLButtonElement>('[data-nav-dropdown-trigger]');
+          if (!trigger) return;
+
+          trigger.addEventListener('click', () => {
+            const isOpen = dropdown.hasAttribute('data-open');
+            if (isOpen) {
+              closeDropdown(dropdown);
+            } else {
+              openDropdown(dropdown);
+            }
+          });
+        });
+
+        // メニュー外クリックで閉じる。
+        document.addEventListener('click', (evt) => {
+          dropdowns.forEach((dropdown) => {
+            if (!dropdown.hasAttribute('data-open')) return;
+            if (evt.target instanceof Node && !dropdown.contains(evt.target)) {
+              closeDropdown(dropdown);
+            }
+          });
+        });
+
+        // Escapeで閉じ、トリガーへフォーカスを戻す。
+        document.addEventListener('keydown', (evt) => {
+          if (evt.key !== 'Escape') return;
+          dropdowns.forEach((dropdown) => {
+            if (!dropdown.hasAttribute('data-open')) return;
+            closeDropdown(dropdown);
+            dropdown.querySelector<HTMLButtonElement>('[data-nav-dropdown-trigger]')?.focus();
+          });
+        });
+      })();
     </script>
 
     <script>
@@ -622,6 +759,155 @@ const hasBeforeSponsor = Astro.slots.has('beforeSponsor');
     .site-header__nav-checkbox:checked ~ .site-header__nav {
       display: flex;
     }
+  }
+
+  /*
+   * ヘッダーの「多磨霊園を知る」ドロップダウン（2026-09-02、ナビゲーション
+   * 監査対応「ヘッダーを増やしすぎない」節）。
+   *
+   * PC（641px以上）: トリガーボタンをクリック/Enter/Spaceで開閉し、
+   * メニューは`.site-header__dropdown[data-open]`のときだけ絶対配置で表示する
+   * （hoverだけに依存しない。開閉制御は下記<script>参照）。
+   * モバイル（640px以下）: メニューの中身は常時展開表示にする
+   * （`.site-header__dropdown-menu`を参照。開閉ボタンの状態に関係なく、
+   * モバイルメニューを開いた時点で3つのリンクがそのまま見える1本の
+   * リストになる）。
+   */
+  .site-header__dropdown {
+    position: relative;
+  }
+
+  .site-header__dropdown-trigger {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3em;
+    font: inherit;
+    color: var(--color-accent);
+    background: none;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+  }
+
+  .site-header__dropdown-trigger:hover {
+    text-decoration: underline;
+  }
+
+  .site-header__dropdown-chevron {
+    transition: transform 0.15s ease;
+  }
+
+  .site-header__dropdown[data-open] .site-header__dropdown-chevron {
+    transform: rotate(180deg);
+  }
+
+  .site-header__dropdown-menu {
+    display: none;
+    flex-direction: column;
+    gap: 0;
+  }
+
+  @media (min-width: 641px) {
+    .site-header__dropdown-menu {
+      position: absolute;
+      top: 100%;
+      left: 0;
+      z-index: 20;
+      min-width: 220px;
+      margin-top: var(--space-2);
+      padding: var(--space-2);
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-card, 10px);
+      box-shadow: 0 4px 16px rgba(41, 44, 41, 0.12);
+    }
+
+    /* 画面右端でのはみ出し防止（ヘッダー右寄りに置かれるドロップダウン用）。 */
+    .site-header__dropdown--align-right .site-header__dropdown-menu {
+      left: auto;
+      right: 0;
+    }
+
+    .site-header__dropdown[data-open] .site-header__dropdown-menu {
+      display: flex;
+    }
+
+    .site-header__dropdown-menu a {
+      padding: 0.6em var(--space-2);
+      border-radius: var(--radius-tag, 6px);
+      white-space: nowrap;
+      cursor: pointer;
+    }
+
+    .site-header__dropdown-menu a:hover {
+      background: var(--color-accent-soft);
+    }
+  }
+
+  @media (max-width: 640px) {
+    .site-header__dropdown-menu {
+      display: flex;
+      padding-left: var(--space-4);
+      border-left: 2px solid var(--color-border);
+      margin: 0 0 var(--space-2);
+    }
+
+    .site-header__dropdown-menu a {
+      padding: var(--space-2) 0;
+      min-height: var(--tap-target-min);
+      display: flex;
+      align-items: center;
+    }
+
+    .site-header__dropdown-trigger {
+      padding: var(--space-3) 0;
+      min-height: var(--tap-target-min);
+      pointer-events: none;
+    }
+
+    .site-header__dropdown-chevron {
+      display: none;
+    }
+  }
+
+  /* モバイルメニュー内の運営系ページ（2026-09-02追加）。640px超では
+     PCヘッダーの見た目（主要4項目のみ）を変えないよう非表示にする。 */
+  .site-header__nav-mobile-extra {
+    display: none;
+  }
+
+  @media (max-width: 640px) {
+    .site-header__nav-mobile-extra {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+      border-top: 1px solid var(--color-border);
+      margin-top: var(--space-2);
+      padding-top: var(--space-2);
+    }
+
+    .site-header__nav-mobile-extra a {
+      padding: var(--space-3) 0;
+      min-height: var(--tap-target-min);
+      display: flex;
+      align-items: center;
+    }
+  }
+
+  .site-header__nav-mobile-label {
+    margin: 0 0 var(--space-2);
+    font-size: var(--font-size-caption, 0.875rem);
+    font-weight: 700;
+    color: var(--color-text-muted);
+  }
+
+  /* aria-current="page" の視覚表示（ヘッダー・フッター共通）。下線の
+     太さだけで示し、色数を増やさない。 */
+  .site-header__nav a[aria-current='page'],
+  .site-header__dropdown-menu a[aria-current='page'] {
+    text-decoration: underline;
+    text-decoration-thickness: 2px;
+    text-underline-offset: 3px;
   }
 
   /* 主要リンクの優先表示（2026-09-01）。フッター最上部に常時見える
@@ -890,8 +1176,18 @@ const hasBeforeSponsor = Astro.slots.has('beforeSponsor');
     text-align: center;
   }
 
+  .site-footer__operator {
+    margin: var(--space-4) 0 0;
+    line-height: 1.6;
+  }
+
+  .site-footer__site-name {
+    font-weight: 700;
+    color: var(--color-text);
+  }
+
   .site-footer__copyright {
-    margin-top: var(--space-4);
+    margin-top: var(--space-2);
   }
 
   a:focus-visible,

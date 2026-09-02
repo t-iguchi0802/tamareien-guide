@@ -25,11 +25,16 @@ const tamaOfficial = getSourceById('SRC-TAMA-OFFICIAL');
 const tamaWorkNotice = getSourceById('SRC-TAMA-WORK-NOTICE');
 const fuchuReburial = getSourceById('SRC-FUCHU-REBURIAL');
 
-/** ガイド記事の出典一覧（sources.csvと重複しないもの）。 */
+/**
+ * ガイド記事の出典一覧（sources.csvと重複しないもの）。
+ * 2026-09-02、ナビゲーション・運営者表示・SEO/AIO監査対応「不要な
+ * 『公式墓所ナビ』を削除」節: 公式墓所ナビ（GUIDE_SOURCES.tamaHakaNavi）
+ * への導線を公開画面（/access/ /guide/famous-graves/）から削除したため、
+ * この一覧からも外した（定義自体はguide-sources.tsに残している）。
+ */
 const guideSourceList = [
   { ...GUIDE_SOURCES.tamaOverview, usedIn: '多磨霊園の歴史' },
   { ...GUIDE_SOURCES.tamaMapPdf, usedIn: '多磨霊園への行き方／著名人墓所ガイド' },
-  { ...GUIDE_SOURCES.tamaHakaNavi, usedIn: '多磨霊園への行き方／著名人墓所ガイド' },
   { ...GUIDE_SOURCES.googleMapsTama, usedIn: '多磨霊園への行き方' },
 ];
 
@@ -83,7 +88,7 @@ const browserTitle = `${pageTitle}｜多磨霊園 お墓ガイド`;
   <section aria-labelledby="guide-sources-heading">
     <h2 id="guide-sources-heading">多磨霊園ガイド記事の情報源</h2>
     <p>
-      <a href={ROUTES.guide.path}>多磨霊園ガイド</a>（行き方・歴史・著名人墓所等）で使用している出典です。事業者比較データとは別に、東京都公園協会の公式ページ・案内図・墓所ナビを直接参照しています。
+      <a href={ROUTES.guide.path}>多磨霊園ガイド</a>（行き方・歴史・著名人墓所等）で使用している出典です。事業者比較データとは別に、東京都公園協会の公式ページ・案内図を直接参照しています。
     </p>
     <div class="sources-table__scroll">
       <table>

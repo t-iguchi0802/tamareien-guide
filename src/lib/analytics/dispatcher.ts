@@ -19,6 +19,12 @@
  *   correction_request_click: （追加属性なし）
  *   sponsor_click            : data-sponsor-id, data-campaign-id, data-slot-position,
  *                             data-page-category（2026-08-28、全ページ共通化に伴い追加）
+ *   internal_guide_link_click: data-destination（2026-09-02追加。ガイド記事間の
+ *                             サイト内遷移。comparison_filter_useはJS側から直接
+ *                             trackComparisonFilterUse()を呼ぶ方式に変更したため
+ *                             このディスパッチャの対象外＝チェックボックスの
+ *                             click/change二重発火を避けるため。詳細は
+ *                             src/components/business/ServiceFilter.astro参照）
  *
  * sponsor_impression（表示回数）はクリック/変更イベントで発火しないため、
  * このディスパッチャの対象外。表示検知（IntersectionObserver等）を行う
@@ -56,6 +62,7 @@ import {
   trackOfficialProcedureClick,
   trackCorrectionRequestClick,
   trackSponsorClick,
+  trackInternalGuideLinkClick,
 } from './events';
 import type { AnalyticsEventName, OutboundLinkType, SponsorSlotPosition } from '../../types/analytics';
 
@@ -156,6 +163,14 @@ function dispatchFromElement(el: Element): void {
         slot_position: slotPosition,
         page_category: pageCategory,
       });
+      return;
+    }
+    case 'internal_guide_link_click': {
+      const destination = el.getAttribute('data-destination');
+      if (!destination) {
+        return;
+      }
+      trackInternalGuideLinkClick({ destination, page_path: pagePath });
       return;
     }
     default:
