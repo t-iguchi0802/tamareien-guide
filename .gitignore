@@ -2,6 +2,11 @@
 dist/
 .astro/
 
+# Cloudflare Workers（wrangler）のローカルキャッシュ・状態ファイル
+# （2026-09-03、wrangler.jsonc追加に伴い追加。wrangler.jsonc自体は
+# コミット対象。dry-run実行時にできる.wrangler/はリポジトリに含めない）
+.wrangler/
+
 # dependencies
 node_modules/
 

@@ -1,0 +1,38 @@
+{
+  /**
+   * Cloudflare Workers静的アセット配信設定（2026-09-03追加）。
+   *
+   * 原因: Cloudflare上でのデプロイ手順は「npm run build（成功）→
+   * npx wrangler deploy」の2段階だが、リポジトリにwrangler設定
+   * （wrangler.jsonc/toml）が存在しない状態だと、wranglerがAstro
+   * プロジェクトを自動検出し、独自にSSR向けの再ビルド（Cloudflare
+   * アダプター相当の挙動）を行おうとする。その再ビルド時の作業
+   * ディレクトリ（/bundle/）がリポジトリのルートと異なるため、
+   * `src/lib/data/loadSponsors.ts`等が`process.cwd()`基準で参照する
+   * `src/data/sponsors.json`のようなJSONデータファイルが見つからず、
+   * 404ページのプリレンダーが
+   * 「no such file or directory, readAll '/bundle/src/data/sponsors.json'」
+   * で失敗していた。
+   *
+   * 本サイトは`astro.config.mjs`で`output: 'static'`（SSR未使用、
+   * @astrojs/cloudflareアダプターも未導入）の完全な静的サイトであり、
+   * `npm run build`が生成する`./dist`をそのまま配信すれば十分である。
+   * `assets.directory`を明示することで、wranglerの自動検出・
+   * 再ビルド（＝上記の原因そのもの）を回避し、`npm run build`で
+   * 生成済みの`./dist`を静的アセットとしてそのまま配信させる。
+   * `main`（Workerスクリプトのエントリポイント）は意図的に設定しない
+   * （Workerを起動せず、静的アセット配信のみを行うため）。
+   *
+   * sponsors.json/businesses.json/sources.csvの内容、
+   * `src/lib/data/loadSponsors.ts`等のデータ読み込みロジックは
+   * 変更していない（今回の原因はwranglerの自動再構成であり、
+   * アプリケーションコード側の問題ではないため）。
+   */
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "tamareien-guide",
+  "compatibility_date": "2026-09-02",
+  "assets": {
+    "directory": "./dist",
+    "not_found_handling": "404-page"
+  }
+}
