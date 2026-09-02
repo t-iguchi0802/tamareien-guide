@@ -1048,10 +1048,42 @@ const hasBeforeSponsor = Astro.slots.has('beforeSponsor');
     margin-bottom: var(--space-6);
   }
 
+  /*
+   * スマートフォン表示のスポンサー領域の余白・横スクロール対策
+   * （2026-09-02、「スマートフォン表示のスポンサー領域を修正」対応）。
+   *
+   * 従来`.sponsor-group`に左右・上下の余白がなく、検索条件領域と
+   * スポンサー枠が画面端に張り付いて一体に見える指摘に対応し、
+   * 左右24px・上下32pxの余白を追加した。この宣言は1400px未満だけで
+   * 意味を持つ（1400px以上では下記`@media(min-width:1400px)`ブロックで
+   * `.sponsor-group{display:contents}`に上書きされ、`display:contents`
+   * の要素はpadding/border/backgroundを一切描画しないため、PC幅では
+   * 自動的に無効化される。メディアクエリで包む必要がない）。
+   *
+   * 横スクロール対策: グリッドアイテムは既定でmin-width:autoが働き、
+   * 中身がトラック幅を超えて広がるとページ全体が横スクロールする
+   * （実機で確認済みの既知の原因）。`grid-template-columns:repeat(2,
+   * minmax(0, 1fr))`のminmax(0, ...)で各トラックの最小幅を明示的に0にし、
+   * `.sponsor-card`側にも`min-width:0`・`width:100%`・
+   * `box-sizing:border-box`を設定して、カード自身がトラック幅を
+   * 超えないようにしている（詳細はSponsorCard.astro参照）。
+   */
   .sponsor-group {
+    box-sizing: border-box;
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: var(--space-3);
+    width: 100%;
+    max-width: 100%;
+    padding: var(--space-8) var(--space-6);
+  }
+
+  /* 340px未満の極端に狭い画面だけ、2列では窮屈になるため1列×4段へ
+     切り替える。360px・390pxは対象外（2列×2段を維持する）。 */
+  @media (max-width: 339px) {
+    .sponsor-group {
+      grid-template-columns: 1fr;
+    }
   }
 
   .sponsor-rail {
@@ -1061,22 +1093,39 @@ const hasBeforeSponsor = Astro.slots.has('beforeSponsor');
     display: contents;
   }
 
-  /* スマートフォン・タブレット幅（1399px以下）でのスポンサー枠の圧縮
-     （2026-09-01、ミチのモバイル優先UI・文章校正対応「スマートフォンの
-     スポンサー枠」節）。SponsorCard.astro自身の既定値（180px、空枠・
-     簡易表示向け）から約39%減の110pxにする（あくまで「床」の値であり、
-     写真付き広告（.sponsor-card--photo）は自身の内容量に応じてこれより
-     自然に高くなる。2026-09-02、SponsorSlot.astro→SponsorCard.astro
-     改名に合わせセレクタを更新）。この宣言は下の
-     `@media (min-width: 1400px)`ブロックより前（source順で先）に
-     置いているため、1400px以上では同ブロック内の
-     `.page-shell .sponsor-rail .sponsor-card { min-height: 400px; }`
-     （詳細度は同じクラス3つだが、source順で後にあるため優先される）が
-     正しく上書きする。セレクタをクラス3つにしている理由は、
-     SponsorCard.astro自身のスコープ済みルールに確実に勝つため
-     （下の1400px以上のルールと同じ理由）。 */
+  /*
+   * 「4枠すべて同じ高さ」の担保（2026-09-02、「スマートフォン表示の
+   * スポンサー領域を修正」対応）。
+   *
+   * CSS Gridの`align-items: stretch`（既定値）は「同じ行のアイテム」の
+   * 高さはそろえるが、2×2グリッドの1段目と2段目は別々のトラック
+   * （grid-auto-rows既定のauto）のため、行をまたいだ高さは自動的には
+   * そろわない。実広告（写真・地域タグ・見出し・キャッチコピー・
+   * サービスタグ・正式名称・CTAの7要素）は、募集カード（見出し・
+   * キャッチコピー・CTAの3要素）よりコンテンツ量が多く、何も
+   * 対策しないと段ごとに高さが変わってしまう（実機検証で確認）。
+   *
+   * 対応: 4枠に共通の`min-height`を、カード幅の帯ごとに実測に基づいて
+   * 設定し、募集カードの余った縦スペースはSponsorCard.astro側の
+   * `.sponsor-card__cta { margin-top: auto }`でCTAをカード下部へ
+   * 押し下げることで自然に吸収する（「CTAの位置をカード下部で統一する」
+   * 要件にも対応）。固定heightではなくmin-heightのため、実広告側の
+   * 文章が万一長くなっても切れることはない。
+   */
   .page-shell .sponsor-group .sponsor-card {
-    min-height: 110px;
+    min-height: 420px;
+  }
+
+  @media (min-width: 481px) {
+    .page-shell .sponsor-group .sponsor-card {
+      min-height: 470px;
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .page-shell .sponsor-group .sponsor-card {
+      min-height: 555px;
+    }
   }
 
   @media (min-width: 1400px) {

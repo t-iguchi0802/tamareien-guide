@@ -41,6 +41,27 @@
  * 十分な余白で自然に収まる分量（見出し・キャッチコピー・タグ3つ・
  * サービス名・CTA）を前提にしている。写真は`aspect-ratio: 3 / 2`・
  * `object-fit: cover`で、カード幅に応じて自然な高さになる。
+ *
+ * スマートフォン表示の修正（2026-09-02、「スマートフォン表示のスポンサー
+ * 領域を修正」対応）:
+ * - 空枠（`.sponsor-card--empty`）を、単なる「広告／スポンサー枠」の
+ *   プレースホルダーから、写真付き広告と同じ構成（ビジュアル領域→
+ *   広告ラベル→見出し→説明→CTA）を持つ「スポンサー募集」カードへ
+ *   刷新した。ビジュアル領域には、架空のロゴ・企業名・写真を使わず、
+ *   サイトの配色に合う抽象的なグラデーション＋控えめな写真プレース
+ *   ホルダーアイコン（「ここに写真が入ります」を示す一般的な絵柄）を
+ *   使う。CTA「掲載について見る」は、実在する`/about/`の
+ *   スポンサー掲載案内セクション（#sponsor-info-heading）へのリンクで、
+ *   sponsor_click等の計測対象にはしない（実際の広告契約ではないため。
+ *   `sponsor_click`のパラメータ契約は変更していない）。
+ * - 実広告・スポンサー募集カードとも、ビジュアル領域を同じ
+ *   `aspect-ratio: 3 / 2`にそろえ、4枠の高さが視覚的にも構造的にも
+ *   そろうようにした。
+ * - 対応内容（serviceTags）は、480px超では従来どおり3つのタグ表示、
+ *   480px以下では「相続・空き家・見守り」のような1行の文字列表示に
+ *   切り替える（3つのタグが2段に折り返して縦に間延びするのを防ぐ。
+ *   マークアップは両方を出力し、CSSの`display`だけで出し分ける
+ *   —既存の「モバイルカード／PC表」の出し分けパターンと同じ考え方）。
  */
 import '../../styles/tokens.css';
 import type { SponsorCardProps } from '../../types/components';
@@ -54,10 +75,32 @@ const headline = sponsor?.headline ?? sponsor?.name ?? '';
 
 {
   !sponsor ? (
-    <div class="sponsor-card sponsor-card--empty" data-sponsor-card data-slot-position={position} data-page-category={pageCategory}>
-      <p class="sponsor-card__eyebrow">広告</p>
-      <p class="sponsor-card__placeholder">スポンサー枠</p>
-    </div>
+    <a
+      class="sponsor-card sponsor-card--empty"
+      data-sponsor-card
+      data-slot-position={position}
+      data-page-category={pageCategory}
+      href="/about/#sponsor-info-heading"
+    >
+      <div class="sponsor-card__media sponsor-card__media--recruit">
+        <span class="sponsor-card__eyebrow sponsor-card__eyebrow--on-photo">広告</span>
+        <svg class="sponsor-card__recruit-icon" width="40" height="40" viewBox="0 0 40 40" aria-hidden="true" focusable="false">
+          <rect x="3" y="7" width="34" height="26" rx="3" fill="none" stroke="currentColor" stroke-width="2" />
+          <circle cx="14" cy="16" r="3.2" fill="none" stroke="currentColor" stroke-width="2" />
+          <path d="M6 28 L15 20 L21 25 L27 17 L34 26" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+        </svg>
+      </div>
+      <div class="sponsor-card__body">
+        <p class="sponsor-card__headline">スポンサー募集中</p>
+        <p class="sponsor-card__tagline">多磨霊園周辺の事業者さまへ</p>
+        <span class="sponsor-card__cta">
+          掲載について見る
+          <svg class="sponsor-card__cta-arrow" width="16" height="16" viewBox="0 0 20 20" aria-hidden="true" focusable="false">
+            <path d="M5 3 L14 10 L5 17" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
+        </span>
+      </div>
+    </a>
   ) : sponsor.image ? (
     <a
       class="sponsor-card sponsor-card--photo"
@@ -88,11 +131,16 @@ const headline = sponsor?.headline ?? sponsor?.name ?? '';
         <p class="sponsor-card__headline">{headline}</p>
         {sponsor.tagline && <p class="sponsor-card__tagline">{sponsor.tagline}</p>}
         {sponsor.serviceTags && sponsor.serviceTags.length > 0 && (
-          <ul class="sponsor-card__tags">
-            {sponsor.serviceTags.map((tag) => (
-              <li>{tag}</li>
-            ))}
-          </ul>
+          <>
+            <ul class="sponsor-card__tags">
+              {sponsor.serviceTags.map((tag) => (
+                <li>{tag}</li>
+              ))}
+            </ul>
+            {/* 480px以下だけで表示する1行版（タグ3つの2段折り返しを避ける）。
+                CSSのdisplayだけで出し分け、内容はサーバー側で1回だけ生成する。 */}
+            <p class="sponsor-card__tags-inline">{sponsor.serviceTags.join('・')}</p>
+          </>
         )}
         <p class="sponsor-card__name">{sponsor.name}</p>
         <span class="sponsor-card__cta">
@@ -142,14 +190,23 @@ const headline = sponsor?.headline ?? sponsor?.name ?? '';
   .sponsor-card {
     display: flex;
     flex-direction: column;
+    /* 横スクロール対策（2026-09-02、「スマートフォン表示のスポンサー領域を
+       修正」対応）: グリッドアイテムは既定でmin-width:autoが働き、
+       中身（画像・長い文字列等）がトラック幅を超えて広がるとページ全体の
+       横スクロールを引き起こす。box-sizing・幅・最小幅を明示して
+       トラック幅に確実に収まるようにする。 */
+    box-sizing: border-box;
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    height: 100%;
     background: var(--color-sponsor-bg);
     border: 1px solid var(--color-sponsor-border);
     border-radius: var(--radius-card);
     box-shadow: 0 1px 3px rgba(43, 41, 38, 0.1);
   }
 
-  /* --- 空枠・簡易表示（従来のsponsor-slot相当の見た目を維持） --- */
-  .sponsor-card--empty,
+  /* --- 簡易表示（画像なしスポンサー用。ロゴ・要約のみ） --- */
   .sponsor-card--simple {
     gap: var(--space-2);
     min-height: 180px;
@@ -162,17 +219,6 @@ const headline = sponsor?.headline ?? sponsor?.name ?? '';
     font-weight: 700;
     letter-spacing: 0.12em;
     color: var(--color-sponsor-fg);
-  }
-
-  .sponsor-card__placeholder {
-    flex: 1;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin: 0;
-    text-align: center;
-    color: var(--color-stone-text);
-    font-size: var(--font-size-label);
   }
 
   .sponsor-card__filled {
@@ -232,12 +278,17 @@ const headline = sponsor?.headline ?? sponsor?.name ?? '';
   }
 
   /*
-   * --- 写真付き広告クリエイティブ（.sponsor-card--photo） ---
-   * カード全体が1つの<a>。「広告としての訴求力」を目的に、写真を
-   * カード上部の主役にし、背景を白／温かいアイボリーへ変更した
-   * （従来の薄いベージュ一色の箱をやめる指示に対応）。
+   * --- 写真付き広告クリエイティブ／スポンサー募集カード
+   * （.sponsor-card--photo / .sponsor-card--empty） ---
+   * カード全体が1つの<a>。「広告としての訴求力」を目的に、写真
+   * （または募集カードの場合は抽象的なビジュアル領域）をカード上部の
+   * 主役にし、背景を白／温かいアイボリーへ変更した（従来の薄い
+   * ベージュ一色の箱をやめる指示に対応）。実広告・募集カードで
+   * まったく同じ構造（ビジュアル領域→本文）を共有することで、
+   * 「4つの広告枠が同じ価値で提供されているように見える」ようにする。
    */
-  .sponsor-card--photo {
+  .sponsor-card--photo,
+  .sponsor-card--empty {
     overflow: hidden;
     background: var(--color-surface);
     border-color: var(--color-sponsor-border);
@@ -249,12 +300,14 @@ const headline = sponsor?.headline ?? sponsor?.name ?? '';
       border-color 0.15s ease;
   }
 
-  .sponsor-card--photo:hover {
+  .sponsor-card--photo:hover,
+  .sponsor-card--empty:hover {
     box-shadow: 0 6px 18px rgba(43, 41, 38, 0.16);
     border-color: var(--color-accent);
   }
 
-  .sponsor-card--photo:focus-visible {
+  .sponsor-card--photo:focus-visible,
+  .sponsor-card--empty:focus-visible {
     outline: 3px solid var(--color-accent);
     outline-offset: 2px;
   }
@@ -262,14 +315,33 @@ const headline = sponsor?.headline ?? sponsor?.name ?? '';
   .sponsor-card__media {
     position: relative;
     width: 100%;
+    max-width: 100%;
     aspect-ratio: 3 / 2;
     overflow: hidden;
     background: var(--color-stone-surface);
+    flex-shrink: 0;
+  }
+
+  /* スポンサー募集カードのビジュアル領域。架空のロゴ・企業名・写真を
+     使わず、サイトの配色（石色・緑）の控えめなグラデーションと、
+     「ここに写真が入ります」を示す一般的なプレースホルダーアイコンだけで
+     構成する（単なる空白にしない）。 */
+  .sponsor-card__media--recruit {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, var(--color-stone-surface) 0%, var(--color-tint-green-bg, #eef2e9) 100%);
+  }
+
+  .sponsor-card__recruit-icon {
+    color: var(--color-sponsor-fg);
+    opacity: 0.55;
   }
 
   .sponsor-card__photo {
     display: block;
     width: 100%;
+    max-width: 100%;
     height: 100%;
     object-fit: cover;
     /* 人物の顔が中央〜上寄りに来る写真を想定し、上端寄りを基準にする。 */
@@ -303,7 +375,9 @@ const headline = sponsor?.headline ?? sponsor?.name ?? '';
   .sponsor-card__body {
     display: flex;
     flex-direction: column;
+    flex: 1;
     gap: 0.35em;
+    min-width: 0;
     padding: var(--space-3) var(--space-3) var(--space-3);
   }
 
@@ -363,12 +437,17 @@ const headline = sponsor?.headline ?? sponsor?.name ?? '';
   }
 
   .sponsor-card__cta {
+    box-sizing: border-box;
     display: flex;
     align-items: center;
     justify-content: center;
     gap: 0.35em;
-    margin-top: 0.5em;
+    width: 100%;
+    /* 常にカード下部へ押し下げる（コンテンツ量が少ない募集カードでも
+       CTAの位置をそろえるため。カードの高さはmin-heightで統一している）。 */
+    margin-top: auto;
     min-height: 48px;
+    padding: 0.4em 0.6em;
     border-radius: var(--radius-pill);
     background: var(--color-accent);
     color: #fff;
@@ -376,7 +455,8 @@ const headline = sponsor?.headline ?? sponsor?.name ?? '';
     font-size: 0.875rem;
   }
 
-  .sponsor-card--photo:hover .sponsor-card__cta {
+  .sponsor-card--photo:hover .sponsor-card__cta,
+  .sponsor-card--empty:hover .sponsor-card__cta {
     background: var(--color-accent-deep);
     box-shadow: 0 2px 8px rgba(28, 46, 38, 0.35);
   }
@@ -385,12 +465,55 @@ const headline = sponsor?.headline ?? sponsor?.name ?? '';
     transition: transform 0.15s ease;
   }
 
-  .sponsor-card--photo:hover .sponsor-card__cta-arrow {
+  .sponsor-card--photo:hover .sponsor-card__cta-arrow,
+  .sponsor-card--empty:hover .sponsor-card__cta-arrow {
     transform: translateX(3px);
+  }
+
+  /* 対応内容の表示切り替え（2026-09-02追加）。480px超はタグ3つ、
+     480px以下は「相続・空き家・見守り」の1行文字列にする
+     （3タグが2段に折り返して縦に間延びするのを防ぐ）。 */
+  .sponsor-card__tags-inline {
+    display: none;
+    margin: 0.2em 0 0;
+    color: var(--color-text-muted);
+    font-size: 0.75rem;
+  }
+
+  @media (max-width: 480px) {
+    .sponsor-card__tags {
+      display: none;
+    }
+
+    .sponsor-card__tags-inline {
+      display: block;
+    }
+
+    /* 360px前後の狭いカード幅でも見出し・キャッチコピー・正式名称が
+       2行程度に収まるよう、文字サイズだけをわずかに詰める
+       （文字を切り詰める＝truncateはしない。折り返しは許容する）。 */
+    .sponsor-card__headline {
+      font-size: 1.0625rem;
+    }
+
+    .sponsor-card__tagline,
+    .sponsor-card--photo .sponsor-card__name,
+    .sponsor-card--empty .sponsor-card__tagline {
+      font-size: 0.75rem;
+    }
+
+    /* 「掲載について見る」（8文字＋矢印）がカード幅の狭いモバイルで
+       2行に折り返さないよう、この幅だけ文字を少し詰める。 */
+    .sponsor-card__cta {
+      gap: 0.2em;
+      padding: 0.4em 0.4em;
+      font-size: 0.8125rem;
+    }
   }
 
   @media (prefers-reduced-motion: reduce) {
     .sponsor-card--photo,
+    .sponsor-card--empty,
     .sponsor-card__cta-arrow {
       transition: none;
     }
