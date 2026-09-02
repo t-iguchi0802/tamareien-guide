@@ -152,8 +152,13 @@
  * 未使用時はページ末尾）にまとめる。SponsorPair.astroは使用しなくなった
  * ため削除した（src/components/sponsors/SponsorGroup.astroのみ使用）。
  * モバイル・タブレット幅（1399px以下）では、枠1つあたりの最小高さを
- * 180px→110px（約39%減）に圧縮した（下記`.sponsor-slot`の上書き参照）。
- * PC幅（1400px以上）の左右レール・枠サイズ（320px）は変更していない。
+ * 180px→110px（約39%減）に圧縮した（下記`.sponsor-card`の上書き参照）。
+ *
+ * スポンサー広告の全面再設計（2026-09-02）: SponsorSlot.astroを
+ * SponsorCard.astroへ改名し、写真付き広告クリエイティブに対応した
+ * （詳細はSponsorCard.astro参照）。PC幅（1400px以上）の枠高さは、
+ * 写真付き広告の目安サイズに合わせ320px→400pxへ引き上げた（4枠とも
+ * 同じ高さを維持する既存方針は変更していない）。
  */
 import '../styles/tokens.css';
 import { siteConfig } from '../lib/siteConfig';
@@ -1058,16 +1063,19 @@ const hasBeforeSponsor = Astro.slots.has('beforeSponsor');
 
   /* スマートフォン・タブレット幅（1399px以下）でのスポンサー枠の圧縮
      （2026-09-01、ミチのモバイル優先UI・文章校正対応「スマートフォンの
-     スポンサー枠」節）。SponsorSlot.astro自身の既定値（180px、モバイル・
-     タブレット向け）から約39%減の110pxにする。この宣言は下の
+     スポンサー枠」節）。SponsorCard.astro自身の既定値（180px、空枠・
+     簡易表示向け）から約39%減の110pxにする（あくまで「床」の値であり、
+     写真付き広告（.sponsor-card--photo）は自身の内容量に応じてこれより
+     自然に高くなる。2026-09-02、SponsorSlot.astro→SponsorCard.astro
+     改名に合わせセレクタを更新）。この宣言は下の
      `@media (min-width: 1400px)`ブロックより前（source順で先）に
      置いているため、1400px以上では同ブロック内の
-     `.page-shell .sponsor-rail .sponsor-slot { min-height: 320px; }`
+     `.page-shell .sponsor-rail .sponsor-card { min-height: 400px; }`
      （詳細度は同じクラス3つだが、source順で後にあるため優先される）が
-     正しく上書きし、320pxのまま変わらない。セレクタをクラス3つにしている
-     理由は、SponsorSlot.astro自身のスコープ済みルールに確実に勝つため
+     正しく上書きする。セレクタをクラス3つにしている理由は、
+     SponsorCard.astro自身のスコープ済みルールに確実に勝つため
      （下の1400px以上のルールと同じ理由）。 */
-  .page-shell .sponsor-group .sponsor-slot {
+  .page-shell .sponsor-group .sponsor-card {
     min-height: 110px;
   }
 
@@ -1144,7 +1152,7 @@ const hasBeforeSponsor = Astro.slots.has('beforeSponsor');
     }
 
     /* スポンサー枠本体のPCサイズ（高さのみ上書き。幅はレール＝グリッド列の
-       幅にフレックスで追従する）。SponsorSlot.astro自身のスコープ済み
+       幅にフレックスで追従する）。SponsorCard.astro自身のスコープ済み
        ルール（Astroのdata-astro-cid属性で詳細度が上がる）に確実に勝つため、
        セレクタをクラス3つにしている。
        重要: このスタイルブロックは<style is:global>のため、Astroの
@@ -1153,9 +1161,14 @@ const hasBeforeSponsor = Astro.slots.has('beforeSponsor');
        ブラウザには理解できない疑似クラスとしてそのまま出力されて
        死んだルールになる（実機・ビルド警告で確認）。ここでは
        `:global()`を使わず、素のセレクタのままクラス3つの詳細度を
-       確保している。 */
-    .page-shell .sponsor-rail .sponsor-slot {
-      min-height: 320px;
+       確保している。
+       2026-09-02（「スポンサー広告の全面再設計」対応）: 従来320pxだった
+       高さを400pxへ引き上げた。写真付き広告の目安サイズ（写真約140〜
+       170px＋本文約220〜250px＝合計約390〜430px）に合わせるためで、
+       「4枠は常に同じ大きさ」という既存の設計方針（SponsorCard.astro
+       コメント参照）どおり、空枠・簡易表示の3枠にも同じ高さが適用される。 */
+    .page-shell .sponsor-rail .sponsor-card {
+      min-height: 400px;
     }
   }
 

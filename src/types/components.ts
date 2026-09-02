@@ -62,8 +62,12 @@ export interface CorrectionCtaProps {
  * 全ページ共通化（2026-08-28）: スポンサー枠がBaseLayout側で全ページに
  * 表示されるようになったため、分析イベント（sponsor_impression /
  * sponsor_click）に含める `position` / `pageCategory` を追加した。
+ *
+ * 共通SponsorCard化（2026-09-02、「スポンサー広告の全面再設計」対応）:
+ * コンポーネント名を`SponsorSlot`から`SponsorCard`へ改名したのに合わせ、
+ * Props型名も`SponsorCardProps`へ改名した（中身は変更していない）。
  */
-export interface SponsorSlotProps {
+export interface SponsorCardProps {
   sponsor: Sponsor | null;
   /** 4枠中のどの位置か（分析イベント用）。 */
   position: SponsorSlotPosition;

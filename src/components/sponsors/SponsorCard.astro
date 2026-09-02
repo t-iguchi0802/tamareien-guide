@@ -1,0 +1,398 @@
+---
+/**
+ * 広告スポンサー枠（1枠）。旧SponsorSlot.astroを改名・再設計した
+ * 共通コンポーネント（2026-09-02、「スポンサー広告の全面再設計」対応）。
+ *
+ * 3種類の表示を、渡された`sponsor`の中身だけで自動的に出し分ける
+ * （呼び出し側・他ページは変更不要。今後スポンサーが増えても、
+ * データ（`src/data/sponsors.json`）に画像・見出し・CTAを追加するだけで
+ * 同水準の広告を追加できる）:
+ * - `sponsor === null`（契約なし）: 「広告」ラベル＋「スポンサー枠」の
+ *   プレースホルダー（`.sponsor-card--empty`）。
+ * - `sponsor.image`あり: 写真を主役にした広告クリエイティブ
+ *   （`.sponsor-card--photo`）。カード全体が1つの`<a>`（キーボード操作・
+ *   focus-visible対応、CTAとカードの二重リンクを作らないための設計）。
+ * - `sponsor.image`なし: 従来どおりロゴ・要約のみの簡易表示
+ *   （`.sponsor-card--simple`）。
+ *
+ * - 4枠は常に同じ大きさ・同じ扱いで、埋まっている枠を優先表示したり
+ *   強調したりしない（呼び出し側もdisplayOrder以外で並べ替えない）。
+ * - 通常掲載（BusinessCard/ServiceFilter）とは完全に分離しており、
+ *   検索条件・絞り込み結果を一切参照しない。
+ * - 計測: 実際にスポンサーが入っている枠のリンクにのみ
+ *   `data-event="sponsor_click"` を付与する（空枠はリンクを持たないため
+ *   計測対象にならない）。表示回数（sponsor_impression）は呼び出し側
+ *   （BaseLayout.astro）のIntersectionObserverが、ルート要素の
+ *   `data-sponsor-id`を対象に送信する。写真付き広告はルート要素自身が
+ *   `<a>`のため、id属性は1要素にのみ存在する（二重カウントの余地がない）。
+ * - 外部リンクには `rel="noopener sponsored"` を付与する。
+ *
+ * ルート要素は`<aside>`ではなく`<div>`/`<a>`にしている。`<aside>`は
+ * 既定でcomplementaryランドマークになり、4枠とも同名（無名）の
+ * ランドマークが並ぶ状態はaxeの`landmark-unique`に抵触する
+ * （実機検証で検出・修正）。呼び出し側の`<aside class="sponsor-group">`に
+ * `aria-label="広告"`を付けているため、個々の枠をランドマーク化する
+ * 必要はない。
+ *
+ * サイズ方針（2026-09-02）: PC幅でのカード高さは、写真付き広告を基準に
+ * 約390〜430px（写真約140〜170px＋本文約220〜250px）を目安にする
+ * （`src/layouts/BaseLayout.astro`の`.sponsor-card`min-height上書き
+ * 参照）。固定height・テキストの強制1行化はせず、min-heightと
+ * 十分な余白で自然に収まる分量（見出し・キャッチコピー・タグ3つ・
+ * サービス名・CTA）を前提にしている。写真は`aspect-ratio: 3 / 2`・
+ * `object-fit: cover`で、カード幅に応じて自然な高さになる。
+ */
+import '../../styles/tokens.css';
+import type { SponsorCardProps } from '../../types/components';
+
+type Props = SponsorCardProps;
+const { sponsor, position, pageCategory } = Astro.props;
+
+const ctaLabel = sponsor?.ctaLabel ?? 'サイトを見る';
+const headline = sponsor?.headline ?? sponsor?.name ?? '';
+---
+
+{
+  !sponsor ? (
+    <div class="sponsor-card sponsor-card--empty" data-sponsor-card data-slot-position={position} data-page-category={pageCategory}>
+      <p class="sponsor-card__eyebrow">広告</p>
+      <p class="sponsor-card__placeholder">スポンサー枠</p>
+    </div>
+  ) : sponsor.image ? (
+    <a
+      class="sponsor-card sponsor-card--photo"
+      data-sponsor-card
+      data-sponsor-id={sponsor.id}
+      data-campaign-id={sponsor.campaignId}
+      data-slot-position={position}
+      data-page-category={pageCategory}
+      href={sponsor.destinationUrl}
+      target="_blank"
+      rel="noopener sponsored"
+      data-event="sponsor_click"
+    >
+      <div class="sponsor-card__media">
+        <img
+          class="sponsor-card__photo"
+          src={sponsor.image}
+          alt={sponsor.imageAlt}
+          loading="lazy"
+          width="600"
+          height="400"
+        />
+        <span class="sponsor-card__eyebrow sponsor-card__eyebrow--on-photo">広告</span>
+        {sponsor.imageIsPlaceholder && <span class="sponsor-card__image-note">イメージ</span>}
+      </div>
+      <div class="sponsor-card__body">
+        {sponsor.area && <span class="sponsor-card__area">{sponsor.area}</span>}
+        <p class="sponsor-card__headline">{headline}</p>
+        {sponsor.tagline && <p class="sponsor-card__tagline">{sponsor.tagline}</p>}
+        {sponsor.serviceTags && sponsor.serviceTags.length > 0 && (
+          <ul class="sponsor-card__tags">
+            {sponsor.serviceTags.map((tag) => (
+              <li>{tag}</li>
+            ))}
+          </ul>
+        )}
+        <p class="sponsor-card__name">{sponsor.name}</p>
+        <span class="sponsor-card__cta">
+          {ctaLabel}
+          <svg class="sponsor-card__cta-arrow" width="16" height="16" viewBox="0 0 20 20" aria-hidden="true" focusable="false">
+            <path d="M5 3 L14 10 L5 17" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
+        </span>
+      </div>
+    </a>
+  ) : (
+    <div
+      class="sponsor-card sponsor-card--simple"
+      data-sponsor-card
+      data-sponsor-id={sponsor.id}
+      data-campaign-id={sponsor.campaignId}
+      data-slot-position={position}
+      data-page-category={pageCategory}
+    >
+      <p class="sponsor-card__eyebrow">広告</p>
+      <div class="sponsor-card__filled">
+        {sponsor.logoUrl && (
+          <img class="sponsor-card__logo" src={sponsor.logoUrl} alt="" loading="lazy" width="32" height="32" />
+        )}
+        <p class="sponsor-card__name">{sponsor.name}</p>
+        <p class="sponsor-card__summary">{sponsor.summary}</p>
+        <a
+          class="sponsor-card__link"
+          href={sponsor.destinationUrl}
+          target="_blank"
+          rel="noopener sponsored"
+          data-event="sponsor_click"
+          data-sponsor-id={sponsor.id}
+          data-campaign-id={sponsor.campaignId}
+          data-slot-position={position}
+          data-page-category={pageCategory}
+        >
+          {ctaLabel}
+          <span class="sr-only">（外部サイトを新しいタブで開きます）</span>
+        </a>
+      </div>
+    </div>
+  )
+}
+
+<style>
+  .sponsor-card {
+    display: flex;
+    flex-direction: column;
+    background: var(--color-sponsor-bg);
+    border: 1px solid var(--color-sponsor-border);
+    border-radius: var(--radius-card);
+    box-shadow: 0 1px 3px rgba(43, 41, 38, 0.1);
+  }
+
+  /* --- 空枠・簡易表示（従来のsponsor-slot相当の見た目を維持） --- */
+  .sponsor-card--empty,
+  .sponsor-card--simple {
+    gap: var(--space-2);
+    min-height: 180px;
+    padding: var(--space-3);
+  }
+
+  .sponsor-card__eyebrow {
+    margin: 0;
+    font-size: var(--font-size-caption);
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    color: var(--color-sponsor-fg);
+  }
+
+  .sponsor-card__placeholder {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0;
+    text-align: center;
+    color: var(--color-stone-text);
+    font-size: var(--font-size-label);
+  }
+
+  .sponsor-card__filled {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4em;
+    flex: 1;
+  }
+
+  .sponsor-card__logo {
+    flex: none;
+    width: 32px;
+    height: 32px;
+    object-fit: contain;
+    border-radius: 6px;
+    background: var(--color-surface);
+  }
+
+  .sponsor-card__name {
+    margin: 0;
+    font-weight: 700;
+    font-size: 0.95rem;
+    color: var(--color-text);
+  }
+
+  .sponsor-card__summary {
+    margin: 0;
+    color: var(--color-text);
+    font-size: var(--font-size-caption);
+    line-height: 1.5;
+  }
+
+  .sponsor-card__link {
+    margin-top: auto;
+    align-self: flex-start;
+    display: inline-flex;
+    align-items: center;
+    min-height: var(--tap-target-min);
+    padding: 0.4em 0.9em;
+    border-radius: var(--radius-pill);
+    background: var(--color-surface);
+    border: 1.5px solid var(--color-sponsor-border);
+    color: var(--color-sponsor-fg);
+    font-weight: 700;
+    font-size: var(--font-size-caption);
+    text-decoration: none;
+  }
+
+  .sponsor-card__link:hover {
+    background: var(--color-sponsor-border);
+    color: var(--color-surface);
+  }
+
+  .sponsor-card__link:focus-visible {
+    outline: 3px solid var(--color-accent);
+    outline-offset: 2px;
+  }
+
+  /*
+   * --- 写真付き広告クリエイティブ（.sponsor-card--photo） ---
+   * カード全体が1つの<a>。「広告としての訴求力」を目的に、写真を
+   * カード上部の主役にし、背景を白／温かいアイボリーへ変更した
+   * （従来の薄いベージュ一色の箱をやめる指示に対応）。
+   */
+  .sponsor-card--photo {
+    overflow: hidden;
+    background: var(--color-surface);
+    border-color: var(--color-sponsor-border);
+    color: var(--color-text);
+    text-decoration: none;
+    cursor: pointer;
+    transition:
+      box-shadow 0.15s ease,
+      border-color 0.15s ease;
+  }
+
+  .sponsor-card--photo:hover {
+    box-shadow: 0 6px 18px rgba(43, 41, 38, 0.16);
+    border-color: var(--color-accent);
+  }
+
+  .sponsor-card--photo:focus-visible {
+    outline: 3px solid var(--color-accent);
+    outline-offset: 2px;
+  }
+
+  .sponsor-card__media {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 3 / 2;
+    overflow: hidden;
+    background: var(--color-stone-surface);
+  }
+
+  .sponsor-card__photo {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    /* 人物の顔が中央〜上寄りに来る写真を想定し、上端寄りを基準にする。 */
+    object-position: center 25%;
+  }
+
+  /* 「広告」ラベルは写真左上に小さく重ねる（本文側には重複表示しない）。 */
+  .sponsor-card__eyebrow--on-photo {
+    position: absolute;
+    top: var(--space-2);
+    left: var(--space-2);
+    margin: 0;
+    padding: 0.2em 0.6em;
+    border-radius: var(--radius-tag, 6px);
+    background: rgba(28, 27, 25, 0.68);
+    color: #fff;
+    letter-spacing: 0.08em;
+  }
+
+  .sponsor-card__image-note {
+    position: absolute;
+    right: var(--space-2);
+    bottom: var(--space-2);
+    padding: 0.1em 0.5em;
+    border-radius: var(--radius-tag, 6px);
+    background: rgba(255, 255, 255, 0.75);
+    color: #2b2926;
+    font-size: 0.6875rem;
+  }
+
+  .sponsor-card__body {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35em;
+    padding: var(--space-3) var(--space-3) var(--space-3);
+  }
+
+  .sponsor-card__area {
+    align-self: flex-start;
+    padding: 0.15em 0.6em;
+    border-radius: var(--radius-pill);
+    border: 1px solid var(--color-border);
+    background: var(--color-bg);
+    color: var(--color-text-muted);
+    font-size: 0.6875rem;
+    font-weight: 700;
+  }
+
+  .sponsor-card__headline {
+    margin: 0.2em 0 0;
+    font-family: var(--font-family-heading);
+    font-weight: 700;
+    font-size: 1.15rem;
+    line-height: 1.35;
+    color: var(--color-accent);
+    text-wrap: balance;
+  }
+
+  .sponsor-card__tagline {
+    margin: 0;
+    color: var(--color-text);
+    font-size: 0.8125rem;
+    line-height: 1.5;
+  }
+
+  .sponsor-card__tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.3em;
+    margin: 0.2em 0 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .sponsor-card__tags li {
+    padding: 0.15em 0.55em;
+    border-radius: var(--radius-tag, 6px);
+    background: var(--color-tint-green-bg, var(--color-accent-soft));
+    color: var(--color-text);
+    font-size: 0.6875rem;
+    font-weight: 700;
+  }
+
+  .sponsor-card--photo .sponsor-card__name {
+    margin: 0.3em 0 0;
+    color: var(--color-text-muted);
+    font-size: 0.75rem;
+    font-weight: 400;
+    /* 折り返し時に「口」のような1文字だけの行が残らないようにする。 */
+    text-wrap: balance;
+  }
+
+  .sponsor-card__cta {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.35em;
+    margin-top: 0.5em;
+    min-height: 48px;
+    border-radius: var(--radius-pill);
+    background: var(--color-accent);
+    color: #fff;
+    font-weight: 700;
+    font-size: 0.875rem;
+  }
+
+  .sponsor-card--photo:hover .sponsor-card__cta {
+    background: var(--color-accent-deep);
+    box-shadow: 0 2px 8px rgba(28, 46, 38, 0.35);
+  }
+
+  .sponsor-card__cta-arrow {
+    transition: transform 0.15s ease;
+  }
+
+  .sponsor-card--photo:hover .sponsor-card__cta-arrow {
+    transform: translateX(3px);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .sponsor-card--photo,
+    .sponsor-card__cta-arrow {
+      transition: none;
+    }
+  }
+</style>

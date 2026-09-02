@@ -12,8 +12,14 @@ import { loadBusinessDataset } from './loadBusinesses';
  * に基づき、businesses.json とは完全に独立したファイル・読み込み経路とする
  * （getBusinesses() 等とは合流させない）。
  *
- * 実在の契約情報がないため、現時点の src/data/sponsors.json は
- * `sponsors: []`（空配列）である。企業名・推薦文を推測で追加しない。
+ * 実在の契約情報がない場合、`sponsors: []`（空配列）を維持する。
+ * 企業名・推薦文・実績・評価を推測で追加しない。
+ *
+ * 写真付き広告対応（2026-09-02）: `websiteUrl`を`destinationUrl`へ改名し、
+ * `headline`/`tagline`/`serviceTags`/`area`/`image`/`imageAlt`/
+ * `imageIsPlaceholder`を追加した（詳細は`src/types/sponsor.ts`参照）。
+ * `image`はサイト内絶対パスのみ許可し、外部URLを直接参照できないように
+ * している（`sitePathSchema`）。
  *
  * 所有者: リード（データ読み込み基盤）。
  */
@@ -31,21 +37,41 @@ function isValidHttpUrl(value: string): boolean {
 
 const httpUrlSchema = z.string().min(1).refine(isValidHttpUrl, 'http(s) URLである必要があります');
 
-const sponsorSchema = z.object({
-  id: z.string().min(1),
-  isSponsored: z.literal(true),
-  campaignId: z.string().min(1),
-  name: z.string().min(1),
-  summary: z.string().min(1),
-  websiteUrl: httpUrlSchema,
-  logoUrl: httpUrlSchema.nullable(),
-  ctaLabel: z.string().min(1).optional(),
-  displayOrder: z.number().int(),
-  periodStart: z.string().min(1),
-  periodEnd: z.string().min(1).nullable(),
-  active: z.boolean(),
-  linkedBusinessId: z.string().min(1).nullable(),
-});
+// `image`は`public/`からのサイト内絶対パス（例: "/images/sponsors/xxx.png"）。
+// 外部URLではなくローカル画像のみを許可する（無断で外部サイトの画像URLを
+// 直接参照しないという方針をスキーマレベルでも担保する）。
+const sitePathSchema = z
+  .string()
+  .min(1)
+  .refine((v) => v.startsWith('/') && !isValidHttpUrl(v), 'サイト内の絶対パス（例: "/images/..."）である必要があります');
+
+const sponsorSchema = z
+  .object({
+    id: z.string().min(1),
+    isSponsored: z.literal(true),
+    campaignId: z.string().min(1),
+    name: z.string().min(1),
+    headline: z.string().min(1).optional(),
+    tagline: z.string().min(1).optional(),
+    summary: z.string().min(1),
+    serviceTags: z.array(z.string().min(1)).optional(),
+    area: z.string().min(1).optional(),
+    image: sitePathSchema.optional(),
+    imageAlt: z.string().min(1).optional(),
+    imageIsPlaceholder: z.boolean().optional(),
+    destinationUrl: httpUrlSchema,
+    logoUrl: httpUrlSchema.nullable(),
+    ctaLabel: z.string().min(1).optional(),
+    displayOrder: z.number().int(),
+    periodStart: z.string().min(1),
+    periodEnd: z.string().min(1).nullable(),
+    active: z.boolean(),
+    linkedBusinessId: z.string().min(1).nullable(),
+  })
+  .refine((s) => !s.image || !!s.imageAlt, {
+    message: 'imageを指定する場合はimageAlt（代替テキスト）も必須です',
+    path: ['imageAlt'],
+  });
 
 const sponsorDatasetSchema = z.object({
   schemaVersion: z.string(),

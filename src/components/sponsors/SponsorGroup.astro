@@ -18,11 +18,17 @@
  * あるべき）に、全14ページで抵触するようになった（以前はTOPページだけの
  * 問題だった）。ルート要素を`<aside>`にし、1ページにつき1つだけの
  * 広告ランドマークにした（4枠それぞれをasideにすると同名ランドマークの
- * 重複＝landmark-unique違反になるため、SponsorSlot.astro自身は
- * 引き続き<div>のまま）。
+ * 重複＝landmark-unique違反になるため、個々の枠自身は引き続き
+ * <div>/<a>のまま）。
+ *
+ * 共通SponsorCard化（2026-09-02、「スポンサー広告の全面再設計」対応）:
+ * `SponsorSlot.astro`を`SponsorCard.astro`へ改名した（写真付き広告・
+ * 簡易表示・空枠の3通りをコンポーネント自身が出し分けるようになった。
+ * 詳細はSponsorCard.astro参照）。呼び出し方（4枠固定・displayOrder順）は
+ * 変更していない。
  */
 import type { Sponsor } from '../../types/sponsor';
-import SponsorSlot from './SponsorSlot.astro';
+import SponsorCard from './SponsorCard.astro';
 
 interface Props {
   sponsorSlots: [Sponsor | null, Sponsor | null, Sponsor | null, Sponsor | null];
@@ -34,11 +40,11 @@ const { sponsorSlots, pageCategory } = Astro.props;
 
 <aside class="sponsor-group" data-sponsor-root aria-label="広告">
   <div class="sponsor-rail sponsor-rail--left">
-    <SponsorSlot sponsor={sponsorSlots[0]} position="left-1" pageCategory={pageCategory} />
-    <SponsorSlot sponsor={sponsorSlots[1]} position="left-2" pageCategory={pageCategory} />
+    <SponsorCard sponsor={sponsorSlots[0]} position="left-1" pageCategory={pageCategory} />
+    <SponsorCard sponsor={sponsorSlots[1]} position="left-2" pageCategory={pageCategory} />
   </div>
   <div class="sponsor-rail sponsor-rail--right">
-    <SponsorSlot sponsor={sponsorSlots[2]} position="right-1" pageCategory={pageCategory} />
-    <SponsorSlot sponsor={sponsorSlots[3]} position="right-2" pageCategory={pageCategory} />
+    <SponsorCard sponsor={sponsorSlots[2]} position="right-1" pageCategory={pageCategory} />
+    <SponsorCard sponsor={sponsorSlots[3]} position="right-2" pageCategory={pageCategory} />
   </div>
 </aside>
