@@ -42,6 +42,9 @@ export const siteConfig: SiteConfig = {
     name: '株式会社サンアローズ',
     url: 'https://sunarrows-tky.co.jp/',
   },
-  // 本番originはCloudflare Pagesのデプロイ確定後にリードが設定する。
-  productionOrigin: null,
+  // 本番ドメイン確定（2026-09-02、「公開前の最終確認とGitHubへのpush準備」
+  // 対応、ユーザー指定）。canonical・OGP・構造化データ・sitemap.xmlの
+  // 絶対URLは、buildCanonicalUrl()（src/lib/seo/canonical.ts）がこの値を
+  // 参照して自動的に組み立てる。
+  productionOrigin: 'https://tamareien-guide.jp',
 };

@@ -6,13 +6,9 @@
  * 対象は`src/lib/routes.ts`のROUTESに載っている公開ページ全件（管理画面等は
  * 存在しないため除外対象なし）。URLは`buildCanonicalUrl()`で生成する。
  *
- * 重要な制約: `siteConfig.productionOrigin`が未確定（現状`null`）のため、
- * 現時点では`<loc>`が相対パスのまま出力される。sitemap.xmlの仕様上、
- * `<loc>`は絶対URLである必要があり、本番ドメインが確定するまでこの
- * ファイルは仕様上「無効」な状態のままである。したがって、本番ドメインが
- * 確定してsiteConfig.productionOriginを設定するまでは、public/robots.txt
- * へ`Sitemap:`行を追加しない（存在しない・無効なsitemapを参照すると
- * クロールエラーの原因になるという既存のQA指摘と同じ理由）。
+ * 本番ドメイン確定（2026-09-02、siteConfig.productionOrigin =
+ * https://tamareien-guide.jp）に伴い、`<loc>`は絶対URLで出力される
+ * （public/robots.txtのSitemap:行もあわせて有効化済み）。
  *
  * lastmodは各ページのbuildCanonicalUrl呼び出し時点のbuild日時ではなく、
  * ここでは省略する（本文の実際の更新日と機械的に同期させる仕組みが
