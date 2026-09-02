@@ -18,11 +18,8 @@ Allow: /
 # のAllow: /が適用される）を変更していない。学習データ収集の可否は
 # サイト所有者の判断事項であり、当エージェントの判断だけでは変更しない。
 
-# sitemap.xml（src/pages/sitemap.xml.ts、2026-09-02追加）は生成されるように
-# なったが、本番originが未確定（siteConfig.productionOrigin = null）のため、
-# 現状は<loc>が相対パスのまま出力され、sitemap.xmlの仕様上は無効な状態にある。
-# QA監査D-3（2026-08-26）の指摘どおり、無効・存在しないsitemapをSitemap:行で
-# 参照するとクロールエラーの原因になるため、本番ドメインが確定し
-# siteConfig.productionOriginを設定するまでは、この行を記載しない。
-# 本番ドメイン確定後、次の行のコメントを外すこと:
-# Sitemap: https://（本番ドメイン）/sitemap.xml
+# sitemap.xml（src/pages/sitemap.xml.ts）は本番ドメイン確定
+# （2026-09-02、siteConfig.productionOrigin = https://tamareien-guide.jp）
+# に伴い、<loc>が絶対URLで出力されるようになったため、下記のSitemap:行を
+# 有効化した。
+Sitemap: https://tamareien-guide.jp/sitemap.xml
