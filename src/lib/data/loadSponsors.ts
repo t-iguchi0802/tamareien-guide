@@ -39,6 +39,7 @@ const sponsorSchema = z.object({
   summary: z.string().min(1),
   websiteUrl: httpUrlSchema,
   logoUrl: httpUrlSchema.nullable(),
+  ctaLabel: z.string().min(1).optional(),
   displayOrder: z.number().int(),
   periodStart: z.string().min(1),
   periodEnd: z.string().min(1).nullable(),

@@ -1,4 +1,20 @@
 {
   "schemaVersion": "1.0.0",
-  "sponsors": []
+  "sponsors": [
+    {
+      "id": "sunarrows_mitaka_anshin",
+      "isSponsored": true,
+      "campaignId": "sunarrows-mitaka-anshin-001",
+      "name": "高齢者とご家族の安心相談窓口",
+      "summary": "相続や実家、空き家、離れて暮らす親のこと。三鷹市周辺の身近な相談窓口です。",
+      "websiteUrl": "https://t-iguchi0802.github.io/mitaka-anshin-soudan/index.html#first",
+      "logoUrl": null,
+      "ctaLabel": "相談窓口を見る",
+      "displayOrder": 1,
+      "linkedBusinessId": null,
+      "periodStart": "2026-09-02",
+      "periodEnd": null,
+      "active": true
+    }
+  ]
 }

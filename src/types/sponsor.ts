@@ -22,6 +22,13 @@ export interface Sponsor {
   summary: string;
   websiteUrl: string;
   logoUrl: string | null;
+  /**
+   * 外部リンクのボタン文言（2026-09-02追加）。省略時は既定文言
+   * 「サイトを見る」を使う（`src/components/sponsors/SponsorSlot.astro`
+   * 参照）。広告主のサービス性質に合わせた文言（例:
+   * 「相談窓口を見る」）を個別に指定できるようにするための任意フィールド。
+   */
+  ctaLabel?: string;
   /** 表示順（管理用の安定順で、優先度・おすすめ度ではない）。 */
   displayOrder: number;
   /**
