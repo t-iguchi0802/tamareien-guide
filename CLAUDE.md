@@ -66,7 +66,7 @@ CLAUDE_CODE_HANDOFF.md / WORKTREE_AGENT_PLAN.md / data_dictionary.md へ立ち�
 
 - サイト名: **多磨霊園のお墓相談比較ガイド**
 - サブタイトル: **墓じまい・管理・納骨・石材店を公開情報で比較**
-- 対象: 多磨霊園周辺の石材店・お墓関連事業者（14社、`businesses.json`）
+- 対象: 多磨霊園周辺の石材店・お墓関連事業者（件数は`businesses.json`を正本として自動表示）
 - 制作方式: Astro + TypeScript、静的出力、JSON + Markdown（外部DB不使用）
 - 誤認防止・運営情報の扱い: 「全ページのヘッダー・フッターへ非公式表記を常時表示する」という
   従来ルールは2026-08-27付でサイト所有者の判断により廃止した。現行ルールは
@@ -116,10 +116,8 @@ CLAUDE_CODE_HANDOFF.md / WORKTREE_AGENT_PLAN.md / data_dictionary.md へ立ち�
 - PCでは本文の左右レール、タブレット・スマートフォンでは本文内（本文より前には
   置かない）へ表示位置を切り替える。共通Layout化する場合も、上部の
   写真・タイトル領域とスポンサー付き本文領域は分離する。
-- 条件付きスポンサー上位表示は、1つ以上の条件が選択され、AND絞り込みの結果に
-  そのスポンサー事業者が含まれる場合だけ行う。上位表示した事業者には
-  「広告・スポンサー掲載」と明記し、通常掲載順を販売しているわけではないことを
-  UI上も明確にする。
+- スポンサー契約の有無を、絞り込み結果・通常掲載順・比較評価へ反映しない。
+  スポンサーは通常一覧と分離した4枠の広告欄だけに表示する。
 - 一般利用者向けの記事本文は、中学生でも意味を理解できる平易な日本語で書く
   （子ども向けの話し方にはしない。専門用語は最初に短い一文で説明し、
   行政・法律上の意味は変えない）。
@@ -191,10 +189,7 @@ CLAUDE_CODE_HANDOFF.md / WORKTREE_AGENT_PLAN.md / data_dictionary.md へ立ち�
 
 ```ts
 type VerificationStatus =
-  | 'confirmed'
-  | 'not_confirmed'
-  | 'explicitly_not_offered'
-  | 'not_applicable';
+  'confirmed' | 'not_confirmed' | 'explicitly_not_offered' | 'not_applicable';
 
 type ServiceKey =
   | 'new_grave'
@@ -213,12 +208,12 @@ type ServiceKey =
 
 状態の画面変換（`data_dictionary.md` 6章。実装は `verificationStatus.ts`）:
 
-| 保存値 | 比較表 | 絞り込み対象 |
-|---|---|---:|
-| `confirmed` | ○ 公開確認済み | 含める |
-| `not_confirmed` | 公開情報では未確認 | 含めない |
-| `explicitly_not_offered` | 非対応と明記 | 含めない |
-| `not_applicable` | 対象外 | 含めない |
+| 保存値                   | 比較表             | 絞り込み対象 |
+| ------------------------ | ------------------ | -----------: |
+| `confirmed`              | ○ 公開確認済み     |       含める |
+| `not_confirmed`          | 公開情報では未確認 |     含めない |
+| `explicitly_not_offered` | 非対応と明記       |     含めない |
+| `not_applicable`         | 対象外             |     含めない |
 
 GA4イベント契約（正本: `CLAUDE_CODE_HANDOFF.md` 7章、型: `src/types/analytics.ts`）:
 
@@ -235,7 +230,7 @@ MVPページURL（正本: `CLAUDE_CODE_HANDOFF.md` 5章、実装契約: `src/lib
 
 ```text
 /               トップ・困りごと別入口
-/sekizaiten/    14社の一覧・比較表
+/sekizaiten/    掲載事業者の一覧・比較表
 /hakajimai/     墓じまい・墓石撤去の比較と見積項目
 /kanri/         墓所管理・清掃・供花の比較
 /tetsuzuki/     改葬・墓所返還・施設変更の違いと公式リンク
@@ -280,14 +275,14 @@ Playwright・axe相当のアクセシビリティ確認もQA段階で追加す�
 
 `WORKTREE_AGENT_PLAN.md` の担当表を正とする。要約:
 
-| 担当 | ブランチ | 編集してよい範囲 | 編集禁止 |
-|---|---|---|---|
-| Data & Content | `feature/data-content` | `src/data/**`, `src/content/**` | components、pages、package系 |
-| UI Components | `feature/ui-components` | `src/components/**`, `src/styles/**` | data、content、pages、package系 |
-| Pages | `feature/pages` | `src/pages/**` | data本文、components内部、package系 |
-| SEO & Analytics | `feature/seo-analytics` | `src/lib/seo/**`, `src/lib/analytics/**`, `public/robots.txt` | data本文、pages本文、package系 |
-| QA | `feature/qa` | `tests/**`, `scripts/qa/**` | 本番コードの直接修正 |
-| Lead | 統合ブランチ | 共有設定・依存関係・統合修正 | 事実データの無断変更 |
+| 担当            | ブランチ                | 編集してよい範囲                                              | 編集禁止                            |
+| --------------- | ----------------------- | ------------------------------------------------------------- | ----------------------------------- |
+| Data & Content  | `feature/data-content`  | `src/data/**`, `src/content/**`                               | components、pages、package系        |
+| UI Components   | `feature/ui-components` | `src/components/**`, `src/styles/**`                          | data、content、pages、package系     |
+| Pages           | `feature/pages`         | `src/pages/**`                                                | data本文、components内部、package系 |
+| SEO & Analytics | `feature/seo-analytics` | `src/lib/seo/**`, `src/lib/analytics/**`, `public/robots.txt` | data本文、pages本文、package系      |
+| QA              | `feature/qa`            | `tests/**`, `scripts/qa/**`                                   | 本番コードの直接修正                |
+| Lead            | 統合ブランチ            | 共有設定・依存関係・統合修正                                  | 事実データの無断変更                |
 
 共有ファイル（リード以外変更禁止。`WORKTREE_AGENT_PLAN.md` 3章）:
 

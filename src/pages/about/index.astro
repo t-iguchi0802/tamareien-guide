@@ -75,7 +75,13 @@ const sponsorInquiryHref = contactEmail
   : null;
 
 const correctionSubject = '多磨霊園 お墓ガイドの掲載情報訂正について';
-const correctionBodyLines = ['事業者名：', '訂正箇所：', '正しい情報：', '確認できるURL：', 'その他：'];
+const correctionBodyLines = [
+  '事業者名：',
+  '訂正箇所：',
+  '正しい情報：',
+  '確認できるURL：',
+  'その他：',
+];
 const correctionHref = contactEmail
   ? buildMailtoHref(contactEmail, correctionSubject, correctionBodyLines)
   : null;
@@ -88,11 +94,15 @@ const correctionHref = contactEmail
     <section aria-labelledby="disclaimer-heading">
       <h2 id="disclaimer-heading">運営者について</h2>
       <p>
-        {siteConfig.name}は、多磨霊園周辺の石材店・お墓関連事業者を公開情報のみで比較する民間の情報サイトです。運営者は<a
+        {
+          siteConfig.name
+        }は、多磨霊園周辺の石材店・お墓関連事業者を公開情報のみで比較する民間の情報サイトです。運営者は<a
           href={ROUTES.operator.path}>{siteConfig.operator.name}</a
         >で、東京都・多磨霊園・東京都公園協会とは独立した事業者であり、ロゴ等の使用や委託・公認関係はありません。制度・行政手続きの正確な情報は<a
           href={ROUTES.tetsuzuki.path}>手続きの案内ページ</a
-        >から各公式ページをご確認ください。運営者の詳細は<a href={ROUTES.operator.path}>運営者情報ページ</a>をご覧ください。
+        >から各公式ページをご確認ください。運営者の詳細は<a href={ROUTES.operator.path}
+          >運営者情報ページ</a
+        >をご覧ください。
       </p>
     </section>
   </Fragment>
@@ -101,17 +111,27 @@ const correctionHref = contactEmail
     <h2 id="criteria-heading">掲載基準</h2>
     <ul>
       <li>
-        調査方法: {editorialPolicy.researchMethod}。掲載事業者への事前ヒアリングは{editorialPolicy.preLaunchInterview
-          ? '行っています'
-          : '行っていません'}。
+        掲載対象:
+        多磨霊園周辺に事業所がある、または事業者の公式情報で多磨霊園への対応を確認できた石材店・お墓関連事業者です。
       </li>
       <li>
-        未確認項目の表示: 公開ページ上で確認できない項目は「{editorialPolicy.unknownLabel}」と表示し、非対応や推測値に置き換えません。
+        調査方法: {editorialPolicy.researchMethod}。掲載事業者への事前ヒアリングは{
+          editorialPolicy.preLaunchInterview ? '行っています' : '行っていません'
+        }。
+      </li>
+      <li>
+        未確認項目の表示: 公開ページ上で確認できない項目は「{
+          editorialPolicy.unknownLabel
+        }」と表示し、非対応や推測値に置き換えません。
       </li>
       <li>掲載順: {editorialPolicy.rankingPolicy}</li>
     </ul>
     <p>
-      掲載データの出典と最終確認日は<a href={ROUTES.sources.path}>情報源ページ</a>で個別に公開しています。
+      掲載データの出典と最終確認日は<a href={ROUTES.sources.path}>情報源ページ</a
+      >で個別に公開しています。
+    </p>
+    <p>
+      公式サイトで墓所関連サービスを確認できない場合でも、現行の商工会名簿等で事業所を確認できた事業者は、サービスを推測せず基本情報だけを掲載します。調査用の内部区分は、営業中かどうか、品質、推奨度を表す評価ではなく、公開画面には表示しません。
     </p>
   </section>
 
@@ -121,6 +141,7 @@ const correctionHref = contactEmail
     <p>
       口コミ点数・星評価・独自ランキングや、「おすすめ」「人気」「優良」等の主観的な表現は使用していません。スポンサー枠を設ける場合は、比較データとは別に管理し、「スポンサー」または「広告」であることを明示します。
     </p>
+    <p>スポンサー契約の有無を、通常掲載順、絞り込み結果、比較内容へ反映しません。</p>
     <div id="sponsor-info-heading" class="contact-block">
       <h3 class="contact-block__heading">スポンサー掲載について</h3>
       <p class="contact-block__body">
@@ -129,7 +150,11 @@ const correctionHref = contactEmail
       {
         sponsorInquiryHref && (
           <>
-            <a class="contact-block__cta" href={sponsorInquiryHref} data-event="sponsor_inquiry_click">
+            <a
+              class="contact-block__cta"
+              href={sponsorInquiryHref}
+              data-event="sponsor_inquiry_click"
+            >
               スポンサー掲載を問い合わせる
             </a>
             <p class="contact-block__email-fallback">

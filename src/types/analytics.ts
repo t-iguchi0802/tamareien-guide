@@ -118,7 +118,7 @@ export interface SponsorInquiryClickParams {
 }
 
 /**
- * スポンサー枠4枠中のどの位置か。左右レール・上位表示のいずれでも、
+ * スポンサー枠4枠中のどの位置か。左右レール・モバイルグリッドのいずれでも、
  * DOM上の物理的な枠位置（left-1が最上段）をそのまま使う。
  */
 export type SponsorSlotPosition = 'left-1' | 'left-2' | 'right-1' | 'right-2';

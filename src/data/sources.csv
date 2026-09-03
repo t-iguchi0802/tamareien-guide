@@ -29,3 +29,20 @@ SRC-ISHISEI-KOGANEI,biz-ishisei,official_site,石誠メモリアルサポート,
 SRC-TAMA-OFFICIAL,,government,公益財団法人東京都公園協会,多磨霊園,https://www.tokyo-park.or.jp/reien/tama/index.html,2026-08-24,多磨霊園の公式概要、開園日、面積、利用案内,checked,制度・施設情報は事業者サイトより優先
 SRC-TAMA-WORK-NOTICE,,government,公益財団法人東京都公園協会,墓所工事における着手届の提出について,https://www.tokyo-park.or.jp/reien/news/2026/information_15.html,2026-08-24,2026年4月1日から工事着手届・完了届を求める案内,checked,公開直前に再確認
 SRC-FUCHU-REBURIAL,,government,府中市,改葬許可申請,https://www.city.fuchu.tokyo.jp/kurashi/tetuduki/sonota/kaisoukyoka.html,2026-08-24,改葬許可の流れ、必要書類、受付窓口,checked,公開直前に再確認
+SRC-KONDO-FUCHU,biz-kondo,official_site,有限会社近藤石材店,府中店のご紹介,https://www.kondo-sekizai.co.jp/company/,2026-09-03,"府中店の住所、電話、営業時間、年中無休、正門前、墓石工事・管理・納骨法要・年間管理・墓じまい",checked,公式サイトを確認
+SRC-YOSHINOYA-FUCHU,biz-yoshinoya-fuchu,official_site,よしの家石材部,多磨霊園正門前の石材店,https://www.yoshinoyasekizai.com/,2026-09-03,"住所、電話、創業、墓石設計施工、免震施工、都立霊園申込支援",checked,公式サイトを確認
+SRC-TACHIBANAYA-FUCHU,biz-tachibanaya-fuchu,official_site,株式会社立花家石材店,立花家本店のご紹介,https://www.tachibanaya-sekizaiten.com/,2026-09-03,"府中市紅葉丘の店舗、正門前、墓石設計施工、修理、クリーニング、法要支援",checked,電話番号は公開ページの表示不整合があるため未掲載
+SRC-TAMAYA,biz-tamaya,official_site,多磨家石材店,多磨霊園のことなら多磨家石材店へ,https://tamayasekizai.co.jp/,2026-09-03,"住所、電話、営業時間、定休日、建墓、リフォーム、清掃管理、納骨・法事、書類手続支援",checked,公式サイトを確認
+SRC-ISHIYAMA,biz-ishiyama,official_site,有限会社石山石材店,石山石材店 本店,https://www.stone-ishiyama.co.jp/,2026-09-03,"住所、電話、営業時間、定休日、建墓、修繕、リフォーム、改葬、墓じまい、納骨",checked,公式サイトを確認
+SRC-MATSUNOYA,biz-matsunoya,official_site,有限会社松乃家石材店,多磨霊園正門前の松乃家石材店,https://www.matsunoya-sekizaiten.com/,2026-09-03,"住所、電話、朝8時営業、建墓、リフォーム、クリーニング、納骨、彫刻、供花",checked,公式サイトと事業者掲載ページを確認
+SRC-MITAMAYA,biz-mitamaya,official_site,有限会社みたま家石材部,みたま家について,https://www.mitamaya.jp/company/,2026-09-03,"住所、電話、墓石設計施工・彫刻・修理、納骨・法事、清掃、植木、供花代行",checked,公式サイトを確認
+SRC-SUDO-TAMA,biz-sudo-tama,official_site,須藤石材株式会社,多磨支店,https://www.sudo-sekizai.co.jp/branch/tama.html,2026-09-03,"多磨支店の住所、電話、営業時間、正門前、墓石展示、建墓、リフォーム、改葬",checked,公式サイトを確認
+SRC-ONODA,biz-onoda,official_site,小野田石材店,サービス案内,https://onodastone.com/service/erection/,2026-09-03,"府中市紅葉丘の店舗、建墓、移転、墓じまい、清掃代行、しきび販売、2026年の施工実績",checked,公式サイトを確認
+SRC-TASHIROYA,biz-tashiroya,official_site,株式会社田代家,多磨霊園トータルサポート,https://1483.jp/tamareien/,2026-09-03,"多磨店の住所・電話、建墓、納骨、彫刻、清掃、年間管理、供花、植木、リフォーム",checked,公式サイトと業界団体名簿を確認
+SRC-MIKIYA,biz-mikiya,official_site,株式会社三喜家,会社案内,https://www.mikiya-sekizai.co.jp/company.html,2026-09-03,"東京本社の住所・電話、多磨霊園駅前通り、墓石建立、法事、供花、僧侶手配",checked,公式サイトを確認
+SRC-YAMAGATAYA,biz-yamagataya,official_site,山形家和中石材店,会社概要,https://yamagataya-sekizai.com/about/,2026-09-03,"住所、電話、営業時間、定休日、墓石設計施工、墓所管理、リフォーム、供花代参",checked,公式サイトを確認
+SRC-TOCHIGIYA,biz-tochigiya,industry_association,全国優良石材店の会,株式会社栃木家石材店,https://www.zenyuseki.or.jp/sekizai/detail.html?id=95,2026-09-03,"多磨霊園から200m、建墓、納骨、法要、墓所メンテナンス、リフォーム",checked,業界団体の現行掲載を確認
+SRC-ENOMOTO,biz-enomoto,official_site,有限会社榎本石材,多磨霊園の墓石なら榎本石材,https://e-stone.info/,2026-09-03,"住所、電話、代表者、昭和29年創業、多磨霊園取扱、建墓、納骨、アフターサービス",checked,公式サイトを確認
+SRC-MATOI,biz-matoi,official_site,有限会社まとい石材,会社案内・仕事,https://matoisekizai.co.jp/about,2026-09-03,"府中市若松町の住所・電話、法人情報、建墓、多磨霊園での墓石修理・リフォーム実績",checked,公式サイトを確認
+SRC-JOUDOUYA,biz-joudouya,social_official,常道屋石材店,公式SNSの営業・作業案内,https://x.com/taro_sekiguchi,2026-09-03,"府中市紅葉丘の店舗、電話、2026年の営業案内、納骨準備、墓所清掃、墓参り代行",checked,公式SNSを確認。公式サイトは安定表示を確認できず未掲載
+SRC-KATO,biz-kato,social_official,加藤石材,公式SNSプロフィール,https://x.com/aZHcHQd09MSRFRR,2026-09-03,"小金井市前原町の店舗、墓石販売、墓所工事、納骨・法事、清掃、改修、墓じまい",checked,公式SNSを確認。電話・営業時間は未確認

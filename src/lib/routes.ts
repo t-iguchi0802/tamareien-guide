@@ -10,7 +10,7 @@ import type { SiteRoute } from '../types/site';
  */
 export const ROUTES = {
   top: { path: '/', description: 'トップ・困りごと別入口' },
-  sekizaiten: { path: '/sekizaiten/', description: '14社の一覧・比較表' },
+  sekizaiten: { path: '/sekizaiten/', description: '周辺事業者の一覧・比較表' },
   hakajimai: { path: '/hakajimai/', description: '墓じまい・墓石撤去の比較と見積項目' },
   kanri: { path: '/kanri/', description: '墓所管理・清掃・供花の比較' },
   tetsuzuki: { path: '/tetsuzuki/', description: '改葬・墓所返還・施設変更の違いと公式リンク' },
@@ -26,7 +26,10 @@ export const ROUTES = {
   // 石材店比較（既存ページ、URL不変）とは別枠の「多磨霊園ガイド」情報記事群。
   // 既存ページを削除・改名せず、ヘッダー主要ナビは最大4項目に保つため、
   // これらは各ヘッダー項目からのリンク先（ガイド一覧／総合案内）として使う。
-  guide: { path: '/guide/', description: '多磨霊園ガイド一覧（アクセス・手続き・歴史/著名人の3カテゴリ）' },
+  guide: {
+    path: '/guide/',
+    description: '多磨霊園ガイド一覧（アクセス・手続き・歴史/著名人の3カテゴリ）',
+  },
   access: { path: '/access/', description: '多磨霊園への行き方（電車・バス・車、門の選び方）' },
   guideHistory: { path: '/guide/history/', description: '多磨霊園の歴史（1923年開園の経緯）' },
   guideFamousGraves: { path: '/guide/famous-graves/', description: '多磨霊園に眠る著名人ガイド' },

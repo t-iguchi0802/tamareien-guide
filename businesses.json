@@ -2,7 +2,7 @@
   "schemaVersion": "1.0.0",
   "datasetId": "tama-cemetery-businesses",
   "title": "多磨霊園周辺 石材店・お墓関連事業者データ",
-  "lastVerifiedAt": "2026-08-24",
+  "lastVerifiedAt": "2026-09-03",
   "locale": "ja-JP",
   "editorialPolicy": {
     "researchMethod": "公開情報のみ",
@@ -714,6 +714,159 @@
       "founded": null,
       "evidenceSourceIds": ["SRC-ISHISEI-COMPANY", "SRC-ISHISEI-KOGANEI"],
       "editorialNotes": ["門前店ではなく新小金井駅前の地域店。多磨霊園での施工事例を多数公開。"]
+    },
+    {
+      "id": "biz-kondo", "slug": "kondo-sekizai", "displayOrder": 150, "listingTier": "A", "listingStatus": "publish",
+      "name": "近藤石材店（府中店）", "legalName": "有限会社近藤石材店", "ownershipType": "not_confirmed",
+      "summary": "多磨霊園正門前の府中店で、墓石工事、墓所管理、納骨・法要、年間管理、墓じまいなどを案内している。",
+      "location": { "postalCode": "183-0004", "prefecture": "東京都", "city": "府中市", "addressLine": "紅葉丘2-31-4", "nearestGate": "正門", "nearestGateStatus": "confirmed", "locationNote": "公式サイトで都営多磨霊園正門前と案内。" },
+      "contact": { "phone": "042-361-6168", "websiteUrl": "https://www.kondo-sekizai.co.jp/", "contactUrl": "https://www.kondo-sekizai.co.jp/contact/", "businessHours": "8:00～17:00", "closedDays": "年中無休", "parking": "confirmed" },
+      "services": { "new_grave": "confirmed", "grave_closure": "confirmed", "reburial_support": "confirmed", "interment": "confirmed", "engraving": "not_confirmed", "cleaning": "confirmed", "annual_management": "confirmed", "flowers": "confirmed", "planting": "not_confirmed", "renovation": "confirmed", "seismic": "not_confirmed", "remote_photo_report": "not_confirmed" },
+      "publishedPrices": [], "credentials": ["全国優良石材店の会・日本石材産業協会の加盟を公式サイトで案内"], "founded": "創業100年（公式サイト表記）", "evidenceSourceIds": ["SRC-KONDO-FUCHU"], "editorialNotes": []
+    },
+    {
+      "id": "biz-yoshinoya-fuchu", "slug": "yoshinoya-fuchu", "displayOrder": 160, "listingTier": "A", "listingStatus": "publish",
+      "name": "よしの家石材部（府中）", "legalName": null, "ownershipType": "not_confirmed",
+      "summary": "多磨霊園正門前で、墓石の設計・製作、都立霊園の申込支援、免震施工などを案内している。",
+      "location": { "postalCode": "183-0004", "prefecture": "東京都", "city": "府中市", "addressLine": "紅葉丘2-7-4", "nearestGate": "正門", "nearestGateStatus": "confirmed", "locationNote": "公式サイトで多磨霊園正門前と案内。" },
+      "contact": { "phone": "042-361-2176", "websiteUrl": "https://www.yoshinoyasekizai.com/", "contactUrl": "https://www.yoshinoyasekizai.com/contact/", "businessHours": null, "closedDays": null, "parking": "not_confirmed" },
+      "services": { "new_grave": "confirmed", "grave_closure": "not_confirmed", "reburial_support": "confirmed", "interment": "not_confirmed", "engraving": "not_confirmed", "cleaning": "not_confirmed", "annual_management": "not_confirmed", "flowers": "not_confirmed", "planting": "not_confirmed", "renovation": "not_confirmed", "seismic": "confirmed", "remote_photo_report": "not_confirmed" },
+      "publishedPrices": [], "credentials": ["全優石認定店を公式サイトで案内"], "founded": "大正12年（1923年）", "evidenceSourceIds": ["SRC-YOSHINOYA-FUCHU"], "editorialNotes": ["小金井門前の同名店とは別店舗として掲載。"]
+    },
+    {
+      "id": "biz-tachibanaya-fuchu", "slug": "tachibanaya-fuchu", "displayOrder": 170, "listingTier": "A", "listingStatus": "publish",
+      "name": "立花家石材店（府中）", "legalName": "株式会社立花家石材店", "ownershipType": "not_confirmed",
+      "summary": "多磨霊園正門前で、墓石の設計施工、修理、クリーニング、法要の支援などを案内している。",
+      "location": { "postalCode": "183-0004", "prefecture": "東京都", "city": "府中市", "addressLine": "紅葉丘2-8-4", "nearestGate": "正門", "nearestGateStatus": "confirmed", "locationNote": "公式サイトで正門前の店舗として案内。" },
+      "contact": { "phone": null, "websiteUrl": "https://www.tachibanaya-sekizaiten.com/", "contactUrl": "https://www.tachibanaya-sekizaiten.com/contact", "businessHours": null, "closedDays": null, "parking": "not_confirmed" },
+      "services": { "new_grave": "confirmed", "grave_closure": "not_confirmed", "reburial_support": "not_confirmed", "interment": "confirmed", "engraving": "not_confirmed", "cleaning": "confirmed", "annual_management": "not_confirmed", "flowers": "not_confirmed", "planting": "not_confirmed", "renovation": "confirmed", "seismic": "not_confirmed", "remote_photo_report": "not_confirmed" },
+      "publishedPrices": [], "credentials": [], "founded": "明治7年（公式サイト表記）", "evidenceSourceIds": ["SRC-TACHIBANAYA-FUCHU"], "editorialNotes": ["公式ページ内の電話番号表示に不整合があるため、電話番号は未掲載。"]
+    },
+    {
+      "id": "biz-tamaya", "slug": "tamaya-sekizai", "displayOrder": 180, "listingTier": "A", "listingStatus": "publish",
+      "name": "多磨家石材店", "legalName": null, "ownershipType": "not_confirmed",
+      "summary": "多磨霊園正門近くで、墓所建立、リフォーム、清掃管理、納骨・法事、都営霊園の書類手続支援を案内している。",
+      "location": { "postalCode": "183-0004", "prefecture": "東京都", "city": "府中市", "addressLine": "紅葉丘2-11-4", "nearestGate": "正門", "nearestGateStatus": "confirmed", "locationNote": "公式サイトで正門から約100メートルと案内。" },
+      "contact": { "phone": "042-361-8650", "websiteUrl": "https://tamayasekizai.co.jp/", "contactUrl": null, "businessHours": "8:00～17:00", "closedDays": "火曜日", "parking": "not_confirmed" },
+      "services": { "new_grave": "confirmed", "grave_closure": "not_confirmed", "reburial_support": "confirmed", "interment": "confirmed", "engraving": "not_confirmed", "cleaning": "confirmed", "annual_management": "confirmed", "flowers": "not_confirmed", "planting": "not_confirmed", "renovation": "confirmed", "seismic": "not_confirmed", "remote_photo_report": "not_confirmed" },
+      "publishedPrices": [], "credentials": [], "founded": null, "evidenceSourceIds": ["SRC-TAMAYA"], "editorialNotes": []
+    },
+    {
+      "id": "biz-ishiyama", "slug": "ishiyama-sekizai", "displayOrder": 190, "listingTier": "A", "listingStatus": "publish",
+      "name": "石山石材店", "legalName": "有限会社石山石材店", "ownershipType": "not_confirmed",
+      "summary": "多磨霊園近くで、墓石の設計施工、修繕・リフォーム、改葬・墓じまい、納骨などを案内している。",
+      "location": { "postalCode": "183-0004", "prefecture": "東京都", "city": "府中市", "addressLine": "紅葉丘1-34-2", "nearestGate": "正門", "nearestGateStatus": "confirmed", "locationNote": "公式サイトで多磨霊園から徒歩5分と案内。" },
+      "contact": { "phone": "042-361-3045", "websiteUrl": "https://www.stone-ishiyama.co.jp/", "contactUrl": "https://www.stone-ishiyama.co.jp/contact", "businessHours": "9:00～17:00", "closedDays": "木曜日", "parking": "not_confirmed" },
+      "services": { "new_grave": "confirmed", "grave_closure": "confirmed", "reburial_support": "confirmed", "interment": "confirmed", "engraving": "not_confirmed", "cleaning": "not_confirmed", "annual_management": "not_confirmed", "flowers": "not_confirmed", "planting": "not_confirmed", "renovation": "confirmed", "seismic": "not_confirmed", "remote_photo_report": "not_confirmed" },
+      "publishedPrices": [], "credentials": [], "founded": "創業100年（公式サイト表記）", "evidenceSourceIds": ["SRC-ISHIYAMA"], "editorialNotes": []
+    },
+    {
+      "id": "biz-matsunoya", "slug": "matsunoya-sekizai", "displayOrder": 200, "listingTier": "A", "listingStatus": "publish",
+      "name": "松乃家石材店", "legalName": "有限会社松乃家石材店", "ownershipType": "not_confirmed",
+      "summary": "多磨霊園正門前で、墓石の設計施工、納骨、戒名彫刻、リフォーム、クリーニング、供花などを案内している。",
+      "location": { "postalCode": "183-0004", "prefecture": "東京都", "city": "府中市", "addressLine": "紅葉丘2-31-3", "nearestGate": "正門", "nearestGateStatus": "confirmed", "locationNote": "公式サイトで多磨霊園正門前と案内。" },
+      "contact": { "phone": "042-361-2262", "websiteUrl": "https://www.matsunoya-sekizaiten.com/", "contactUrl": null, "businessHours": "8:00～", "closedDays": null, "parking": "not_confirmed" },
+      "services": { "new_grave": "confirmed", "grave_closure": "not_confirmed", "reburial_support": "not_confirmed", "interment": "confirmed", "engraving": "confirmed", "cleaning": "confirmed", "annual_management": "not_confirmed", "flowers": "confirmed", "planting": "not_confirmed", "renovation": "confirmed", "seismic": "not_confirmed", "remote_photo_report": "not_confirmed" },
+      "publishedPrices": [], "credentials": [], "founded": null, "evidenceSourceIds": ["SRC-MATSUNOYA"], "editorialNotes": []
+    },
+    {
+      "id": "biz-mitamaya", "slug": "mitamaya", "displayOrder": 210, "listingTier": "A", "listingStatus": "publish",
+      "name": "みたま家石材店", "legalName": "有限会社みたま家石材部", "ownershipType": "not_confirmed",
+      "summary": "多磨霊園近くで、墓石の設計施工・彫刻・修理、納骨・法事、墓所清掃、植木の手入れ、供花代行などを案内している。",
+      "location": { "postalCode": "183-0004", "prefecture": "東京都", "city": "府中市", "addressLine": "紅葉丘1-36-3", "nearestGate": "正門", "nearestGateStatus": "confirmed", "locationNote": "公式サイトで多磨霊園近くの店舗として案内。" },
+      "contact": { "phone": "042-361-2120", "websiteUrl": "https://www.mitamaya.jp/", "contactUrl": "https://www.mitamaya.jp/contact/", "businessHours": null, "closedDays": null, "parking": "not_confirmed" },
+      "services": { "new_grave": "confirmed", "grave_closure": "not_confirmed", "reburial_support": "not_confirmed", "interment": "confirmed", "engraving": "confirmed", "cleaning": "confirmed", "annual_management": "not_confirmed", "flowers": "confirmed", "planting": "confirmed", "renovation": "confirmed", "seismic": "not_confirmed", "remote_photo_report": "not_confirmed" },
+      "publishedPrices": [], "credentials": [], "founded": null, "evidenceSourceIds": ["SRC-MITAMAYA"], "editorialNotes": []
+    },
+    {
+      "id": "biz-sudo-tama", "slug": "sudo-tama", "displayOrder": 220, "listingTier": "A", "listingStatus": "publish",
+      "name": "須藤石材 多磨支店", "legalName": "須藤石材株式会社", "ownershipType": "not_confirmed",
+      "summary": "多磨霊園正門前の支店で、墓石展示、建墓、墓所リフォーム、改葬などの相談を案内している。",
+      "location": { "postalCode": "183-0004", "prefecture": "東京都", "city": "府中市", "addressLine": "紅葉丘1-36-5", "nearestGate": "正門", "nearestGateStatus": "confirmed", "locationNote": "公式サイトで都立多磨霊園正門前と案内。" },
+      "contact": { "phone": "0120-148-505", "websiteUrl": "https://www.sudo-sekizai.co.jp/branch/tama.html", "contactUrl": "https://www.sudo-sekizai.co.jp/contact/", "businessHours": "8:30～17:00", "closedDays": null, "parking": "not_confirmed" },
+      "services": { "new_grave": "confirmed", "grave_closure": "not_confirmed", "reburial_support": "confirmed", "interment": "not_confirmed", "engraving": "not_confirmed", "cleaning": "not_confirmed", "annual_management": "not_confirmed", "flowers": "not_confirmed", "planting": "not_confirmed", "renovation": "confirmed", "seismic": "not_confirmed", "remote_photo_report": "not_confirmed" },
+      "publishedPrices": [], "credentials": [], "founded": "創業120年（2026年公式サイト表記）", "evidenceSourceIds": ["SRC-SUDO-TAMA"], "editorialNotes": []
+    },
+    {
+      "id": "biz-onoda", "slug": "onoda-sekizai", "displayOrder": 230, "listingTier": "A", "listingStatus": "publish",
+      "name": "小野田石材店", "legalName": null, "ownershipType": "not_confirmed",
+      "summary": "多磨霊園近くで、墓石建立、移転工事、墓じまい、清掃代行、しきび販売などを案内し、2026年の施工実績も公開している。",
+      "location": { "postalCode": "183-0004", "prefecture": "東京都", "city": "府中市", "addressLine": "紅葉丘2-32-20", "nearestGate": "正門", "nearestGateStatus": "confirmed", "locationNote": "公式サイトで正門近くの店舗として案内。" },
+      "contact": { "phone": null, "websiteUrl": "https://onodastone.com/", "contactUrl": "https://onodastone.com/contact/", "businessHours": "8:00～17:00", "closedDays": null, "parking": "not_confirmed" },
+      "services": { "new_grave": "confirmed", "grave_closure": "confirmed", "reburial_support": "confirmed", "interment": "not_confirmed", "engraving": "not_confirmed", "cleaning": "confirmed", "annual_management": "not_confirmed", "flowers": "confirmed", "planting": "not_confirmed", "renovation": "not_confirmed", "seismic": "not_confirmed", "remote_photo_report": "not_confirmed" },
+      "publishedPrices": [], "credentials": [], "founded": null, "evidenceSourceIds": ["SRC-ONODA"], "editorialNotes": []
+    },
+    {
+      "id": "biz-tashiroya", "slug": "tashiroya-tama", "displayOrder": 240, "listingTier": "A", "listingStatus": "publish",
+      "name": "田代家（多磨店）", "legalName": "株式会社田代家", "ownershipType": "not_confirmed",
+      "summary": "小金井門側の多磨店で、建墓、納骨、彫刻、清掃、年間管理、供花、植木、墓石の補修・リフォームなどを案内している。",
+      "location": { "postalCode": "184-0013", "prefecture": "東京都", "city": "小金井市", "addressLine": "前原町1-8-3", "nearestGate": "小金井門", "nearestGateStatus": "confirmed", "locationNote": "業界団体の現行名簿で多磨店所在地を確認。" },
+      "contact": { "phone": "042-381-0072", "websiteUrl": "https://1483.jp/", "contactUrl": "https://1483.jp/contact/", "businessHours": "8:00～17:00", "closedDays": "水曜日", "parking": "not_confirmed" },
+      "services": { "new_grave": "confirmed", "grave_closure": "not_confirmed", "reburial_support": "not_confirmed", "interment": "confirmed", "engraving": "confirmed", "cleaning": "confirmed", "annual_management": "confirmed", "flowers": "confirmed", "planting": "confirmed", "renovation": "confirmed", "seismic": "not_confirmed", "remote_photo_report": "not_confirmed" },
+      "publishedPrices": [], "credentials": ["全国石製品協同組合の加盟石材店名簿に掲載"], "founded": "昭和7年（1932年）", "evidenceSourceIds": ["SRC-TASHIROYA"], "editorialNotes": []
+    },
+    {
+      "id": "biz-mikiya", "slug": "mikiya-tokyo", "displayOrder": 250, "listingTier": "A", "listingStatus": "publish",
+      "name": "三喜家石材店（東京本社）", "legalName": "株式会社三喜家", "ownershipType": "not_confirmed",
+      "summary": "多磨霊園の駅前通りに東京本社を置き、墓石建立、法事、供花、僧侶手配などを案内している。",
+      "location": { "postalCode": "183-0004", "prefecture": "東京都", "city": "府中市", "addressLine": "紅葉丘2-13-3", "nearestGate": null, "nearestGateStatus": "not_confirmed", "locationNote": "公式サイトで多磨霊園西武線駅前通りと案内。" },
+      "contact": { "phone": "042-361-3038", "websiteUrl": "https://www.mikiya-sekizai.co.jp/", "contactUrl": null, "businessHours": null, "closedDays": null, "parking": "not_confirmed" },
+      "services": { "new_grave": "confirmed", "grave_closure": "not_confirmed", "reburial_support": "not_confirmed", "interment": "confirmed", "engraving": "not_confirmed", "cleaning": "not_confirmed", "annual_management": "not_confirmed", "flowers": "confirmed", "planting": "not_confirmed", "renovation": "not_confirmed", "seismic": "not_confirmed", "remote_photo_report": "not_confirmed" },
+      "publishedPrices": [], "credentials": [], "founded": null, "evidenceSourceIds": ["SRC-MIKIYA"], "editorialNotes": []
+    },
+    {
+      "id": "biz-yamagataya", "slug": "yamagataya-sekizai", "displayOrder": 260, "listingTier": "A", "listingStatus": "publish",
+      "name": "山形家和中石材店", "legalName": null, "ownershipType": "not_confirmed",
+      "summary": "多磨霊園近くで、墓石の設計施工、墓所管理、献花代参、リフォーム、法要の支援などを案内している。",
+      "location": { "postalCode": "183-0004", "prefecture": "東京都", "city": "府中市", "addressLine": "紅葉丘2-14-12", "nearestGate": "正門", "nearestGateStatus": "confirmed", "locationNote": "公式サイトで多磨霊園の石材店として案内。" },
+      "contact": { "phone": "042-361-3136", "websiteUrl": "https://yamagataya-sekizai.com/", "contactUrl": "https://yamagataya-sekizai.com/contact/", "businessHours": "9:00～17:00", "closedDays": "木曜日", "parking": "not_confirmed" },
+      "services": { "new_grave": "confirmed", "grave_closure": "not_confirmed", "reburial_support": "not_confirmed", "interment": "confirmed", "engraving": "not_confirmed", "cleaning": "confirmed", "annual_management": "confirmed", "flowers": "confirmed", "planting": "not_confirmed", "renovation": "confirmed", "seismic": "not_confirmed", "remote_photo_report": "not_confirmed" },
+      "publishedPrices": [], "credentials": [], "founded": "昭和4年（1929年）", "evidenceSourceIds": ["SRC-YAMAGATAYA"], "editorialNotes": []
+    },
+    {
+      "id": "biz-tochigiya", "slug": "tochigiya", "displayOrder": 270, "listingTier": "A", "listingStatus": "publish",
+      "name": "栃木家石材店（本店）", "legalName": "株式会社栃木家石材店", "ownershipType": "not_confirmed",
+      "summary": "多磨霊園近くの本店で、建墓、納骨・法要、墓所のメンテナンス、リフォームなどを案内している。",
+      "location": { "postalCode": "183-0004", "prefecture": "東京都", "city": "府中市", "addressLine": "紅葉丘1-17-7", "nearestGate": null, "nearestGateStatus": "not_confirmed", "locationNote": "業界団体ページで多磨霊園から200メートルと案内。" },
+      "contact": { "phone": "0120-15-2222", "websiteUrl": "https://www.tochigi-ya.co.jp/", "contactUrl": "https://www.tochigi-ya.co.jp/contact/", "businessHours": null, "closedDays": null, "parking": "not_confirmed" },
+      "services": { "new_grave": "confirmed", "grave_closure": "not_confirmed", "reburial_support": "not_confirmed", "interment": "confirmed", "engraving": "not_confirmed", "cleaning": "confirmed", "annual_management": "not_confirmed", "flowers": "not_confirmed", "planting": "not_confirmed", "renovation": "confirmed", "seismic": "not_confirmed", "remote_photo_report": "not_confirmed" },
+      "publishedPrices": [], "credentials": ["全国優良石材店の会の加盟店ページに掲載"], "founded": null, "evidenceSourceIds": ["SRC-TOCHIGIYA"], "editorialNotes": []
+    },
+    {
+      "id": "biz-enomoto", "slug": "enomoto-sekizai", "displayOrder": 280, "listingTier": "A", "listingStatus": "publish",
+      "name": "榎本石材", "legalName": "有限会社榎本石材", "ownershipType": "not_confirmed",
+      "summary": "府中市白糸台に店舗を置き、多磨霊園を取扱霊園として、墓石建立、納骨、アフターサービスなどを案内している。",
+      "location": { "postalCode": "183-0011", "prefecture": "東京都", "city": "府中市", "addressLine": "白糸台1-59-22", "nearestGate": null, "nearestGateStatus": "not_confirmed", "locationNote": "公式サイトで都立多磨霊園を取扱霊園として掲載。" },
+      "contact": { "phone": "042-361-8282", "websiteUrl": "https://e-stone.info/", "contactUrl": "https://e-stone.info/contact/", "businessHours": null, "closedDays": null, "parking": "not_confirmed" },
+      "services": { "new_grave": "confirmed", "grave_closure": "not_confirmed", "reburial_support": "not_confirmed", "interment": "confirmed", "engraving": "not_confirmed", "cleaning": "not_confirmed", "annual_management": "not_confirmed", "flowers": "not_confirmed", "planting": "not_confirmed", "renovation": "confirmed", "seismic": "not_confirmed", "remote_photo_report": "not_confirmed" },
+      "publishedPrices": [], "credentials": [], "founded": "昭和29年（1954年）", "evidenceSourceIds": ["SRC-ENOMOTO"], "editorialNotes": []
+    },
+    {
+      "id": "biz-matoi", "slug": "matoi-sekizai", "displayOrder": 290, "listingTier": "A", "listingStatus": "publish",
+      "name": "まとい石材", "legalName": "有限会社まとい石材", "ownershipType": "not_confirmed",
+      "summary": "府中市若松町に店舗を置き、建墓のほか、多磨霊園での墓石修理・リフォーム実績を案内している。",
+      "location": { "postalCode": "183-0005", "prefecture": "東京都", "city": "府中市", "addressLine": "若松町1-35-2", "nearestGate": null, "nearestGateStatus": "not_confirmed", "locationNote": "公式サイトで多磨霊園での修理実績を案内。" },
+      "contact": { "phone": "042-362-0148", "websiteUrl": "https://matoisekizai.co.jp/", "contactUrl": "https://matoisekizai.co.jp/contact", "businessHours": null, "closedDays": null, "parking": "not_confirmed" },
+      "services": { "new_grave": "confirmed", "grave_closure": "not_confirmed", "reburial_support": "not_confirmed", "interment": "not_confirmed", "engraving": "not_confirmed", "cleaning": "not_confirmed", "annual_management": "not_confirmed", "flowers": "not_confirmed", "planting": "not_confirmed", "renovation": "confirmed", "seismic": "not_confirmed", "remote_photo_report": "not_confirmed" },
+      "publishedPrices": [], "credentials": [], "founded": "平成2年（1990年）設立", "evidenceSourceIds": ["SRC-MATOI"], "editorialNotes": []
+    },
+    {
+      "id": "biz-joudouya", "slug": "joudouya", "displayOrder": 300, "listingTier": "B", "listingStatus": "publish",
+      "name": "常道屋石材店", "legalName": null, "ownershipType": "not_confirmed",
+      "summary": "府中市紅葉丘の店舗から、営業案内、納骨準備、墓所清掃、墓参り代行などの情報を公式SNSで発信している。",
+      "location": { "postalCode": "183-0004", "prefecture": "東京都", "city": "府中市", "addressLine": "紅葉丘2-12-1", "nearestGate": null, "nearestGateStatus": "not_confirmed", "locationNote": "公式SNSのプロフィールと投稿で所在地・営業活動を確認。" },
+      "contact": { "phone": "042-361-3070", "websiteUrl": null, "directoryUrl": "https://x.com/taro_sekiguchi", "contactUrl": null, "businessHours": null, "closedDays": null, "parking": "confirmed" },
+      "services": { "new_grave": "not_confirmed", "grave_closure": "not_confirmed", "reburial_support": "not_confirmed", "interment": "confirmed", "engraving": "not_confirmed", "cleaning": "confirmed", "annual_management": "not_confirmed", "flowers": "confirmed", "planting": "not_confirmed", "renovation": "not_confirmed", "seismic": "not_confirmed", "remote_photo_report": "not_confirmed" },
+      "publishedPrices": [], "credentials": [], "founded": null, "evidenceSourceIds": ["SRC-JOUDOUYA"], "editorialNotes": ["公式サイトの安定表示を確認できないため、公式SNSを出典とした。"]
+    },
+    {
+      "id": "biz-kato", "slug": "kato-sekizai", "displayOrder": 310, "listingTier": "B", "listingStatus": "publish",
+      "name": "加藤石材", "legalName": null, "ownershipType": "not_confirmed",
+      "summary": "小金井市前原町の石材店として、墓石販売、墓所工事、納骨・法事、清掃、改修、墓じまいなどを公式SNSで案内している。",
+      "location": { "postalCode": "184-0013", "prefecture": "東京都", "city": "小金井市", "addressLine": "前原町4-7-39", "nearestGate": null, "nearestGateStatus": "not_confirmed", "locationNote": "公式SNSと地域の公開名簿で所在地を確認。" },
+      "contact": { "phone": null, "websiteUrl": null, "directoryUrl": "https://x.com/aZHcHQd09MSRFRR", "contactUrl": null, "businessHours": null, "closedDays": null, "parking": "not_confirmed" },
+      "services": { "new_grave": "confirmed", "grave_closure": "confirmed", "reburial_support": "not_confirmed", "interment": "confirmed", "engraving": "not_confirmed", "cleaning": "confirmed", "annual_management": "not_confirmed", "flowers": "not_confirmed", "planting": "not_confirmed", "renovation": "confirmed", "seismic": "not_confirmed", "remote_photo_report": "not_confirmed" },
+      "publishedPrices": [], "credentials": [], "founded": null, "evidenceSourceIds": ["SRC-KATO"], "editorialNotes": ["電話番号・営業時間は現行の公開情報で確認できないため未掲載。"]
     }
   ]
 }

@@ -1,6 +1,6 @@
 ---
 /**
- * 14社の一覧・比較表。
+ * 掲載事業者の一覧・比較表。件数はデータから自動表示する。
  * 正本: CLAUDE_CODE_HANDOFF.md 5章 / src/lib/routes.ts ROUTES.sekizaiten
  *
  * editorial-redesign（2026-08-26）: 「目的から探す」体験の本体をこのページに置く。
@@ -15,11 +15,8 @@
  * 密な表を主役にしないよう<details>で折りたたみ、必要な人だけが開く
  * 「詳しい比較表」として維持する（機能・データは変更していない）。
  *
- * スポンサー条件付き上位表示（2026-08-27追加）: スポンサー契約中の事業者
- * （sponsors.jsonのlinkedBusinessIdがbusinesses.jsonのidと一致するもの）
- * のidをここで計算し、ServiceFilterへ渡す。実際の並べ替え・バッジ表示は
- * ServiceFilter.astro側で行う（判定ロジックの置き場所を1箇所にする）。
- * sponsors.json/businesses.jsonの内容自体はここでも変更しない。
+ * スポンサー契約の有無は通常掲載順・絞り込み結果へ反映しない。
+ * 広告はBaseLayoutのスポンサー枠だけに表示し、比較一覧と分離する。
  *
  * モバイル最優先レビュー対応（2026-09-01）: ページ上部に小さめの写真
  * （hero-cemetery-photo-v2.png、既存プロジェクト内画像を別クロップで再利用。
@@ -43,7 +40,7 @@
 import '../../styles/guide-article.css';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import { ROUTES } from '../../lib/routes';
-import { getBusinesses, getActiveSponsors } from '../../lib/data';
+import { getBusinesses, getBusinessDataset } from '../../lib/data';
 import ComparisonTable from '../../components/business/ComparisonTable.astro';
 import ServiceFilter from '../../components/business/ServiceFilter.astro';
 import BusinessGrid from '../../components/business/BusinessGrid.astro';
@@ -52,9 +49,10 @@ import { ALL_SERVICE_KEYS } from '../_lib/business-display';
 import { buildBusinessListItemListJsonLd } from '../../lib/seo';
 
 const businesses = getBusinesses();
-const sponsoredBusinessIds = getActiveSponsors()
-  .map((sponsor) => sponsor.linkedBusinessId)
-  .filter((id): id is string => id !== null);
+const dataset = getBusinessDataset();
+const serviceConfirmedCount = businesses.filter((business) =>
+  Object.values(business.services).some((status) => status === 'confirmed'),
+).length;
 /*
  * title/description/H1の更新（2026-09-02、ミチの編集改善・SEO/AIO対応
  * 「title・description・H1」節）: BaseLayoutのタイトル自動サフィックスを
@@ -68,12 +66,11 @@ const sponsoredBusinessIds = getActiveSponsors()
 // （絞り込みチェックボックス）をより直接的に表す文言へ変更した。
 const pageTitle = '多磨霊園周辺の石材店を条件で探す｜多磨霊園 お墓ガイド';
 const heroHeading = '多磨霊園の石材店一覧・比較';
-const description =
-  '多磨霊園周辺の石材店・お墓関連事業者14社を、墓石を建てる・直す、墓じまい、清掃・管理などの目的から比較できます。公開情報のみで中立に整理しています。';
+const description = `多磨霊園周辺の石材店・お墓関連事業者${businesses.length}社を、墓石を建てる・直す、墓じまい、清掃・管理などの目的から比較できます。公開情報のみで中立に整理しています。`;
 
 /*
  * ItemList構造化データ（2026-09-02、ミチの編集改善・SEO/AIO対応
- * 「構造化データ」節）: 14社の一覧であることを構造化データでも示す。
+ * 「構造化データ」節）: 掲載事業者の一覧であることを構造化データでも示す。
  * itemListOrderをUnorderedにするbuildItemListJsonLd側の実装により、
  * 「推奨順位のランキングではない」ことを明示している（displayOrderは
  * あくまで管理用の安定表示順。data_dictionary.md・CLAUDE.md参照）。
@@ -82,7 +79,10 @@ const description =
  * （#business-{id}、BusinessCard.astroのid属性）を使う。
  */
 const businessListJsonLd = buildBusinessListItemListJsonLd(
-  businesses.map((business) => ({ business, path: `${ROUTES.sekizaiten.path}#business-${business.id}` })),
+  businesses.map((business) => ({
+    business,
+    path: `${ROUTES.sekizaiten.path}#business-${business.id}`,
+  })),
   { listPath: ROUTES.sekizaiten.path, name: heroHeading, description },
 );
 ---
@@ -90,23 +90,22 @@ const businessListJsonLd = buildBusinessListItemListJsonLd(
 <BaseLayout title={pageTitle} description={description} extraJsonLd={[businessListJsonLd]}>
   <Fragment slot="beforeSponsor">
     <h1>{heroHeading}</h1>
-    <div
-      class="article__hero-photo article__hero-photo--compact"
-      style="background-image:url('/images/hero-cemetery-photo-v2.png');background-position:center 55%;"
-    ></div>
-    <p class="article__hero-photo__credit">イメージ写真</p>
-    <p>
-      掲載情報は、各社のWebサイト等で確認できた公開情報をもとに整理しています。事業者への確認で得た情報は、確認後に随時反映します。掲載順は事業者の推奨順位ではありません。詳しくは<a
+    <div class="coverage-summary">
+      <p class="coverage-summary__count"><strong>{businesses.length}社</strong>を掲載</p>
+      <p>
+        {
+          serviceConfirmedCount
+        }社は墓所関連サービスを確認済み。残る事業者は所在地等の基本情報のみを掲載しています。
+      </p>
+      <p class="coverage-summary__date">公開情報の最終調査: {dataset.lastVerifiedAt}</p>
+    </div>
+    <p class="listing-policy">
+      対象は、多磨霊園周辺に事業所があるか、公式情報で多磨霊園への対応を確認できた事業者です。掲載順は推奨順位・品質順位・広告順位ではありません。詳しくは<a
         href={ROUTES.about.path}>運営方針・掲載基準</a
       >をご覧ください。
     </p>
 
-    <ServiceFilter
-      businesses={businesses}
-      mode="inline"
-      sponsoredBusinessIds={sponsoredBusinessIds}
-      externalGrid
-    />
+    <ServiceFilter businesses={businesses} mode="inline" externalGrid />
   </Fragment>
 
   <section aria-label="事業者一覧・詳しい比較表">
@@ -129,11 +128,32 @@ const businessListJsonLd = buildBusinessListItemListJsonLd(
   <section aria-labelledby="links-heading">
     <h2 id="links-heading">関連ページ</h2>
     <ul class="article__related-grid">
-      <li><a class="article__related-card" href={ROUTES.hakajimai.path}>墓じまい・墓石撤去の比較を見る</a></li>
-      <li><a class="article__related-card" href={ROUTES.kanri.path}>墓所管理・清掃・供花の比較を見る</a></li>
-      <li><a class="article__related-card" href={ROUTES.tetsuzuki.path}>改葬・墓所返還などの手続きを見る</a></li>
-      <li><a class="article__related-card" href={ROUTES.guideProcedures.path} data-event="internal_guide_link_click" data-destination="guide_procedures">墓じまい・お墓の手続き 総合案内を見る</a></li>
-      <li><a class="article__related-card" href={ROUTES.sources.path}>情報源・最終確認日を見る</a></li>
+      <li>
+        <a class="article__related-card" href={ROUTES.hakajimai.path}
+          >墓じまい・墓石撤去の比較を見る</a
+        >
+      </li>
+      <li>
+        <a class="article__related-card" href={ROUTES.kanri.path}
+          >墓所管理・清掃・供花の比較を見る</a
+        >
+      </li>
+      <li>
+        <a class="article__related-card" href={ROUTES.tetsuzuki.path}
+          >改葬・墓所返還などの手続きを見る</a
+        >
+      </li>
+      <li>
+        <a
+          class="article__related-card"
+          href={ROUTES.guideProcedures.path}
+          data-event="internal_guide_link_click"
+          data-destination="guide_procedures">墓じまい・お墓の手続き 総合案内を見る</a
+        >
+      </li>
+      <li>
+        <a class="article__related-card" href={ROUTES.sources.path}>情報源・最終確認日を見る</a>
+      </li>
     </ul>
   </section>
 </BaseLayout>
@@ -141,6 +161,50 @@ const businessListJsonLd = buildBusinessListItemListJsonLd(
 <style>
   .masonry-rule {
     margin-block: var(--space-6);
+  }
+
+  .coverage-summary {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    align-items: center;
+    gap: var(--space-3) var(--space-4);
+    margin-bottom: var(--space-4);
+    padding: var(--space-4);
+    border: 1px solid var(--color-stone-line);
+    border-radius: var(--radius-card);
+    background: var(--color-stone-surface);
+  }
+
+  .coverage-summary p {
+    margin: 0;
+  }
+
+  .coverage-summary__count strong {
+    font-family: var(--font-family-heading);
+    font-size: 1.75rem;
+    color: var(--color-accent-deep);
+  }
+
+  .coverage-summary__date {
+    color: var(--color-stone-text);
+    font-size: var(--font-size-caption);
+  }
+
+  .listing-policy {
+    color: var(--color-stone-text);
+    font-size: var(--font-size-label);
+  }
+
+  @media (max-width: 767px) {
+    .coverage-summary {
+      grid-template-columns: 1fr;
+      gap: var(--space-1);
+      padding: var(--space-3) var(--space-4);
+    }
+
+    .listing-policy {
+      margin-bottom: var(--space-4);
+    }
   }
 
   .detail-table {

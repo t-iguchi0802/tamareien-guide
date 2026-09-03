@@ -5,7 +5,7 @@
  *
  * editorial-redesign（2026-08-26）: 「業者データベース」ではなく
  * 「目的から相談先を探せる地域ガイド」という方向で全面再設計した。
- * 14社の詳細な一覧・カードグリッドはここに複製せず、共有コンポーネント
+ * 事業者の詳細な一覧・カードグリッドはここに複製せず、共有コンポーネント
  * <ServiceFilter mode="link"> の「この条件で一覧を見る」から
  * /sekizaiten/ へ選択条件（?services=a,b,c）を引き継いで遷移する
  * （困りごと別の入口というこのページの役割を保ちつつ、
@@ -129,6 +129,9 @@ import ServiceFilter from '../components/business/ServiceFilter.astro';
 import { getActiveTamaNewsItems } from './_lib/tama-news';
 
 const businesses = getBusinesses();
+const serviceConfirmedCount = businesses.filter((business) =>
+  Object.values(business.services).some((status) => status === 'confirmed'),
+).length;
 const tamaNewsItems = getActiveTamaNewsItems();
 
 function formatJaDate(iso: string): string {
@@ -151,6 +154,7 @@ const description =
         <p class="hero__lead">
           墓石を建てる、直す、墓じまい、清掃・管理。必要なことから相談先を探せます。
         </p>
+        <a class="hero__cta" href={ROUTES.sekizaiten.path}>{businesses.length}社の一覧を見る</a>
       </div>
       <p class="hero__image-credit">イメージ写真</p>
     </section>
@@ -160,7 +164,7 @@ const description =
   </Fragment>
 
   <Fragment slot="beforeSponsor">
-    <ServiceFilter businesses={businesses} mode="link" targetPath={ROUTES.sekizaiten.path} openByDefault />
+    <ServiceFilter businesses={businesses} mode="link" targetPath={ROUTES.sekizaiten.path} />
   </Fragment>
 
   <hr class="masonry-rule" />
@@ -198,7 +202,9 @@ const description =
   <section aria-labelledby="trust-heading" class="trust">
     <h2 id="trust-heading">当サイトについて</h2>
     <p>
-      多磨霊園周辺の石材店・お墓関連事業者{businesses.length}社を、公開情報のみで中立に比較する民間の情報サイトです。掲載順は事業者の推奨順位ではありません。運営者情報・掲載基準・広告方針・訂正窓口は<a
+      多磨霊園周辺の石材店・お墓関連事業者{businesses.length}社を掲載し、そのうち{
+        serviceConfirmedCount
+      }社は墓所関連サービスを公開情報で確認しています。掲載順は推奨順位でも広告順位でもありません。運営者情報・掲載基準・広告方針・訂正窓口は<a
         href={ROUTES.about.path}>運営方針ページ</a
       >を、情報源と最終確認日は<a href={ROUTES.sources.path}>情報源ページ</a>をご覧ください。
     </p>
@@ -208,7 +214,9 @@ const description =
 
   <section aria-labelledby="top-guide-heading" class="top-guide">
     <h2 id="top-guide-heading">多磨霊園ガイド</h2>
-    <p class="top-guide__lead">お参り・お墓の手続き・歴史について、公開情報をもとにまとめた記事です。</p>
+    <p class="top-guide__lead">
+      お参り・お墓の手続き・歴史について、公開情報をもとにまとめた記事です。
+    </p>
     <div class="top-guide__entries">
       <a
         class="top-guide__entry"
@@ -217,7 +225,9 @@ const description =
         data-destination="access"
       >
         <span class="top-guide__entry-heading">行き方・園内案内</span>
-        <span class="top-guide__entry-description">電車・バス・車での行き方と、門ごとの開閉時間です。</span>
+        <span class="top-guide__entry-description"
+          >電車・バス・車での行き方と、門ごとの開閉時間です。</span
+        >
       </a>
       <a
         class="top-guide__entry"
@@ -226,7 +236,9 @@ const description =
         data-destination="guide_procedures"
       >
         <span class="top-guide__entry-heading">墓じまい・各種手続き</span>
-        <span class="top-guide__entry-description">墓じまいと改葬の違いや、行政手続きの公式リンクです。</span>
+        <span class="top-guide__entry-description"
+          >墓じまいと改葬の違いや、行政手続きの公式リンクです。</span
+        >
       </a>
       <a
         class="top-guide__entry"
@@ -235,7 +247,9 @@ const description =
         data-destination="history"
       >
         <span class="top-guide__entry-heading">歴史・著名人の墓所</span>
-        <span class="top-guide__entry-description">1923年開園の経緯と、著名人の墓所についてです。</span>
+        <span class="top-guide__entry-description"
+          >1923年開園の経緯と、著名人の墓所についてです。</span
+        >
       </a>
     </div>
   </section>
@@ -279,7 +293,9 @@ const description =
 
   @media (max-width: 767px) {
     .hero {
-      min-height: clamp(240px, 58vw, 340px);
+      min-height: 220px;
+      padding: var(--space-4);
+      margin-bottom: var(--space-4);
     }
   }
 
@@ -326,6 +342,20 @@ const description =
     font-size: 1.1rem;
     color: #f3ead9;
     text-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+  }
+
+  .hero__cta {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: var(--tap-target-min);
+    margin-top: var(--space-4);
+    padding: 0.65em 1.4em;
+    border-radius: var(--radius-pill);
+    background: #fffdf8;
+    color: var(--color-accent-deep);
+    font-weight: 700;
+    text-decoration: none;
   }
 
   /* 「掲載方針・情報源」への小さなリンク（2026-09-02追加）。ヒーロー写真の
