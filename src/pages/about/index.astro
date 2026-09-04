@@ -1,9 +1,7 @@
 ---
 /**
- * 運営方針、掲載基準、広告方針、訂正窓口。
+ * 運営者、掲載情報、広告案内、訂正窓口。
  * 正本: CLAUDE_CODE_HANDOFF.md 5章・6章 / src/lib/routes.ts ROUTES.about
- *
- * editorialPolicy（businesses.json）を根拠として方針を説明する。
  *
  * スポンサー掲載・訂正窓口の文章刷新とmailto化（2026-09-02、「スポンサー
  * 掲載ページと訂正窓口の文章」対応）: siteConfig.contact.contactEmailが
@@ -37,14 +35,9 @@
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import { siteConfig } from '../../lib/siteConfig';
 import { ROUTES } from '../../lib/routes';
-import { getBusinessDataset } from '../../lib/data';
 
-const dataset = getBusinessDataset();
-const { editorialPolicy } = dataset;
-
-const pageTitle = '運営方針・掲載基準・広告方針・訂正窓口';
-const description =
-  '当サイトの運営者情報、掲載基準、広告・スポンサー方針、掲載情報の訂正窓口について説明します。';
+const pageTitle = '運営者・掲載情報';
+const description = 'サイトの運営者、掲載情報、スポンサー掲載、情報の訂正窓口をご案内します。';
 const browserTitle = `${pageTitle}｜多磨霊園 お墓ガイド`;
 
 /**
@@ -91,57 +84,31 @@ const correctionHref = contactEmail
   <Fragment slot="beforeSponsor">
     <h1>{pageTitle}</h1>
 
-    <section aria-labelledby="disclaimer-heading">
-      <h2 id="disclaimer-heading">運営者について</h2>
+    <section aria-labelledby="operator-heading">
+      <h2 id="operator-heading">運営者</h2>
       <p>
-        {
-          siteConfig.name
-        }は、多磨霊園周辺の石材店・お墓関連事業者を公開情報のみで比較する民間の情報サイトです。運営者は<a
-          href={ROUTES.operator.path}>{siteConfig.operator.name}</a
-        >で、東京都・多磨霊園・東京都公園協会とは独立した事業者であり、ロゴ等の使用や委託・公認関係はありません。制度・行政手続きの正確な情報は<a
-          href={ROUTES.tetsuzuki.path}>手続きの案内ページ</a
-        >から各公式ページをご確認ください。運営者の詳細は<a href={ROUTES.operator.path}
-          >運営者情報ページ</a
-        >をご覧ください。
+        {siteConfig.name}は、<a href={ROUTES.operator.path}>{siteConfig.operator.name}</a
+        >が運営しています。多磨霊園周辺の石材店探しと、お墓に関する情報を分かりやすくまとめています。
       </p>
     </section>
   </Fragment>
 
   <section aria-labelledby="criteria-heading">
-    <h2 id="criteria-heading">掲載基準</h2>
+    <h2 id="criteria-heading">掲載している情報</h2>
     <ul>
-      <li>
-        掲載対象:
-        多磨霊園周辺に事業所がある、または事業者の公式情報で多磨霊園への対応を確認できた石材店・お墓関連事業者です。
-      </li>
-      <li>
-        調査方法: {editorialPolicy.researchMethod}。掲載事業者への事前ヒアリングは{
-          editorialPolicy.preLaunchInterview ? '行っています' : '行っていません'
-        }。
-      </li>
-      <li>
-        未確認項目の表示: 公開ページ上で確認できない項目は「{
-          editorialPolicy.unknownLabel
-        }」と表示し、非対応や推測値に置き換えません。
-      </li>
-      <li>掲載順: {editorialPolicy.rankingPolicy}</li>
+      <li>多磨霊園周辺に事業所がある石材店・お墓関連事業者</li>
+      <li>公式サイト、商工会、業界団体などで確認できた連絡先とサービス</li>
     </ul>
     <p>
-      掲載データの出典と最終確認日は<a href={ROUTES.sources.path}>情報源ページ</a
-      >で個別に公開しています。
-    </p>
-    <p>
-      公式サイトで墓所関連サービスを確認できない場合でも、現行の商工会名簿等で事業所を確認できた事業者は、サービスを推測せず基本情報だけを掲載します。調査用の内部区分は、営業中かどうか、品質、推奨度を表す評価ではなく、公開画面には表示しません。
+      各情報の確認先は<a href={ROUTES.sources.path}>情報源一覧</a>で確認できます。
     </p>
   </section>
 
   <section aria-labelledby="ad-policy-heading">
-    <h2 id="ad-policy-heading">広告・スポンサー方針</h2>
-    <p>{editorialPolicy.sponsorshipPolicy}</p>
+    <h2 id="ad-policy-heading">スポンサー掲載</h2>
     <p>
-      口コミ点数・星評価・独自ランキングや、「おすすめ」「人気」「優良」等の主観的な表現は使用していません。スポンサー枠を設ける場合は、比較データとは別に管理し、「スポンサー」または「広告」であることを明示します。
+      サイト内には広告枠があります。また、条件検索で該当するスポンサー契約店がある場合は、検索結果の先頭に「PR」と表示します。
     </p>
-    <p>スポンサー契約の有無を、通常掲載順、絞り込み結果、比較内容へ反映しません。</p>
     <div id="sponsor-info-heading" class="contact-block">
       <h3 class="contact-block__heading">スポンサー掲載について</h3>
       <p class="contact-block__body">

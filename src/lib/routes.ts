@@ -14,7 +14,7 @@ export const ROUTES = {
   hakajimai: { path: '/hakajimai/', description: '墓じまい・墓石撤去の比較と見積項目' },
   kanri: { path: '/kanri/', description: '墓所管理・清掃・供花の比較' },
   tetsuzuki: { path: '/tetsuzuki/', description: '改葬・墓所返還・施設変更の違いと公式リンク' },
-  about: { path: '/about/', description: '運営方針、掲載基準、広告方針、訂正窓口' },
+  about: { path: '/about/', description: '運営者、掲載情報、スポンサー掲載、訂正窓口' },
   sources: { path: '/sources/', description: '情報源・最終確認日' },
   privacy: { path: '/privacy/', description: 'プライバシーポリシー' },
   // 2026-09-02、ナビゲーション・運営者表示・SEO/AIO監査対応で追加。

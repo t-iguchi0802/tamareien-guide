@@ -15,6 +15,8 @@ import type { Sponsor } from './sponsor';
 
 export interface BusinessCardProps {
   business: Business;
+  /** 有効なスポンサー契約と紐づく事業者。通常時は表示順へ影響させない。 */
+  isSponsored?: boolean;
 }
 
 export interface ComparisonTableProps {

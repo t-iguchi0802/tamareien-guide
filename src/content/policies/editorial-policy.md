@@ -1,15 +1,15 @@
 ---
-title: "運営方針・掲載基準"
-description: "当サイトが事業者情報をどのように調べ、どのように掲載しているかについての方針。"
-targetPage: "/about/"
+title: '運営方針・掲載基準'
+description: '当サイトが事業者情報をどのように調べ、どのように掲載しているかについての方針。'
+targetPage: '/about/'
 basedOnFields:
-  - "editorialPolicy.researchMethod"
-  - "editorialPolicy.preLaunchInterview"
-  - "editorialPolicy.unknownLabel"
-  - "editorialPolicy.officialSiteDisclaimer"
-  - "editorialPolicy.rankingPolicy"
-  - "editorialPolicy.sponsorshipPolicy"
-lastVerifiedAt: "2026-08-24"
+  - 'editorialPolicy.researchMethod'
+  - 'editorialPolicy.preLaunchInterview'
+  - 'editorialPolicy.unknownLabel'
+  - 'editorialPolicy.officialSiteDisclaimer'
+  - 'editorialPolicy.rankingPolicy'
+  - 'editorialPolicy.sponsorshipPolicy'
+lastVerifiedAt: '2026-08-24'
 ---
 
 ## 調査方法
@@ -26,7 +26,7 @@ lastVerifiedAt: "2026-08-24"
 
 ## スポンサー表示について
 
-スポンサー枠を設ける場合は、通常の掲載・比較結果とは別に管理し、「スポンサー」または「広告」であることを明示する。スポンサー契約の有無が、通常の掲載順・比較結果・評価に影響することはない。
+スポンサー契約は通常の掲載データとは別に管理する。条件未選択時は通常掲載順を維持する。サービス条件が選択された場合に限り、条件に一致するスポンサー契約店を「PR」と明記して検索結果の先頭に表示する。条件に一致しないスポンサーは表示せず、比較内容や評価は変更しない。
 
 ## 当サイトの位置づけ
 

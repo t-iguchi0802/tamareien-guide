@@ -15,8 +15,9 @@
  * 密な表を主役にしないよう<details>で折りたたみ、必要な人だけが開く
  * 「詳しい比較表」として維持する（機能・データは変更していない）。
  *
- * スポンサー契約の有無は通常掲載順・絞り込み結果へ反映しない。
- * 広告はBaseLayoutのスポンサー枠だけに表示し、比較一覧と分離する。
+ * 条件未選択時は通常掲載順を維持する。1つ以上のサービス条件を選んだ場合は、
+ * AND条件に一致するスポンサー契約店だけを「PR」と明記して
+ * 結果の先頭へ表示する。不一致スポンサーは表示せず、重複もさせない。
  *
  * モバイル最優先レビュー対応（2026-09-01）: ページ上部に小さめの写真
  * （hero-cemetery-photo-v2.png、既存プロジェクト内画像を別クロップで再利用。
@@ -40,7 +41,7 @@
 import '../../styles/guide-article.css';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import { ROUTES } from '../../lib/routes';
-import { getBusinesses, getBusinessDataset } from '../../lib/data';
+import { getBusinesses, getActiveSponsors } from '../../lib/data';
 import ComparisonTable from '../../components/business/ComparisonTable.astro';
 import ServiceFilter from '../../components/business/ServiceFilter.astro';
 import BusinessGrid from '../../components/business/BusinessGrid.astro';
@@ -49,10 +50,9 @@ import { ALL_SERVICE_KEYS } from '../_lib/business-display';
 import { buildBusinessListItemListJsonLd } from '../../lib/seo';
 
 const businesses = getBusinesses();
-const dataset = getBusinessDataset();
-const serviceConfirmedCount = businesses.filter((business) =>
-  Object.values(business.services).some((status) => status === 'confirmed'),
-).length;
+const sponsoredBusinessIds = getActiveSponsors()
+  .map((sponsor) => sponsor.linkedBusinessId)
+  .filter((id): id is string => id !== null);
 /*
  * title/description/H1の更新（2026-09-02、ミチの編集改善・SEO/AIO対応
  * 「title・description・H1」節）: BaseLayoutのタイトル自動サフィックスを
@@ -90,26 +90,20 @@ const businessListJsonLd = buildBusinessListItemListJsonLd(
 <BaseLayout title={pageTitle} description={description} extraJsonLd={[businessListJsonLd]}>
   <Fragment slot="beforeSponsor">
     <h1>{heroHeading}</h1>
-    <div class="coverage-summary">
-      <p class="coverage-summary__count"><strong>{businesses.length}社</strong>を掲載</p>
-      <p>
-        {
-          serviceConfirmedCount
-        }社は墓所関連サービスを確認済み。残る事業者は所在地等の基本情報のみを掲載しています。
-      </p>
-      <p class="coverage-summary__date">公開情報の最終調査: {dataset.lastVerifiedAt}</p>
-    </div>
-    <p class="listing-policy">
-      対象は、多磨霊園周辺に事業所があるか、公式情報で多磨霊園への対応を確認できた事業者です。掲載順は推奨順位・品質順位・広告順位ではありません。詳しくは<a
-        href={ROUTES.about.path}>運営方針・掲載基準</a
-      >をご覧ください。
+    <p class="page-lead">
+      掲載中の{businesses.length}社から、希望する内容や地域に合う石材店を探せます。
     </p>
 
-    <ServiceFilter businesses={businesses} mode="inline" externalGrid />
+    <ServiceFilter
+      businesses={businesses}
+      mode="inline"
+      externalGrid
+      sponsoredBusinessIds={sponsoredBusinessIds}
+    />
   </Fragment>
 
   <section aria-label="事業者一覧・詳しい比較表">
-    <BusinessGrid businesses={businesses} />
+    <BusinessGrid businesses={businesses} sponsoredBusinessIds={sponsoredBusinessIds} />
 
     <hr class="masonry-rule" />
 
@@ -163,47 +157,16 @@ const businessListJsonLd = buildBusinessListItemListJsonLd(
     margin-block: var(--space-6);
   }
 
-  .coverage-summary {
-    display: grid;
-    grid-template-columns: auto minmax(0, 1fr) auto;
-    align-items: center;
-    gap: var(--space-3) var(--space-4);
-    margin-bottom: var(--space-4);
-    padding: var(--space-4);
-    border: 1px solid var(--color-stone-line);
-    border-radius: var(--radius-card);
-    background: var(--color-stone-surface);
-  }
-
-  .coverage-summary p {
-    margin: 0;
-  }
-
-  .coverage-summary__count strong {
-    font-family: var(--font-family-heading);
-    font-size: 1.75rem;
-    color: var(--color-accent-deep);
-  }
-
-  .coverage-summary__date {
+  .page-lead {
+    margin: 0 0 var(--space-5);
     color: var(--color-stone-text);
-    font-size: var(--font-size-caption);
-  }
-
-  .listing-policy {
-    color: var(--color-stone-text);
-    font-size: var(--font-size-label);
+    font-size: 1.05rem;
   }
 
   @media (max-width: 767px) {
-    .coverage-summary {
-      grid-template-columns: 1fr;
-      gap: var(--space-1);
-      padding: var(--space-3) var(--space-4);
-    }
-
-    .listing-policy {
+    .page-lead {
       margin-bottom: var(--space-4);
+      font-size: 1rem;
     }
   }
 

@@ -129,9 +129,6 @@ import ServiceFilter from '../components/business/ServiceFilter.astro';
 import { getActiveTamaNewsItems } from './_lib/tama-news';
 
 const businesses = getBusinesses();
-const serviceConfirmedCount = businesses.filter((business) =>
-  Object.values(business.services).some((status) => status === 'confirmed'),
-).length;
 const tamaNewsItems = getActiveTamaNewsItems();
 
 function formatJaDate(iso: string): string {
@@ -158,9 +155,6 @@ const description =
       </div>
       <p class="hero__image-credit">イメージ写真</p>
     </section>
-    <p class="top-policy-link">
-      <a href={ROUTES.about.path}>掲載方針・情報源</a>
-    </p>
   </Fragment>
 
   <Fragment slot="beforeSponsor">
@@ -200,14 +194,13 @@ const description =
   <hr class="masonry-rule" />
 
   <section aria-labelledby="trust-heading" class="trust">
-    <h2 id="trust-heading">当サイトについて</h2>
+    <h2 id="trust-heading">このサイトでできること</h2>
     <p>
-      多磨霊園周辺の石材店・お墓関連事業者{businesses.length}社を掲載し、そのうち{
-        serviceConfirmedCount
-      }社は墓所関連サービスを公開情報で確認しています。掲載順は推奨順位でも広告順位でもありません。運営者情報・掲載基準・広告方針・訂正窓口は<a
-        href={ROUTES.about.path}>運営方針ページ</a
-      >を、情報源と最終確認日は<a href={ROUTES.sources.path}>情報源ページ</a>をご覧ください。
+      多磨霊園周辺の石材店・お墓関連事業者{
+        businesses.length
+      }社を、墓石建立、墓じまい、管理・清掃などの目的から探せます。各社の連絡先や確認できたサービスを、ひとつの画面で見比べられます。
     </p>
+    <p><a href={ROUTES.about.path}>運営者・掲載情報を見る</a></p>
   </section>
 
   <hr class="masonry-rule" />
@@ -356,23 +349,6 @@ const description =
     color: var(--color-accent-deep);
     font-weight: 700;
     text-decoration: none;
-  }
-
-  /* 「掲載方針・情報源」への小さなリンク（2026-09-02追加）。ヒーロー写真の
-     すぐ下、3列（左スポンサー／中央フィルター／右スポンサー）が始まる前の
-     余白部分に収める、控えめな1行リンク。写真下の余白自体はそのまま
-     残し、その中に小さく文字を置くだけにとどめる。 */
-  .top-policy-link {
-    max-width: 960px;
-    margin: 0 auto;
-    padding: 0 var(--space-6);
-    text-align: right;
-    font-size: var(--font-size-caption, 0.875rem);
-  }
-
-  .top-policy-link a {
-    color: var(--color-text-muted);
-    text-decoration: underline;
   }
 
   .hero__image-credit {

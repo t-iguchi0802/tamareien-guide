@@ -25,9 +25,11 @@ import BusinessCard from './BusinessCard.astro';
 
 interface Props {
   businesses: Business[];
+  sponsoredBusinessIds?: string[];
 }
 
-const { businesses } = Astro.props;
+const { businesses, sponsoredBusinessIds = [] } = Astro.props;
+const sponsoredBusinessIdSet = new Set(sponsoredBusinessIds);
 ---
 
 <p class="service-filter__empty" data-filter-empty hidden>
@@ -46,14 +48,18 @@ const { businesses } = Astro.props;
   <label>
     <span>並び順</span>
     <select data-sort-select>
-      <option value="default">掲載順</option>
+      <option value="default">標準</option>
       <option value="city">市別</option>
       <option value="name">名称順</option>
     </select>
   </label>
 </div>
 <div class="business-grid" data-business-grid>
-  {businesses.map((business) => <BusinessCard business={business} />)}
+  {
+    businesses.map((business) => (
+      <BusinessCard business={business} isSponsored={sponsoredBusinessIdSet.has(business.id)} />
+    ))
+  }
 </div>
 <button type="button" class="business-grid__more" data-show-more hidden>
   残り<span data-show-more-count>0</span>社を表示

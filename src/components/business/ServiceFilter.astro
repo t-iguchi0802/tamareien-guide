@@ -84,9 +84,10 @@
  *   操作説明的な響きを減らすため）。絞り込みロジック・ServiceKey・
  *   チェックボックスの構造・GA4イベントは変更していない。
  *
- * スポンサー契約の有無はこのコンポーネントへ渡さない。
- * 絞り込み結果・掲載順・比較表示は通常掲載データだけで決まり、広告は
- * BaseLayoutの独立したスポンサー枠で表示する。
+ * スポンサー契約店は、1つ以上のサービス条件が選択された場合に限り、
+ * AND条件に一致した事業者を検索結果の先頭へ表示する。条件未選択時は
+ * 通常掲載順を維持し、不一致スポンサーは表示しない。上位表示カードには
+ * 「PR」を明記する。
  */
 import type { Business, ServiceKey } from '../../types/business';
 import { PURPOSE_GROUPS, SERVICE_LABELS } from './serviceLabels';
@@ -123,9 +124,19 @@ interface Props {
    * 同時に1つしか存在しないため、documentスコープでも衝突しない）。
    */
   externalGrid?: boolean;
+  /** 有効なスポンサー契約と紐づく事業者ID。スポンサーJSONからページ側で渡す。 */
+  sponsoredBusinessIds?: string[];
 }
 
-const { businesses, mode, targetPath, openByDefault = false, externalGrid = false } = Astro.props;
+const {
+  businesses,
+  mode,
+  targetPath,
+  openByDefault = false,
+  externalGrid = false,
+  sponsoredBusinessIds = [],
+} = Astro.props;
+const sponsoredBusinessIdSet = new Set(sponsoredBusinessIds);
 
 /** クライアント側のAND判定用データ（confirmedなserviceKeyのみを持たせる）。 */
 const businessFilterData = businesses.map((business) => ({
@@ -133,6 +144,7 @@ const businessFilterData = businesses.map((business) => ({
   name: business.name,
   city: business.location.city,
   displayOrder: business.displayOrder,
+  isSponsored: sponsoredBusinessIdSet.has(business.id),
   services: (Object.keys(business.services) as ServiceKey[]).filter((key) =>
     isFilterableStatus(business.services[key]),
   ),
@@ -227,7 +239,7 @@ const businessFilterData = businesses.map((business) => ({
 
   <div class="service-filter__result">
     <p class="service-filter__result-text" aria-live="polite">
-      <span data-result-prefix>{mode === 'inline' ? '掲載対象の事業者' : '掲載対象'}</span>
+      <span data-result-prefix>{mode === 'inline' ? 'すべての事業者' : '掲載中'}</span>
       <strong data-result-count>{businesses.length}</strong>社
     </p>
     <button type="button" class="service-filter__clear" data-filter-clear> 条件をクリア </button>
@@ -246,7 +258,11 @@ const businessFilterData = businesses.map((business) => ({
     </p>
   </noscript>
 
-  {mode === 'inline' && !externalGrid && <BusinessGrid businesses={businesses} />}
+  {
+    mode === 'inline' && !externalGrid && (
+      <BusinessGrid businesses={businesses} sponsoredBusinessIds={sponsoredBusinessIds} />
+    )
+  }
 
   <script
     type="application/json"
@@ -263,6 +279,7 @@ const businessFilterData = businesses.map((business) => ({
       name: string;
       city: string;
       displayOrder: number;
+      isSponsored: boolean;
       services: string[];
     }
 
@@ -357,12 +374,12 @@ const businessFilterData = businesses.map((business) => ({
         if (resultCountEl) resultCountEl.textContent = String(matchIds.size);
         if (resultPrefixEl) {
           resultPrefixEl.textContent = hasSelection
-            ? '選んだ条件への対応を確認できた事業者'
+            ? '条件に合う事業者'
             : selectedArea
-              ? `${selectedArea}の掲載事業者`
+              ? `${selectedArea}の事業者`
               : mode === 'inline'
-                ? '掲載対象の事業者'
-                : '掲載対象';
+                ? 'すべての事業者'
+                : '掲載中';
         }
 
         if (mode === 'inline' && grid) {
@@ -375,6 +392,13 @@ const businessFilterData = businesses.map((business) => ({
           const sortMode = sortSelect?.value || 'default';
           cards
             .sort((a, b) => {
+              // サービス条件を選んだ検索時だけ、一致スポンサーを先頭へ。
+              // 条件未選択時は通常順を維持し、広告契約で自然掲載順を変えない。
+              if (hasSelection) {
+                const sponsorCompare =
+                  Number(b.dataset.sponsored === 'true') - Number(a.dataset.sponsored === 'true');
+                if (sponsorCompare !== 0) return sponsorCompare;
+              }
               if (sortMode === 'name')
                 return (a.dataset.businessName || '').localeCompare(
                   b.dataset.businessName || '',
@@ -398,6 +422,10 @@ const businessFilterData = businesses.map((business) => ({
             const isWithinLimit = listExpanded || matchedIndex < initialLimit;
             card.hidden = !isMatch || !isWithinLimit;
             if (isMatch) matchedIndex += 1;
+            const sponsorBadge = card.querySelector<HTMLElement>('[data-sponsor-result-badge]');
+            if (sponsorBadge) {
+              sponsorBadge.hidden = !(hasSelection && isMatch && card.dataset.sponsored === 'true');
+            }
             const prefixEl = card.querySelector('[data-service-prefix]');
             if (prefixEl) {
               prefixEl.textContent = hasSelection

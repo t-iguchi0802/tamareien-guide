@@ -11,7 +11,8 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import { ROUTES } from '../lib/routes';
 
 const pageTitle = 'ページが見つかりません｜多磨霊園 お墓ガイド';
-const description = 'お探しのページが見つかりませんでした。トップページまたは主要ページからお探しください。';
+const description =
+  'お探しのページが見つかりませんでした。トップページまたは主要ページからお探しください。';
 ---
 
 <BaseLayout title={pageTitle} description={description} noindex>
@@ -24,7 +25,7 @@ const description = 'お探しのページが見つかりませんでした。�
       <li><a href={ROUTES.top.path}>トップページ</a></li>
       <li><a href={ROUTES.sekizaiten.path}>石材店一覧・比較</a></li>
       <li><a href={ROUTES.guide.path}>多磨霊園ガイド一覧</a></li>
-      <li><a href={ROUTES.about.path}>運営方針・お問い合わせ</a></li>
+      <li><a href={ROUTES.about.path}>運営者・お問い合わせ</a></li>
     </ul>
   </div>
 </BaseLayout>

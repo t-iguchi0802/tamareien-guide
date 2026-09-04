@@ -69,9 +69,12 @@
      「広告」ラベル等の小さな文字には同じ色相を暗くした#8A6530
      （白背景比5.27:1、AA適合）を使う。#A97D3E自体は枠線・背景タイントの
      装飾用途（コントラスト規定の対象外）にのみ使う。 */
-  --color-sponsor-bg: #fbf3e6;
-  --color-sponsor-border: #a97d3e;
-  --color-sponsor-fg: #8a6530;
+  --color-sponsor-bg: #fff7ef;
+  --color-sponsor-border: #df6b2f;
+  --color-sponsor-fg: #8e3516;
+  --color-sponsor-cta: #075c70;
+  --color-sponsor-cta-hover: #063f4d;
+  --color-sponsor-highlight: #f29a50;
 
   /* 情報の種類を見分けるための控えめな配色追加（2026-09-01、ミチのモバイル最優先
      レビュー対応）。原色・強いグラデーションは使わず、既存の「石色・生成り・

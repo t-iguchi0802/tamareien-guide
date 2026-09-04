@@ -27,8 +27,7 @@ export interface NavDropdownItem {
 }
 
 export type PrimaryNavEntry =
-  | ({ kind: 'link' } & NavLinkItem)
-  | ({ kind: 'dropdown' } & NavDropdownItem);
+  ({ kind: 'link' } & NavLinkItem) | ({ kind: 'dropdown' } & NavDropdownItem);
 
 /**
  * ヘッダー主要ナビ（PC原則4項目）。
@@ -54,7 +53,7 @@ export const PRIMARY_NAV: PrimaryNavEntry[] = [
 
 /** モバイルメニュー内、主要ページに続けて表示する運営系ページ。 */
 export const OPERATOR_NAV: NavLinkItem[] = [
-  { label: '運営方針・掲載基準・広告方針', path: ROUTES.about.path },
+  { label: '運営者・掲載情報', path: ROUTES.about.path },
   { label: '運営者情報', path: ROUTES.operator.path },
   { label: '情報源・最終確認日', path: ROUTES.sources.path },
   { label: 'プライバシーポリシー', path: ROUTES.privacy.path },
@@ -65,7 +64,7 @@ export const FOOTER_PRIMARY_LINKS: NavLinkItem[] = [
   { label: 'トップ', path: ROUTES.top.path },
   { label: '石材店一覧・比較', path: ROUTES.sekizaiten.path },
   { label: '墓じまい・手続き', path: ROUTES.guideProcedures.path },
-  { label: '運営方針', path: ROUTES.about.path },
+  { label: '運営者・掲載情報', path: ROUTES.about.path },
 ];
 
 export interface FooterNavGroup {
@@ -98,7 +97,7 @@ export const FOOTER_NAV_GROUPS: FooterNavGroup[] = [
   {
     label: '運営',
     items: [
-      { label: '運営方針・掲載基準・広告方針・訂正窓口', path: ROUTES.about.path },
+      { label: '運営者・掲載情報', path: ROUTES.about.path },
       { label: 'スポンサー掲載について', path: `${ROUTES.about.path}#sponsor-info-heading` },
       { label: '運営者情報', path: ROUTES.operator.path },
       { label: '情報源・最終確認日', path: ROUTES.sources.path },

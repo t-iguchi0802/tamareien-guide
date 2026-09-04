@@ -27,8 +27,9 @@
  *   AND条件の一致判定に使う。ここでの判定ロジック自体は持たない
  *   （表示コンポーネントとしての責務にとどめる）。
  *
- * スポンサー契約の有無は通常カードに持ち込まず、通常掲載順・情報量・
- * 絞り込み結果を広告契約から独立させる。
+ * スポンサー契約店は、利用者が1つ以上のサービス条件を選び、その条件に
+ * 一致した場合だけ「PR」を表示する。未選択時はバッジを
+ * 隠し、通常掲載順へ影響させない。
  *
  * カード内容の段階表示（2026-09-01、ミチのモバイル優先UI・文章校正対応
  * 「石材店一覧のスマートフォン表示」節）: 390px幅でカードが縦に長く
@@ -58,7 +59,7 @@ import MapLink from '../access/MapLink.astro';
 import { SERVICE_LABELS } from './serviceLabels';
 
 type Props = BusinessCardProps;
-const { business } = Astro.props;
+const { business, isSponsored = false } = Astro.props;
 
 const UNCONFIRMED_TEXT = '公開情報では未確認';
 const INITIAL_SERVICE_COUNT = 3;
@@ -105,9 +106,11 @@ const showSeparateContact =
   data-business-name={business.name}
   data-business-city={business.location.city}
   data-business-order={business.displayOrder}
+  data-sponsored={String(isSponsored)}
   data-service-keys={confirmedServiceKeys.join(',')}
 >
   <header class="business-card__header">
+    <p class="business-card__sponsor-badge" data-sponsor-result-badge hidden>PR</p>
     <h3 class="business-card__name">{business.name}</h3>
     <p class="business-card__meta">
       {business.location.city}
@@ -248,6 +251,22 @@ const showSeparateContact =
     display: flex;
     flex-direction: column;
     gap: 0.2em;
+  }
+
+  .business-card__sponsor-badge {
+    width: fit-content;
+    margin: 0 0 var(--space-1);
+    padding: 0.25em 0.7em;
+    border: 1px solid var(--color-sponsor-border);
+    border-radius: var(--radius-pill);
+    background: var(--color-sponsor-bg);
+    color: var(--color-sponsor-fg);
+    font-size: var(--font-size-caption);
+    font-weight: 700;
+  }
+
+  .business-card__sponsor-badge[hidden] {
+    display: none;
   }
 
   .business-card__name {

@@ -39,7 +39,8 @@ const guideSourceList = [
 ];
 
 const pageTitle = '情報源・最終確認日';
-const description = '掲載情報の出典（公式サイト・行政ページ等）と、それぞれの最終確認日の一覧です。';
+const description =
+  '掲載情報の出典（公式サイト・行政ページ等）と、それぞれの最終確認日の一覧です。';
 const browserTitle = `${pageTitle}｜多磨霊園 お墓ガイド`;
 ---
 
@@ -47,7 +48,7 @@ const browserTitle = `${pageTitle}｜多磨霊園 お墓ガイド`;
   <h1>{pageTitle}</h1>
   <p>
     当サイトに掲載している情報は、以下の出典（事業者の公式サイト、行政の公式ページ、商工会等の名簿）をもとにしています。住所・電話・料金・制度は90日ごと、行政制度は30日ごとまたは公開直前を目安に再確認しています。リンク切れに気づいた場合は<a
-      href={ROUTES.about.path}>運営方針ページ</a
+      href={ROUTES.about.path}>運営者・掲載情報</a
     >の訂正窓口までお知らせください。
   </p>
 
@@ -68,7 +69,11 @@ const browserTitle = `${pageTitle}｜多磨霊園 お墓ガイド`;
         {
           sources.map((source) => (
             <tr>
-              <td>{source.business_id ? businessNameById.get(source.business_id) || source.business_id : '共通（施設・行政情報）'}</td>
+              <td>
+                {source.business_id
+                  ? businessNameById.get(source.business_id) || source.business_id
+                  : '共通（施設・行政情報）'}
+              </td>
               <td>{source.publisher}</td>
               <td>{source.title}</td>
               <td>{source.source_type}</td>
@@ -88,11 +93,19 @@ const browserTitle = `${pageTitle}｜多磨霊園 お墓ガイド`;
   <section aria-labelledby="guide-sources-heading">
     <h2 id="guide-sources-heading">多磨霊園ガイド記事の情報源</h2>
     <p>
-      <a href={ROUTES.guide.path}>多磨霊園ガイド</a>（行き方・歴史・著名人墓所等）で使用している出典です。事業者比較データとは別に、東京都公園協会の公式ページ・案内図を直接参照しています。
+      <a href={ROUTES.guide.path}>多磨霊園ガイド</a
+      >（行き方・歴史・著名人墓所等）で使用している出典です。事業者比較データとは別に、東京都公園協会の公式ページ・案内図を直接参照しています。
     </p>
     <div class="sources-table__scroll">
       <table>
-        <caption>ガイド記事の情報源一覧（{guideSourceList.length + (tamaOfficial ? 1 : 0) + (tamaWorkNotice ? 1 : 0) + (fuchuReburial ? 1 : 0)}件）</caption>
+        <caption
+          >ガイド記事の情報源一覧（{
+            guideSourceList.length +
+              (tamaOfficial ? 1 : 0) +
+              (tamaWorkNotice ? 1 : 0) +
+              (fuchuReburial ? 1 : 0)
+          }件）</caption
+        >
         <thead>
           <tr>
             <th scope="col">発行者</th>

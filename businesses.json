@@ -10,7 +10,7 @@
     "unknownLabel": "公開情報では未確認",
     "officialSiteDisclaimer": "当サイトは東京都、多磨霊園、東京都公園協会の公式サイトではありません。",
     "rankingPolicy": "掲載順は推奨順位・品質順位・広告順位を意味しない。",
-    "sponsorshipPolicy": "スポンサー表示と通常掲載・比較評価を分離する。"
+    "sponsorshipPolicy": "条件未選択時は通常掲載順を維持する。サービス条件検索時は、一致するスポンサー契約店だけを「PR」表示付きで先頭表示し、比較内容や評価は変更しない。"
   },
   "statusValues": [
     "confirmed",

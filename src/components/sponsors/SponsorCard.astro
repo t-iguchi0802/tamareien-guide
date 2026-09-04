@@ -17,8 +17,8 @@
  *
  * - 4枠は常に同じ大きさ・同じ扱いで、埋まっている枠を優先表示したり
  *   強調したりしない（呼び出し側もdisplayOrder以外で並べ替えない）。
- * - 通常掲載（BusinessCard/ServiceFilter）とは完全に分離しており、
- *   検索条件・絞り込み結果を一切参照しない。
+ * - この独立広告枠自体は検索条件・絞り込み結果を参照しない。サービス条件
+ *   検索時のスポンサー契約店先頭表示はBusinessCard/ServiceFilter側で扱う。
  * - 計測: 実際にスポンサーが入っている枠のリンクにのみ
  *   `data-event="sponsor_click"` を付与する（空枠はリンクを持たないため
  *   計測対象にならない）。表示回数（sponsor_impression）は呼び出し側
@@ -84,10 +84,33 @@ const headline = sponsor?.headline ?? sponsor?.name ?? '';
     >
       <div class="sponsor-card__media sponsor-card__media--recruit">
         <span class="sponsor-card__eyebrow sponsor-card__eyebrow--on-photo">広告</span>
-        <svg class="sponsor-card__recruit-icon" width="40" height="40" viewBox="0 0 40 40" aria-hidden="true" focusable="false">
-          <rect x="3" y="7" width="34" height="26" rx="3" fill="none" stroke="currentColor" stroke-width="2" />
+        <svg
+          class="sponsor-card__recruit-icon"
+          width="40"
+          height="40"
+          viewBox="0 0 40 40"
+          aria-hidden="true"
+          focusable="false"
+        >
+          <rect
+            x="3"
+            y="7"
+            width="34"
+            height="26"
+            rx="3"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+          />
           <circle cx="14" cy="16" r="3.2" fill="none" stroke="currentColor" stroke-width="2" />
-          <path d="M6 28 L15 20 L21 25 L27 17 L34 26" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+          <path
+            d="M6 28 L15 20 L21 25 L27 17 L34 26"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          />
         </svg>
       </div>
       <div class="sponsor-card__body">
@@ -95,8 +118,22 @@ const headline = sponsor?.headline ?? sponsor?.name ?? '';
         <p class="sponsor-card__tagline">多磨霊園周辺の事業者さまへ</p>
         <span class="sponsor-card__cta">
           掲載について見る
-          <svg class="sponsor-card__cta-arrow" width="16" height="16" viewBox="0 0 20 20" aria-hidden="true" focusable="false">
-            <path d="M5 3 L14 10 L5 17" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" />
+          <svg
+            class="sponsor-card__cta-arrow"
+            width="16"
+            height="16"
+            viewBox="0 0 20 20"
+            aria-hidden="true"
+            focusable="false"
+          >
+            <path
+              d="M5 3 L14 10 L5 17"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2.2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            />
           </svg>
         </span>
       </div>
@@ -145,8 +182,22 @@ const headline = sponsor?.headline ?? sponsor?.name ?? '';
         <p class="sponsor-card__name">{sponsor.name}</p>
         <span class="sponsor-card__cta">
           {ctaLabel}
-          <svg class="sponsor-card__cta-arrow" width="16" height="16" viewBox="0 0 20 20" aria-hidden="true" focusable="false">
-            <path d="M5 3 L14 10 L5 17" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" />
+          <svg
+            class="sponsor-card__cta-arrow"
+            width="16"
+            height="16"
+            viewBox="0 0 20 20"
+            aria-hidden="true"
+            focusable="false"
+          >
+            <path
+              d="M5 3 L14 10 L5 17"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2.2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            />
           </svg>
         </span>
       </div>
@@ -163,7 +214,14 @@ const headline = sponsor?.headline ?? sponsor?.name ?? '';
       <p class="sponsor-card__eyebrow">広告</p>
       <div class="sponsor-card__filled">
         {sponsor.logoUrl && (
-          <img class="sponsor-card__logo" src={sponsor.logoUrl} alt="" loading="lazy" width="32" height="32" />
+          <img
+            class="sponsor-card__logo"
+            src={sponsor.logoUrl}
+            alt=""
+            loading="lazy"
+            width="32"
+            height="32"
+          />
         )}
         <p class="sponsor-card__name">{sponsor.name}</p>
         <p class="sponsor-card__summary">{sponsor.summary}</p>
@@ -201,9 +259,9 @@ const headline = sponsor?.headline ?? sponsor?.name ?? '';
     min-width: 0;
     height: 100%;
     background: var(--color-sponsor-bg);
-    border: 1px solid var(--color-sponsor-border);
+    border: 2px solid var(--color-sponsor-border);
     border-radius: var(--radius-card);
-    box-shadow: 0 1px 3px rgba(43, 41, 38, 0.1);
+    box-shadow: 0 5px 18px rgba(67, 42, 26, 0.13);
   }
 
   /* --- 簡易表示（画像なしスポンサー用。ロゴ・要約のみ） --- */
@@ -330,12 +388,15 @@ const headline = sponsor?.headline ?? sponsor?.name ?? '';
     display: flex;
     align-items: center;
     justify-content: center;
-    background: linear-gradient(135deg, var(--color-stone-surface) 0%, var(--color-tint-green-bg, #eef2e9) 100%);
+    background:
+      radial-gradient(circle at 82% 18%, rgba(255, 218, 170, 0.75) 0 14%, transparent 15%),
+      radial-gradient(circle at 15% 85%, rgba(255, 255, 255, 0.18) 0 20%, transparent 21%),
+      linear-gradient(135deg, #075c70 0%, #13839b 52%, #f29a50 100%);
   }
 
   .sponsor-card__recruit-icon {
-    color: var(--color-sponsor-fg);
-    opacity: 0.55;
+    color: #fff;
+    opacity: 0.95;
   }
 
   .sponsor-card__photo {
@@ -385,9 +446,9 @@ const headline = sponsor?.headline ?? sponsor?.name ?? '';
     align-self: flex-start;
     padding: 0.15em 0.6em;
     border-radius: var(--radius-pill);
-    border: 1px solid var(--color-border);
-    background: var(--color-bg);
-    color: var(--color-text-muted);
+    border: 1px solid #9bc8d2;
+    background: #e8f6f8;
+    color: #075166;
     font-size: 0.6875rem;
     font-weight: 700;
   }
@@ -398,7 +459,7 @@ const headline = sponsor?.headline ?? sponsor?.name ?? '';
     font-weight: 700;
     font-size: 1.15rem;
     line-height: 1.35;
-    color: var(--color-accent);
+    color: var(--color-sponsor-cta);
     text-wrap: balance;
   }
 
@@ -421,8 +482,8 @@ const headline = sponsor?.headline ?? sponsor?.name ?? '';
   .sponsor-card__tags li {
     padding: 0.15em 0.55em;
     border-radius: var(--radius-tag, 6px);
-    background: var(--color-tint-green-bg, var(--color-accent-soft));
-    color: var(--color-text);
+    background: #fff0e5;
+    color: #873714;
     font-size: 0.6875rem;
     font-weight: 700;
   }
@@ -449,7 +510,7 @@ const headline = sponsor?.headline ?? sponsor?.name ?? '';
     min-height: 48px;
     padding: 0.4em 0.6em;
     border-radius: var(--radius-pill);
-    background: var(--color-accent);
+    background: var(--color-sponsor-cta);
     color: #fff;
     font-weight: 700;
     font-size: 0.875rem;
@@ -457,8 +518,8 @@ const headline = sponsor?.headline ?? sponsor?.name ?? '';
 
   .sponsor-card--photo:hover .sponsor-card__cta,
   .sponsor-card--empty:hover .sponsor-card__cta {
-    background: var(--color-accent-deep);
-    box-shadow: 0 2px 8px rgba(28, 46, 38, 0.35);
+    background: var(--color-sponsor-cta-hover);
+    box-shadow: 0 3px 10px rgba(6, 63, 77, 0.35);
   }
 
   .sponsor-card__cta-arrow {
