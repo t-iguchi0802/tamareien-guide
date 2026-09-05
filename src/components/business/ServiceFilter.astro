@@ -176,10 +176,8 @@ const businessFilterData = businesses.map((business) => ({
   data-filter-target={targetPath ?? ''}
 >
   <div class="service-filter__purpose">
-    <h2 id="service-filter-heading" class="service-filter__heading">
-      お墓について、何をご希望ですか？
-    </h2>
-    <p class="service-filter__hint">主な希望を1つ選ぶか、下の条件を直接選んでください。</p>
+    <h2 id="service-filter-heading" class="service-filter__heading">主な希望から選ぶ</h2>
+    <p class="service-filter__hint">近いものを1つ選ぶか、下の条件から絞り込んでください。</p>
     <div class="service-filter__purpose-grid">
       {
         PURPOSE_GROUPS.map((group) => (
@@ -234,9 +232,9 @@ const businessFilterData = businesses.map((business) => ({
 
   <div class="service-filter__conditions">
     <div>
-      <h3 class="service-filter__conditions-heading">条件を追加して絞り込む</h3>
+      <h3 class="service-filter__conditions-heading">条件を選択して絞り込む</h3>
       <p class="service-filter__conditions-hint">
-        よく使われる条件は、ここから直接選べます。複数選ぶと、すべてに対応する事業者を表示します。
+        希望する条件を選んでください。複数選ぶと、すべてに対応する事業者を表示します。
       </p>
     </div>
 
@@ -789,6 +787,10 @@ const businessFilterData = businesses.map((business) => ({
     grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: var(--space-4);
     padding-top: 0;
+  }
+
+  .service-filter__groups--featured .service-filter__checks {
+    grid-template-columns: 1fr;
   }
 
   /*
