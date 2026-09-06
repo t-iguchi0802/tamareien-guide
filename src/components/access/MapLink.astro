@@ -8,7 +8,7 @@ import '../../styles/tokens.css';
 import type { MapLinkProps } from '../../types/components';
 
 type Props = MapLinkProps;
-const { businessId, href, label } = Astro.props;
+const { businessId, businessName, href, label } = Astro.props;
 const displayLabel = label ?? '地図で見る';
 const pagePath = Astro.url.pathname;
 ---
@@ -17,6 +17,7 @@ const pagePath = Astro.url.pathname;
   class="map-link"
   data-event="business_map_click"
   data-business-id={businessId}
+  data-business-name={businessName}
   data-page-path={pagePath}
   href={href}
   target="_blank"

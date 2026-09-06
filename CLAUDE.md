@@ -219,9 +219,9 @@ type ServiceKey =
 GA4イベント契約（正本: `CLAUDE_CODE_HANDOFF.md` 7章、型: `src/types/analytics.ts`）:
 
 ```text
-business_outbound_click  { business_id, link_type, page_path }
-business_phone_click     { business_id, page_path }
-business_map_click       { business_id, page_path }
+business_outbound_click  { business_id, business_name, link_type, page_path }
+business_phone_click     { business_id, business_name, page_path }
+business_map_click       { business_id, business_name, page_path }
 comparison_filter_use    { filter_type, filter_value, page_path }
 official_procedure_click { authority, topic, page_path }
 correction_request_click { page_path }

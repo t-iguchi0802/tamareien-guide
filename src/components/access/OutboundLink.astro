@@ -10,7 +10,7 @@ import '../../styles/tokens.css';
 import type { OutboundLinkProps } from '../../types/components';
 
 type Props = OutboundLinkProps;
-const { businessId, linkType, href, label } = Astro.props;
+const { businessId, businessName, linkType, href, label } = Astro.props;
 
 const defaultLabelByType: Record<OutboundLinkProps['linkType'], string> = {
   official_site: '公式サイトを見る',
@@ -27,6 +27,7 @@ const pagePath = Astro.url.pathname;
   data-outbound-link
   data-event="business_outbound_click"
   data-business-id={businessId}
+  data-business-name={businessName}
   data-link-type={linkType}
   data-page-path={pagePath}
   href={href}

@@ -143,6 +143,7 @@ const headline = sponsor?.headline ?? sponsor?.name ?? '';
       class="sponsor-card sponsor-card--photo"
       data-sponsor-card
       data-sponsor-id={sponsor.id}
+      data-sponsor-name={sponsor.name}
       data-campaign-id={sponsor.campaignId}
       data-slot-position={position}
       data-page-category={pageCategory}
@@ -207,6 +208,7 @@ const headline = sponsor?.headline ?? sponsor?.name ?? '';
       class="sponsor-card sponsor-card--simple"
       data-sponsor-card
       data-sponsor-id={sponsor.id}
+      data-sponsor-name={sponsor.name}
       data-campaign-id={sponsor.campaignId}
       data-slot-position={position}
       data-page-category={pageCategory}
@@ -232,6 +234,7 @@ const headline = sponsor?.headline ?? sponsor?.name ?? '';
           rel="noopener sponsored"
           data-event="sponsor_click"
           data-sponsor-id={sponsor.id}
+          data-sponsor-name={sponsor.name}
           data-campaign-id={sponsor.campaignId}
           data-slot-position={position}
           data-page-category={pageCategory}

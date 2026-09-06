@@ -153,7 +153,11 @@ const showSeparateContact =
   <div class="business-card__contact-row">
     {
       business.contact.phone ? (
-        <PhoneLink businessId={business.id} phone={business.contact.phone} />
+        <PhoneLink
+          businessId={business.id}
+          businessName={business.name}
+          phone={business.contact.phone}
+        />
       ) : (
         <p class="business-card__unconfirmed-note">電話番号: {UNCONFIRMED_TEXT}</p>
       )
@@ -165,6 +169,7 @@ const showSeparateContact =
       primaryOutbound && (
         <OutboundLink
           businessId={business.id}
+          businessName={business.name}
           linkType={primaryOutbound.linkType}
           href={primaryOutbound.href}
           label={primaryOutbound.label}
@@ -172,7 +177,7 @@ const showSeparateContact =
       )
     }
     <span class="business-card__secondary-cta">
-      <MapLink businessId={business.id} href={mapHref} />
+      <MapLink businessId={business.id} businessName={business.name} href={mapHref} />
     </span>
   </footer>
 
@@ -213,6 +218,7 @@ const showSeparateContact =
           <p class="business-card__secondary-cta">
             <OutboundLink
               businessId={business.id}
+              businessName={business.name}
               linkType="contact"
               href={business.contact.contactUrl}
               label="問い合わせページを見る"
