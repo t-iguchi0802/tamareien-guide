@@ -127,18 +127,27 @@
  * - 「多磨霊園の公式お知らせ」（東京都公園協会等の公式発表、tama-news.ts）と
  *   「多磨霊園・周辺の読みもの」（独自の地域メディア・ブログ枠、news.json。
  *   旧名称「多磨霊園・周辺の新着記事」から改称）を、まとめて「新着情報エリア」
- *   として`<div id="latest-info">`で1つに包んだ。ヒーローの「新着情報」
- *   ボタンは`/#latest-info`でこのエリアの先頭へページ内スクロールする
- *   （どちらか一方が0件でも、もう一方の見出しへ確実にスクロールできる）。
+ *   として`<div id="latest-info">`で1つに包んだ。
  * - 「読みもの一覧を見る」（旧「新着記事一覧を見る」）のリンク先は
  *   引き続き`/news/`のまま変更していない。
+ *
+ * ヒーローの新着情報バー（2026-09-14再修正、サイト所有者判断）: ヒーロー内に
+ * 追加していた「新着情報」ボタン（`/#latest-info`へのページ内スクロール）は、
+ * ファーストビューだけでは何が新着なのか分からないという指摘を受け廃止した。
+ * 代わりに、ヒーロー直下（ファーストビューに収まる位置）へ、`tamaNewsItems`
+ * （公式お知らせ）と`newsArticles`（読みもの）を比較して**公開日が最も新しい
+ * 1件だけ**を表示する`.latest-info-bar`を追加した。読みものの場合は記事詳細
+ * ページへ、公式お知らせの場合は公式情報源（外部）へ直接リンクする（要件どおり、
+ * 下方の「多磨霊園の公式お知らせ」「多磨霊園・周辺の読みもの」セクション自体は
+ * 変更・削除していない）。「◯社の一覧を見る」は単独の主CTAに戻し、優先度を
+ * 下げていない。
  */
 import BaseLayout from '../layouts/BaseLayout.astro';
 import { ROUTES } from '../lib/routes';
 import { getBusinesses, getPublishedNewsArticles } from '../lib/data';
 import ServiceFilter from '../components/business/ServiceFilter.astro';
 import { getActiveTamaNewsItems } from './_lib/tama-news';
-import { formatJaDate } from './_lib/news-display';
+import { formatJaDate, formatShortJaDate } from './_lib/news-display';
 import NewsCard from './_partials/NewsCard.astro';
 
 const businesses = getBusinesses();
@@ -148,6 +157,50 @@ const tamaNewsItems = getActiveTamaNewsItems();
 // 地域メディア・ブログ枠（src/data/news.json、人が確認した記事のみ）。
 // 最大3件、公開日の新しい順（getPublishedNewsArticlesが既に降順ソート済み）。
 const newsArticles = getPublishedNewsArticles().slice(0, 3);
+
+/**
+ * ヒーロー直下の新着情報バー用データ（2026-09-14追加）。
+ * 「多磨霊園の公式お知らせ」（tamaNewsItems）と「多磨霊園・周辺の読みもの」
+ * （newsArticles）を公開日で比較し、最も新しい1件だけを選ぶ。
+ *
+ * - tamaNewsItemsは配列順が公開日の降順である保証がない
+ *   （tama-news.ts側は手動管理の配列のため）ため、ここで明示的に最大値を求める。
+ * - newsArticlesはgetPublishedNewsArticles()が既に公開日の降順で返すため、
+ *   先頭要素がそのまま最新の読みものになる。
+ * - 公開日が同日の場合は「読みもの」を優先する（独自記事の方が具体的な内容を
+ *   持つことが多いため。公式発表そのものは下の「多磨霊園の公式お知らせ」
+ *   セクションで引き続き確認できる）。
+ */
+type LatestInfoItem =
+  | { kind: 'reading'; title: string; publishedAt: string; href: string; slug: string }
+  | { kind: 'official'; title: string; publishedAt: string; href: string };
+
+const latestOfficialItem = tamaNewsItems.reduce<(typeof tamaNewsItems)[number] | null>(
+  (latest, item) => (!latest || item.publishedAt > latest.publishedAt ? item : latest),
+  null,
+);
+const latestReadingItem = newsArticles[0] ?? null;
+
+let latestInfo: LatestInfoItem | null = null;
+if (
+  latestReadingItem &&
+  (!latestOfficialItem || latestReadingItem.publishedAt >= latestOfficialItem.publishedAt)
+) {
+  latestInfo = {
+    kind: 'reading',
+    title: latestReadingItem.title,
+    publishedAt: latestReadingItem.publishedAt,
+    href: `/news/${latestReadingItem.slug}/`,
+    slug: latestReadingItem.slug,
+  };
+} else if (latestOfficialItem) {
+  latestInfo = {
+    kind: 'official',
+    title: latestOfficialItem.title,
+    publishedAt: latestOfficialItem.publishedAt,
+    href: latestOfficialItem.sourceUrl,
+  };
+}
 // title更新（2026-09-02、ナビゲーション・運営者表示・SEO/AIO監査対応
 // 「ページタイトルと検索意図」節）: 「多磨霊園のお墓・石材店を目的から探す」を
 // 前半に置き、内容（お墓・石材店を目的から探せること）をより明確にした。
@@ -167,20 +220,54 @@ const description =
         <p class="hero__lead">
           墓石を建てる、直す、墓じまい、清掃・管理。必要なことから相談先を探せます。
         </p>
-        <div class="hero__actions">
-          <a class="hero__cta" href={ROUTES.sekizaiten.path}>{businesses.length}社の一覧を見る</a>
-          <a
-            class="hero__cta hero__cta--secondary"
-            href="/#latest-info"
-            data-event="internal_guide_link_click"
-            data-destination="news_hero"
-          >
-            新着情報
-          </a>
-        </div>
+        <a class="hero__cta" href={ROUTES.sekizaiten.path}>{businesses.length}社の一覧を見る</a>
       </div>
       <p class="hero__image-credit">イメージ写真</p>
     </section>
+
+    {
+      /*
+       * ヒーロー直下の新着情報バー（2026-09-14追加）。ファーストビューに
+       * 収まる位置に置き、公式お知らせ・読みもののうち公開日が最も新しい
+       * 1件だけをコンパクトに表示する。0件（両方とも情報がない）場合は
+       * 何も表示しない（空の枠を作らない）。
+       */
+      latestInfo && latestInfo.kind === 'reading' && (
+        <a
+          class="latest-info-bar"
+          href={latestInfo.href}
+          data-event="internal_guide_link_click"
+          data-destination={`news_hero_bar:${latestInfo.slug}`}
+        >
+          <span class="latest-info-bar__label">新着情報</span>
+          <span class="latest-info-bar__date">{formatShortJaDate(latestInfo.publishedAt)}</span>
+          <span class="latest-info-bar__title">{latestInfo.title}</span>
+          <span class="latest-info-bar__arrow" aria-hidden="true">
+            →
+          </span>
+        </a>
+      )
+    }
+    {
+      latestInfo && latestInfo.kind === 'official' && (
+        <a
+          class="latest-info-bar"
+          href={latestInfo.href}
+          rel="noopener"
+          target="_blank"
+          data-event="official_procedure_click"
+          data-authority="tokyo_park_association"
+          data-topic="top_latest_info_bar"
+        >
+          <span class="latest-info-bar__label">新着情報</span>
+          <span class="latest-info-bar__date">{formatShortJaDate(latestInfo.publishedAt)}</span>
+          <span class="latest-info-bar__title">{latestInfo.title}</span>
+          <span class="latest-info-bar__arrow" aria-hidden="true">
+            →
+          </span>
+        </a>
+      )
+    }
   </Fragment>
 
   <Fragment slot="beforeSponsor">
@@ -408,24 +495,15 @@ const description =
     text-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
   }
 
-  /* 「〇社の一覧を見る」「新着情報」の2ボタンをまとめる行（2026-09-14追加）。
-     検索導線（一覧を見る）を最優先する方針は維持しつつ、その直下に
-     「新着情報」への導線を並べる。flex-wrapによりスマートフォン幅でも
-     両方が折り返して確実に見える・タップできる状態を保つ。 */
-  .hero__actions {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    justify-content: center;
-    gap: var(--space-3);
-    margin-top: var(--space-4);
-  }
-
+  /* 「〇社の一覧を見る」（2026-09-14、新着情報バー追加に伴い単独の主CTAへ
+     戻した。検索導線の優先度を下げないため、ボタンの見た目・margin-topは
+     変更していない）。 */
   .hero__cta {
     display: inline-flex;
     align-items: center;
     justify-content: center;
     min-height: var(--tap-target-min);
+    margin-top: var(--space-4);
     padding: 0.65em 1.4em;
     border-radius: var(--radius-pill);
     background: #fffdf8;
@@ -434,19 +512,76 @@ const description =
     text-decoration: none;
   }
 
-  /* 「新着情報」は検索導線（.hero__cta）より視覚的な優先度を一段落とした
-     控えめな縁取りピルにする（検索導線を最優先する方針を維持するため）。
-     背景を敷かず、既存の白文字・text-shadowをそのまま利用して
-     写真の上でも読めるコントラストを保つ。 */
-  .hero__cta--secondary {
-    background: transparent;
-    border: 1.5px solid #fffdf8;
-    color: #fffdf8;
-    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+  /* ヒーロー直下の新着情報バー（2026-09-14追加）。ヒーロー自体はフルブリード
+     （画面全幅、.page-shellの外）だが、このバーは`.site-main`と同じ960px幅の
+     中央寄せ列に揃える。`min()`でmax-widthに「画面幅 − 左右space-4」も
+     候補として渡し、960px未満の画面でも左右に最小限の余白を確保する
+     （固定pxのmargin-inline + auto centeringだけでは、画面幅が960pxより
+     狭いときに中央寄せが効かず左右の余白が付かないため）。 */
+  .latest-info-bar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-2) var(--space-3);
+    max-width: min(960px, calc(100% - var(--space-4) * 2));
+    margin: 0 auto var(--space-6);
+    padding: var(--space-3) var(--space-4);
+    min-height: var(--tap-target-min);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-card, 10px);
+    background: var(--color-surface);
+    color: var(--color-text);
+    text-decoration: none;
   }
 
-  .hero__cta--secondary:hover {
-    background: rgba(255, 253, 248, 0.15);
+  .latest-info-bar:hover {
+    border-color: var(--color-accent);
+    background: var(--color-accent-soft);
+  }
+
+  .latest-info-bar__label {
+    flex: none;
+    padding: 0.2em 0.7em;
+    border-radius: var(--radius-tag, 6px);
+    background: var(--color-accent);
+    color: #fffdf8;
+    font-weight: 700;
+    font-size: var(--font-size-caption, 0.875rem);
+  }
+
+  .latest-info-bar__date {
+    flex: none;
+    color: var(--color-text-muted);
+    font-weight: 700;
+    font-size: var(--font-size-caption, 0.875rem);
+  }
+
+  /* PC等の広い幅では1行に収め、長いタイトルは末尾を省略する。
+     767px以下では2行目へ折り返せるよう、nowrap/ellipsisを解除する
+     （要件「スマホでは1〜2行表示」に対応）。 */
+  .latest-info-bar__title {
+    flex: 1 1 auto;
+    min-width: 0;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    font-weight: 700;
+    color: var(--color-text);
+  }
+
+  @media (max-width: 767px) {
+    .latest-info-bar__title {
+      flex-basis: 100%;
+      white-space: normal;
+      overflow: visible;
+      text-overflow: unset;
+    }
+  }
+
+  .latest-info-bar__arrow {
+    flex: none;
+    color: var(--color-accent);
+    font-weight: 700;
   }
 
   .hero__image-credit {

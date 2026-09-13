@@ -37,3 +37,12 @@ export function formatJaDate(iso: string): string {
   const [y, m, d] = iso.split('-').map(Number);
   return `${y}年${m}月${d}日`;
 }
+
+/**
+ * "YYYY-MM-DD" を "M/D" へ整形する（ヒーロー直下の新着情報バー等、
+ * コンパクトな表示専用。年を省略するため、日付だけを強調したい場所限定で使う）。
+ */
+export function formatShortJaDate(iso: string): string {
+  const [, m, d] = iso.split('-').map(Number);
+  return `${m}/${d}`;
+}
