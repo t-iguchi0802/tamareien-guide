@@ -155,7 +155,17 @@ const description =
         <p class="hero__lead">
           墓石を建てる、直す、墓じまい、清掃・管理。必要なことから相談先を探せます。
         </p>
-        <a class="hero__cta" href={ROUTES.sekizaiten.path}>{businesses.length}社の一覧を見る</a>
+        <div class="hero__actions">
+          <a class="hero__cta" href={ROUTES.sekizaiten.path}>{businesses.length}社の一覧を見る</a>
+          <a
+            class="hero__cta hero__cta--secondary"
+            href={ROUTES.news.path}
+            data-event="internal_guide_link_click"
+            data-destination="news_hero"
+          >
+            新着情報
+          </a>
+        </div>
       </div>
       <p class="hero__image-credit">イメージ写真</p>
     </section>
@@ -371,18 +381,45 @@ const description =
     text-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
   }
 
+  /* 「〇社の一覧を見る」「新着情報」の2ボタンをまとめる行（2026-09-14追加）。
+     検索導線（一覧を見る）を最優先する方針は維持しつつ、その直下に
+     「新着情報」への導線を並べる。flex-wrapによりスマートフォン幅でも
+     両方が折り返して確実に見える・タップできる状態を保つ。 */
+  .hero__actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-3);
+    margin-top: var(--space-4);
+  }
+
   .hero__cta {
     display: inline-flex;
     align-items: center;
     justify-content: center;
     min-height: var(--tap-target-min);
-    margin-top: var(--space-4);
     padding: 0.65em 1.4em;
     border-radius: var(--radius-pill);
     background: #fffdf8;
     color: var(--color-accent-deep);
     font-weight: 700;
     text-decoration: none;
+  }
+
+  /* 「新着情報」は検索導線（.hero__cta）より視覚的な優先度を一段落とした
+     控えめな縁取りピルにする（検索導線を最優先する方針を維持するため）。
+     背景を敷かず、既存の白文字・text-shadowをそのまま利用して
+     写真の上でも読めるコントラストを保つ。 */
+  .hero__cta--secondary {
+    background: transparent;
+    border: 1.5px solid #fffdf8;
+    color: #fffdf8;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+  }
+
+  .hero__cta--secondary:hover {
+    background: rgba(255, 253, 248, 0.15);
   }
 
   .hero__image-credit {
