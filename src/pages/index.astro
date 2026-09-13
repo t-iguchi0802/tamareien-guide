@@ -159,7 +159,7 @@ const description =
           <a class="hero__cta" href={ROUTES.sekizaiten.path}>{businesses.length}社の一覧を見る</a>
           <a
             class="hero__cta hero__cta--secondary"
-            href={ROUTES.news.path}
+            href="/#latest-news"
             data-event="internal_guide_link_click"
             data-destination="news_hero"
           >
@@ -216,7 +216,7 @@ const description =
      * 空の枠・ダミー記事を表示せず、セクションごと出力しない。
      */
     newsArticles.length > 0 && (
-      <section aria-labelledby="local-news-heading" class="local-news">
+      <section id="latest-news" aria-labelledby="local-news-heading" class="local-news">
         <h2 id="local-news-heading">多磨霊園・周辺の新着記事</h2>
         <ul class="local-news__list">
           {newsArticles.map((article) => (
@@ -494,8 +494,13 @@ const description =
 
   /* 「多磨霊園・周辺の新着記事」（2026-09-13追加）。カード自体の見た目は
      _partials/NewsCard.astro側で持つため、ここでは一覧のグリッド配置と
-     「新着記事一覧を見る」リンクだけを担当する。 */
+     「新着記事一覧を見る」リンクだけを担当する。
+     2026-09-14追加: ヒーローの「新着情報」ボタンから`/#latest-news`で
+     このセクションへページ内スクロールする。現状ヘッダーは固定表示では
+     ないが、将来固定ヘッダーになった場合でも見出しが隠れないよう、
+     念のため`scroll-margin-top`を設定しておく。 */
   .local-news {
+    scroll-margin-top: var(--space-6);
     color: var(--color-text);
   }
 
