@@ -138,6 +138,24 @@ const {
 } = Astro.props;
 const sponsoredBusinessIdSet = new Set(sponsoredBusinessIds);
 
+/**
+ * 最初から見せる個別条件は各目的から2件ずつ（計6件）。
+ * 残りは明確な開閉ボタンの中に置き、同じチェックボックスを重複表示しない。
+ */
+const featuredServiceCount = 2;
+const featuredPurposeGroups = PURPOSE_GROUPS.map((group) => ({
+  ...group,
+  serviceKeys: group.serviceKeys.slice(0, featuredServiceCount),
+}));
+const additionalPurposeGroups = PURPOSE_GROUPS.map((group) => ({
+  ...group,
+  serviceKeys: group.serviceKeys.slice(featuredServiceCount),
+})).filter((group) => group.serviceKeys.length > 0);
+const additionalServiceCount = additionalPurposeGroups.reduce(
+  (count, group) => count + group.serviceKeys.length,
+  0,
+);
+
 /** クライアント側のAND判定用データ（confirmedなserviceKeyのみを持たせる）。 */
 const businessFilterData = businesses.map((business) => ({
   id: business.id,
@@ -158,12 +176,8 @@ const businessFilterData = businesses.map((business) => ({
   data-filter-target={targetPath ?? ''}
 >
   <div class="service-filter__purpose">
-    <h2 id="service-filter-heading" class="service-filter__heading">
-      お墓について、何をご希望ですか？
-    </h2>
-    <p class="service-filter__hint">
-      当てはまる内容を選ぶと、関連する条件が表示されます。あとから詳しい条件を追加できます。
-    </p>
+    <h2 id="service-filter-heading" class="service-filter__heading">主な希望から選ぶ</h2>
+    <p class="service-filter__hint">近いものを1つ選ぶか、下の条件から絞り込んでください。</p>
     <div class="service-filter__purpose-grid">
       {
         PURPOSE_GROUPS.map((group) => (
@@ -216,11 +230,17 @@ const businessFilterData = businesses.map((business) => ({
 
   <hr class="masonry-rule" />
 
-  <details class="service-filter__detail" open={openByDefault}>
-    <summary class="service-filter__detail-summary">さらに条件を選ぶ</summary>
-    <div class="service-filter__groups">
+  <div class="service-filter__conditions">
+    <div>
+      <h3 class="service-filter__conditions-heading">条件を選択して絞り込む</h3>
+      <p class="service-filter__conditions-hint">
+        希望する条件を選んでください。複数選ぶと、すべてに対応する事業者を表示します。
+      </p>
+    </div>
+
+    <div class="service-filter__groups service-filter__groups--featured">
       {
-        PURPOSE_GROUPS.map((group) => (
+        featuredPurposeGroups.map((group) => (
           <fieldset class="service-filter__group">
             <legend class="service-filter__group-legend">{group.heading}</legend>
             <div class="service-filter__checks">
@@ -235,7 +255,31 @@ const businessFilterData = businesses.map((business) => ({
         ))
       }
     </div>
-  </details>
+
+    <details class="service-filter__detail" open={openByDefault}>
+      <summary class="service-filter__detail-summary">
+        <span>残りの条件を見る</span>
+        <span class="service-filter__detail-count">（{additionalServiceCount}項目）</span>
+      </summary>
+      <div class="service-filter__groups">
+        {
+          additionalPurposeGroups.map((group) => (
+            <fieldset class="service-filter__group">
+              <legend class="service-filter__group-legend">{group.heading}</legend>
+              <div class="service-filter__checks">
+                {group.serviceKeys.map((key) => (
+                  <label class="service-check" data-service-check>
+                    <input type="checkbox" name="service" value={key} data-filter-checkbox />
+                    <span class="service-check__label">{SERVICE_LABELS[key]}</span>
+                  </label>
+                ))}
+              </div>
+            </fieldset>
+          ))
+        }
+      </div>
+    </details>
+  </div>
 
   <div class="service-filter__result">
     <p class="service-filter__result-text" aria-live="polite">
@@ -662,19 +706,73 @@ const businessFilterData = businesses.map((business) => ({
     transition: transform 0.15s ease;
   }
 
+  .service-filter__conditions {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+  }
+
+  .service-filter__conditions-heading {
+    margin: 0 0 var(--space-2);
+    font-family: var(--font-family-heading);
+    font-size: 1.2rem;
+  }
+
+  .service-filter__conditions-hint {
+    margin: 0;
+    color: var(--color-stone-text);
+    font-size: var(--font-size-label);
+  }
+
   .service-filter__detail {
     border: none;
   }
 
   .service-filter__detail-summary {
     cursor: pointer;
-    font-family: var(--font-family-heading);
-    font-weight: 700;
-    font-size: 1.1rem;
-    padding: var(--space-2) 0;
+    width: fit-content;
     min-height: var(--tap-target-min);
     display: flex;
     align-items: center;
+    gap: 0.2em;
+    padding: 0.65em 1em;
+    border: 1px solid var(--color-accent);
+    border-radius: var(--radius-pill);
+    background: var(--color-accent-soft);
+    color: var(--color-accent-deep);
+    font-family: var(--font-family-heading);
+    font-weight: 700;
+    font-size: 1rem;
+    list-style: none;
+  }
+
+  .service-filter__detail-summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .service-filter__detail-summary::after {
+    content: '＋';
+    margin-left: var(--space-2);
+    font-size: 1.15em;
+    line-height: 1;
+  }
+
+  .service-filter__detail[open] .service-filter__detail-summary::after {
+    content: '−';
+  }
+
+  .service-filter__detail-summary:hover {
+    background: var(--color-surface);
+  }
+
+  .service-filter__detail-summary:focus-visible {
+    outline: 3px solid var(--color-accent);
+    outline-offset: 2px;
+  }
+
+  .service-filter__detail-count {
+    font-family: var(--font-family-sans, sans-serif);
+    font-weight: 400;
   }
 
   .service-filter__groups {
@@ -682,6 +780,17 @@ const businessFilterData = businesses.map((business) => ({
     flex-direction: column;
     gap: var(--space-5, 1.25rem);
     padding-top: var(--space-3);
+  }
+
+  .service-filter__groups--featured {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--space-4);
+    padding-top: 0;
+  }
+
+  .service-filter__groups--featured .service-filter__checks {
+    grid-template-columns: 1fr;
   }
 
   /*
@@ -842,6 +951,16 @@ const businessFilterData = businesses.map((business) => ({
   @media (max-width: 767px) {
     .service-filter {
       gap: var(--space-4);
+    }
+
+    .service-filter__groups--featured {
+      grid-template-columns: 1fr;
+      gap: var(--space-3);
+    }
+
+    .service-filter__detail-summary {
+      width: 100%;
+      justify-content: center;
     }
 
     .service-filter__purpose-grid {

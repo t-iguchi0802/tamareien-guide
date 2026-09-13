@@ -568,13 +568,15 @@ const hasBeforeSponsor = Astro.slots.has('beforeSponsor');
               if (!entry.isIntersecting) return;
               const el = entry.target as HTMLElement;
               const sponsorId = el.getAttribute('data-sponsor-id');
+              const sponsorName = el.getAttribute('data-sponsor-name');
               const campaignId = el.getAttribute('data-campaign-id');
               const slotPosition = el.getAttribute('data-slot-position') as SponsorSlotPosition | null;
               const pageCategory = el.getAttribute('data-page-category');
-              if (!sponsorId || !campaignId || !slotPosition || !pageCategory || seen.has(sponsorId)) return;
+              if (!sponsorId || !sponsorName || !campaignId || !slotPosition || !pageCategory || seen.has(sponsorId)) return;
               seen.add(sponsorId);
               trackSponsorImpression({
                 sponsor_id: sponsorId,
+                sponsor_name: sponsorName,
                 campaign_id: campaignId,
                 page_path: pagePath,
                 slot_position: slotPosition,

@@ -71,17 +71,20 @@ export type OutboundLinkType = 'official_site' | 'contact' | 'directory';
 
 export interface BusinessOutboundClickParams {
   business_id: string;
+  business_name: string;
   link_type: OutboundLinkType;
   page_path: string;
 }
 
 export interface BusinessPhoneClickParams {
   business_id: string;
+  business_name: string;
   page_path: string;
 }
 
 export interface BusinessMapClickParams {
   business_id: string;
+  business_name: string;
   page_path: string;
 }
 
@@ -126,6 +129,7 @@ export type SponsorSlotPosition = 'left-1' | 'left-2' | 'right-1' | 'right-2';
 /** スポンサー枠がビューポート内に表示されたとき（1枠につき1ページで1回）。 */
 export interface SponsorImpressionParams {
   sponsor_id: string;
+  sponsor_name: string;
   campaign_id: string;
   page_path: string;
   slot_position: SponsorSlotPosition;
@@ -135,6 +139,7 @@ export interface SponsorImpressionParams {
 /** スポンサー枠の外部リンク（広告主サイト）のクリック。 */
 export interface SponsorClickParams {
   sponsor_id: string;
+  sponsor_name: string;
   campaign_id: string;
   page_path: string;
   slot_position: SponsorSlotPosition;

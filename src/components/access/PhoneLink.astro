@@ -10,7 +10,7 @@ import '../../styles/tokens.css';
 import type { PhoneLinkProps } from '../../types/components';
 
 type Props = PhoneLinkProps;
-const { businessId, phone } = Astro.props;
+const { businessId, businessName, phone } = Astro.props;
 
 const telHref = `tel:${phone.replace(/[^0-9+]/g, '')}`;
 const pagePath = Astro.url.pathname;
@@ -20,6 +20,7 @@ const pagePath = Astro.url.pathname;
   class="phone-link"
   data-event="business_phone_click"
   data-business-id={businessId}
+  data-business-name={businessName}
   data-page-path={pagePath}
   href={telHref}
 >

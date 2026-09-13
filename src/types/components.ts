@@ -30,6 +30,7 @@ export interface VerificationBadgeProps {
 
 export interface OutboundLinkProps {
   businessId: string;
+  businessName: string;
   linkType: OutboundLinkType;
   href: string;
   label?: string;
@@ -37,12 +38,14 @@ export interface OutboundLinkProps {
 
 export interface PhoneLinkProps {
   businessId: string;
+  businessName: string;
   /** 電話番号が未確認の場合はこのコンポーネントを描画しない（呼び出し側で判定）。 */
   phone: string;
 }
 
 export interface MapLinkProps {
   businessId: string;
+  businessName: string;
   href: string;
   label?: string;
 }

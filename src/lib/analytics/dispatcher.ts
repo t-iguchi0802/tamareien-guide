@@ -98,12 +98,14 @@ function dispatchFromElement(el: Element): void {
   switch (eventName) {
     case 'business_outbound_click': {
       const businessId = el.getAttribute('data-business-id');
+      const businessName = el.getAttribute('data-business-name');
       const linkTypeRaw = el.getAttribute('data-link-type');
-      if (!businessId || !isOutboundLinkType(linkTypeRaw)) {
+      if (!businessId || !businessName || !isOutboundLinkType(linkTypeRaw)) {
         return;
       }
       trackBusinessOutboundClick({
         business_id: businessId,
+        business_name: businessName,
         link_type: linkTypeRaw,
         page_path: pagePath,
       });
@@ -111,18 +113,28 @@ function dispatchFromElement(el: Element): void {
     }
     case 'business_phone_click': {
       const businessId = el.getAttribute('data-business-id');
-      if (!businessId) {
+      const businessName = el.getAttribute('data-business-name');
+      if (!businessId || !businessName) {
         return;
       }
-      trackBusinessPhoneClick({ business_id: businessId, page_path: pagePath });
+      trackBusinessPhoneClick({
+        business_id: businessId,
+        business_name: businessName,
+        page_path: pagePath,
+      });
       return;
     }
     case 'business_map_click': {
       const businessId = el.getAttribute('data-business-id');
-      if (!businessId) {
+      const businessName = el.getAttribute('data-business-name');
+      if (!businessId || !businessName) {
         return;
       }
-      trackBusinessMapClick({ business_id: businessId, page_path: pagePath });
+      trackBusinessMapClick({
+        business_id: businessId,
+        business_name: businessName,
+        page_path: pagePath,
+      });
       return;
     }
     case 'comparison_filter_use': {
@@ -153,14 +165,16 @@ function dispatchFromElement(el: Element): void {
     }
     case 'sponsor_click': {
       const sponsorId = el.getAttribute('data-sponsor-id');
+      const sponsorName = el.getAttribute('data-sponsor-name');
       const campaignId = el.getAttribute('data-campaign-id');
       const slotPosition = el.getAttribute('data-slot-position') as SponsorSlotPosition | null;
       const pageCategory = el.getAttribute('data-page-category');
-      if (!sponsorId || !campaignId || !slotPosition || !pageCategory) {
+      if (!sponsorId || !sponsorName || !campaignId || !slotPosition || !pageCategory) {
         return;
       }
       trackSponsorClick({
         sponsor_id: sponsorId,
+        sponsor_name: sponsorName,
         campaign_id: campaignId,
         page_path: pagePath,
         slot_position: slotPosition,

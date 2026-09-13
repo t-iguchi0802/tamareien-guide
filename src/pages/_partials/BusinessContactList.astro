@@ -39,18 +39,27 @@ const UNCONFIRMED_PHONE_TEXT = '電話番号: 公開情報では未確認';
           <ul class="business-contact-list__actions">
             <li>
               {business.contact.phone ? (
-                <PhoneLink businessId={business.id} phone={business.contact.phone} />
+                <PhoneLink
+                  businessId={business.id}
+                  businessName={business.name}
+                  phone={business.contact.phone}
+                />
               ) : (
                 <span class="business-contact-list__unconfirmed">{UNCONFIRMED_PHONE_TEXT}</span>
               )}
             </li>
             <li>
-              <MapLink businessId={business.id} href={buildMapSearchUrl(business)} />
+              <MapLink
+                businessId={business.id}
+                businessName={business.name}
+                href={buildMapSearchUrl(business)}
+              />
             </li>
             {business.contact.websiteUrl ? (
               <li>
                 <OutboundLink
                   businessId={business.id}
+                  businessName={business.name}
                   linkType="official_site"
                   href={business.contact.websiteUrl}
                 />
@@ -60,6 +69,7 @@ const UNCONFIRMED_PHONE_TEXT = '電話番号: 公開情報では未確認';
                 <li>
                   <OutboundLink
                     businessId={business.id}
+                    businessName={business.name}
                     linkType="directory"
                     href={business.contact.directoryUrl}
                   />
