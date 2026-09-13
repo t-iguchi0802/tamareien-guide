@@ -42,12 +42,15 @@ export const ROUTES = {
     description: '墓じまいと改葬の違い｜多磨霊園で手続きを始める前に',
   },
 
-  // ニュース・記事掲載機能（2026-09-13追加）。TOPの「多磨霊園の公式お知らせ」
-  // （src/pages/_lib/tama-news.ts、東京都公園協会の公式発表のみ）とは別枠の、
-  // 記事一覧・詳細ページ。個別記事（/news/[slug]/）はslugごとの動的ルートの
-  // ため、単一のURLを持つROUTESには含めない（一覧・詳細それぞれの生成先は
-  // src/pages/sitemap.xml.ts側でgetPublishedNewsArticles()から個別に追加する）。
-  news: { path: '/news/', description: '多磨霊園・周辺の新着記事一覧' },
+  // ニュース・記事掲載機能（2026-09-13追加、2026-09-14に名称整理）。
+  // TOPの「多磨霊園の公式お知らせ」（src/pages/_lib/tama-news.ts、東京都公園
+  // 協会の公式発表のみ）とは別枠の、「周辺の読みもの」（独自の地域メディア・
+  // ブログ枠）の一覧・詳細ページ。両者の役割分担はCLAUDE.md2章「公式情報と
+  // 周辺の読みものの分離」を正とする。個別記事（/news/[slug]/）はslugごとの
+  // 動的ルートのため、単一のURLを持つROUTESには含めない（一覧・詳細それぞれの
+  // 生成先はsrc/pages/sitemap.xml.ts側でgetPublishedNewsArticles()から
+  // 個別に追加する）。URL（/news/）自体は既存リンクを維持するため変更しない。
+  news: { path: '/news/', description: '多磨霊園・周辺の読みもの一覧' },
 } as const satisfies Record<string, SiteRoute>;
 
 export type RouteKey = keyof typeof ROUTES;

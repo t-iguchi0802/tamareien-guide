@@ -1,8 +1,12 @@
 ---
 /**
- * 「多磨霊園・周辺の新着記事」個別記事ページ。
+ * 「多磨霊園・周辺の読みもの」個別記事ページ。
  * 正本: CLAUDE_CODE_HANDOFF.md追加要件（ニュース・記事掲載機能） /
  * src/lib/routes.ts ROUTES.news（一覧の親、詳細はslugごとの動的ルート）。
+ *
+ * 独自の地域メディア・ブログ枠であり、東京都公園協会等の公式発表（TOPの
+ * 「多磨霊園の公式お知らせ」）とは別枠（CLAUDE.md2章「公式情報と周辺の
+ * 読みものの分離」）。
  *
  * `output: 'static'`のため、getStaticPaths()が返すslug（＝
  * getPublishedNewsArticles()で公開対象と判定された記事）だけが実際の
@@ -37,7 +41,7 @@ const path = `/news/${article.slug}/`;
 const description = article.summary
   ? article.summary
   : truncateDescription(article.body[0] ?? article.title);
-const pageTitle = `${article.title}｜多磨霊園・周辺の新着記事｜多磨霊園 お墓ガイド`;
+const pageTitle = `${article.title}｜多磨霊園・周辺の読みもの｜多磨霊園 お墓ガイド`;
 
 const articleJsonLd = buildArticleJsonLd({
   path,
@@ -56,7 +60,7 @@ const articleJsonLd = buildArticleJsonLd({
 >
   <article class="article">
     <p class="article__eyebrow">
-      <a href={ROUTES.news.path}>多磨霊園・周辺の新着記事</a> ／ {
+      <a href={ROUTES.news.path}>多磨霊園・周辺の読みもの</a> ／ {
         NEWS_CATEGORY_LABELS[article.category]
       }
     </p>
@@ -87,7 +91,7 @@ const articleJsonLd = buildArticleJsonLd({
       )
     }
 
-    <p><a href={ROUTES.news.path}>新着記事一覧に戻る</a></p>
+    <p><a href={ROUTES.news.path}>読みもの一覧に戻る</a></p>
     <p><a href={ROUTES.about.path}>誤りに気づいた場合の訂正窓口はこちら</a></p>
   </article>
 </BaseLayout>

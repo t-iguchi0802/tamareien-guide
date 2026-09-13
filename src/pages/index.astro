@@ -121,6 +121,17 @@
  *   画面上のH1とは独立させた。descriptionもTOP専用の文言にした。
  * - ヒーローのPC側サイズ（.hero、min-height）・スポンサーとの位置関係
  *   （pageTopスロット→page-shell外）は変更していない。
+ *
+ * 公式情報と周辺の読みものの分離（2026-09-14、サイト所有者判断による恒久
+ * ルール。詳細はCLAUDE.md2章「公式情報と周辺の読みものの分離」）:
+ * - 「多磨霊園の公式お知らせ」（東京都公園協会等の公式発表、tama-news.ts）と
+ *   「多磨霊園・周辺の読みもの」（独自の地域メディア・ブログ枠、news.json。
+ *   旧名称「多磨霊園・周辺の新着記事」から改称）を、まとめて「新着情報エリア」
+ *   として`<div id="latest-info">`で1つに包んだ。ヒーローの「新着情報」
+ *   ボタンは`/#latest-info`でこのエリアの先頭へページ内スクロールする
+ *   （どちらか一方が0件でも、もう一方の見出しへ確実にスクロールできる）。
+ * - 「読みもの一覧を見る」（旧「新着記事一覧を見る」）のリンク先は
+ *   引き続き`/news/`のまま変更していない。
  */
 import BaseLayout from '../layouts/BaseLayout.astro';
 import { ROUTES } from '../lib/routes';
@@ -132,8 +143,9 @@ import NewsCard from './_partials/NewsCard.astro';
 
 const businesses = getBusinesses();
 const tamaNewsItems = getActiveTamaNewsItems();
-// ニュース・記事掲載機能（2026-09-13追加）。東京都公園協会の公式お知らせ
-// （上のtamaNewsItems）とは別枠の、人が確認した記事案（src/data/news.json）。
+// 「多磨霊園・周辺の読みもの」（2026-09-13追加、2026-09-14に名称整理）。
+// 東京都公園協会の公式お知らせ（上のtamaNewsItems）とは別枠の、独自の
+// 地域メディア・ブログ枠（src/data/news.json、人が確認した記事のみ）。
 // 最大3件、公開日の新しい順（getPublishedNewsArticlesが既に降順ソート済み）。
 const newsArticles = getPublishedNewsArticles().slice(0, 3);
 // title更新（2026-09-02、ナビゲーション・運営者表示・SEO/AIO監査対応
@@ -159,7 +171,7 @@ const description =
           <a class="hero__cta" href={ROUTES.sekizaiten.path}>{businesses.length}社の一覧を見る</a>
           <a
             class="hero__cta hero__cta--secondary"
-            href="/#latest-news"
+            href="/#latest-info"
             data-event="internal_guide_link_click"
             data-destination="news_hero"
           >
@@ -178,55 +190,70 @@ const description =
   <hr class="masonry-rule" />
 
   {
-    tamaNewsItems.length > 0 && (
-      <section aria-labelledby="tama-news-heading" class="tama-news">
-        <h2 id="tama-news-heading">多磨霊園の公式お知らせ</h2>
-        <ul class="tama-news__list">
-          {tamaNewsItems.map((item) => (
-            <li class="tama-news__item">
-              <a
-                class="tama-news__link"
-                href={item.sourceUrl}
-                rel="noopener"
-                target="_blank"
-                data-event="official_procedure_click"
-                data-authority="tokyo_park_association"
-                data-topic="top_tama_news"
-              >
-                {item.title}
-              </a>
-              <p class="tama-news__meta">
-                {item.sourceName}（公開日: {formatJaDate(item.publishedAt)}）
-              </p>
-            </li>
-          ))}
-        </ul>
-      </section>
-    )
-  }
-
-  <hr class="masonry-rule" />
-
-  {
     /*
-     * 「多磨霊園・周辺の新着記事」（2026-09-13追加）。上の「多磨霊園の公式お知らせ」
-     * （東京都公園協会の公式発表のみ）とは別枠で、人が確認した記事案
-     * （src/data/news.json、getPublishedNewsArticles()）を最大3件表示する。
-     * CLAUDE_CODE_HANDOFF.md追加要件どおり、記事が1件もない場合は
-     * 空の枠・ダミー記事を表示せず、セクションごと出力しない。
+     * 「新着情報エリア」（2026-09-14、公式情報と周辺の読みものの分離に伴い
+     * 新設。詳細はCLAUDE.md2章「公式情報と周辺の読みものの分離」）。
+     * 性質の異なる次の2つを、まとめて1つのページ内スクロール先にする。
+     * - 「多磨霊園の公式お知らせ」: 東京都公園協会等の公式発表のみ
+     *   （tama-news.ts、getActiveTamaNewsItems()）。
+     * - 「多磨霊園・周辺の読みもの」: 独自の地域メディア・ブログ枠
+     *   （news.json、getPublishedNewsArticles()）。旧名称
+     *   「多磨霊園・周辺の新着記事」から改称した（公式発表と混同されない
+     *   表現にするため）。
+     * ヒーローの「新着情報」ボタンは`/#latest-info`（このdivの先頭）へ
+     * スクロールする。どちらか一方が0件でも、もう一方の見出しへ確実に
+     * 到達できるよう、個々のsectionではなくこのdiv自体にidを持たせている。
      */
-    newsArticles.length > 0 && (
-      <section id="latest-news" aria-labelledby="local-news-heading" class="local-news">
-        <h2 id="local-news-heading">多磨霊園・周辺の新着記事</h2>
-        <ul class="local-news__list">
-          {newsArticles.map((article) => (
-            <NewsCard article={article} />
-          ))}
-        </ul>
-        <p class="local-news__more">
-          <a href={ROUTES.news.path}>新着記事一覧を見る</a>
-        </p>
-      </section>
+    (tamaNewsItems.length > 0 || newsArticles.length > 0) && (
+      <div id="latest-info" class="latest-info">
+        {tamaNewsItems.length > 0 && (
+          <section aria-labelledby="tama-news-heading" class="tama-news">
+            <h2 id="tama-news-heading">多磨霊園の公式お知らせ</h2>
+            <ul class="tama-news__list">
+              {tamaNewsItems.map((item) => (
+                <li class="tama-news__item">
+                  <a
+                    class="tama-news__link"
+                    href={item.sourceUrl}
+                    rel="noopener"
+                    target="_blank"
+                    data-event="official_procedure_click"
+                    data-authority="tokyo_park_association"
+                    data-topic="top_tama_news"
+                  >
+                    {item.title}
+                  </a>
+                  <p class="tama-news__meta">
+                    {item.sourceName}（公開日: {formatJaDate(item.publishedAt)}）
+                  </p>
+                </li>
+              ))}
+            </ul>
+          </section>
+        )}
+
+        {tamaNewsItems.length > 0 && newsArticles.length > 0 && <hr class="masonry-rule" />}
+
+        {
+          /*
+           * 記事が1件もない場合は、空の枠・ダミー記事を表示せず、
+           * セクションごと出力しない（CLAUDE_CODE_HANDOFF.md追加要件）。
+           */
+          newsArticles.length > 0 && (
+            <section aria-labelledby="local-news-heading" class="local-news">
+              <h2 id="local-news-heading">多磨霊園・周辺の読みもの</h2>
+              <ul class="local-news__list">
+                {newsArticles.map((article) => (
+                  <NewsCard article={article} />
+                ))}
+              </ul>
+              <p class="local-news__more">
+                <a href={ROUTES.news.path}>読みもの一覧を見る</a>
+              </p>
+            </section>
+          )
+        }
+      </div>
     )
   }
 
@@ -492,15 +519,20 @@ const description =
     font-size: var(--font-size-caption, 0.875rem);
   }
 
-  /* 「多磨霊園・周辺の新着記事」（2026-09-13追加）。カード自体の見た目は
-     _partials/NewsCard.astro側で持つため、ここでは一覧のグリッド配置と
-     「新着記事一覧を見る」リンクだけを担当する。
-     2026-09-14追加: ヒーローの「新着情報」ボタンから`/#latest-news`で
-     このセクションへページ内スクロールする。現状ヘッダーは固定表示では
-     ないが、将来固定ヘッダーになった場合でも見出しが隠れないよう、
-     念のため`scroll-margin-top`を設定しておく。 */
-  .local-news {
+  /* 「新着情報エリア」（2026-09-14追加）。「多磨霊園の公式お知らせ」と
+     「多磨霊園・周辺の読みもの」をまとめて包む親要素。ヒーローの
+     「新着情報」ボタンから`/#latest-info`でここへページ内スクロールする。
+     現状ヘッダーは固定表示ではないが、将来固定ヘッダーになった場合でも
+     見出しが隠れないよう、念のため`scroll-margin-top`を設定しておく。 */
+  .latest-info {
     scroll-margin-top: var(--space-6);
+  }
+
+  /* 「多磨霊園・周辺の読みもの」（2026-09-13追加、2026-09-14に
+     「多磨霊園・周辺の新着記事」から改称。公式発表との混同を避けるため）。
+     カード自体の見た目は_partials/NewsCard.astro側で持つため、ここでは
+     一覧のグリッド配置と「読みもの一覧を見る」リンクだけを担当する。 */
+  .local-news {
     color: var(--color-text);
   }
 
