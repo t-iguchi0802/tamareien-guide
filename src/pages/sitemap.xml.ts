@@ -17,9 +17,14 @@
 import type { APIRoute } from 'astro';
 import { ROUTES } from '../lib/routes';
 import { buildCanonicalUrl } from '../lib/seo';
+import { getPublishedNewsArticles } from '../data/news';
 
 export const GET: APIRoute = () => {
-  const urls = Object.values(ROUTES).map((route) => buildCanonicalUrl(route.path));
+  const staticUrls = Object.values(ROUTES).map((route) => buildCanonicalUrl(route.path));
+  const articleUrls = getPublishedNewsArticles().map((article) =>
+    buildCanonicalUrl(`${ROUTES.news.path}${article.slug}/`),
+  );
+  const urls = [...staticUrls, ...articleUrls];
 
   const body = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">

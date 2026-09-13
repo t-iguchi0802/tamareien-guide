@@ -44,6 +44,7 @@ export const PRIMARY_NAV: PrimaryNavEntry[] = [
     label: '多磨霊園を知る',
     id: 'nav-dropdown-guide',
     items: [
+      { label: '多磨霊園・周辺の新着記事', path: ROUTES.news.path },
       { label: '多磨霊園ガイド一覧', path: ROUTES.guide.path },
       { label: '多磨霊園の歴史', path: ROUTES.guideHistory.path },
       { label: '多磨霊園に眠る著名人', path: ROUTES.guideFamousGraves.path },
@@ -86,6 +87,7 @@ export const FOOTER_NAV_GROUPS: FooterNavGroup[] = [
   {
     label: 'ガイド',
     items: [
+      { label: '多磨霊園・周辺の新着記事', path: ROUTES.news.path },
       { label: '多磨霊園を知る', path: ROUTES.guide.path },
       { label: '行き方・園内案内', path: ROUTES.access.path },
       { label: '墓じまい・手続き総合案内', path: ROUTES.guideProcedures.path },

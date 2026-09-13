@@ -127,9 +127,11 @@ import { ROUTES } from '../lib/routes';
 import { getBusinesses } from '../lib/data';
 import ServiceFilter from '../components/business/ServiceFilter.astro';
 import { getActiveTamaNewsItems } from './_lib/tama-news';
+import { getRecentNewsArticles } from '../data/news';
 
 const businesses = getBusinesses();
 const tamaNewsItems = getActiveTamaNewsItems();
+const siteNewsItems = getRecentNewsArticles();
 
 function formatJaDate(iso: string): string {
   const [y, m, d] = iso.split('-').map(Number);
@@ -169,7 +171,7 @@ const description =
   {
     tamaNewsItems.length > 0 && (
       <section aria-labelledby="tama-news-heading" class="tama-news">
-        <h2 id="tama-news-heading">多磨霊園に関する最新情報</h2>
+        <h2 id="tama-news-heading">多磨霊園の公式お知らせ</h2>
         <ul class="tama-news__list">
           {tamaNewsItems.map((item) => (
             <li class="tama-news__item">
@@ -191,6 +193,33 @@ const description =
           ))}
         </ul>
       </section>
+    )
+  }
+
+  {
+    siteNewsItems.length > 0 && (
+      <>
+        <hr class="masonry-rule" />
+        <section aria-labelledby="site-news-heading" class="site-news">
+          <div class="site-news__heading-row">
+            <h2 id="site-news-heading">多磨霊園・周辺の新着記事</h2>
+            <a href={ROUTES.news.path}>記事一覧を見る</a>
+          </div>
+          <ul class="site-news__list">
+            {siteNewsItems.map((article) => (
+              <li class="site-news__item">
+                <a class="site-news__link" href={`${ROUTES.news.path}${article.slug}/`}>
+                  {article.title}
+                </a>
+                <p class="site-news__meta">
+                  {article.category} ／ 公開日: {formatJaDate(article.publishedAt)}
+                </p>
+                <p class="site-news__summary">{article.summary}</p>
+              </li>
+            ))}
+          </ul>
+        </section>
+      </>
     )
   }
 
@@ -427,6 +456,78 @@ const description =
     margin: var(--space-2) 0 0;
     color: var(--color-text-muted);
     font-size: var(--font-size-caption, 0.875rem);
+  }
+
+  .site-news__heading-row {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--space-3);
+    margin-bottom: var(--space-4);
+  }
+
+  .site-news__heading-row h2 {
+    margin: 0;
+    font-family: var(--font-family-heading);
+  }
+
+  .site-news__heading-row > a {
+    flex: none;
+    color: var(--color-accent);
+    font-weight: 700;
+  }
+
+  .site-news__list {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--space-3);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .site-news__item {
+    padding: var(--space-4);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-card, 10px);
+    background: var(--color-surface);
+  }
+
+  .site-news__link {
+    color: var(--color-accent);
+    font-weight: 700;
+    line-height: 1.5;
+    text-decoration: none;
+  }
+
+  .site-news__link:hover {
+    text-decoration: underline;
+  }
+
+  .site-news__meta,
+  .site-news__summary {
+    margin: var(--space-2) 0 0;
+  }
+
+  .site-news__meta {
+    color: var(--color-text-muted);
+    font-size: var(--font-size-caption, 0.875rem);
+  }
+
+  .site-news__summary {
+    color: var(--color-stone-text);
+    font-size: var(--font-size-label);
+  }
+
+  @media (max-width: 767px) {
+    .site-news__heading-row {
+      align-items: flex-start;
+      flex-direction: column;
+    }
+
+    .site-news__list {
+      grid-template-columns: 1fr;
+    }
   }
 
   /* --- 「当サイトについて」。ServiceFilterはBaseLayout.astroの

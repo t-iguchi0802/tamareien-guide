@@ -1,0 +1,115 @@
+---
+import '../../styles/guide-article.css';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { ROUTES } from '../../lib/routes';
+import { buildArticleJsonLd } from '../../lib/seo';
+import { getPublishedNewsArticles, type NewsArticle } from '../../data/news';
+
+export function getStaticPaths() {
+  return getPublishedNewsArticles().map((article) => ({
+    params: { slug: article.slug },
+    props: { article },
+  }));
+}
+
+interface Props {
+  article: NewsArticle;
+}
+
+const { article } = Astro.props;
+const articlePath = `${ROUTES.news.path}${article.slug}/`;
+const articleJsonLd = buildArticleJsonLd({
+  path: articlePath,
+  headline: article.title,
+  description: article.description,
+  datePublished: article.publishedAt,
+  dateModified: article.updatedAt,
+});
+
+function formatJaDate(iso: string): string {
+  const [year, month, day] = iso.split('-').map(Number);
+  return `${year}年${month}月${day}日`;
+}
+---
+
+<BaseLayout
+  title={`${article.title}｜多磨霊園 お墓ガイド`}
+  description={article.description}
+  ogType="article"
+  breadcrumbs={[
+    { name: 'トップ', path: ROUTES.top.path },
+    { name: '新着記事', path: ROUTES.news.path },
+    { name: article.title, path: articlePath },
+  ]}
+  extraJsonLd={[articleJsonLd]}
+>
+  <article class="article">
+    <p class="article__eyebrow">
+      <a href={ROUTES.news.path}>多磨霊園・周辺の新着記事</a> ／ {article.category}
+    </p>
+    <h1>{article.title}</h1>
+    <p class="article__lead">{article.summary}</p>
+    <p class="article__meta">
+      公開日：{formatJaDate(article.publishedAt)}
+      {
+        article.updatedAt !== article.publishedAt &&
+          ` ／ 更新日：${formatJaDate(article.updatedAt)}`
+      }
+    </p>
+
+    {
+      article.sections.map((section, index) => (
+        <section aria-labelledby={`news-section-${index}`}>
+          <h2 id={`news-section-${index}`}>{section.heading}</h2>
+          {section.paragraphs.map((paragraph) => (
+            <p>{paragraph}</p>
+          ))}
+          {section.bullets && (
+            <ul>
+              {section.bullets.map((bullet) => (
+                <li>{bullet}</li>
+              ))}
+            </ul>
+          )}
+        </section>
+      ))
+    }
+
+    <section aria-labelledby="news-sources-heading">
+      <h2 id="news-sources-heading">情報源・確認日</h2>
+      <ul class="article__sources">
+        {
+          article.sources.map((source) => (
+            <li>
+              <a href={source.url} target="_blank" rel="noopener">
+                {source.name}「{source.title}」
+              </a>
+              （{source.publishedAt && `発表日：${formatJaDate(source.publishedAt)}／`}確認日：
+              {formatJaDate(source.checkedAt)}）
+            </li>
+          ))
+        }
+      </ul>
+      <p class="article__note">
+        公式発表をもとに当サイトで要点を整理しています。予定や運用が変更される場合があるため、訪問前に公式ページの最新情報をご確認ください。
+      </p>
+    </section>
+
+    <section aria-labelledby="news-related-heading">
+      <h2 id="news-related-heading">関連ページ</h2>
+      <ul class="article__related-grid">
+        <li>
+          <a class="article__related-card" href={ROUTES.access.path}>行き方・園内案内</a>
+        </li>
+        <li>
+          <a class="article__related-card" href={ROUTES.guideProcedures.path}
+            >墓じまい・各種手続き</a
+          >
+        </li>
+        <li>
+          <a class="article__related-card" href={ROUTES.sekizaiten.path}>周辺の石材店を比較する</a>
+        </li>
+      </ul>
+    </section>
+  </article>
+</BaseLayout>

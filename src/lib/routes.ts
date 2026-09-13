@@ -30,6 +30,7 @@ export const ROUTES = {
     path: '/guide/',
     description: '多磨霊園ガイド一覧（アクセス・手続き・歴史/著名人の3カテゴリ）',
   },
+  news: { path: '/news/', description: '多磨霊園・周辺の新着記事一覧' },
   access: { path: '/access/', description: '多磨霊園への行き方（電車・バス・車、門の選び方）' },
   guideHistory: { path: '/guide/history/', description: '多磨霊園の歴史（1923年開園の経緯）' },
   guideFamousGraves: { path: '/guide/famous-graves/', description: '多磨霊園に眠る著名人ガイド' },

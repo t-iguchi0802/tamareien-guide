@@ -1,0 +1,111 @@
+---
+import '../../styles/guide-article.css';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { ROUTES } from '../../lib/routes';
+import { buildItemListJsonLd } from '../../lib/seo';
+import { getPublishedNewsArticles } from '../../data/news';
+
+const articles = getPublishedNewsArticles();
+const pageTitle = '多磨霊園・周辺の新着記事｜多磨霊園 お墓ガイド';
+const description =
+  '多磨霊園の公式発表、墓参りに役立つ情報、周辺地域のニュースを、情報源と確認日を明示して紹介します。';
+
+const itemListJsonLd = buildItemListJsonLd(
+  articles.map((article) => ({
+    name: article.title,
+    path: `${ROUTES.news.path}${article.slug}/`,
+  })),
+  {
+    listPath: ROUTES.news.path,
+    name: '多磨霊園・周辺の新着記事',
+    description,
+  },
+);
+
+function formatJaDate(iso: string): string {
+  const [year, month, day] = iso.split('-').map(Number);
+  return `${year}年${month}月${day}日`;
+}
+---
+
+<BaseLayout
+  title={pageTitle}
+  description={description}
+  breadcrumbs={[
+    { name: 'トップ', path: ROUTES.top.path },
+    { name: '多磨霊園・周辺の新着記事', path: ROUTES.news.path },
+  ]}
+  extraJsonLd={[itemListJsonLd]}
+>
+  <article class="article news-index">
+    <p class="article__eyebrow"><a href={ROUTES.top.path}>トップ</a> ／ 新着記事</p>
+    <h1>多磨霊園・周辺の新着記事</h1>
+    <p class="article__lead">
+      公式発表や現地利用に関わる情報を確認し、出典と確認日を明示して紹介します。
+    </p>
+
+    {
+      articles.length > 0 ? (
+        <ul class="news-index__list">
+          {articles.map((article) => (
+            <li>
+              <p class="news-index__category">{article.category}</p>
+              <h2>
+                <a href={`${ROUTES.news.path}${article.slug}/`}>{article.title}</a>
+              </h2>
+              <p class="article__meta">公開日：{formatJaDate(article.publishedAt)}</p>
+              <p>{article.summary}</p>
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <p>現在、掲載中の記事はありません。</p>
+      )
+    }
+  </article>
+</BaseLayout>
+
+<style>
+  .news-index__list {
+    display: grid;
+    gap: var(--space-4);
+    margin: var(--space-6) 0 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .news-index__list > li {
+    padding: var(--space-4);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-card, 10px);
+    background: var(--color-surface);
+  }
+
+  .news-index__list h2 {
+    margin-top: var(--space-2);
+  }
+
+  .news-index__list h2::before {
+    content: none;
+  }
+
+  .news-index__list h2 a {
+    color: var(--color-accent);
+    text-decoration: none;
+  }
+
+  .news-index__list h2 a:hover {
+    text-decoration: underline;
+  }
+
+  .news-index__category {
+    display: inline-block;
+    margin: 0;
+    padding: 0.2em 0.65em;
+    border-radius: var(--radius-pill, 999px);
+    background: var(--color-accent-soft);
+    color: var(--color-accent-deep, var(--color-accent));
+    font-size: var(--font-size-caption, 0.875rem);
+    font-weight: 700;
+  }
+</style>

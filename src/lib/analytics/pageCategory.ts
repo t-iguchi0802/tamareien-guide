@@ -21,7 +21,12 @@ export function resolvePageCategory(pathname: string): PageCategory {
     return 'comparison';
   }
   if (pathname.startsWith('/tetsuzuki/')) return 'procedure';
-  if (pathname.startsWith('/guide/') || pathname.startsWith('/access/')) return 'guide';
+  if (
+    pathname.startsWith('/guide/') ||
+    pathname.startsWith('/access/') ||
+    pathname.startsWith('/news/')
+  )
+    return 'guide';
   if (
     pathname.startsWith('/about/') ||
     pathname.startsWith('/sources/') ||
