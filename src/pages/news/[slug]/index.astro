@@ -1,0 +1,93 @@
+---
+/**
+ * 「多磨霊園・周辺の新着記事」個別記事ページ。
+ * 正本: CLAUDE_CODE_HANDOFF.md追加要件（ニュース・記事掲載機能） /
+ * src/lib/routes.ts ROUTES.news（一覧の親、詳細はslugごとの動的ルート）。
+ *
+ * `output: 'static'`のため、getStaticPaths()が返すslug（＝
+ * getPublishedNewsArticles()で公開対象と判定された記事）だけが実際の
+ * ページとして生成される。記事データが0件の場合はgetStaticPaths()が
+ * 空配列を返し、このルート自体が1ページも生成されない（ビルドは失敗しない）。
+ *
+ * 本文（body）は事前に人が確認した段落配列のプレーンテキストであり、
+ * HTML/Markdownとして解釈しない（`set:html`等を使わず、Astroの通常の
+ * テキスト展開でエスケープされた状態のまま表示する）。
+ */
+import '../../../styles/guide-article.css';
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import { ROUTES } from '../../../lib/routes';
+import { getPublishedNewsArticles } from '../../../lib/data';
+import { NEWS_CATEGORY_LABELS, formatJaDate } from '../../_lib/news-display';
+import { buildArticleJsonLd, truncateDescription } from '../../../lib/seo';
+import type { NewsArticle } from '../../../types/news';
+
+export function getStaticPaths() {
+  return getPublishedNewsArticles().map((article) => ({
+    params: { slug: article.slug },
+    props: { article },
+  }));
+}
+
+interface Props {
+  article: NewsArticle;
+}
+
+const { article } = Astro.props;
+const path = `/news/${article.slug}/`;
+const description = article.summary
+  ? article.summary
+  : truncateDescription(article.body[0] ?? article.title);
+const pageTitle = `${article.title}｜多磨霊園・周辺の新着記事｜多磨霊園 お墓ガイド`;
+
+const articleJsonLd = buildArticleJsonLd({
+  path,
+  headline: article.title,
+  description,
+  datePublished: article.publishedAt,
+  dateModified: article.updatedAt ?? article.publishedAt,
+});
+---
+
+<BaseLayout
+  title={pageTitle}
+  description={description}
+  ogType="article"
+  extraJsonLd={[articleJsonLd]}
+>
+  <article class="article">
+    <p class="article__eyebrow">
+      <a href={ROUTES.news.path}>多磨霊園・周辺の新着記事</a> ／ {
+        NEWS_CATEGORY_LABELS[article.category]
+      }
+    </p>
+    <h1>{article.title}</h1>
+    <p class="article__meta">
+      公開日: {formatJaDate(article.publishedAt)}
+      {
+        article.updatedAt && article.updatedAt !== article.publishedAt && (
+          <>（更新日: {formatJaDate(article.updatedAt)}）</>
+        )
+      }
+    </p>
+
+    {article.body.map((paragraph) => <p>{paragraph}</p>)}
+
+    {
+      article.sourceName && article.sourceUrl && (
+        <section aria-labelledby="news-article-source-heading">
+          <h2 id="news-article-source-heading">情報源</h2>
+          <ul class="article__sources">
+            <li>
+              <a href={article.sourceUrl} rel="noopener" target="_blank">
+                {article.sourceName}
+              </a>
+            </li>
+          </ul>
+        </section>
+      )
+    }
+
+    <p><a href={ROUTES.news.path}>新着記事一覧に戻る</a></p>
+    <p><a href={ROUTES.about.path}>誤りに気づいた場合の訂正窓口はこちら</a></p>
+  </article>
+</BaseLayout>

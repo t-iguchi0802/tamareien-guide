@@ -1,0 +1,82 @@
+---
+/**
+ * 「多磨霊園・周辺の新着記事」一覧ページ。
+ * 正本: CLAUDE_CODE_HANDOFF.md追加要件（ニュース・記事掲載機能） /
+ * src/lib/routes.ts ROUTES.news（2026-09-13新設）。
+ *
+ * TOPの「多磨霊園の公式お知らせ」（東京都公園協会の公式発表のみ、
+ * src/pages/_lib/tama-news.ts）とは別枠。こちらは、多磨霊園のニュース・
+ * 周辺地域のニュース・著名人・歴史・周辺の飲食店や店舗・散策情報・
+ * 墓参りやアクセスの実用情報という幅広いカテゴリの記事を扱う。
+ *
+ * 運用前提（CLAUDE.md「ニュースを外部サイトから自動取得したり、自動公開
+ * したりする機能は今回は作らない」）: 記事は src/data/news.json への
+ * 手動追加（人の確認を経た記事案）のみを対象にする。記事データが0件でも
+ * ビルドが成功し、その場合はダミー記事ではなく短い案内文を表示する。
+ *
+ * 石材店比較（既存ページ、URL・機能とも不変）とは完全に独立したページ・
+ * データ経路であり、既存の絞り込み・スポンサー・GA4計測・既存事業者
+ * データには一切触れない。
+ */
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { ROUTES } from '../../lib/routes';
+import { getPublishedNewsArticles } from '../../lib/data';
+import { buildItemListJsonLd } from '../../lib/seo';
+import NewsCard from '../_partials/NewsCard.astro';
+
+const articles = getPublishedNewsArticles();
+
+const pageTitle = '多磨霊園・周辺の新着記事一覧｜多磨霊園 お墓ガイド';
+const heroHeading = '多磨霊園・周辺の新着記事';
+const description =
+  '多磨霊園と周辺地域について、ニュース、著名人、歴史、飲食店・散策情報、墓参り・アクセスの実用情報などをまとめた記事の一覧です。';
+
+const itemListJsonLd =
+  articles.length > 0
+    ? buildItemListJsonLd(
+        articles.map((article) => ({ name: article.title, path: `/news/${article.slug}/` })),
+        { listPath: ROUTES.news.path, name: heroHeading, description },
+      )
+    : null;
+---
+
+<BaseLayout
+  title={pageTitle}
+  description={description}
+  extraJsonLd={itemListJsonLd ? [itemListJsonLd] : []}
+>
+  <h1>{heroHeading}</h1>
+  <p>
+    多磨霊園に関するニュースや、周辺地域の話題、著名人・歴史、飲食店・散策情報、墓参り・アクセスの実用情報を、確認したうえで掲載しています。行政の公式発表は
+    <a href={ROUTES.top.path}>トップページの「多磨霊園の公式お知らせ」</a>でご案内しています。
+  </p>
+
+  {
+    articles.length > 0 ? (
+      <ul class="news-index__list">
+        {articles.map((article) => (
+          <NewsCard article={article} />
+        ))}
+      </ul>
+    ) : (
+      <p>現在公開している記事はありません。準備ができ次第、掲載します。</p>
+    )
+  }
+</BaseLayout>
+
+<style>
+  .news-index__list {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--space-4);
+    list-style: none;
+    margin: var(--space-6) 0 0;
+    padding: 0;
+  }
+
+  @media (max-width: 767px) {
+    .news-index__list {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

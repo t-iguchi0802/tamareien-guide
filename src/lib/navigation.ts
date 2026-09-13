@@ -92,6 +92,10 @@ export const FOOTER_NAV_GROUPS: FooterNavGroup[] = [
       { label: '改葬・手続きの公式リンク', path: ROUTES.tetsuzuki.path },
       { label: '歴史', path: ROUTES.guideHistory.path },
       { label: '著名人墓所', path: ROUTES.guideFamousGraves.path },
+      // ニュース・記事掲載機能（2026-09-13追加）。ヘッダー主要ナビ
+      // （原則4項目）は増やさず、フッターのサイトマップ的な役割の
+      // この一覧へ追加するのみにとどめる。
+      { label: '新着記事一覧', path: ROUTES.news.path },
     ],
   },
   {

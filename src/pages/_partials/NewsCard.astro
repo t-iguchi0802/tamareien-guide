@@ -1,0 +1,92 @@
+---
+/**
+ * 「多磨霊園・周辺の新着記事」の簡潔なカード表示（写真なし）。
+ * TOPの新着記事セクション（最大3件）と /news/ 一覧ページの両方から使う。
+ *
+ * `_partials` はAstroのルーティング対象外（src/pages/_partials/PriceList.astro
+ * と同じ位置づけ）。
+ *
+ * 内部リンクの計測は、既存の `internal_guide_link_click`（サイト内の
+ * ガイド・記事コンテンツへの遷移を表す既存イベント）をそのまま再利用し、
+ * 新規イベント名は追加しない。`data-destination` にはどの記事かが分かる
+ * よう `news:${slug}` を入れる。
+ */
+import type { NewsArticle } from '../../types/news';
+import { NEWS_CATEGORY_LABELS, formatJaDate } from '../_lib/news-display';
+
+interface Props {
+  article: NewsArticle;
+}
+
+const { article } = Astro.props;
+const href = `/news/${article.slug}/`;
+---
+
+<li class="news-card">
+  <p class="news-card__meta">
+    <span class="news-card__category">{NEWS_CATEGORY_LABELS[article.category]}</span>
+    <span class="news-card__date">公開日: {formatJaDate(article.publishedAt)}</span>
+  </p>
+  <p class="news-card__title">
+    <a href={href} data-event="internal_guide_link_click" data-destination={`news:${article.slug}`}>
+      {article.title}
+    </a>
+  </p>
+  {article.summary && <p class="news-card__summary">{article.summary}</p>}
+</li>
+
+<style>
+  .news-card {
+    padding: var(--space-4);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-card, 10px);
+    background: var(--color-surface);
+  }
+
+  .news-card__meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-2) var(--space-3);
+    margin: 0 0 var(--space-2);
+  }
+
+  .news-card__category {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.2em 0.7em;
+    border-radius: var(--radius-tag, 6px);
+    background: var(--color-accent-soft);
+    color: var(--color-accent-deep, var(--color-accent));
+    font-size: var(--font-size-caption, 0.875rem);
+    font-weight: 700;
+  }
+
+  .news-card__date {
+    color: var(--color-text-muted);
+    font-size: var(--font-size-caption, 0.875rem);
+  }
+
+  .news-card__title {
+    margin: 0 0 var(--space-2);
+    font-weight: 700;
+    line-height: 1.5;
+  }
+
+  .news-card__title a {
+    color: var(--color-text);
+    text-decoration: none;
+  }
+
+  .news-card__title a:hover {
+    color: var(--color-accent);
+    text-decoration: underline;
+  }
+
+  .news-card__summary {
+    margin: 0;
+    color: var(--color-text-muted);
+    font-size: var(--font-size-label, 0.9375rem);
+    line-height: 1.6;
+  }
+</style>

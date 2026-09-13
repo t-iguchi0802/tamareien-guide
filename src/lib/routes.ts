@@ -41,6 +41,13 @@ export const ROUTES = {
     path: '/guide/procedures/hakajimai-to-kaisou/',
     description: '墓じまいと改葬の違い｜多磨霊園で手続きを始める前に',
   },
+
+  // ニュース・記事掲載機能（2026-09-13追加）。TOPの「多磨霊園の公式お知らせ」
+  // （src/pages/_lib/tama-news.ts、東京都公園協会の公式発表のみ）とは別枠の、
+  // 記事一覧・詳細ページ。個別記事（/news/[slug]/）はslugごとの動的ルートの
+  // ため、単一のURLを持つROUTESには含めない（一覧・詳細それぞれの生成先は
+  // src/pages/sitemap.xml.ts側でgetPublishedNewsArticles()から個別に追加する）。
+  news: { path: '/news/', description: '多磨霊園・周辺の新着記事一覧' },
 } as const satisfies Record<string, SiteRoute>;
 
 export type RouteKey = keyof typeof ROUTES;

@@ -124,17 +124,18 @@
  */
 import BaseLayout from '../layouts/BaseLayout.astro';
 import { ROUTES } from '../lib/routes';
-import { getBusinesses } from '../lib/data';
+import { getBusinesses, getPublishedNewsArticles } from '../lib/data';
 import ServiceFilter from '../components/business/ServiceFilter.astro';
 import { getActiveTamaNewsItems } from './_lib/tama-news';
+import { formatJaDate } from './_lib/news-display';
+import NewsCard from './_partials/NewsCard.astro';
 
 const businesses = getBusinesses();
 const tamaNewsItems = getActiveTamaNewsItems();
-
-function formatJaDate(iso: string): string {
-  const [y, m, d] = iso.split('-').map(Number);
-  return `${y}年${m}月${d}日`;
-}
+// ニュース・記事掲載機能（2026-09-13追加）。東京都公園協会の公式お知らせ
+// （上のtamaNewsItems）とは別枠の、人が確認した記事案（src/data/news.json）。
+// 最大3件、公開日の新しい順（getPublishedNewsArticlesが既に降順ソート済み）。
+const newsArticles = getPublishedNewsArticles().slice(0, 3);
 // title更新（2026-09-02、ナビゲーション・運営者表示・SEO/AIO監査対応
 // 「ページタイトルと検索意図」節）: 「多磨霊園のお墓・石材店を目的から探す」を
 // 前半に置き、内容（お墓・石材店を目的から探せること）をより明確にした。
@@ -166,7 +167,7 @@ const description =
   {
     tamaNewsItems.length > 0 && (
       <section aria-labelledby="tama-news-heading" class="tama-news">
-        <h2 id="tama-news-heading">多磨霊園に関する最新情報</h2>
+        <h2 id="tama-news-heading">多磨霊園の公式お知らせ</h2>
         <ul class="tama-news__list">
           {tamaNewsItems.map((item) => (
             <li class="tama-news__item">
@@ -187,6 +188,31 @@ const description =
             </li>
           ))}
         </ul>
+      </section>
+    )
+  }
+
+  <hr class="masonry-rule" />
+
+  {
+    /*
+     * 「多磨霊園・周辺の新着記事」（2026-09-13追加）。上の「多磨霊園の公式お知らせ」
+     * （東京都公園協会の公式発表のみ）とは別枠で、人が確認した記事案
+     * （src/data/news.json、getPublishedNewsArticles()）を最大3件表示する。
+     * CLAUDE_CODE_HANDOFF.md追加要件どおり、記事が1件もない場合は
+     * 空の枠・ダミー記事を表示せず、セクションごと出力しない。
+     */
+    newsArticles.length > 0 && (
+      <section aria-labelledby="local-news-heading" class="local-news">
+        <h2 id="local-news-heading">多磨霊園・周辺の新着記事</h2>
+        <ul class="local-news__list">
+          {newsArticles.map((article) => (
+            <NewsCard article={article} />
+          ))}
+        </ul>
+        <p class="local-news__more">
+          <a href={ROUTES.news.path}>新着記事一覧を見る</a>
+        </p>
       </section>
     )
   }
@@ -419,6 +445,38 @@ const description =
     margin: var(--space-2) 0 0;
     color: var(--color-text-muted);
     font-size: var(--font-size-caption, 0.875rem);
+  }
+
+  /* 「多磨霊園・周辺の新着記事」（2026-09-13追加）。カード自体の見た目は
+     _partials/NewsCard.astro側で持つため、ここでは一覧のグリッド配置と
+     「新着記事一覧を見る」リンクだけを担当する。 */
+  .local-news {
+    color: var(--color-text);
+  }
+
+  .local-news h2 {
+    font-family: var(--font-family-heading);
+    margin: 0 0 var(--space-4);
+  }
+
+  .local-news__list {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--space-3);
+    list-style: none;
+    margin: 0 0 var(--space-4);
+    padding: 0;
+  }
+
+  @media (max-width: 767px) {
+    .local-news__list {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  .local-news__more {
+    margin: 0;
+    font-weight: 700;
   }
 
   /* --- 「当サイトについて」。ServiceFilterはBaseLayout.astroの

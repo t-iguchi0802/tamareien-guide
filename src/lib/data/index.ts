@@ -14,6 +14,9 @@ export * from './verificationStatus';
 // （data_dictionary.md 9章「通常比較表のデータと広告契約データを
 // 同じJSONに混在させない」）。
 export * from './loadSponsors';
+// 「多磨霊園・周辺の新着記事」データ（src/data/news.json）も同様に、
+// businesses.json/sponsors.jsonとは完全に別経路（src/lib/data/loadNews.ts）。
+export * from './loadNews';
 
 let validated = false;
 
