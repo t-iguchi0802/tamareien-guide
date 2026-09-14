@@ -56,7 +56,7 @@ export const TAMA_NEWS_ITEMS: TamaNewsItem[] = [
     expiresAt: '2026-09-25',
   },
   {
-    title: '多磨霊園 野鳥観察会（10月3日開催、9月25日申込締切）',
+    title: '多磨霊園 野鳥観察会（10月3日開催、申込残り2名・9月14日11時38分確認）',
     publishedAt: '2026-08-26',
     sourceName: '公益財団法人東京都公園協会',
     sourceUrl: 'https://www.tokyo-park.or.jp/reien/tama/news/2026/park_info_28.html',
