@@ -13,16 +13,16 @@ import CorrectionCta from '../../components/common/CorrectionCta.astro';
 
 const businesses = getBusinesses();
 const serviceKeys = ['grave_closure', 'reburial_support'] as const;
-const pageTitle = '墓じまい・墓石撤去の比較';
+const pageTitle = '多磨霊園の墓じまい・墓石撤去を比較';
 const description =
-  '墓じまい・墓石撤去、改葬の手続支援について、公開情報で確認できる事業者の対応状況と見積項目を比較します。';
-const browserTitle = `${pageTitle}｜多磨霊園 お墓ガイド`;
+  '多磨霊園の墓じまい・墓石撤去、改葬の手続支援について、公開情報で確認できる事業者の対応状況と見積項目を比較します。';
+const browserTitle = `${pageTitle}｜お墓ガイド`;
 ---
 
 <BaseLayout title={browserTitle} description={description}>
   <h1>{pageTitle}</h1>
   <p>
-    墓じまい（墓石の解体・撤去）と、改葬にともなう手続支援について、公開ページで確認できた対応状況をまとめています。実際の見積りは現地確認が必要になることが一般的です。行政手続き（改葬許可申請等）については<a
+    多磨霊園での墓じまい（墓石の解体・撤去）と、改葬にともなう手続支援について、公開ページで確認できた対応状況をまとめています。実際の見積りは現地確認が必要になることが一般的です。行政手続き（改葬許可申請等）については<a
       href={ROUTES.tetsuzuki.path}>手続きの案内ページ</a
     >をご覧ください。
   </p>

@@ -13,19 +13,19 @@ import CorrectionCta from '../../components/common/CorrectionCta.astro';
 
 const businesses = getBusinesses();
 const serviceKeys = ['annual_management', 'cleaning', 'flowers', 'planting'] as const;
-const pageTitle = '墓所管理・清掃・供花の比較';
+const pageTitle = '多磨霊園の墓所管理・清掃・墓参り代行を比較';
 const description =
-  '年間管理、清掃、供花・墓参り代行、植木の対応状況を、公開情報のみで事業者ごとに比較します。';
+  '多磨霊園の年間管理、墓所清掃、供花・墓参り代行、植木の対応状況を、公開情報のみで事業者ごとに比較します。';
 // <title>専用（2026-09-02、ミチの編集改善・SEO/AIO対応「title・description・H1」節）:
 // BaseLayoutのタイトル自動サフィックスを廃止したため、H1（pageTitle）とは
 // 別に、サイト名を含む完結した<title>文字列を用意する。
-const browserTitle = `${pageTitle}｜多磨霊園 お墓ガイド`;
+const browserTitle = `${pageTitle}｜お墓ガイド`;
 ---
 
 <BaseLayout title={browserTitle} description={description}>
   <h1>{pageTitle}</h1>
   <p>
-    遠方にお住まいの方向けに、年間を通じた墓所管理・清掃・供花・植木の対応状況を比較しています。「遠方対応・写真報告」の対応状況もあわせてご確認ください。
+    多磨霊園にお墓があり、遠方にお住まいの方向けに、年間を通じた墓所管理・清掃・供花・植木の対応状況を比較しています。「遠方対応・写真報告」の対応状況もあわせてご確認ください。
   </p>
 
   <section aria-labelledby="kanri-comparison-heading">
