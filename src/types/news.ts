@@ -75,6 +75,12 @@ export interface NewsArticle {
   summary?: string;
   /** 記事本文（段落ごとの配列。プレーンテキストのみ、HTML/Markdownは解釈しない）。 */
   body: string[];
+  /** 記事詳細ページに表示する画像（写真ではなくイメージの場合も含む）。 */
+  image?: {
+    src: string;
+    alt: string;
+    note?: string;
+  };
   /** 参考にした情報源の名称（sourceUrlとセットで指定する）。 */
   sourceName?: string;
   /** 参考にした情報源のURL（sourceNameとセットで指定する）。 */

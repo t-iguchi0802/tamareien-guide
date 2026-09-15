@@ -21,6 +21,26 @@
       "sourceName": "公益財団法人東京都公園協会『9月お彼岸期間の開閉門時間とみたま堂（献花台）について』",
       "sourceUrl": "https://www.tokyo-park.or.jp/reien/tama/news/2026/park_info_1_1_2.html",
       "published": true
+    },
+    {
+      "slug": "2026-fuchu-kuri-festival-lanterns",
+      "title": "墓参りのあとに見たい、府中「くり祭」の行灯",
+      "category": "area_feature",
+      "publishedAt": "2026-09-15",
+      "summary": "多磨霊園の墓参りと組み合わせて楽しみたい、府中・大國魂神社の秋季祭「くり祭」を短く紹介します。",
+      "image": {
+        "src": "/images/news/2026-kuri-festival-lanterns-illustration.webp",
+        "alt": "秋の夕暮れ、大國魂神社をイメージした行灯のイラスト",
+        "note": "写真は転載できないため、これは実際の写真ではなくイメージイラストです。"
+      },
+      "body": [
+        "2026年9月27日（日）・28日（月）、大國魂神社で秋季祭「くり祭」が開催されます。境内には約260本の奉納行灯が並び、夕方から夜にかけて独特の雰囲気を楽しめます。行灯の掲出時間は9時から21時までです。",
+        "多磨霊園へ墓参りしたあと、府中駅周辺で休憩し、夕方からくり祭を訪れる過ごし方もよさそうです。大國魂神社へは、京王線府中駅またはJR府中本町駅から徒歩約5分です。",
+        "荒天時は延期される場合があるため、訪問前に大國魂神社の公式案内で最新情報を確認しましょう。"
+      ],
+      "sourceName": "大國魂神社『秋季祭くり祭』",
+      "sourceUrl": "https://www.ookunitamajinja.or.jp/matsuri/9-kurimatsuri.php",
+      "published": true
     }
   ]
 }

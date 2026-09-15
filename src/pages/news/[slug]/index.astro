@@ -74,6 +74,15 @@ const articleJsonLd = buildArticleJsonLd({
       }
     </p>
 
+    {
+      article.image && (
+        <figure class="article__image">
+          <img src={article.image.src} alt={article.image.alt} loading="lazy" />
+          {article.image.note && <figcaption>{article.image.note}</figcaption>}
+        </figure>
+      )
+    }
+
     {article.body.map((paragraph) => <p>{paragraph}</p>)}
 
     {
