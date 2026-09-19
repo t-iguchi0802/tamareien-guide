@@ -17,7 +17,7 @@
  */
 :root {
   /* 見出し用書体: OS標準の明朝体のみ（刻字・銘板を想起させる、Webフォント不使用） */
-  --font-family-heading: 'Yu Mincho', 'YuMincho', 'Hiragino Mincho ProN', 'Noto Serif JP', serif;
+  --font-family-heading: 'Noto Sans JP', system-ui, -apple-system, 'Segoe UI', sans-serif;
 
   /* コンポーネント内の補助文字サイズ（バッジ・キャプション用。本文は17px基準を維持） */
   --font-size-label: 0.9375rem; /* 15px */
@@ -28,15 +28,15 @@
      editorial-redesign: BaseLayoutの生成り寄りの新トークンに合わせて調整。
      この二重線モチーフ（border-top: 3px double）をヒーロー・見出し・カード上部で
      繰り返し使う、このサイトの視覚的シグネチャとする。 */
-  --color-stone-line: #d8cca8;
-  --color-stone-line-soft: #ece3cd;
-  --color-stone-text: #655e4c; /* --color-stone-surface比5.28:1、paper比5.77:1でAA適合確認済み */
+  --color-stone-line: #d8c2b8;
+  --color-stone-line-soft: #eee2dc;
+  --color-stone-text: #5e6263;
 
   /* カードの地色（石色）。--color-surfaceより一段沈んだ、より「石」寄りの面。 */
-  --color-stone-surface: #efe8d8;
+  --color-stone-surface: #fff5ee;
 
   /* 深緑の濃淡（ホバー・押下時など） */
-  --color-accent-deep: #1c2e26;
+  --color-accent-deep: #2e5e59;
 
   /* 確認状態の色。confirmedはBaseLayoutの--color-accent系をそのまま使う。 */
   --color-status-confirmed-fg: var(--color-accent);

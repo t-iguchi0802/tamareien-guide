@@ -621,13 +621,15 @@ const hasBeforeSponsor = Astro.slots.has('beforeSponsor');
        13.4:1、--color-accentが白背景ボタン比10.1:1でいずれもAAAレベル）。
        補助色#62747Dは、本文muted系（--color-text-muted）に採用
        （bg比4.63:1、AA適合）。全ペアWCAG AA（4.5:1）以上を計算式で確認済み。 */
-    --color-bg: #fbf9f4;
+    --color-bg: #fffaf3;
     --color-surface: #ffffff;
-    --color-text: #292c29;
-    --color-text-muted: #62747d;
-    --color-accent: #29483a;
-    --color-accent-soft: #e4e9e0;
-    --color-border: #e4e2da;
+    --color-text: #202427;
+    --color-text-muted: #626a6d;
+    --color-accent: #3f7771;
+    --color-accent-soft: #e8f1ee;
+    --color-border: #ded8cf;
+    --color-action: #c95f45;
+    --color-action-hover: #aa4935;
 
     --font-family-base: 'Noto Sans JP', system-ui, -apple-system, 'Segoe UI', sans-serif;
 
@@ -702,9 +704,9 @@ const hasBeforeSponsor = Astro.slots.has('beforeSponsor');
     flex-direction: column;
   }
   .site-header__name {
-    font-weight: 700;
+    font-weight: 850;
     font-size: 1.25rem;
-    color: var(--color-accent-deep, #1c2e26);
+    color: var(--color-text);
   }
   .site-header__subtitle {
     font-size: 0.9rem;
@@ -774,10 +776,11 @@ const hasBeforeSponsor = Astro.slots.has('beforeSponsor');
       align-items: center;
       min-height: var(--tap-target-min);
       padding: 0.4em 0.9em;
-      border: 1px solid var(--color-border);
+      border: 2px solid var(--color-accent);
       border-radius: var(--radius-pill, 999px);
       background: var(--color-surface);
-      color: var(--color-text);
+      color: var(--color-accent);
+      font-weight: 800;
       font-size: 0.9rem;
       cursor: pointer;
     }

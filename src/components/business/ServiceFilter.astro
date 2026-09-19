@@ -605,6 +605,8 @@ const businessFilterData = businesses.map((business) => ({
 
   .service-filter__heading {
     font-family: var(--font-family-heading);
+    font-weight: 900;
+    letter-spacing: -0.02em;
     margin: 0 0 var(--space-2);
   }
 
@@ -677,7 +679,7 @@ const businessFilterData = businesses.map((business) => ({
 
   .purpose-card__heading {
     font-family: var(--font-family-heading);
-    font-weight: 700;
+    font-weight: 850;
     font-size: 1.1rem;
     padding-right: var(--space-6);
   }
@@ -965,20 +967,51 @@ const businessFilterData = businesses.map((business) => ({
 
     .service-filter__purpose-grid {
       grid-template-columns: 1fr;
-      gap: var(--space-2);
+      gap: 0;
     }
 
     .purpose-card {
-      gap: 0.25rem;
-      padding: var(--space-3) var(--space-4);
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 0.2rem var(--space-3);
+      padding: var(--space-4) 0;
+      border: 0;
+      border-bottom: 1px solid var(--color-border);
+      border-radius: 0;
+      background: transparent;
+    }
+
+    .purpose-card:first-child {
+      border-top: 1px solid var(--color-border);
+    }
+
+    .purpose-card:hover {
+      background: var(--color-accent-soft);
+      box-shadow: none;
+    }
+
+    .purpose-card__heading {
+      font-size: 1.18rem;
+      color: var(--color-text);
     }
 
     .purpose-card__description {
       line-height: 1.45;
+      grid-column: 1;
     }
 
     .purpose-card__cta {
-      padding-top: var(--space-1);
+      grid-column: 2;
+      grid-row: 1 / span 2;
+      align-self: center;
+      padding: 0;
+      font-size: 0;
+    }
+
+    .purpose-card__cta svg {
+      width: 28px;
+      height: 28px;
+      color: var(--color-accent);
     }
 
     .service-filter__result {

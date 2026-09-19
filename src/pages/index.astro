@@ -429,7 +429,7 @@ const description =
        くわしい条件）をスクロールなしの初期画面から押し出してしまう
        副作用が確認されたため縮小した。PC/スマートフォンとも、
        写真は画面全幅・background-size: coverのまま維持し、高さだけを抑える。 */
-    min-height: clamp(300px, 32vw, 420px);
+    min-height: clamp(360px, 36vw, 500px);
     padding: var(--space-6);
     overflow: hidden;
     background-image: url('/images/hero-cemetery-photo-v2.png');
@@ -438,14 +438,18 @@ const description =
     /* ヒーロー下端と、下のスポンサー付き比較エリアとの間に、
        少しだけ縦の余白を設ける（8〜12px程度広げる指示に基づき、
        目安値のclamp(28px,2vw,36px)を採用）。 */
-    margin-bottom: clamp(28px, 2vw, 36px);
+    margin-bottom: 0;
   }
 
   @media (max-width: 767px) {
     .hero {
-      min-height: 220px;
-      padding: var(--space-4);
-      margin-bottom: var(--space-4);
+      display: block;
+      min-height: 0;
+      padding: 248px var(--space-4) var(--space-6);
+      background-size: 100% 260px;
+      background-position: center top;
+      background-repeat: no-repeat;
+      background-color: var(--color-bg);
     }
   }
 
@@ -467,14 +471,19 @@ const description =
        0 1px 3px→0 1px 4px相当まで強め、opacityを下げた分の
        コントラスト低下を補っている（見出し・本文とも実機の写真上で
        目視確認）。 */
-    background: rgba(18, 42, 31, 0.82);
-    border: 1px solid rgba(214, 170, 88, 0.8);
-    box-shadow: 0 14px 38px rgba(9, 22, 16, 0.28);
+    background: rgba(255, 250, 243, 0.94);
+    border: 0;
+    border-left: 8px solid var(--color-action);
+    box-shadow: 0 18px 44px rgba(45, 37, 32, 0.18);
   }
 
   @media (max-width: 767px) {
     .hero__panel {
-      padding: var(--space-4) var(--space-5, 1.25rem);
+      padding: var(--space-5, 1.25rem) 0 0;
+      text-align: left;
+      background: transparent;
+      border: 0;
+      box-shadow: none;
     }
   }
 
@@ -484,10 +493,10 @@ const description =
     min-height: 30px;
     margin: 0 0 var(--space-2);
     padding: 0.2em 0.8em;
-    border: 1px solid rgba(255, 249, 236, 0.55);
-    border-radius: var(--radius-pill);
-    background: rgba(214, 170, 88, 0.16);
-    color: #f4cf83;
+    border: 0;
+    border-radius: 4px;
+    background: var(--color-action);
+    color: #ffffff;
     font-size: var(--font-size-caption, 0.875rem);
     font-weight: 700;
     letter-spacing: 0.04em;
@@ -495,13 +504,13 @@ const description =
 
   .hero__heading {
     font-family: var(--font-family-heading);
-    font-weight: 700;
-    font-size: clamp(1.2rem, 5.7vw, 2.75rem);
-    line-height: 1.45;
-    letter-spacing: 0.01em;
+    font-weight: 900;
+    font-size: clamp(1.65rem, 5.9vw, 3.2rem);
+    line-height: 1.25;
+    letter-spacing: -0.025em;
     margin: 0 0 var(--space-3);
-    color: #fffdf8;
-    text-shadow: 0 1px 4px rgba(0, 0, 0, 0.45);
+    color: var(--color-text);
+    text-shadow: none;
   }
 
   .hero__heading-line {
@@ -512,8 +521,9 @@ const description =
   .hero__lead {
     margin: 0;
     font-size: 1.1rem;
-    color: #f3ead9;
-    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+    color: #444a4c;
+    font-weight: 650;
+    text-shadow: none;
   }
 
   /* 「〇社の一覧を見る」（2026-09-14、新着情報バー追加に伴い単独の主CTAへ
@@ -528,18 +538,18 @@ const description =
     margin-top: var(--space-4);
     padding: 0.75em 1.55em;
     border-radius: var(--radius-pill);
-    background: #d6aa58;
-    color: #172b23;
-    font-weight: 800;
+    background: var(--color-action);
+    color: #ffffff;
+    font-weight: 900;
     text-decoration: none;
-    box-shadow: 0 7px 18px rgba(8, 20, 14, 0.34);
+    box-shadow: 0 8px 18px rgba(157, 66, 47, 0.25);
     transition:
       transform 160ms ease,
       background-color 160ms ease;
   }
 
   .hero__cta:hover {
-    background: #e4bc70;
+    background: var(--color-action-hover);
     transform: translateY(-2px);
   }
 
@@ -555,16 +565,17 @@ const description =
     align-items: center;
     gap: var(--space-2) var(--space-3);
     max-width: min(960px, calc(100% - var(--space-4) * 2));
-    margin: 0 auto var(--space-6);
-    padding: var(--space-3) var(--space-4);
+    margin: var(--space-3) auto var(--space-8);
+    padding: var(--space-4) 0;
     min-height: var(--tap-target-min);
-    border: 1px solid #c8d5cd;
-    border-left: 6px solid var(--color-accent);
-    border-radius: var(--radius-card, 10px);
-    background: var(--color-surface);
+    border: 0;
+    border-top: 1px solid var(--color-border);
+    border-bottom: 1px solid var(--color-border);
+    border-radius: 0;
+    background: transparent;
     color: var(--color-text);
     text-decoration: none;
-    box-shadow: 0 8px 24px rgba(30, 60, 47, 0.09);
+    box-shadow: none;
   }
 
   .latest-info-bar:hover {
@@ -576,8 +587,8 @@ const description =
     flex: none;
     padding: 0.2em 0.7em;
     border-radius: var(--radius-tag, 6px);
-    background: #d6aa58;
-    color: #172b23;
+    background: var(--color-action);
+    color: #ffffff;
     font-weight: 800;
     font-size: var(--font-size-caption, 0.875rem);
   }
@@ -626,7 +637,8 @@ const description =
 
   @media (max-width: 767px) {
     .latest-info-bar {
-      padding: var(--space-4);
+      max-width: calc(100% - var(--space-8));
+      padding: var(--space-4) 0;
     }
 
     .latest-info-bar__arrow {
@@ -645,6 +657,13 @@ const description =
     background: rgba(255, 255, 255, 0.65);
     color: #2b2926;
     font-size: var(--font-size-caption, 0.875rem);
+  }
+
+  @media (max-width: 767px) {
+    .hero__image-credit {
+      top: 224px;
+      bottom: auto;
+    }
   }
 
   .masonry-rule {
