@@ -64,6 +64,7 @@ export function buildWebSiteJsonLd(): JsonLd {
     '@type': 'WebSite',
     name: siteConfig.name,
     url: buildCanonicalUrl('/'),
+    image: buildCanonicalUrl('/site-icon-512.png'),
     description: siteConfig.subtitle,
     publisher: {
       '@type': 'Organization',

@@ -28,7 +28,7 @@ import type { SiteConfig } from '../types/site';
  */
 export const siteConfig: SiteConfig = {
   name: '多磨霊園 お墓ガイド',
-  subtitle: '石材店・墓じまい・管理を目的から探す',
+  subtitle: '多磨霊園の石材店・墓じまい・管理を比較',
   locale: 'ja-JP',
   contact: {
     correctionUrl: '/about/',
