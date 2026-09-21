@@ -53,6 +53,7 @@ const sponsorSchema = z
     name: z.string().min(1),
     headline: z.string().min(1).optional(),
     tagline: z.string().min(1).optional(),
+    byline: z.string().min(1).optional(),
     summary: z.string().min(1),
     serviceTags: z.array(z.string().min(1)).optional(),
     area: z.string().min(1).optional(),
