@@ -62,14 +62,9 @@ type Props = BusinessCardProps;
 const { business, isSponsored = false } = Astro.props;
 
 const UNCONFIRMED_TEXT = '公開情報では未確認';
-const INITIAL_SERVICE_COUNT = 3;
-
 const confirmedServiceKeys = (Object.keys(SERVICE_LABELS) as ServiceKey[]).filter(
   (key) => business.services[key] === 'confirmed',
 );
-const primaryServiceKeys = confirmedServiceKeys.slice(0, INITIAL_SERVICE_COUNT);
-const restServiceKeys = confirmedServiceKeys.slice(INITIAL_SERVICE_COUNT);
-
 const addressText = [
   business.location.prefecture,
   business.location.city,
@@ -110,7 +105,7 @@ const showSeparateContact =
   data-service-keys={confirmedServiceKeys.join(',')}
 >
   <header class="business-card__header">
-    <p class="business-card__sponsor-badge" data-sponsor-result-badge hidden>PR</p>
+    <p class="business-card__sponsor-badge" data-sponsor-result-badge hidden>PR｜メインスポンサー</p>
     <h3 class="business-card__name">{business.name}</h3>
     <p class="business-card__meta">
       {business.location.city}
@@ -129,26 +124,27 @@ const showSeparateContact =
 
   {
     confirmedServiceKeys.length > 0 ? (
-      <p class="business-card__services">
-        <span data-service-prefix>対応を確認できるサービス:</span>{' '}
-        {primaryServiceKeys.map((key, i) => (
-          <>
-            {i > 0 && '、'}
-            <span class="service-word" data-service-word={key}>
-              {SERVICE_LABELS[key]}
-            </span>
-          </>
-        ))}
-        {restServiceKeys.length > 0 && (
-          <span class="business-card__services-more">（ほか{restServiceKeys.length}件）</span>
-        )}
-      </p>
+      <div class="business-card__services-block">
+        <p class="business-card__services-label">対応サービス</p>
+        <p class="business-card__services">
+          {confirmedServiceKeys.map((key, i) => (
+            <>
+              {i > 0 && '、'}
+              <span class="service-word" data-service-word={key}>
+                {SERVICE_LABELS[key]}
+              </span>
+            </>
+          ))}
+        </p>
+      </div>
     ) : (
       <p class="business-card__services business-card__services--none">
         公開ページ上で対応を確認できたサービスは、現時点でありません（掲載情報は随時更新します）。
       </p>
     )
   }
+
+  <p class="business-card__summary">{business.summary}</p>
 
   <div class="business-card__contact-row">
     {
@@ -181,53 +177,6 @@ const showSeparateContact =
     </span>
   </footer>
 
-  <details class="business-card__detail">
-    <summary class="business-card__detail-summary">詳しい対応内容を見る</summary>
-    <div class="business-card__detail-body">
-      {
-        restServiceKeys.length > 0 && (
-          <p class="business-card__services business-card__services--rest">
-            <span data-service-prefix>そのほかの確認できるサービス:</span>{' '}
-            {restServiceKeys.map((key, i) => (
-              <>
-                {i > 0 && '、'}
-                <span class="service-word" data-service-word={key}>
-                  {SERVICE_LABELS[key]}
-                </span>
-              </>
-            ))}
-          </p>
-        )
-      }
-
-      <p class="business-card__summary">{business.summary}</p>
-
-      {
-        (business.credentials.length > 0 || business.founded) && (
-          <ul class="business-card__credentials">
-            {business.founded && <li>創業 {business.founded}</li>}
-            {business.credentials.map((credential) => (
-              <li>{credential}</li>
-            ))}
-          </ul>
-        )
-      }
-
-      {
-        showSeparateContact && business.contact.contactUrl && (
-          <p class="business-card__secondary-cta">
-            <OutboundLink
-              businessId={business.id}
-              businessName={business.name}
-              linkType="contact"
-              href={business.contact.contactUrl}
-              label="問い合わせページを見る"
-            />
-          </p>
-        )
-      }
-    </div>
-  </details>
 </article>
 
 <style>
@@ -319,11 +268,24 @@ const showSeparateContact =
     font-size: var(--font-size-label);
   }
 
+  .business-card__services-block {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3em;
+  }
+
+  .business-card__services-label {
+    margin: 0;
+    color: var(--color-text);
+    font-size: var(--font-size-caption);
+    font-weight: 700;
+  }
+
   .business-card__services {
     margin: 0;
     color: var(--color-stone-text);
     font-size: var(--font-size-label);
-    line-height: 1.6;
+    line-height: 1.7;
   }
 
   .business-card__services--none {
