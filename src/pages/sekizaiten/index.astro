@@ -98,9 +98,21 @@ const businessListJsonLd = buildBusinessListItemListJsonLd(
       businesses={businesses}
       mode="inline"
       externalGrid
+      externalResult
       sponsoredBusinessIds={sponsoredBusinessIds}
     />
   </Fragment>
+
+  <div class="stone-list-summary">
+    <p class="stone-list-summary__label">石材店一覧</p>
+    <p class="stone-list-summary__count" aria-live="polite">
+      <span data-result-prefix>すべての事業者</span>
+      <strong data-result-count>{businesses.length}</strong>社
+    </p>
+    <button type="button" class="stone-list-summary__clear" data-filter-clear hidden>
+      選択をクリア
+    </button>
+  </div>
 
   <section aria-label="事業者一覧・詳しい比較表">
     <BusinessGrid businesses={businesses} sponsoredBusinessIds={sponsoredBusinessIds} />
@@ -153,6 +165,53 @@ const businessListJsonLd = buildBusinessListItemListJsonLd(
 </BaseLayout>
 
 <style>
+  .stone-list-summary {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-2) var(--space-3);
+    margin: 0 0 var(--space-5);
+    padding: var(--space-4);
+    border: 1px solid var(--color-stone-line);
+    border-radius: var(--radius-card);
+    background: var(--color-stone-surface);
+  }
+
+  .stone-list-summary__label {
+    width: 100%;
+    margin: 0;
+    font-family: var(--font-family-heading);
+    font-weight: 700;
+    color: var(--color-text);
+  }
+
+  .stone-list-summary__count {
+    margin: 0;
+    font-size: 1rem;
+  }
+
+  .stone-list-summary__count strong {
+    margin-inline: 0.25em;
+    font-family: var(--font-family-heading);
+    font-size: 1.3rem;
+    color: var(--color-accent-deep);
+  }
+
+  .stone-list-summary__clear {
+    min-height: var(--tap-target-min);
+    padding: 0.3em 0.4em;
+    border: 0;
+    background: transparent;
+    color: var(--color-accent);
+    text-decoration: underline;
+    font: inherit;
+    cursor: pointer;
+  }
+
+  .stone-list-summary__clear[hidden] {
+    display: none;
+  }
+
   .masonry-rule {
     margin-block: var(--space-6);
   }
@@ -164,6 +223,25 @@ const businessListJsonLd = buildBusinessListItemListJsonLd(
   }
 
   @media (max-width: 767px) {
+    .stone-list-summary {
+      margin-top: var(--space-3);
+      margin-bottom: var(--space-4);
+      padding: var(--space-3) var(--space-4);
+    }
+
+    .stone-list-summary__label {
+      font-size: 0.95rem;
+    }
+
+    .stone-list-summary__count {
+      width: 100%;
+      font-size: 0.92rem;
+    }
+
+    .stone-list-summary__count strong {
+      font-size: 1.2rem;
+    }
+
     .page-lead {
       margin-bottom: var(--space-3);
       font-size: 0.95rem;
