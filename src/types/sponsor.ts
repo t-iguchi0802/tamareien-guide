@@ -38,6 +38,8 @@ export interface Sponsor {
   tagline?: string;
   /** 広告内に補助表示する担当者・肩書等（例:「暮らしの相談員 井口 大成」）。 */
   byline?: string;
+  /** 広告内で特に目立たせる短い訴求（例:「三鷹市内のスマホ相談は無料」）。 */
+  highlight?: string;
   /** 広告主が用意した短い説明（当サイトの中立要約とは別扱いの広告文）。
    *  写真付き広告で`serviceTags`を使う場合も、meta descriptionや
    *  簡易表示（画像なしスポンサー）向けの説明として保持する。 */
