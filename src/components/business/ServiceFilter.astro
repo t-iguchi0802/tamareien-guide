@@ -22,6 +22,8 @@ interface Props {
   /** 旧API互換。細かな条件UIは廃止したため現在は使用しない。 */
   openByDefault?: boolean;
   externalGrid?: boolean;
+  /** trueの場合、結果件数・クリアUIは呼び出し側で描画する。 */
+  externalResult?: boolean;
   /** メインスポンサーと紐づく事業者ID。 */
   sponsoredBusinessIds?: string[];
 }
@@ -31,6 +33,7 @@ const {
   mode,
   targetPath,
   externalGrid = false,
+  externalResult = false,
   sponsoredBusinessIds = [],
 } = Astro.props;
 
@@ -84,23 +87,25 @@ const businessFilterData = businesses.map((business) => ({
     </div>
   </div>
 
-  <div class="service-filter__result">
-    <p class="service-filter__result-label">石材店一覧</p>
-    <p class="service-filter__result-text" aria-live="polite">
-      <span data-result-prefix>{mode === 'inline' ? 'すべての事業者' : '掲載中'}</span>
-      <strong data-result-count>{businesses.length}</strong>社
-    </p>
-    <button type="button" class="service-filter__clear" data-filter-clear hidden>
-      選択をクリア
-    </button>
-    {
-      mode === 'link' && targetPath && (
-        <a class="service-filter__cta" data-filter-cta href={targetPath}>
-          石材店の一覧を見る
-        </a>
-      )
-    }
-  </div>
+  {
+    !externalResult && (
+      <div class="service-filter__result">
+        <p class="service-filter__result-label">石材店一覧</p>
+        <p class="service-filter__result-text" aria-live="polite">
+          <span data-result-prefix>{mode === 'inline' ? 'すべての事業者' : '掲載中'}</span>
+          <strong data-result-count>{businesses.length}</strong>社
+        </p>
+        <button type="button" class="service-filter__clear" data-filter-clear hidden>
+          選択をクリア
+        </button>
+        {mode === 'link' && targetPath && (
+          <a class="service-filter__cta" data-filter-cta href={targetPath}>
+            石材店の一覧を見る
+          </a>
+        )}
+      </div>
+    )
+  }
 
   <noscript>
     <p class="service-filter__noscript">
@@ -147,9 +152,9 @@ const businessFilterData = businesses.map((business) => ({
       const purposeButtons = Array.from(
         root.querySelectorAll<HTMLButtonElement>('[data-purpose-button]'),
       );
-      const clearButton = root.querySelector<HTMLButtonElement>('[data-filter-clear]');
-      const resultCountEl = root.querySelector('[data-result-count]');
-      const resultPrefixEl = root.querySelector('[data-result-prefix]');
+      const clearButton = document.querySelector<HTMLButtonElement>('[data-filter-clear]');
+      const resultCountEl = document.querySelector('[data-result-count]');
+      const resultPrefixEl = document.querySelector('[data-result-prefix]');
       const mode = root.getAttribute('data-filter-mode');
       const targetPath = root.getAttribute('data-filter-target') || '';
       const ctaLink = root.querySelector<HTMLAnchorElement>('[data-filter-cta]');
