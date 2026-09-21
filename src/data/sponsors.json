@@ -6,8 +6,8 @@
       "isSponsored": true,
       "campaignId": "sunarrows-mitaka-anshin-001",
       "name": "みたか暮らし相談室",
-      "headline": "暮らしの「困った」を、相談から実際の対応まで。",
-      "tagline": "スマホ、日々の暮らし、実家やご家族のこと。まずは身近な相談相手へ。",
+      "headline": "みたか暮らし相談室",
+      "tagline": "暮らしの「困った」を、相談から実際の対応まで。",
       "summary": "スマホ、庭・草刈り、買い物、業者探し、実家・空き家、家族・相続の入口相談まで対応します。",
       "serviceTags": [
         "スマホ相談",
@@ -25,7 +25,8 @@
       "linkedBusinessId": null,
       "periodStart": "2026-09-02",
       "periodEnd": null,
-      "active": true
+      "active": true,
+      "byline": "暮らしの相談員 井口 大成"
     }
   ]
 }
