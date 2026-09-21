@@ -15,7 +15,7 @@ const businesses = getBusinesses();
 const serviceKeys = ['annual_management', 'cleaning', 'flowers', 'planting'] as const;
 const pageTitle = '多磨霊園の墓所管理・清掃・墓参り代行を比較';
 const description =
-  '多磨霊園の年間管理、墓所清掃、供花・墓参り代行、植木の対応状況を、公開情報のみで事業者ごとに比較します。';
+  '多磨霊園の年間管理、墓所清掃、供花・墓参り代行、植木、遠方対応について、各社HP等の公開情報から確認できた内容を比較します。';
 // <title>専用（2026-09-02、ミチの編集改善・SEO/AIO対応「title・description・H1」節）:
 // BaseLayoutのタイトル自動サフィックスを廃止したため、H1（pageTitle）とは
 // 別に、サイト名を含む完結した<title>文字列を用意する。
@@ -25,14 +25,15 @@ const browserTitle = `${pageTitle}｜お墓ガイド`;
 <BaseLayout title={browserTitle} description={description}>
   <h1>{pageTitle}</h1>
   <p>
-    多磨霊園にお墓があり、遠方にお住まいの方向けに、年間を通じた墓所管理・清掃・供花・植木の対応状況を比較しています。「遠方対応・写真報告」の対応状況もあわせてご確認ください。
+    年間管理、墓所清掃、供花・墓参り代行、植木、遠方対応について、各石材店のHP等から確認できた内容を一覧にしています。
   </p>
 
   <section aria-labelledby="kanri-comparison-heading">
-    <h2 id="kanri-comparison-heading">対応状況の比較</h2>
+    <h2 id="kanri-comparison-heading">サービス比較</h2>
     <ComparisonTable
       businesses={businesses}
       visibleServices={[...serviceKeys, 'remote_photo_report']}
+      displayMode="simple"
     />
   </section>
 
@@ -44,7 +45,7 @@ const browserTitle = `${pageTitle}｜お墓ガイド`;
   <section aria-labelledby="kanri-price-heading">
     <h2 id="kanri-price-heading">価格の目安</h2>
     <p>
-      公開ページ上に金額の記載がある場合のみ、以下に「◯円〜」の形式で表示します。回数・訪問頻度・墓所の広さ等の条件により変動する場合があります。
+      各社HP等に料金の記載があるものを掲載しています。実際の料金や条件は各店舗へ直接ご確認ください。
     </p>
     <PriceList businesses={businesses} serviceKeys={[...serviceKeys]} />
   </section>
