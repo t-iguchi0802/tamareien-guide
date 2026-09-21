@@ -1,130 +1,28 @@
 ---
 /**
- * 「目的から探す」絞り込みコンポーネント（editorial-redesign）。
+ * 3分類だけで探す、シンプルな石材店フィルター。
  *
- * TOPページ（mode="link"）と /sekizaiten/（mode="inline"）の両方から使う共有部品。
- * どちらも同じ3つの目的ボタン・同じ詳しい条件チェックボックスを表示し、
- * 選択内容の意味（AND条件・confirmedのみ対象）を統一する。
- *
- * - mode="inline": このコンポーネント自身が<BusinessCard>のグリッドを描画し、
- *   選択条件に応じてクライアント側で表示・非表示を切り替える（/sekizaiten/用）。
- * - mode="link": グリッドは描画せず、選択内容を反映したURL
- *   （?services=a,b,c）へのCTAリンクだけを出す（TOPページ用）。
- *   遷移先（/sekizaiten/）はページ読み込み時に同じクエリを読み取り、
- *   同じ選択状態を復元する。
- *
- * データの絞り込みは常に「confirmedのみを対象に含める」
- * （isFilterableStatus、data_dictionary.md 6章）というAND条件で行う。
- * 未選択時は全事業者を対象とする（絞り込み条件0件 = 制限なし）。
- * 事業者データ・確認状態・掲載順は一切変更しない。表示順は常に
- * 呼び出し側から渡されたbusinesses配列の順序を保つ（並べ替えない）。
- *
- * JavaScript無効時は、初期HTML（全事業者を表示した状態）のまま
- * フォールバックする。チェックボックス自体はネイティブ要素なので、
- * JS無効でも「選べる」こと自体は壊れないが、実際の絞り込み・件数更新・
- * グリッドの表示切替はJS前提であるため<noscript>で明示する。
- *
- * 見出し文言・目的カードのUI強化（2026-09-02、ナビゲーション・運営者
- * 表示・SEO/AIO監査対応「TOPの目的選択の言葉」「3つの目的カードを
- * 選択UIとして明確にする」節）:
- * - 見出しを「まず、近いものを選んでください」→「お墓について、
- *   何をご希望ですか？」、補足を「選ぶと、下の『くわしい条件』が
- *   自動でチェックされます。あとから条件を追加・変更することもできます。」
- *   →「当てはまる内容を選ぶと、関連する条件が表示されます。あとから
- *   詳しい条件を追加できます。」に変更した（画面の構造を説明する
- *   表現をやめ、利用者の目的を尋ねる文言にした）。この文言はTOP
- *   （mode="link"）・/sekizaiten/（mode="inline"）の両方で共有される。
- * - 目的カード（.purpose-card）はもともと<button type="button">実装
- *   だったため、「カード全体をbuttonにする」「PCでcursor:pointer」は
- *   既存のまま満たしていた。今回追加したのは、(1)カード下部に
- *   「この内容から探す →」という操作文（.purpose-card__cta）、
- *   (2)選択状態をチェックボックスとの同期で判定し、aria-pressed・
- *   `.is-selected`（背景色・枠線・チェックマーク）で示す仕組み、
- *   (3)hover時の枠線・影・矢印の変化。カードはgrid直下の子要素のため、
- *   同じ行の高さはCSS Grid既定のalign-items:stretchで既にそろっている
- *   （追加のCSSは不要）。
- * - 「選択状態の判定」は、そのグループのserviceKeysが1つでもチェック
- *   されていれば「選択中」とみなす（複数目的の同時選択を維持するため、
- *   AND一致ではなくOR一致で判定する）。チェックボックスを直接操作した
- *   場合も、この判定を再計算してカードの見た目に反映する（目的カードと
- *   詳細条件チェックボックスの状態を常に同期させる）。
- *
- * GA4イベント重複送信の修正（2026-09-02、同対応「GA4実装監査」節）:
- * 従来、チェックボックス自体に`data-event="comparison_filter_use"`を
- * 付けていたため、1回のクリックで「click」「change」の両方のイベントを
- * 拾う汎用ディスパッチャ（src/lib/analytics/dispatcher.ts）が同じ内容の
- * イベントを2回送信していた（チェックボックスはクリックで
- * checked状態が変わるとclick・changeの両方が発火するため）。
- * 目的ボタン・クリアボタンは<button>要素でchangeイベントを持たないため
- * この問題は起きないが、挙動を統一するため、3つの操作すべてで
- * 汎用ディスパッチャに頼らず、このコンポーネント自身のJSから
- * `trackComparisonFilterUse()`を直接1回だけ呼び出す方式に統一した
- * （チェックボックス・目的ボタン・クリアボタンいずれの
- * `data-event`/`data-filter-type`/`data-filter-value`属性も削除した）。
- * 併せて、`selected_count`（送信時点で選択中の詳細条件数）・
- * `result_count`（絞り込み後の該当件数）をパラメータへ追加し、
- * 「絞り込み後の該当件数」「0件になった検索（result_count===0）」を
- * 既存イベント名のまま分析できるようにした（新しいイベント名は
- * 追加していない）。
- *
- * グループ見出しの構造的な整列修正・表記見直し（2026-09-02、「説明文の
- * 簡素化とTOP条件選択UIの位置ずれ」対応）:
- * - <fieldset>/<legend>のブラウザ既定スタイル（fieldsetのborder・padding・
- *   min-inline-size、legendが枠線に重なる特殊配置）が原因で、3つの
- *   グループ見出しの左端・上下位置がそろわず、見出しが枠線に食い込んで
- *   見える不具合があった。数値の微調整ではなく、fieldset自体は
- *   border:0・padding:0・min-width:0で完全にリセットして透明な箱に戻し、
- *   背景色・枠線は見出し（legend）の下に置く別要素
- *   （.service-filter__checks、選択肢コンテナ）へ移す構造に変更した
- *   （詳細は下記CSSコメント参照）。
- * - チェック項目のグリッドを、ラベルの文字数で列数が変わるauto-fillから、
- *   769px以上3列・481〜768px2列・480px以下1列の共通グリッドに変更した。
- * - 見出し文言「くわしい条件から選ぶ」→「さらに条件を選ぶ」に変更した
- *   （TOP上部の「お墓について、何をご希望ですか？」との重複感・
- *   操作説明的な響きを減らすため）。絞り込みロジック・ServiceKey・
- *   チェックボックスの構造・GA4イベントは変更していない。
- *
- * スポンサー契約店は、1つ以上のサービス条件が選択された場合に限り、
- * AND条件に一致した事業者を検索結果の先頭へ表示する。条件未選択時は
- * 通常掲載順を維持し、不一致スポンサーは表示しない。上位表示カードには
- * 「PR」を明記する。
+ * 2026-09-21 UI再設計:
+ * - 細かなサービス別チェックボックスを廃止し、目的は3分類だけにする。
+ * - 3分類は単一選択。各社の具体的な対応内容はBusinessCard側で直接見せる。
+ * - 分類内のいずれか1サービスを公開情報で確認できれば該当とする（OR条件）。
+ * - メインスポンサー（sponsoredBusinessIds）は、どの3分類を選んでも
+ *   検索結果の最上位PR枠に表示する。未選択時は通常掲載順を維持する。
+ * - TOP（mode="link"）と一覧（mode="inline"）で同じ3分類を共有する。
  */
 import type { Business, ServiceKey } from '../../types/business';
-import { PURPOSE_GROUPS, SERVICE_LABELS } from './serviceLabels';
+import { PURPOSE_GROUPS } from './serviceLabels';
 import { isFilterableStatus } from '../../lib/data/verificationStatus';
 import BusinessGrid from './BusinessGrid.astro';
 
 interface Props {
   businesses: Business[];
   mode: 'inline' | 'link';
-  /** mode="link" のとき必須。絞り込み結果を反映したクエリを付けて遷移する先。 */
   targetPath?: string;
-  /**
-   * 詳しい条件（<details>）を初期状態で開いておくかどうか。
-   * 既定値はfalseで、指定しない呼び出し元（/sekizaiten/等）の挙動は変えない。
-   * mode="inline"は元々常時open扱いのため実質的な影響はなく、
-   * mode="link"（TOPページ等）で明示的にtrueを渡した場合だけ効果を持つ。
-   * ユーザーは表示後も任意に閉じたり開いたりできる（open属性の初期値のみ変更）。
-   */
+  /** 旧API互換。細かな条件UIは廃止したため現在は使用しない。 */
   openByDefault?: boolean;
-  /**
-   * true の場合、mode="inline" でも事業者カードのグリッド（`.business-grid`）と
-   * 0件メッセージをこのコンポーネント自身では描画しない（呼び出し側が
-   * 別途 `<BusinessCard>` を使って自分で描画する）。
-   *
-   * 用途（2026-09-01、ミチのモバイル優先UI・文章校正対応「スマートフォンの
-   * スポンサー枠」節）: /sekizaiten/ で「結果件数の後、事業者一覧の前」に
-   * スポンサー枠を1箇所だけ挟むため。BaseLayout.astroの`beforeSponsor`
-   * スロット（本文前半→スポンサー枠1組→本文後半、TOPページと同じ仕組み）を
-   * 使うには、ServiceFilterの出力を「目的選択〜結果件数」までと
-   * 「事業者グリッド以降」とに分ける必要があるが、フィルタリングJSは
-   * 変更しない（`root.querySelector`ではなく`document.querySelector`で
-   * グリッド・0件メッセージを探すようにするだけで、判定ロジック自体は
-   * 一切変えていない。1ページに`mode="inline"`のServiceFilterは
-   * 同時に1つしか存在しないため、documentスコープでも衝突しない）。
-   */
   externalGrid?: boolean;
-  /** 有効なスポンサー契約と紐づく事業者ID。スポンサーJSONからページ側で渡す。 */
+  /** メインスポンサーと紐づく事業者ID。 */
   sponsoredBusinessIds?: string[];
 }
 
@@ -132,35 +30,15 @@ const {
   businesses,
   mode,
   targetPath,
-  openByDefault = false,
   externalGrid = false,
   sponsoredBusinessIds = [],
 } = Astro.props;
+
 const sponsoredBusinessIdSet = new Set(sponsoredBusinessIds);
 
-/**
- * 最初から見せる個別条件は各目的から2件ずつ（計6件）。
- * 残りは明確な開閉ボタンの中に置き、同じチェックボックスを重複表示しない。
- */
-const featuredServiceCount = 2;
-const featuredPurposeGroups = PURPOSE_GROUPS.map((group) => ({
-  ...group,
-  serviceKeys: group.serviceKeys.slice(0, featuredServiceCount),
-}));
-const additionalPurposeGroups = PURPOSE_GROUPS.map((group) => ({
-  ...group,
-  serviceKeys: group.serviceKeys.slice(featuredServiceCount),
-})).filter((group) => group.serviceKeys.length > 0);
-const additionalServiceCount = additionalPurposeGroups.reduce(
-  (count, group) => count + group.serviceKeys.length,
-  0,
-);
-
-/** クライアント側のAND判定用データ（confirmedなserviceKeyのみを持たせる）。 */
 const businessFilterData = businesses.map((business) => ({
   id: business.id,
   name: business.name,
-  city: business.location.city,
   displayOrder: business.displayOrder,
   isSponsored: sponsoredBusinessIdSet.has(business.id),
   services: (Object.keys(business.services) as ServiceKey[]).filter((key) =>
@@ -176,8 +54,11 @@ const businessFilterData = businesses.map((business) => ({
   data-filter-target={targetPath ?? ''}
 >
   <div class="service-filter__purpose">
-    <h2 id="service-filter-heading" class="service-filter__heading">主な希望から選ぶ</h2>
-    <p class="service-filter__hint">近いものを1つ選ぶか、下の条件から絞り込んでください。</p>
+    <h2 id="service-filter-heading" class="service-filter__heading">どんなことでお困りですか？</h2>
+    <p class="service-filter__hint">
+      3つの目的から選ぶだけ。具体的な対応内容は、各石材店の欄で確認できます。
+    </p>
+
     <div class="service-filter__purpose-grid">
       {
         PURPOSE_GROUPS.map((group) => (
@@ -192,7 +73,7 @@ const businessFilterData = businesses.map((business) => ({
             <span class="purpose-card__heading">{group.heading}</span>
             <span class="purpose-card__description">{group.description}</span>
             <span class="purpose-card__cta" aria-hidden="true">
-              この内容から探す
+              この内容で見る
               <svg width="14" height="14" viewBox="0 0 20 20" focusable="false">
                 <path
                   d="M5 3 L14 10 L5 17"
@@ -228,69 +109,18 @@ const businessFilterData = businesses.map((business) => ({
     </div>
   </div>
 
-  <hr class="masonry-rule" />
-
-  <div class="service-filter__conditions">
-    <div>
-      <h3 class="service-filter__conditions-heading">条件を選択して絞り込む</h3>
-      <p class="service-filter__conditions-hint">
-        希望する条件を選んでください。複数選ぶと、すべてに対応する事業者を表示します。
-      </p>
-    </div>
-
-    <div class="service-filter__groups service-filter__groups--featured">
-      {
-        featuredPurposeGroups.map((group) => (
-          <fieldset class="service-filter__group">
-            <legend class="service-filter__group-legend">{group.heading}</legend>
-            <div class="service-filter__checks">
-              {group.serviceKeys.map((key) => (
-                <label class="service-check" data-service-check>
-                  <input type="checkbox" name="service" value={key} data-filter-checkbox />
-                  <span class="service-check__label">{SERVICE_LABELS[key]}</span>
-                </label>
-              ))}
-            </div>
-          </fieldset>
-        ))
-      }
-    </div>
-
-    <details class="service-filter__detail" open={openByDefault}>
-      <summary class="service-filter__detail-summary">
-        <span>残りの条件を見る</span>
-        <span class="service-filter__detail-count">（{additionalServiceCount}項目）</span>
-      </summary>
-      <div class="service-filter__groups">
-        {
-          additionalPurposeGroups.map((group) => (
-            <fieldset class="service-filter__group">
-              <legend class="service-filter__group-legend">{group.heading}</legend>
-              <div class="service-filter__checks">
-                {group.serviceKeys.map((key) => (
-                  <label class="service-check" data-service-check>
-                    <input type="checkbox" name="service" value={key} data-filter-checkbox />
-                    <span class="service-check__label">{SERVICE_LABELS[key]}</span>
-                  </label>
-                ))}
-              </div>
-            </fieldset>
-          ))
-        }
-      </div>
-    </details>
-  </div>
-
   <div class="service-filter__result">
     <p class="service-filter__result-text" aria-live="polite">
       <span data-result-prefix>{mode === 'inline' ? 'すべての事業者' : '掲載中'}</span>
       <strong data-result-count>{businesses.length}</strong>社
     </p>
-    <button type="button" class="service-filter__clear" data-filter-clear> 条件をクリア </button>
+    <button type="button" class="service-filter__clear" data-filter-clear hidden>
+      選択をクリア
+    </button>
     {
       mode === 'link' && targetPath && (
         <a class="service-filter__cta" data-filter-cta href={targetPath}>
-          この条件で石材店の一覧を見る
+          石材店の一覧を見る
         </a>
       )
     }
@@ -298,7 +128,7 @@ const businessFilterData = businesses.map((business) => ({
 
   <noscript>
     <p class="service-filter__noscript">
-      条件の絞り込みにはJavaScriptが必要です。JavaScriptが無効なため、現在は全事業者を表示しています。
+      絞り込みにはJavaScriptが必要です。JavaScriptが無効なため、現在は全事業者を表示しています。
     </p>
   </noscript>
 
@@ -321,7 +151,6 @@ const businessFilterData = businesses.map((business) => ({
     interface FilterBusiness {
       id: string;
       name: string;
-      city: string;
       displayOrder: number;
       isSponsored: boolean;
       services: string[];
@@ -333,9 +162,6 @@ const businessFilterData = businesses.map((business) => ({
 
       const dataEl = root.querySelector('[data-service-filter-data]');
       const businessData: FilterBusiness[] = dataEl ? JSON.parse(dataEl.textContent || '[]') : [];
-      const checkboxes = Array.from(
-        root.querySelectorAll<HTMLInputElement>('input[data-filter-checkbox]'),
-      );
       const purposeButtons = Array.from(
         root.querySelectorAll<HTMLButtonElement>('[data-purpose-button]'),
       );
@@ -344,116 +170,86 @@ const businessFilterData = businesses.map((business) => ({
       const resultPrefixEl = root.querySelector('[data-result-prefix]');
       const mode = root.getAttribute('data-filter-mode');
       const targetPath = root.getAttribute('data-filter-target') || '';
-      const ctaLink = root.querySelector('[data-filter-cta]');
+      const ctaLink = root.querySelector<HTMLAnchorElement>('[data-filter-cta]');
       const pagePath = window.location.pathname;
 
-      function track(
-        filterType: string,
-        filterValue: string,
-        selectedCount: number,
-        resultCount: number,
-      ): void {
-        trackComparisonFilterUse({
-          filter_type: filterType,
-          filter_value: filterValue,
-          page_path: pagePath,
-          selected_count: selectedCount,
-          result_count: resultCount,
-        });
-      }
-
-      // 目的カード（.purpose-card）の選択状態表示（2026-09-02追加）。
-      // そのグループのserviceKeysのうち1つでも選択中ならカードを
-      // 「選択中」として示す（OR一致。AND一致にすると、目的カードが
-      // 対応する複数キーの一部だけを個別チェックボックスで選んだ場合に
-      // 見た目が一切変化せず分かりにくいため）。目的カード経由の選択・
-      // チェックボックス直接操作のどちらの後でも呼び出し、常に同期させる。
-      function syncPurposeButtons(selected: Set<string>): void {
-        purposeButtons.forEach((btn) => {
-          const keys = (btn.getAttribute('data-purpose-services') || '').split(',').filter(Boolean);
-          const isSelected = keys.some((key) => selected.has(key));
-          btn.classList.toggle('is-selected', isSelected);
-          btn.setAttribute('aria-pressed', String(isSelected));
-        });
-      }
-      // 0件メッセージ・事業者グリッドは、externalGrid（ServiceFilter.astro
-      // 側のprops参照）が使われるページ（/sekizaiten/）では、この
-      // <section>の外（BaseLayout.astroの`beforeSponsor`分割の「後半」側）
-      // に置かれる。1ページに mode="inline" のServiceFilterは同時に1つ
-      // しか存在しないため、documentスコープで探しても衝突しない
-      // （root.querySelectorから変更。AND判定・非表示判定は同じ）。
       const emptyEl = document.querySelector<HTMLElement>('[data-filter-empty]');
       const grid = document.querySelector<HTMLElement>('[data-business-grid]');
       const showMoreButton = document.querySelector<HTMLButtonElement>('[data-show-more]');
       const showMoreCount = document.querySelector<HTMLElement>('[data-show-more-count]');
-      const areaSelect = document.querySelector<HTMLSelectElement>('[data-area-filter]');
-      const sortSelect = document.querySelector<HTMLSelectElement>('[data-sort-select]');
       const initialLimit = 10;
+
+      let activePurposeId = '';
+      let activeKeys = new Set<string>();
       let listExpanded = false;
 
-      function getSelected(): Set<string> {
-        return new Set(checkboxes.filter((cb) => cb.checked).map((cb) => cb.value));
+      function track(filterValue: string, resultCount: number): void {
+        trackComparisonFilterUse({
+          filter_type: 'purpose',
+          filter_value: filterValue,
+          page_path: pagePath,
+          selected_count: activeKeys.size,
+          result_count: resultCount,
+        });
+      }
+
+      function setPurpose(id: string): void {
+        activePurposeId = id;
+        const button = purposeButtons.find((item) => item.dataset.purposeId === id);
+        activeKeys = new Set(
+          (button?.getAttribute('data-purpose-services') || '').split(',').filter(Boolean),
+        );
+
+        purposeButtons.forEach((item) => {
+          const selected = item.dataset.purposeId === activePurposeId;
+          item.classList.toggle('is-selected', selected);
+          item.setAttribute('aria-pressed', String(selected));
+        });
+
+        if (clearButton) clearButton.hidden = !activePurposeId;
+      }
+
+      function clearPurpose(): void {
+        activePurposeId = '';
+        activeKeys = new Set();
+        purposeButtons.forEach((item) => {
+          item.classList.remove('is-selected');
+          item.setAttribute('aria-pressed', 'false');
+        });
+        if (clearButton) clearButton.hidden = true;
       }
 
       function applyFilter(): number {
-        const selected = getSelected();
-        const hasSelection = selected.size > 0;
-        const selectedArea = areaSelect?.value || '';
-
-        checkboxes.forEach((cb) => {
-          const label = cb.closest('[data-service-check]');
-          if (label) label.classList.toggle('is-selected', cb.checked);
-        });
-
-        syncPurposeButtons(selected);
+        const hasSelection = activePurposeId !== '';
 
         const matchingBusinesses = businessData.filter((business) => {
-          const matchesServices =
-            !hasSelection || Array.from(selected).every((key) => business.services.includes(key));
-          const matchesArea = !selectedArea || business.city === selectedArea;
-          return matchesServices && matchesArea;
+          if (!hasSelection) return true;
+          // メインスポンサーは、どの3分類でも必ず検索結果に含める。
+          if (business.isSponsored) return true;
+          return business.services.some((key) => activeKeys.has(key));
         });
         const matchIds = new Set(matchingBusinesses.map((business) => business.id));
 
         if (resultCountEl) resultCountEl.textContent = String(matchIds.size);
         if (resultPrefixEl) {
-          resultPrefixEl.textContent = hasSelection
-            ? '条件に合う事業者'
-            : selectedArea
-              ? `${selectedArea}の事業者`
-              : mode === 'inline'
-                ? 'すべての事業者'
-                : '掲載中';
+          const label =
+            purposeButtons.find((item) => item.dataset.purposeId === activePurposeId)
+              ?.querySelector('.purpose-card__heading')
+              ?.textContent?.trim() || '';
+          resultPrefixEl.textContent = hasSelection ? `${label}に対応する事業者` : mode === 'inline' ? 'すべての事業者' : '掲載中';
         }
 
         if (mode === 'inline' && grid) {
-          // ":scope > " に限定する。PhoneLink/MapLink/OutboundLinkもそれぞれ
-          // 計測用の data-business-id を持つため、限定しないとカード内部の
-          // リンクまで誤って「カード」として拾ってしまう。
           const cards = Array.from(
             grid.querySelectorAll<HTMLElement>(':scope > [data-business-id]'),
           );
-          const sortMode = sortSelect?.value || 'default';
+
           cards
             .sort((a, b) => {
-              // サービス条件を選んだ検索時だけ、一致スポンサーを先頭へ。
-              // 条件未選択時は通常順を維持し、広告契約で自然掲載順を変えない。
               if (hasSelection) {
                 const sponsorCompare =
                   Number(b.dataset.sponsored === 'true') - Number(a.dataset.sponsored === 'true');
                 if (sponsorCompare !== 0) return sponsorCompare;
-              }
-              if (sortMode === 'name')
-                return (a.dataset.businessName || '').localeCompare(
-                  b.dataset.businessName || '',
-                  'ja',
-                );
-              if (sortMode === 'city') {
-                const cityCompare = (a.dataset.businessCity || '').localeCompare(
-                  b.dataset.businessCity || '',
-                  'ja',
-                );
-                if (cityCompare !== 0) return cityCompare;
               }
               return Number(a.dataset.businessOrder || 0) - Number(b.dataset.businessOrder || 0);
             })
@@ -461,46 +257,42 @@ const businessFilterData = businesses.map((business) => ({
 
           let matchedIndex = 0;
           cards.forEach((card) => {
-            const id = card.getAttribute('data-business-id') || '';
+            const id = card.dataset.businessId || '';
             const isMatch = matchIds.has(id);
             const isWithinLimit = listExpanded || matchedIndex < initialLimit;
             card.hidden = !isMatch || !isWithinLimit;
             if (isMatch) matchedIndex += 1;
+
+            const isSponsor = card.dataset.sponsored === 'true';
             const sponsorBadge = card.querySelector<HTMLElement>('[data-sponsor-result-badge]');
-            if (sponsorBadge) {
-              sponsorBadge.hidden = !(hasSelection && isMatch && card.dataset.sponsored === 'true');
-            }
-            const prefixEl = card.querySelector('[data-service-prefix]');
-            if (prefixEl) {
-              prefixEl.textContent = hasSelection
-                ? '選んだ条件と一致する対応:'
-                : '対応を確認できるサービス:';
-            }
-            const words = card.querySelectorAll<HTMLElement>('[data-service-word]');
+            if (sponsorBadge) sponsorBadge.hidden = !(hasSelection && isSponsor);
+
+            const words = Array.from(
+              card.querySelectorAll<HTMLElement>('[data-service-word]'),
+            );
             words.forEach((word) => {
-              const key = word.getAttribute('data-service-word') || '';
-              word.classList.toggle('service-word--matched', hasSelection && selected.has(key));
+              const key = word.dataset.serviceWord || '';
+              word.classList.toggle('service-word--matched', hasSelection && activeKeys.has(key));
             });
 
-            // 選択条件と一致した項目のカード上部表示（2026-09-01追加）。
-            // 一致した[data-service-word]（初期表示・詳細側の両方を含む）の
-            // テキストをそのまま複製する（SERVICE_LABELSをJS側で
-            // 二重管理しない）。一致するカードすべてに表示する。
             const matchBlock = card.querySelector<HTMLElement>('[data-match-block]');
             const matchListEl = card.querySelector<HTMLElement>('[data-match-list]');
             if (matchBlock && matchListEl) {
-              if (hasSelection && isMatch) {
-                const matchedLabels = Array.from(words)
-                  .filter((word) => selected.has(word.getAttribute('data-service-word') || ''))
-                  .map((word) => word.textContent || '');
+              const matchedLabels = words
+                .filter((word) => activeKeys.has(word.dataset.serviceWord || ''))
+                .map((word) => word.textContent?.trim() || '')
+                .filter(Boolean);
+
+              if (hasSelection && isMatch && matchedLabels.length > 0) {
                 matchListEl.textContent = matchedLabels.join('、');
                 matchBlock.hidden = false;
               } else {
-                matchBlock.hidden = true;
                 matchListEl.textContent = '';
+                matchBlock.hidden = true;
               }
             }
           });
+
           if (emptyEl) emptyEl.hidden = matchIds.size > 0;
           if (showMoreButton) {
             const remaining = Math.max(0, matchIds.size - initialLimit);
@@ -510,85 +302,52 @@ const businessFilterData = businesses.map((business) => ({
         }
 
         if (mode === 'link' && ctaLink && targetPath) {
-          if (hasSelection) {
-            const query = encodeURIComponent(Array.from(selected).join(','));
-            ctaLink.setAttribute('href', `${targetPath}?services=${query}`);
-          } else {
-            ctaLink.setAttribute('href', targetPath);
-          }
+          ctaLink.href = hasSelection
+            ? `${targetPath}?purpose=${encodeURIComponent(activePurposeId)}`
+            : targetPath;
         }
 
         return matchIds.size;
       }
 
-      // GA4イベントは、汎用ディスパッチャ（data-event属性・click/change委譲）
-      // には委ねず、ここで明示的に1操作につき1回だけ送信する
-      // （チェックボックスの場合、data-event属性を付けるとclick/changeの
-      // 両方から二重送信されるバグがあったため。上記コメント参照）。
-      checkboxes.forEach((cb) =>
-        cb.addEventListener('change', () => {
+      purposeButtons.forEach((button) => {
+        button.addEventListener('click', () => {
+          const id = button.dataset.purposeId || '';
+          setPurpose(id);
           listExpanded = false;
           const resultCount = applyFilter();
-          track('service', cb.value, getSelected().size, resultCount);
-        }),
-      );
-
-      purposeButtons.forEach((btn) => {
-        btn.addEventListener('click', () => {
-          const keys = (btn.getAttribute('data-purpose-services') || '').split(',').filter(Boolean);
-          checkboxes.forEach((cb) => {
-            cb.checked = keys.includes(cb.value);
-          });
-          listExpanded = false;
-          const resultCount = applyFilter();
-          track(
-            'purpose',
-            btn.getAttribute('data-purpose-id') || '',
-            getSelected().size,
-            resultCount,
-          );
+          track(id, resultCount);
         });
       });
 
-      if (clearButton) {
-        clearButton.addEventListener('click', () => {
-          checkboxes.forEach((cb) => {
-            cb.checked = false;
-          });
-          if (areaSelect) areaSelect.value = '';
-          listExpanded = false;
-          const resultCount = applyFilter();
-          track('clear', 'all', 0, resultCount);
-        });
-      }
-
-      areaSelect?.addEventListener('change', () => {
+      clearButton?.addEventListener('click', () => {
+        clearPurpose();
         listExpanded = false;
-        applyFilter();
+        const resultCount = applyFilter();
+        track('clear', resultCount);
       });
-      sortSelect?.addEventListener('change', applyFilter);
+
       showMoreButton?.addEventListener('click', () => {
         listExpanded = true;
         applyFilter();
       });
 
-      // ブラウザ（特にChromium系）は、リロードや戻る操作でチェックボックスの
-      // 選択状態を独自に復元することがある（フォームのsticky state）。
-      // クエリの有無にかかわらず「未選択が既定」を保証するため、まず全て
-      // 未選択にリセットしてから、必要な場合だけ下のクエリ復元で再設定する。
-      checkboxes.forEach((cb) => {
-        cb.checked = false;
-      });
-
-      // TOPページの「この条件で一覧を見る」から遷移してきた場合、
-      // ?services=a,b,c を読み取って同じ選択状態を復元する。
+      // 新URL: ?purpose=build|closure|care
       const params = new URLSearchParams(window.location.search);
-      const fromQuery = params.get('services');
-      if (fromQuery) {
-        const wanted = new Set(fromQuery.split(',').filter(Boolean));
-        checkboxes.forEach((cb) => {
-          cb.checked = wanted.has(cb.value);
-        });
+      const fromPurpose = params.get('purpose');
+      if (fromPurpose && purposeButtons.some((item) => item.dataset.purposeId === fromPurpose)) {
+        setPurpose(fromPurpose);
+      } else {
+        // 旧URL（?services=...）から来た場合も、該当する3分類へ自然に移行する。
+        const oldServices = new Set((params.get('services') || '').split(',').filter(Boolean));
+        if (oldServices.size > 0) {
+          const matchedButton = purposeButtons.find((item) =>
+            (item.getAttribute('data-purpose-services') || '')
+              .split(',')
+              .some((key) => oldServices.has(key)),
+          );
+          if (matchedButton?.dataset.purposeId) setPurpose(matchedButton.dataset.purposeId);
+        }
       }
 
       applyFilter();
@@ -600,12 +359,12 @@ const businessFilterData = businesses.map((business) => ({
   .service-filter {
     display: flex;
     flex-direction: column;
-    gap: var(--space-6);
+    gap: var(--space-5);
   }
 
   .service-filter__heading {
-    font-family: var(--font-family-heading);
     margin: 0 0 var(--space-2);
+    font-family: var(--font-family-heading);
   }
 
   .service-filter__hint {
@@ -616,7 +375,7 @@ const businessFilterData = businesses.map((business) => ({
 
   .service-filter__purpose-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: var(--space-4);
   }
 
@@ -625,29 +384,27 @@ const businessFilterData = businesses.map((business) => ({
     display: flex;
     flex-direction: column;
     gap: var(--space-2);
-    text-align: left;
-    background: var(--color-stone-surface);
+    min-height: 150px;
+    padding: var(--space-4) var(--space-5, 1.25rem);
     border: 1px solid var(--color-stone-line);
     border-radius: var(--radius-card);
-    padding: var(--space-4) var(--space-5, 1.25rem);
-    font: inherit;
+    background: var(--color-stone-surface);
     color: var(--color-text);
+    text-align: left;
+    font: inherit;
     cursor: pointer;
-    min-height: var(--tap-target-min);
     transition:
       background-color 0.15s ease,
       border-color 0.15s ease,
-      box-shadow 0.15s ease;
+      box-shadow 0.15s ease,
+      transform 0.15s ease;
   }
 
   .purpose-card:hover {
     background: var(--color-surface);
     border-color: var(--color-accent);
-    box-shadow: 0 2px 8px rgba(41, 44, 41, 0.1);
-  }
-
-  .purpose-card:hover .purpose-card__cta svg {
-    transform: translateX(3px);
+    box-shadow: 0 4px 12px rgba(41, 44, 41, 0.1);
+    transform: translateY(-1px);
   }
 
   .purpose-card:focus-visible {
@@ -655,12 +412,34 @@ const businessFilterData = businesses.map((business) => ({
     outline-offset: 2px;
   }
 
-  /* 選択状態（2026-09-02追加）。チェックマーク（右上）・背景色・枠線で示す。
-     aria-pressedと連動させ、スクリーンリーダーにも選択状態を伝える。 */
   .purpose-card.is-selected {
+    border: 2px solid var(--color-accent);
     background: var(--color-accent-soft);
-    border-color: var(--color-accent);
-    border-width: 2px;
+  }
+
+  .purpose-card__heading {
+    padding-right: var(--space-6);
+    font-family: var(--font-family-heading);
+    font-weight: 700;
+    font-size: 1.1rem;
+    line-height: 1.4;
+  }
+
+  .purpose-card__description {
+    flex: 1;
+    color: var(--color-stone-text);
+    font-size: var(--font-size-label);
+    line-height: 1.55;
+  }
+
+  .purpose-card__cta {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3em;
+    margin-top: auto;
+    color: var(--color-accent);
+    font-weight: 700;
+    font-size: var(--font-size-label);
   }
 
   .purpose-card__check {
@@ -675,255 +454,42 @@ const businessFilterData = businesses.map((business) => ({
     display: block;
   }
 
-  .purpose-card__heading {
-    font-family: var(--font-family-heading);
-    font-weight: 700;
-    font-size: 1.1rem;
-    padding-right: var(--space-6);
-  }
-
-  .purpose-card__description {
-    color: var(--color-stone-text);
-    font-size: var(--font-size-label);
-    line-height: 1.6;
-    flex: 1;
-  }
-
-  /* 「この内容から探す →」（2026-09-02追加）。カードが「説明の書かれた箱」
-     ではなく検索を始められる選択肢であることを示す操作文。 */
-  .purpose-card__cta {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.3em;
-    margin-top: auto;
-    padding-top: var(--space-2);
-    color: var(--color-accent);
-    font-weight: 700;
-    font-size: var(--font-size-label);
-  }
-
-  .purpose-card__cta svg {
-    transition: transform 0.15s ease;
-  }
-
-  .service-filter__conditions {
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-4);
-  }
-
-  .service-filter__conditions-heading {
-    margin: 0 0 var(--space-2);
-    font-family: var(--font-family-heading);
-    font-size: 1.2rem;
-  }
-
-  .service-filter__conditions-hint {
-    margin: 0;
-    color: var(--color-stone-text);
-    font-size: var(--font-size-label);
-  }
-
-  .service-filter__detail {
-    border: none;
-  }
-
-  .service-filter__detail-summary {
-    cursor: pointer;
-    width: fit-content;
-    min-height: var(--tap-target-min);
-    display: flex;
-    align-items: center;
-    gap: 0.2em;
-    padding: 0.65em 1em;
-    border: 1px solid var(--color-accent);
-    border-radius: var(--radius-pill);
-    background: var(--color-accent-soft);
-    color: var(--color-accent-deep);
-    font-family: var(--font-family-heading);
-    font-weight: 700;
-    font-size: 1rem;
-    list-style: none;
-  }
-
-  .service-filter__detail-summary::-webkit-details-marker {
-    display: none;
-  }
-
-  .service-filter__detail-summary::after {
-    content: '＋';
-    margin-left: var(--space-2);
-    font-size: 1.15em;
-    line-height: 1;
-  }
-
-  .service-filter__detail[open] .service-filter__detail-summary::after {
-    content: '−';
-  }
-
-  .service-filter__detail-summary:hover {
-    background: var(--color-surface);
-  }
-
-  .service-filter__detail-summary:focus-visible {
-    outline: 3px solid var(--color-accent);
-    outline-offset: 2px;
-  }
-
-  .service-filter__detail-count {
-    font-family: var(--font-family-sans, sans-serif);
-    font-weight: 400;
-  }
-
-  .service-filter__groups {
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-5, 1.25rem);
-    padding-top: var(--space-3);
-  }
-
-  .service-filter__groups--featured {
-    display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: var(--space-4);
-    padding-top: 0;
-  }
-
-  .service-filter__groups--featured .service-filter__checks {
-    grid-template-columns: 1fr;
-  }
-
-  /*
-   * グループ見出し（fieldset/legend）の構造的な修正（2026-09-02、
-   * 「TOP条件選択のグループ見出しを整列」節）。
-   *
-   * 原因: <fieldset>にはブラウザ既定のborder（groove等）・padding・
-   * min-inline-size: min-contentがあり、<legend>には既定でその境界線に
-   * 重ねて配置される特殊なレンダリングがある。従来はfieldset自体に
-   * 背景色・枠線・paddingを与えていたため、legendがその枠線に食い込み、
-   * 左端・上下位置がブラウザ依存でずれていた。
-   *
-   * 修正方針: fieldset自体の既定スタイルを完全にリセットして「意味付け
-   * だけを持つ透明な箱」に戻し、背景色・枠線は見出し（legend）の下に
-   * 置く別要素（.service-filter__checks、選択肢コンテナ）へ移した。
-   * これにより「見出し→選択肢の枠→次の見出し→次の枠」という順序が
-   * 構造的に（数値の微調整ではなく）明確になる。
-   */
-  .service-filter__group {
-    /* グループ間の余白は、親.service-filter__groups（flex column）の
-       gapだけで統一する（marginを併用すると値が二重になるため使わない）。 */
-    margin: 0;
-    padding: 0;
-    border: 0;
-    min-width: 0;
-  }
-
-  .service-filter__group-legend {
-    display: block;
-    float: none;
-    width: 100%;
-    padding: 0;
-    /* 見出しから選択肢コンテナまでの間隔を3グループとも同じ値にする。 */
-    margin: 0 0 var(--space-3);
-    font-family: var(--font-family-heading);
-    font-weight: 700;
-    color: var(--color-text);
-    font-size: 1rem;
-  }
-
-  /* 選択肢コンテナ（背景色・枠線はfieldsetからここへ移した）。
-     チェック項目は768px超で3列、481〜768pxで2列、480px以下で1列の
-     共通グリッドを使う（文字数に応じたauto-fill等の可変列数はやめ、
-     3グループで列数がそろうようにする）。 */
-  .service-filter__checks {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: var(--space-2);
-    padding: var(--space-4);
-    border: 1px solid var(--color-tint-green-border);
-    border-radius: var(--radius-card, 10px);
-    background: var(--color-tint-green-bg);
-  }
-
-  @media (min-width: 481px) {
-    .service-filter__checks {
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-    }
-  }
-
-  @media (min-width: 769px) {
-    .service-filter__checks {
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-    }
-  }
-
-  .service-check {
-    display: flex;
-    align-items: center;
-    gap: var(--space-2);
-    height: 100%;
-    min-height: var(--tap-target-min);
-    padding: 0.6em var(--space-3);
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-card);
-    background: var(--color-surface);
-    cursor: pointer;
-    transition:
-      background-color 0.15s ease,
-      border-color 0.15s ease;
-  }
-
-  .service-check input {
-    width: 1.15em;
-    height: 1.15em;
-    accent-color: var(--color-accent);
-    flex: none;
-  }
-
-  .service-check.is-selected {
-    background: var(--color-accent-soft);
-    border-color: var(--color-accent);
-  }
-
-  .service-check:focus-within {
-    outline: 3px solid var(--color-accent);
-    outline-offset: 2px;
-  }
-
-  /* モバイル最優先レビュー対応（2026-09-01）: 「チェック後に結果が変化した
-     ことが分かる」ため、結果件数を独立した石色のカードにした
-     （背景色・枠だけの変更で、絞り込みロジック・aria-live等は変更していない）。 */
   .service-filter__result {
     display: flex;
     flex-wrap: wrap;
     align-items: center;
-    gap: var(--space-4);
-    padding: var(--space-4);
+    gap: var(--space-3);
+    padding: var(--space-3) var(--space-4);
     border: 1px solid var(--color-stone-line);
-    border-radius: var(--radius-card, 10px);
+    border-radius: var(--radius-card);
     background: var(--color-stone-surface);
   }
 
   .service-filter__result-text {
     margin: 0;
-    font-size: 1.15rem;
+    font-size: 1.05rem;
   }
 
   .service-filter__result-text strong {
+    margin-inline: 0.25em;
     font-family: var(--font-family-heading);
-    font-size: 1.5rem;
+    font-size: 1.35rem;
     color: var(--color-accent-deep);
   }
 
   .service-filter__clear {
-    background: none;
-    border: none;
+    min-height: var(--tap-target-min);
+    padding: 0.3em 0.4em;
+    border: 0;
+    background: transparent;
     color: var(--color-accent);
     text-decoration: underline;
     font: inherit;
     cursor: pointer;
-    padding: 0.3em 0.2em;
-    min-height: var(--tap-target-min);
+  }
+
+  .service-filter__clear[hidden] {
+    display: none;
   }
 
   .service-filter__cta {
@@ -931,6 +497,7 @@ const businessFilterData = businesses.map((business) => ({
     align-items: center;
     justify-content: center;
     min-height: var(--tap-target-min);
+    margin-left: auto;
     padding: 0.6em 1.4em;
     border-radius: var(--radius-pill);
     background: var(--color-accent);
@@ -953,37 +520,18 @@ const businessFilterData = businesses.map((business) => ({
       gap: var(--space-4);
     }
 
-    .service-filter__groups--featured {
-      grid-template-columns: 1fr;
-      gap: var(--space-3);
-    }
-
-    .service-filter__detail-summary {
-      width: 100%;
-      justify-content: center;
-    }
-
     .service-filter__purpose-grid {
       grid-template-columns: 1fr;
       gap: var(--space-2);
     }
 
     .purpose-card {
-      gap: 0.25rem;
+      min-height: 0;
       padding: var(--space-3) var(--space-4);
     }
 
     .purpose-card__description {
       line-height: 1.45;
-    }
-
-    .purpose-card__cta {
-      padding-top: var(--space-1);
-    }
-
-    .service-filter__result {
-      gap: var(--space-2) var(--space-3);
-      padding: var(--space-3) var(--space-4);
     }
 
     .service-filter__result-text {
@@ -993,39 +541,7 @@ const businessFilterData = businesses.map((business) => ({
 
     .service-filter__cta {
       flex: 1 1 100%;
-    }
-
-    .service-filter[data-filter-mode='inline'] .service-filter__hint {
-      display: none;
-    }
-
-    .service-filter[data-filter-mode='inline'] .service-filter__purpose-grid {
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-    }
-
-    .service-filter[data-filter-mode='inline'] .purpose-card {
-      justify-content: center;
-      min-height: 82px;
-      padding: var(--space-2);
-      text-align: center;
-    }
-
-    .service-filter[data-filter-mode='inline'] .purpose-card__heading {
-      padding: 0;
-      font-size: 0.9rem;
-      line-height: 1.35;
-    }
-
-    .service-filter[data-filter-mode='inline'] .purpose-card__description,
-    .service-filter[data-filter-mode='inline'] .purpose-card__cta {
-      display: none;
-    }
-
-    .service-filter[data-filter-mode='inline'] .purpose-card__check {
-      top: 0.25rem;
-      right: 0.25rem;
-      width: 16px;
-      height: 16px;
+      margin-left: 0;
     }
   }
 </style>
