@@ -385,7 +385,7 @@ const hasBeforeSponsor = Astro.slots.has('beforeSponsor');
 
     {
       hasBeforeSponsor ? (
-        <div class="page-shell page-shell--split">
+        <div class="page-shell page-shell--split" data-page-category={pageCategory}>
           {/* 「本文」ランドマーク（<main>）はHTML上1つだけにする必要があるため、
               スキップリンクの遷移先も含め、本文の先頭（beforeSponsorの中身）
               側に<main id="main-content">を置く。後半（既定スロットの中身）は
@@ -400,7 +400,7 @@ const hasBeforeSponsor = Astro.slots.has('beforeSponsor');
           </div>
         </div>
       ) : (
-        <div class="page-shell">
+        <div class="page-shell" data-page-category={pageCategory}>
           <main id="main-content" class="site-main">
             <slot />
           </main>
@@ -1169,6 +1169,59 @@ const hasBeforeSponsor = Astro.slots.has('beforeSponsor');
   @media (min-width: 1024px) {
     .page-shell .sponsor-group .sponsor-card {
       min-height: 555px;
+    }
+  }
+
+  /*
+   * 比較ページのスマホ用メインスポンサー表示（2026-09-21）。
+   * PCは従来どおり左右レール。スマホだけ、比較UIより前に来るスポンサー
+   * 4枠を横スワイプ式の目立つ広告帯として表示する。
+   * 空き枠はスマホでは非表示にし、実スポンサーだけを見せる。
+   */
+  @media (max-width: 767px) {
+    .page-shell--split[data-page-category='comparison'] .sponsor-group {
+      position: relative;
+      display: flex;
+      gap: var(--space-3);
+      overflow-x: auto;
+      width: 100%;
+      max-width: 100vw;
+      padding: 3.8rem var(--space-4) var(--space-5);
+      background: var(--color-sponsor-bg);
+      border-block: 1px solid var(--color-sponsor-border);
+      scroll-snap-type: x mandatory;
+      overscroll-behavior-inline: contain;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: thin;
+    }
+
+    .page-shell--split[data-page-category='comparison'] .sponsor-group::before {
+      content: 'PR｜メインスポンサー';
+      position: absolute;
+      top: var(--space-4);
+      left: var(--space-4);
+      color: var(--color-sponsor-fg);
+      font-family: var(--font-family-heading);
+      font-size: 0.95rem;
+      font-weight: 800;
+      letter-spacing: 0.02em;
+    }
+
+    .page-shell--split[data-page-category='comparison'] .sponsor-rail {
+      display: contents;
+    }
+
+    .page-shell--split[data-page-category='comparison'] .sponsor-card {
+      flex: 0 0 min(84vw, 340px);
+      width: min(84vw, 340px);
+      min-width: min(84vw, 340px);
+      min-height: 390px;
+      scroll-snap-align: start;
+      box-shadow: 0 8px 24px rgba(67, 42, 26, 0.18);
+    }
+
+    .page-shell--split[data-page-category='comparison'] .sponsor-card--empty {
+      display: none;
     }
   }
 
