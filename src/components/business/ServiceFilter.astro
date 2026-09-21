@@ -3,11 +3,11 @@
  * 3分類だけで探す、シンプルな石材店フィルター。
  *
  * 2026-09-21 UI再設計:
- * - 細かなサービス別チェックボックスを廃止し、目的は3分類だけにする。
- * - 3分類は単一選択。各社の具体的な対応内容はBusinessCard側で直接見せる。
- * - 分類内のいずれか1サービスを公開情報で確認できれば該当とする（OR条件）。
- * - メインスポンサー（sponsoredBusinessIds）は、どの3分類を選んでも
- *   検索結果の最上位PR枠に表示する。未選択時は通常掲載順を維持する。
+ * - 細かなサービス別チェックボックスは使わず、目的は3分類だけにする。
+ * - 3分類は複数選択可能。各分類の中では、いずれか1サービスを確認できれば
+ *   その分類に対応するとみなし、複数分類を選んだ場合は分類間をANDで絞り込む。
+ * - メインスポンサー（sponsoredBusinessIds）は、どの分類を選んでも
+ *   検索結果に含め、選択時は最上位PR枠へ表示する。
  * - TOP（mode="link"）と一覧（mode="inline"）で同じ3分類を共有する。
  */
 import type { Business, ServiceKey } from '../../types/business';
@@ -56,7 +56,7 @@ const businessFilterData = businesses.map((business) => ({
   <div class="service-filter__purpose">
     <h2 id="service-filter-heading" class="service-filter__heading">どんなことでお困りですか？</h2>
     <p class="service-filter__hint">
-      3つの目的から選ぶだけ。具体的な対応内容は、各石材店の欄で確認できます。
+      複数選択できます。具体的な対応内容は、各石材店の欄で確認できます。
     </p>
 
     <div class="service-filter__purpose-grid">
@@ -70,39 +70,14 @@ const businessFilterData = businesses.map((business) => ({
             data-purpose-services={group.serviceKeys.join(',')}
             aria-pressed="false"
           >
-            <span class="purpose-card__heading">{group.heading}</span>
-            <span class="purpose-card__description">{group.description}</span>
-            <span class="purpose-card__cta" aria-hidden="true">
-              この内容で見る
-              <svg width="14" height="14" viewBox="0 0 20 20" focusable="false">
-                <path
-                  d="M5 3 L14 10 L5 17"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="2.2"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                />
-              </svg>
+            <span class="purpose-card__checkbox" aria-hidden="true">
+              <span class="purpose-card__checkbox-check">✓</span>
             </span>
-            <svg
-              class="purpose-card__check"
-              width="20"
-              height="20"
-              viewBox="0 0 20 20"
-              aria-hidden="true"
-              focusable="false"
-            >
-              <circle cx="10" cy="10" r="9" fill="currentColor" />
-              <path
-                d="M6 10.5 L8.7 13 L14 7"
-                fill="none"
-                stroke="#fff"
-                stroke-width="2"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-              />
-            </svg>
+            <span class="purpose-card__copy">
+              <span class="purpose-card__heading">{group.heading}</span>
+              <span class="purpose-card__description">{group.description}</span>
+              <span class="purpose-card__cta" aria-hidden="true">選択する</span>
+            </span>
           </button>
         ))
       }
@@ -110,6 +85,7 @@ const businessFilterData = businesses.map((business) => ({
   </div>
 
   <div class="service-filter__result">
+    <p class="service-filter__result-label">石材店一覧</p>
     <p class="service-filter__result-text" aria-live="polite">
       <span data-result-prefix>{mode === 'inline' ? 'すべての事業者' : '掲載中'}</span>
       <strong data-result-count>{businesses.length}</strong>社
@@ -156,6 +132,12 @@ const businessFilterData = businesses.map((business) => ({
       services: string[];
     }
 
+    interface PurposeSelection {
+      id: string;
+      label: string;
+      keys: string[];
+    }
+
     (function initServiceFilter() {
       const root = document.querySelector<HTMLElement>('[data-filter-mode]');
       if (!root) return;
@@ -179,64 +161,69 @@ const businessFilterData = businesses.map((business) => ({
       const showMoreCount = document.querySelector<HTMLElement>('[data-show-more-count]');
       const initialLimit = 10;
 
-      let activePurposeId = '';
-      let activeKeys = new Set<string>();
+      const activePurposeIds = new Set<string>();
       let listExpanded = false;
+
+      function getPurposeSelections(): PurposeSelection[] {
+        return purposeButtons
+          .filter((button) => activePurposeIds.has(button.dataset.purposeId || ''))
+          .map((button) => ({
+            id: button.dataset.purposeId || '',
+            label:
+              button.querySelector<HTMLElement>('.purpose-card__heading')?.textContent?.trim() || '',
+            keys: (button.dataset.purposeServices || '').split(',').filter(Boolean),
+          }));
+      }
+
+      function getActiveKeys(): Set<string> {
+        return new Set(getPurposeSelections().flatMap((selection) => selection.keys));
+      }
+
+      function syncPurposeButtons(): void {
+        purposeButtons.forEach((button) => {
+          const id = button.dataset.purposeId || '';
+          const selected = activePurposeIds.has(id);
+          button.classList.toggle('is-selected', selected);
+          button.setAttribute('aria-pressed', String(selected));
+        });
+        if (clearButton) clearButton.hidden = activePurposeIds.size === 0;
+      }
 
       function track(filterValue: string, resultCount: number): void {
         trackComparisonFilterUse({
           filter_type: 'purpose',
           filter_value: filterValue,
           page_path: pagePath,
-          selected_count: activeKeys.size,
+          selected_count: activePurposeIds.size,
           result_count: resultCount,
         });
       }
 
-      function setPurpose(id: string): void {
-        activePurposeId = id;
-        const button = purposeButtons.find((item) => item.dataset.purposeId === id);
-        activeKeys = new Set(
-          (button?.getAttribute('data-purpose-services') || '').split(',').filter(Boolean),
-        );
-
-        purposeButtons.forEach((item) => {
-          const selected = item.dataset.purposeId === activePurposeId;
-          item.classList.toggle('is-selected', selected);
-          item.setAttribute('aria-pressed', String(selected));
-        });
-
-        if (clearButton) clearButton.hidden = !activePurposeId;
-      }
-
-      function clearPurpose(): void {
-        activePurposeId = '';
-        activeKeys = new Set();
-        purposeButtons.forEach((item) => {
-          item.classList.remove('is-selected');
-          item.setAttribute('aria-pressed', 'false');
-        });
-        if (clearButton) clearButton.hidden = true;
-      }
-
       function applyFilter(): number {
-        const hasSelection = activePurposeId !== '';
+        const selections = getPurposeSelections();
+        const activeKeys = getActiveKeys();
+        const hasSelection = selections.length > 0;
 
         const matchingBusinesses = businessData.filter((business) => {
           if (!hasSelection) return true;
-          // メインスポンサーは、どの3分類でも必ず検索結果に含める。
+          // メインスポンサーは、どの3分類を選んでも検索結果に含める。
           if (business.isSponsored) return true;
-          return business.services.some((key) => activeKeys.has(key));
+          // 各分類内はOR、複数分類間はAND。
+          return selections.every((selection) =>
+            selection.keys.some((key) => business.services.includes(key)),
+          );
         });
         const matchIds = new Set(matchingBusinesses.map((business) => business.id));
 
         if (resultCountEl) resultCountEl.textContent = String(matchIds.size);
         if (resultPrefixEl) {
-          const label =
-            purposeButtons.find((item) => item.dataset.purposeId === activePurposeId)
-              ?.querySelector('.purpose-card__heading')
-              ?.textContent?.trim() || '';
-          resultPrefixEl.textContent = hasSelection ? `${label}に対応する事業者` : mode === 'inline' ? 'すべての事業者' : '掲載中';
+          if (!hasSelection) {
+            resultPrefixEl.textContent = mode === 'inline' ? 'すべての事業者' : '掲載中';
+          } else if (selections.length === 1) {
+            resultPrefixEl.textContent = `${selections[0].label}に対応する事業者`;
+          } else {
+            resultPrefixEl.textContent = '選択した条件に合う事業者';
+          }
         }
 
         if (mode === 'inline' && grid) {
@@ -267,9 +254,7 @@ const businessFilterData = businesses.map((business) => ({
             const sponsorBadge = card.querySelector<HTMLElement>('[data-sponsor-result-badge]');
             if (sponsorBadge) sponsorBadge.hidden = !(hasSelection && isSponsor);
 
-            const words = Array.from(
-              card.querySelectorAll<HTMLElement>('[data-service-word]'),
-            );
+            const words = Array.from(card.querySelectorAll<HTMLElement>('[data-service-word]'));
             words.forEach((word) => {
               const key = word.dataset.serviceWord || '';
               word.classList.toggle('service-word--matched', hasSelection && activeKeys.has(key));
@@ -303,7 +288,9 @@ const businessFilterData = businesses.map((business) => ({
 
         if (mode === 'link' && ctaLink && targetPath) {
           ctaLink.href = hasSelection
-            ? `${targetPath}?purpose=${encodeURIComponent(activePurposeId)}`
+            ? `${targetPath}?purpose=${encodeURIComponent(
+                selections.map((selection) => selection.id).join(','),
+              )}`
             : targetPath;
         }
 
@@ -313,7 +300,13 @@ const businessFilterData = businesses.map((business) => ({
       purposeButtons.forEach((button) => {
         button.addEventListener('click', () => {
           const id = button.dataset.purposeId || '';
-          setPurpose(id);
+          if (!id) return;
+          if (activePurposeIds.has(id)) {
+            activePurposeIds.delete(id);
+          } else {
+            activePurposeIds.add(id);
+          }
+          syncPurposeButtons();
           listExpanded = false;
           const resultCount = applyFilter();
           track(id, resultCount);
@@ -321,7 +314,8 @@ const businessFilterData = businesses.map((business) => ({
       });
 
       clearButton?.addEventListener('click', () => {
-        clearPurpose();
+        activePurposeIds.clear();
+        syncPurposeButtons();
         listExpanded = false;
         const resultCount = applyFilter();
         track('clear', resultCount);
@@ -332,24 +326,30 @@ const businessFilterData = businesses.map((business) => ({
         applyFilter();
       });
 
-      // 新URL: ?purpose=build|closure|care
+      // 新URL: ?purpose=build,closure,care
       const params = new URLSearchParams(window.location.search);
-      const fromPurpose = params.get('purpose');
-      if (fromPurpose && purposeButtons.some((item) => item.dataset.purposeId === fromPurpose)) {
-        setPurpose(fromPurpose);
-      } else {
-        // 旧URL（?services=...）から来た場合も、該当する3分類へ自然に移行する。
+      const fromPurpose = (params.get('purpose') || '').split(',').filter(Boolean);
+      fromPurpose.forEach((id) => {
+        if (purposeButtons.some((button) => button.dataset.purposeId === id)) {
+          activePurposeIds.add(id);
+        }
+      });
+
+      // 旧URL（?services=...）も、該当する分類へ移行する。
+      if (activePurposeIds.size === 0) {
         const oldServices = new Set((params.get('services') || '').split(',').filter(Boolean));
         if (oldServices.size > 0) {
-          const matchedButton = purposeButtons.find((item) =>
-            (item.getAttribute('data-purpose-services') || '')
-              .split(',')
-              .some((key) => oldServices.has(key)),
-          );
-          if (matchedButton?.dataset.purposeId) setPurpose(matchedButton.dataset.purposeId);
+          purposeButtons.forEach((button) => {
+            const keys = (button.dataset.purposeServices || '').split(',').filter(Boolean);
+            if (keys.some((key) => oldServices.has(key))) {
+              const id = button.dataset.purposeId || '';
+              if (id) activePurposeIds.add(id);
+            }
+          });
         }
       }
 
+      syncPurposeButtons();
       applyFilter();
     })();
   </script>
@@ -359,7 +359,6 @@ const businessFilterData = businesses.map((business) => ({
   .service-filter {
     display: flex;
     flex-direction: column;
-    gap: var(--space-5);
   }
 
   .service-filter__heading {
@@ -380,28 +379,25 @@ const businessFilterData = businesses.map((business) => ({
   }
 
   .purpose-card {
-    position: relative;
     display: flex;
-    flex-direction: column;
-    gap: var(--space-2);
-    min-height: 150px;
-    padding: var(--space-4) var(--space-5, 1.25rem);
-    border: 1px solid var(--color-stone-line);
+    align-items: flex-start;
+    gap: var(--space-3);
+    min-height: 146px;
+    padding: var(--space-4);
+    border: 1.5px solid var(--color-stone-line);
     border-radius: var(--radius-card);
-    background: var(--color-stone-surface);
+    background: #fff;
     color: var(--color-text);
     text-align: left;
     font: inherit;
     cursor: pointer;
     transition:
-      background-color 0.15s ease,
       border-color 0.15s ease,
       box-shadow 0.15s ease,
       transform 0.15s ease;
   }
 
   .purpose-card:hover {
-    background: var(--color-surface);
     border-color: var(--color-accent);
     box-shadow: 0 4px 12px rgba(41, 44, 41, 0.1);
     transform: translateY(-1px);
@@ -414,14 +410,51 @@ const businessFilterData = businesses.map((business) => ({
 
   .purpose-card.is-selected {
     border: 2px solid var(--color-accent);
-    background: var(--color-accent-soft);
+    background: #fff;
+  }
+
+  .purpose-card__checkbox {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 24px;
+    width: 24px;
+    height: 24px;
+    margin-top: 0.05em;
+    border: 2px solid var(--color-stone-line);
+    border-radius: 5px;
+    background: #fff;
+    color: #fff;
+    font-size: 0.95rem;
+    font-weight: 800;
+    line-height: 1;
+  }
+
+  .purpose-card__checkbox-check {
+    opacity: 0;
+  }
+
+  .purpose-card.is-selected .purpose-card__checkbox {
+    border-color: var(--color-accent);
+    background: var(--color-accent);
+  }
+
+  .purpose-card.is-selected .purpose-card__checkbox-check {
+    opacity: 1;
+  }
+
+  .purpose-card__copy {
+    display: flex;
+    flex: 1;
+    min-width: 0;
+    flex-direction: column;
+    gap: var(--space-2);
   }
 
   .purpose-card__heading {
-    padding-right: var(--space-6);
     font-family: var(--font-family-heading);
     font-weight: 700;
-    font-size: 1.1rem;
+    font-size: 1.08rem;
     line-height: 1.4;
   }
 
@@ -433,36 +466,30 @@ const businessFilterData = businesses.map((business) => ({
   }
 
   .purpose-card__cta {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.3em;
     margin-top: auto;
     color: var(--color-accent);
+    font-size: var(--font-size-caption);
     font-weight: 700;
-    font-size: var(--font-size-label);
-  }
-
-  .purpose-card__check {
-    display: none;
-    position: absolute;
-    top: var(--space-3);
-    right: var(--space-3);
-    color: var(--color-accent);
-  }
-
-  .purpose-card.is-selected .purpose-card__check {
-    display: block;
   }
 
   .service-filter__result {
     display: flex;
     flex-wrap: wrap;
     align-items: center;
-    gap: var(--space-3);
-    padding: var(--space-3) var(--space-4);
+    gap: var(--space-2) var(--space-3);
+    margin-top: var(--space-8);
+    padding: var(--space-4);
     border: 1px solid var(--color-stone-line);
     border-radius: var(--radius-card);
     background: var(--color-stone-surface);
+  }
+
+  .service-filter__result-label {
+    width: 100%;
+    margin: 0;
+    font-family: var(--font-family-heading);
+    font-weight: 700;
+    color: var(--color-text);
   }
 
   .service-filter__result-text {
@@ -516,27 +543,65 @@ const businessFilterData = businesses.map((business) => ({
   }
 
   @media (max-width: 767px) {
-    .service-filter {
-      gap: var(--space-4);
+    .service-filter__heading {
+      margin-bottom: 0.2rem;
+      font-size: 1.15rem;
+    }
+
+    .service-filter__hint {
+      margin-bottom: var(--space-2);
+      font-size: 0.82rem;
     }
 
     .service-filter__purpose-grid {
       grid-template-columns: 1fr;
-      gap: var(--space-2);
+      gap: 0.45rem;
     }
 
     .purpose-card {
-      min-height: 0;
+      min-height: 52px;
+      padding: 0.65rem 0.8rem;
+      align-items: center;
+      gap: 0.7rem;
+    }
+
+    .purpose-card__checkbox {
+      flex-basis: 22px;
+      width: 22px;
+      height: 22px;
+      margin-top: 0;
+    }
+
+    .purpose-card__copy {
+      gap: 0;
+    }
+
+    .purpose-card__heading {
+      font-size: 0.96rem;
+      line-height: 1.3;
+    }
+
+    .purpose-card__description,
+    .purpose-card__cta {
+      display: none;
+    }
+
+    .service-filter__result {
+      margin-top: var(--space-6);
       padding: var(--space-3) var(--space-4);
     }
 
-    .purpose-card__description {
-      line-height: 1.45;
+    .service-filter__result-label {
+      font-size: 0.95rem;
     }
 
     .service-filter__result-text {
       width: 100%;
-      font-size: 1rem;
+      font-size: 0.92rem;
+    }
+
+    .service-filter__result-text strong {
+      font-size: 1.2rem;
     }
 
     .service-filter__cta {
