@@ -22,6 +22,8 @@ export interface BusinessCardProps {
 export interface ComparisonTableProps {
   businesses: Business[];
   visibleServices: ServiceKey[];
+  /** detailed=従来の確認状態表示、simple=○/－だけの簡潔な比較表示。 */
+  displayMode?: 'detailed' | 'simple';
 }
 
 export interface VerificationBadgeProps {
