@@ -64,7 +64,7 @@ const sponsoredBusinessIds = getActiveSponsors()
 // title更新（2026-09-02、ナビゲーション・運営者表示・SEO/AIO監査対応
 // 「ページタイトルと検索意図」節）: 「条件で探す」という実際の操作
 // （絞り込みチェックボックス）をより直接的に表す文言へ変更した。
-const pageTitle = '多磨霊園周辺の石材店を条件で探す｜多磨霊園 お墓ガイド';
+const pageTitle = '多磨霊園周辺の石材店を目的から比較｜多磨霊園 お墓ガイド';
 const heroHeading = '多磨霊園の石材店一覧・比較';
 const description = `多磨霊園周辺の石材店・お墓関連事業者${businesses.length}社を、墓石を建てる・直す、墓じまい、清掃・管理などの目的から比較できます。公開情報のみで中立に整理しています。`;
 
@@ -91,16 +91,16 @@ const businessListJsonLd = buildBusinessListItemListJsonLd(
   <Fragment slot="beforeSponsor">
     <h1>{heroHeading}</h1>
     <p class="page-lead">
-      掲載中の{businesses.length}社から、希望する内容や地域に合う石材店を探せます。
+      掲載中の{businesses.length}社から、3つの目的で石材店を絞り込み、各社の対応内容を比較できます。
     </p>
-
-    <ServiceFilter
-      businesses={businesses}
-      mode="inline"
-      externalGrid
-      sponsoredBusinessIds={sponsoredBusinessIds}
-    />
   </Fragment>
+
+  <ServiceFilter
+    businesses={businesses}
+    mode="inline"
+    externalGrid
+    sponsoredBusinessIds={sponsoredBusinessIds}
+  />
 
   <section aria-label="事業者一覧・詳しい比較表">
     <BusinessGrid businesses={businesses} sponsoredBusinessIds={sponsoredBusinessIds} />
