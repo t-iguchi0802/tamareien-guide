@@ -91,16 +91,16 @@ const businessListJsonLd = buildBusinessListItemListJsonLd(
   <Fragment slot="beforeSponsor">
     <h1>{heroHeading}</h1>
     <p class="page-lead">
-      掲載中の{businesses.length}社から、3つの目的で石材店を絞り込み、各社の対応内容を比較できます。
+      3つの目的から選んで、各石材店の対応内容を比較できます。
     </p>
-  </Fragment>
 
-  <ServiceFilter
-    businesses={businesses}
-    mode="inline"
-    externalGrid
-    sponsoredBusinessIds={sponsoredBusinessIds}
-  />
+    <ServiceFilter
+      businesses={businesses}
+      mode="inline"
+      externalGrid
+      sponsoredBusinessIds={sponsoredBusinessIds}
+    />
+  </Fragment>
 
   <section aria-label="事業者一覧・詳しい比較表">
     <BusinessGrid businesses={businesses} sponsoredBusinessIds={sponsoredBusinessIds} />
@@ -165,8 +165,9 @@ const businessListJsonLd = buildBusinessListItemListJsonLd(
 
   @media (max-width: 767px) {
     .page-lead {
-      margin-bottom: var(--space-4);
-      font-size: 1rem;
+      margin-bottom: var(--space-3);
+      font-size: 0.95rem;
+      line-height: 1.5;
     }
   }
 
