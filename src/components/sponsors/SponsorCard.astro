@@ -71,6 +71,7 @@ const { sponsor, position, pageCategory } = Astro.props;
 
 const ctaLabel = sponsor?.ctaLabel ?? 'サイトを見る';
 const headline = sponsor?.headline ?? sponsor?.name ?? '';
+const sponsorTheme = sponsor?.id === 'sunarrows_mitaka_anshin' ? 'mitaka-kurashi' : undefined;
 ---
 
 {
@@ -151,6 +152,7 @@ const headline = sponsor?.headline ?? sponsor?.name ?? '';
       target="_blank"
       rel="noopener sponsored"
       data-event="sponsor_click"
+      data-brand-theme={sponsorTheme}
     >
       <div class="sponsor-card__media">
         <img
@@ -212,6 +214,7 @@ const headline = sponsor?.headline ?? sponsor?.name ?? '';
       data-campaign-id={sponsor.campaignId}
       data-slot-position={position}
       data-page-category={pageCategory}
+      data-brand-theme={sponsorTheme}
     >
       <p class="sponsor-card__eyebrow">広告</p>
       <div class="sponsor-card__filled">
@@ -272,6 +275,40 @@ const headline = sponsor?.headline ?? sponsor?.name ?? '';
     gap: var(--space-2);
     min-height: 180px;
     padding: var(--space-3);
+  }
+
+  /* みたか暮らし相談室: リニューアル後HPのネイビー＋オレンジを反映。 */
+  .sponsor-card[data-brand-theme='mitaka-kurashi'] {
+    border-color: #c86b32;
+    box-shadow: 0 7px 22px rgba(23, 50, 77, 0.16);
+  }
+
+  .sponsor-card[data-brand-theme='mitaka-kurashi'] .sponsor-card__headline {
+    color: #17324d;
+  }
+
+  .sponsor-card[data-brand-theme='mitaka-kurashi'] .sponsor-card__area {
+    border-color: #c86b32;
+    background: #f7f4ee;
+    color: #17324d;
+  }
+
+  .sponsor-card[data-brand-theme='mitaka-kurashi'] .sponsor-card__tags li {
+    background: #fbefe7;
+    color: #7d3b17;
+  }
+
+  .sponsor-card[data-brand-theme='mitaka-kurashi'] .sponsor-card__eyebrow--on-photo {
+    background: rgba(23, 50, 77, 0.9);
+  }
+
+  .sponsor-card[data-brand-theme='mitaka-kurashi'] .sponsor-card__cta {
+    background: #17324d;
+  }
+
+  .sponsor-card[data-brand-theme='mitaka-kurashi']:hover .sponsor-card__cta {
+    background: #234663;
+    box-shadow: 0 3px 10px rgba(23, 50, 77, 0.28);
   }
 
   .sponsor-card__eyebrow {
