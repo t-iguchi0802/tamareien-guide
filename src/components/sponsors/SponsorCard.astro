@@ -182,7 +182,7 @@ const sponsorTheme = sponsor?.id === 'sunarrows_mitaka_anshin' ? 'mitaka-kurashi
             <p class="sponsor-card__tags-inline">{sponsor.serviceTags.join('・')}</p>
           </>
         )}
-        <p class="sponsor-card__name">{sponsor.name}</p>
+        <p class="sponsor-card__name">{sponsor.byline ?? sponsor.name}</p>
         <span class="sponsor-card__cta">
           {ctaLabel}
           <svg
