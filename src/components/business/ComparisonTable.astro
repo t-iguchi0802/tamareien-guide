@@ -1,24 +1,10 @@
 ---
 /**
- * 比較コンポーネント。
+ * 事業者ごとのサービス比較表。
  *
- * PC幅ではsticky見出し・sticky事業者列を持つ<table>、
- * 狭い幅ではネイティブ<details>を使ったカード形式に切り替える
- * （JS不要・キーボード操作可能・data_dictionary.md「スマートフォンではカード表示」要件）。
- *
- * 並び順は呼び出し側が渡すbusinesses配列の順序をそのまま使う
- * （このコンポーネント自身は並べ替え・絞り込みを行わない。displayOrderは
- * 推奨順位ではないため、独自の並べ替えロジックを追加しない）。
- *
- * 各セルの状態表示は VerificationBadge を必ず経由する
- * （statusToDisplayLabel()の唯一の経路を守るため、テーブル側で文言を作らない）。
- *
- * 公開前仕上げ修正（2026-08-26）: `.comparison-table__scroll`
- * （横スクロール領域）に `tabindex="0"` `role="region"` `aria-label` を付与し、
- * axeの`scrollable-region-focusable`（serious）を解消した。キーボード利用者が
- * Tabでこの領域へフォーカスし、矢印キー等でスクロールできるようにするための
- * 追加であり、見た目・スマートフォンでのタッチスクロール操作は変更していない
- * （`:focus-visible`のアウトラインはキーボード操作時のみ表示される）。
+ * displayMode="detailed": 従来の確認状態バッジを表示。
+ * displayMode="simple": confirmedだけを「○」、それ以外を「－」で表示し、
+ * 説明は表外の短い注記1か所へ集約する。
  */
 import '../../styles/tokens.css';
 import type { ComparisonTableProps } from '../../types/components';
@@ -26,13 +12,26 @@ import VerificationBadge from '../common/VerificationBadge.astro';
 import { SERVICE_LABELS } from './serviceLabels';
 
 type Props = ComparisonTableProps;
-const { businesses, visibleServices } = Astro.props;
+const { businesses, visibleServices, displayMode = 'detailed' } = Astro.props;
+const isSimple = displayMode === 'simple';
+
+function simpleMark(status: string): string {
+  return status === 'confirmed' ? '○' : '－';
+}
 ---
 
-<div class="comparison-table">
-  <p class="comparison-table__note">
-    「公開情報では未確認」は非対応という意味ではなく、事業者の公開情報で対応の有無を確認できていないことを示します。
-  </p>
+<div class:list={['comparison-table', isSimple && 'comparison-table--simple']}>
+  {
+    isSimple ? (
+      <p class="comparison-table__note">
+        ※ ○は各社HP等の公開情報から対応を確認できた項目です。－は非対応を示すものではありません。最新の対応内容は各店舗へ直接ご確認ください。
+      </p>
+    ) : (
+      <p class="comparison-table__note">
+        「公開情報では未確認」は非対応という意味ではなく、事業者の公開情報で対応の有無を確認できていないことを示します。
+      </p>
+    )
+  }
 
   <div
     class="comparison-table__scroll"
@@ -70,7 +69,23 @@ const { businesses, visibleServices } = Astro.props;
               </th>
               {visibleServices.map((key) => (
                 <td class="comparison-table__cell">
-                  <VerificationBadge status={business.services[key]} />
+                  {isSimple ? (
+                    <span
+                      class:list={[
+                        'comparison-table__simple-mark',
+                        business.services[key] === 'confirmed' && 'is-confirmed',
+                      ]}
+                      aria-label={
+                        business.services[key] === 'confirmed'
+                          ? '公開情報で対応を確認'
+                          : '公開情報では対応を確認できず'
+                      }
+                    >
+                      {simpleMark(business.services[key])}
+                    </span>
+                  ) : (
+                    <VerificationBadge status={business.services[key]} />
+                  )}
                 </td>
               ))}
             </tr>
@@ -80,34 +95,73 @@ const { businesses, visibleServices } = Astro.props;
     </table>
   </div>
 
-  <ul class="comparison-table__mobile-list">
-    {
-      businesses.map((business) => (
-        <li>
-          <details class="comparison-card">
-            <summary class="comparison-card__summary">
+  {
+    isSimple ? (
+      <ul class="comparison-table__mobile-list comparison-table__mobile-list--simple">
+        {businesses.map((business) => (
+          <li class="comparison-card comparison-card--simple">
+            <div class="comparison-card__summary comparison-card__summary--static">
               <span class="comparison-card__name">{business.name}</span>
               <span class="comparison-card__meta">
                 {business.location.city}
                 {business.location.nearestGateStatus === 'confirmed' &&
                   business.location.nearestGate && <>・{business.location.nearestGate}</>}
               </span>
-            </summary>
+            </div>
             <dl class="comparison-card__services">
               {visibleServices.map((key) => (
                 <div class="comparison-card__service-row">
                   <dt>{SERVICE_LABELS[key]}</dt>
                   <dd>
-                    <VerificationBadge status={business.services[key]} />
+                    <span
+                      class:list={[
+                        'comparison-table__simple-mark',
+                        business.services[key] === 'confirmed' && 'is-confirmed',
+                      ]}
+                      aria-label={
+                        business.services[key] === 'confirmed'
+                          ? '公開情報で対応を確認'
+                          : '公開情報では対応を確認できず'
+                      }
+                    >
+                      {simpleMark(business.services[key])}
+                    </span>
                   </dd>
                 </div>
               ))}
             </dl>
-          </details>
-        </li>
-      ))
-    }
-  </ul>
+          </li>
+        ))}
+      </ul>
+    ) : (
+      <ul class="comparison-table__mobile-list">
+        {businesses.map((business) => (
+          <li>
+            <details class="comparison-card">
+              <summary class="comparison-card__summary">
+                <span class="comparison-card__name">{business.name}</span>
+                <span class="comparison-card__meta">
+                  {business.location.city}
+                  {business.location.nearestGateStatus === 'confirmed' &&
+                    business.location.nearestGate && <>・{business.location.nearestGate}</>}
+                </span>
+              </summary>
+              <dl class="comparison-card__services">
+                {visibleServices.map((key) => (
+                  <div class="comparison-card__service-row">
+                    <dt>{SERVICE_LABELS[key]}</dt>
+                    <dd>
+                      <VerificationBadge status={business.services[key]} />
+                    </dd>
+                  </div>
+                ))}
+              </dl>
+            </details>
+          </li>
+        ))}
+      </ul>
+    )
+  }
 </div>
 
 <style>
@@ -115,9 +169,9 @@ const { businesses, visibleServices } = Astro.props;
     margin: 0 0 var(--space-3);
     font-size: var(--font-size-label);
     color: var(--color-stone-text);
+    line-height: 1.6;
   }
 
-  /* --- デスクトップ表（768px以上を主な対象。狭い幅では横スクロール可能） --- */
   .comparison-table__scroll {
     display: none;
     overflow-x: auto;
@@ -197,7 +251,22 @@ const { businesses, visibleServices } = Astro.props;
     background: var(--color-bg);
   }
 
-  /* --- モバイルカード（767px以下。<details>でJS無しの開閉を実現） --- */
+  .comparison-table__simple-mark {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 2rem;
+    min-height: 2rem;
+    color: var(--color-text-muted);
+    font-size: 1.15rem;
+    font-weight: 700;
+  }
+
+  .comparison-table__simple-mark.is-confirmed {
+    color: var(--color-accent-deep);
+    font-size: 1.35rem;
+  }
+
   .comparison-table__mobile-list {
     display: flex;
     flex-direction: column;
@@ -247,6 +316,15 @@ const { businesses, visibleServices } = Astro.props;
     outline-offset: -3px;
   }
 
+  .comparison-card__summary--static {
+    cursor: default;
+    padding-bottom: var(--space-3);
+  }
+
+  .comparison-card__summary--static::after {
+    content: none;
+  }
+
   .comparison-card__name {
     font-family: var(--font-family-heading);
     font-weight: 700;
@@ -289,10 +367,15 @@ const { businesses, visibleServices } = Astro.props;
     margin: 0;
   }
 
+  .comparison-card--simple .comparison-card__services {
+    padding-top: 0;
+  }
+
   @media (min-width: 768px) {
     .comparison-table__scroll {
       display: block;
     }
+
     .comparison-table__mobile-list {
       display: none;
     }
