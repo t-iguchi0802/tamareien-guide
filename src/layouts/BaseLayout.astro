@@ -1327,7 +1327,9 @@ const hasBeforeSponsor = Astro.slots.has('beforeSponsor');
        「4枠は常に同じ大きさ」という既存の設計方針（SponsorCard.astro
        コメント参照）どおり、空枠・簡易表示の3枠にも同じ高さが適用される。 */
     .page-shell .sponsor-rail .sponsor-card {
-      min-height: 400px;
+      height: 470px;
+      min-height: 470px;
+      max-height: 470px;
     }
   }
 
