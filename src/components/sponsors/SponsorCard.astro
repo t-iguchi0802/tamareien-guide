@@ -170,6 +170,8 @@ const sponsorTheme = sponsor?.id === 'sunarrows_mitaka_anshin' ? 'mitaka-kurashi
         {sponsor.area && <span class="sponsor-card__area">{sponsor.area}</span>}
         <p class="sponsor-card__headline">{headline}</p>
         {sponsor.tagline && <p class="sponsor-card__tagline">{sponsor.tagline}</p>}
+        {sponsor.byline && <p class="sponsor-card__byline">{sponsor.byline}</p>}
+        {sponsor.highlight && <p class="sponsor-card__highlight">{sponsor.highlight}</p>}
         {sponsor.serviceTags && sponsor.serviceTags.length > 0 && (
           <>
             <ul class="sponsor-card__tags">
@@ -182,7 +184,7 @@ const sponsorTheme = sponsor?.id === 'sunarrows_mitaka_anshin' ? 'mitaka-kurashi
             <p class="sponsor-card__tags-inline">{sponsor.serviceTags.join('・')}</p>
           </>
         )}
-        <p class="sponsor-card__name">{sponsor.byline ?? sponsor.name}</p>
+        {!sponsor.byline && <p class="sponsor-card__name">{sponsor.name}</p>}
         <span class="sponsor-card__cta">
           {ctaLabel}
           <svg
@@ -284,7 +286,11 @@ const sponsorTheme = sponsor?.id === 'sunarrows_mitaka_anshin' ? 'mitaka-kurashi
   }
 
   .sponsor-card[data-brand-theme='mitaka-kurashi'] .sponsor-card__headline {
+    margin-top: 0.25em;
     color: #17324d;
+    font-size: 1.35rem;
+    line-height: 1.22;
+    letter-spacing: -0.02em;
   }
 
   .sponsor-card[data-brand-theme='mitaka-kurashi'] .sponsor-card__area {
@@ -510,6 +516,25 @@ const sponsorTheme = sponsor?.id === 'sunarrows_mitaka_anshin' ? 'mitaka-kurashi
     line-height: 1.5;
   }
 
+  .sponsor-card__byline {
+    margin: 0.15em 0 0;
+    color: var(--color-text-muted);
+    font-size: 0.75rem;
+    font-weight: 700;
+    line-height: 1.4;
+  }
+
+  .sponsor-card__highlight {
+    margin: 0.25em 0 0;
+    padding: 0.35em 0.55em;
+    border-left: 3px solid #c86b32;
+    background: #f7f4ee;
+    color: #17324d;
+    font-size: 0.75rem;
+    font-weight: 800;
+    line-height: 1.35;
+  }
+
   .sponsor-card__tags {
     display: flex;
     flex-wrap: wrap;
@@ -598,9 +623,15 @@ const sponsorTheme = sponsor?.id === 'sunarrows_mitaka_anshin' ? 'mitaka-kurashi
     }
 
     .sponsor-card__tagline,
+    .sponsor-card__byline,
+    .sponsor-card__highlight,
     .sponsor-card--photo .sponsor-card__name,
     .sponsor-card--empty .sponsor-card__tagline {
       font-size: 0.75rem;
+    }
+
+    .sponsor-card[data-brand-theme='mitaka-kurashi'] .sponsor-card__headline {
+      font-size: 1.2rem;
     }
 
     /* 「掲載について見る」（8文字＋矢印）がカード幅の狭いモバイルで
