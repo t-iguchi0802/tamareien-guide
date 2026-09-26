@@ -159,7 +159,7 @@ export const NEWS_ARTICLES: NewsArticle[] = [
     category: '多磨霊園の歴史',
     publishedAt: '2026-09-26',
     updatedAt: '2026-09-26',
-    status: 'draft',
+    status: 'published',
     sections: [
       {
         heading: '多磨霊園は日本初の公園墓地',
