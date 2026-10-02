@@ -1,0 +1,121 @@
+---
+import '../../../styles/guide-article.css';
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import { ROUTES } from '../../../lib/routes';
+import { GUIDE_SOURCES } from '../../_lib/guide-sources';
+import { buildArticleJsonLd } from '../../../lib/seo';
+
+const pageTitle = '多磨霊園 みたま堂｜納骨・墓参・現在の利用案内';
+const heroHeading = '多磨霊園のみたま堂';
+const description =
+  '多磨霊園みたま堂の現在の利用状況を、東京都公園協会の公式情報をもとに整理。改修工事中の納骨・お引き取り・墓参、予約方法、仮設献花台を案内します。';
+const checkedAtJa = '2026年10月2日';
+
+const articleJsonLd = buildArticleJsonLd({
+  path: ROUTES.guideMitamado.path,
+  headline: heroHeading,
+  description,
+  datePublished: '2026-10-02',
+  dateModified: '2026-10-02',
+  image: '/images/hero-cemetery-photo-v2.png',
+});
+---
+
+<BaseLayout
+  title={pageTitle}
+  description={description}
+  ogType="article"
+  breadcrumbs={[
+    { name: '多磨霊園ガイド', path: ROUTES.guide.path },
+    { name: 'みたま堂', path: ROUTES.guideMitamado.path },
+  ]}
+  extraJsonLd={[articleJsonLd]}
+>
+  <Fragment slot="beforeSponsor">
+    <article class="article">
+      <p class="article__eyebrow"><a href={ROUTES.guide.path}>多磨霊園ガイド</a> ／ 納骨・供養</p>
+      <h1>{heroHeading}</h1>
+      <p class="article__lead">改修工事中の納骨・お引き取り・墓参について</p>
+      <p class="article__meta">更新日：{checkedAtJa}</p>
+
+      <div class="article__callout article__callout--warm">
+        <p class="article__callout__eyebrow">現在の利用状況</p>
+        <p>
+          みたま堂は改修工事のため、<strong>2027年3月末まで閉鎖予定</strong>です。堂内には入れませんが、
+          納骨・ご遺骨のお引き取りは予約制で受け付けられており、墓参は仮設祭壇で行えます。
+        </p>
+      </div>
+
+      <section aria-labelledby="mitamado-now-heading">
+        <h2 id="mitamado-now-heading">いま、できること</h2>
+        <div class="article__table-scroll">
+          <table>
+            <caption>2026年10月2日時点の案内</caption>
+            <tbody>
+              <tr><th scope="row">納骨</th><td>可能。1週間前までに電話予約が必要です。</td></tr>
+              <tr><th scope="row">お引き取り</th><td>可能。1週間前までに電話予約が必要です。</td></tr>
+              <tr><th scope="row">墓参</th><td>仮設祭壇で行えます。堂内には入れません。</td></tr>
+              <tr><th scope="row">仮設祭壇</th><td>公式案内では24時間開放です。ただし夜間は園内への車両出入りができません。</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </article>
+  </Fragment>
+
+  <div class="article">
+    <section aria-labelledby="mitamado-what-heading">
+      <h2 id="mitamado-what-heading">みたま堂とは</h2>
+      <p>
+        多磨霊園内にある収蔵施設で、公式のお知らせでは「長期収蔵施設」「一時収蔵施設」が対象として案内されています。
+        現在は建物の改修工事中です。
+      </p>
+    </section>
+
+    <section aria-labelledby="mitamado-reservation-heading">
+      <h2 id="mitamado-reservation-heading">納骨・お引き取りの予約</h2>
+      <p>
+        納骨・お引き取りは事前予約が必要です。公式案内では<strong>1週間前までに電話で申し込む</strong>よう案内されています。
+        曜日・時間帯は長期収蔵施設と一時収蔵施設で異なるため、予約時に最新の時間を確認してください。
+      </p>
+      <p>
+        多磨霊園管理事務所：<strong>042-365-2079</strong>（公式サイト掲載）
+      </p>
+    </section>
+
+    <section aria-labelledby="mitamado-kaisou-heading">
+      <h2 id="mitamado-kaisou-heading">改葬を伴う場合</h2>
+      <p>
+        みたま堂から遺骨を別の墓地・納骨先へ移す場合は、改葬許可の手続きが関係します。
+        多磨霊園に関する改葬の基本は、<a href={ROUTES.tetsuzuki.path}>改葬・墓所返還の手続き案内</a>で確認できます。
+      </p>
+    </section>
+
+    <section aria-labelledby="mitamado-related-heading">
+      <h2 id="mitamado-related-heading">関連ページ</h2>
+      <ul class="article__related-grid">
+        <li><a class="article__related-card article__related-card--limestone" href={ROUTES.guideGassou.path}>合葬埋蔵施設を見る</a></li>
+        <li><a class="article__related-card article__related-card--limestone" href={ROUTES.guideJumokuso.path}>樹木葬・樹林墓地を見る</a></li>
+        <li><a class="article__related-card article__related-card--limestone" href={ROUTES.access.path}>多磨霊園へのアクセスを見る</a></li>
+      </ul>
+    </section>
+
+    <section aria-labelledby="mitamado-sources-heading">
+      <h2 id="mitamado-sources-heading">情報源</h2>
+      <ul class="article__sources">
+        <li>
+          <a href={GUIDE_SOURCES.tamaMitamadoNotice2026May.url} rel="noopener" target="_blank">
+            {GUIDE_SOURCES.tamaMitamadoNotice2026May.publisher}「{GUIDE_SOURCES.tamaMitamadoNotice2026May.title}」
+          </a>
+          （最終確認日: {GUIDE_SOURCES.tamaMitamadoNotice2026May.checkedAt}）
+        </li>
+        <li>
+          <a href={GUIDE_SOURCES.tamaWinterGateNotice2026.url} rel="noopener" target="_blank">
+            {GUIDE_SOURCES.tamaWinterGateNotice2026.publisher}「{GUIDE_SOURCES.tamaWinterGateNotice2026.title}」
+          </a>
+          （最終確認日: {GUIDE_SOURCES.tamaWinterGateNotice2026.checkedAt}）
+        </li>
+      </ul>
+    </section>
+  </div>
+</BaseLayout>
