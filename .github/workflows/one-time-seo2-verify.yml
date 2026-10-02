@@ -1,0 +1,32 @@
+name: One-time SEO phase 2 verification
+
+on:
+  push:
+    branches:
+      - integrated-mvp
+    paths:
+      - .github/workflows/one-time-seo2-verify.yml
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: integrated-mvp
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run check
+      - run: npm run build
+      - name: Confirm new pages
+        run: |
+          test -f dist/guide/application/index.html
+          test -f dist/guide/cost/index.html
+          grep -q "/guide/application/" dist/sitemap.xml
+          grep -q "/guide/cost/" dist/sitemap.xml
