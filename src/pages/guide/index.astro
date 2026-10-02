@@ -13,7 +13,7 @@ import { ROUTES } from '../../lib/routes';
 
 const pageTitle = '多磨霊園ガイド';
 const description =
-  '多磨霊園への行き方、墓じまい・お墓の手続き、歴史・著名人について、公開情報をもとに整理したガイド記事の一覧です。';
+  '多磨霊園への行き方、みたま堂、樹木葬・合葬埋蔵施設、墓じまい・お墓の手続き、歴史・著名人について、公式情報を中心に整理したガイド一覧です。';
 const browserTitle = `${pageTitle}｜行き方・手続き・歴史のまとめ`;
 
 const categories = [
@@ -22,6 +22,16 @@ const categories = [
     heading: '墓参り・アクセス',
     description: '電車・バス・車での行き方、門ごとの開閉時間、公式案内図へのリンクです。',
     links: [{ href: ROUTES.access.path, label: '多磨霊園への行き方｜電車・バス・車と入口の選び方' }],
+  },
+  {
+    id: 'burial',
+    heading: '納骨・供養・合葬',
+    description: 'みたま堂、樹木葬として探される樹林型合葬埋蔵施設、合葬埋蔵施設の公式情報を整理しています。',
+    links: [
+      { href: ROUTES.guideMitamado.path, label: '多磨霊園のみたま堂｜納骨・墓参・現在の利用案内' },
+      { href: ROUTES.guideJumokuso.path, label: '多磨霊園の樹木葬｜樹林型合葬埋蔵施設・申込・費用' },
+      { href: ROUTES.guideGassou.path, label: '多磨霊園の合葬埋蔵施設｜申込・費用・納骨の基本' },
+    ],
   },
   {
     id: 'procedures',
@@ -50,7 +60,7 @@ const categories = [
 <BaseLayout title={browserTitle} description={description}>
   <h1>{pageTitle}</h1>
   <p>
-    多磨霊園にお参り・お墓相談で訪れる方向けに、行き方・手続き・歴史についての記事をまとめています。石材店の比較は<a
+    多磨霊園にお参り・お墓相談で訪れる方向けに、行き方、納骨・供養、手続き、歴史についての記事をまとめています。石材店の比較は<a
       href={ROUTES.sekizaiten.path}>石材店一覧・比較ページ</a
     >をご覧ください。
   </p>
@@ -77,7 +87,7 @@ const categories = [
 <style>
   .guide-categories {
     display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: var(--space-6);
     margin-top: var(--space-6);
   }
