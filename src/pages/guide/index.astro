@@ -13,8 +13,8 @@ import { ROUTES } from '../../lib/routes';
 
 const pageTitle = '多磨霊園ガイド';
 const description =
-  '多磨霊園への行き方、みたま堂、樹木葬・合葬埋蔵施設、墓じまい・お墓の手続き、歴史・著名人について、公式情報を中心に整理したガイド一覧です。';
-const browserTitle = `${pageTitle}｜みたま堂・樹木葬・墓じまい・アクセス`;
+  '多磨霊園への行き方、募集・費用、みたま堂、樹木葬・合葬埋蔵施設、墓じまい・お墓の手続き、歴史・著名人について、公式情報を中心に整理したガイド一覧です。';
+const browserTitle = `${pageTitle}｜募集・費用・みたま堂・墓じまい・アクセス`;
 
 const categories = [
   {
@@ -25,9 +25,11 @@ const categories = [
   },
   {
     id: 'burial',
-    heading: '納骨・供養・合葬',
-    description: 'みたま堂、樹木葬として探される樹林型合葬埋蔵施設、合葬埋蔵施設の公式情報を整理しています。',
+    heading: '募集・費用・納骨',
+    description: '新規募集と費用、みたま堂、樹林型・合葬埋蔵施設の公式情報を整理しています。',
     links: [
+      { href: ROUTES.guideApplication.path, label: '多磨霊園の募集・申し込み｜抽選・倍率・申込資格' },
+      { href: ROUTES.guideCost.path, label: '多磨霊園の費用｜使用料・管理料・墓石・納骨' },
       { href: ROUTES.guideMitamado.path, label: '多磨霊園のみたま堂｜納骨・墓参・現在の利用案内' },
       { href: ROUTES.guideJumokuso.path, label: '多磨霊園の樹木葬｜樹林型合葬埋蔵施設・申込・費用' },
       { href: ROUTES.guideGassou.path, label: '多磨霊園の合葬埋蔵施設｜申込・費用・納骨の基本' },
