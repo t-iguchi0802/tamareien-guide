@@ -73,6 +73,42 @@ export const GUIDE_SOURCES = {
     url: 'https://www.tokyo-park.or.jp/association/assets/reien_pressrelease_20260525.pdf',
     checkedAt: '2026-10-02',
   },
+  reienRequest2026: {
+    publisher: '公益財団法人東京都公園協会',
+    title: '都立霊園をご希望の方へ',
+    url: 'https://www.tokyo-park.or.jp/reien/use/new_user/request/index.html',
+    checkedAt: '2026-10-02',
+  },
+  reienApplicationGuide2026: {
+    publisher: '公益財団法人東京都公園協会',
+    title: '令和8年度 東京都立霊園使用者の募集 申込みのしおり',
+    url: 'https://www.tokyo-park.or.jp/reien/reien_shiori_r8.pdf',
+    checkedAt: '2026-10-02',
+  },
+  reienLottery2026: {
+    publisher: '東京都・公益財団法人東京都公園協会',
+    title: '令和8年度 都立霊園公募受付状況と抽選会について',
+    url: 'https://www.tokyo-park.or.jp/reien/assets/reien_lottery_r8.pdf',
+    checkedAt: '2026-10-02',
+  },
+  reienLotteryResults2026: {
+    publisher: '公益財団法人東京都公園協会',
+    title: '令和8年度 都立霊園使用者の募集 抽選結果について',
+    url: 'https://www.tokyo-park.or.jp/reien/use/new_user/results/index.html',
+    checkedAt: '2026-10-02',
+  },
+  reienFees2026: {
+    publisher: '公益財団法人東京都公園協会',
+    title: '東京都霊園使用料・管理料・手数料一覧表（令和8年4月1日現在）',
+    url: 'https://www.tokyo-park.or.jp/reien/assets/80401shiyoiuryounado.pdf',
+    checkedAt: '2026-10-02',
+  },
+  reienPayment2026: {
+    publisher: '公益財団法人東京都公園協会',
+    title: '管理料のお支払い',
+    url: 'https://www.tokyo-park.or.jp/reien/use/payment/index.html',
+    checkedAt: '2026-10-02',
+  },
   gassouGuide: {
     publisher: '公益財団法人東京都公園協会',
     title: '都立霊園 合葬埋蔵施設 使用の手引',
