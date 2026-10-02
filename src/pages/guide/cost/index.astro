@@ -1,0 +1,163 @@
+---
+import '../../../styles/guide-article.css';
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import { ROUTES } from '../../../lib/routes';
+import { GUIDE_SOURCES } from '../../_lib/guide-sources';
+import { buildArticleJsonLd } from '../../../lib/seo';
+
+const pageTitle = '多磨霊園の費用｜使用料・管理料・墓石・納骨・墓じまい';
+const heroHeading = '多磨霊園の費用';
+const description =
+  '多磨霊園の使用料・年間管理料、合葬埋蔵施設・樹林型合葬埋蔵施設の費用を令和8年度の公式資料から整理。墓石建立や墓じまいは別費用であることも案内します。';
+const checkedAtJa = '2026年10月2日';
+
+const articleJsonLd = buildArticleJsonLd({
+  path: ROUTES.guideCost.path,
+  headline: heroHeading,
+  description,
+  datePublished: '2026-10-02',
+  dateModified: '2026-10-02',
+  image: '/images/hero-cemetery-photo-v2.webp',
+});
+---
+
+<BaseLayout
+  title={pageTitle}
+  description={description}
+  ogType="article"
+  breadcrumbs={[
+    { name: '多磨霊園ガイド', path: ROUTES.guide.path },
+    { name: '費用', path: ROUTES.guideCost.path },
+  ]}
+  extraJsonLd={[articleJsonLd]}
+>
+  <Fragment slot="beforeSponsor">
+    <article class="article">
+      <p class="article__eyebrow"><a href={ROUTES.guide.path}>多磨霊園ガイド</a> ／ 費用</p>
+      <h1>{heroHeading}</h1>
+      <p class="article__lead">墓地の使用料と、墓石・工事の費用は別です</p>
+      <p class="article__meta">更新日：{checkedAtJa}</p>
+
+      <div class="article__callout">
+        <p>
+          多磨霊園で必要になる費用は、選ぶ施設によって大きく異なります。
+          一般埋蔵施設では東京都へ納める<strong>使用料・年間管理料</strong>のほか、
+          墓石を建てる場合の石材店への費用が別にかかります。
+        </p>
+      </div>
+
+      <section aria-labelledby="cost-summary-heading">
+        <h2 id="cost-summary-heading">令和8年度の主な費用</h2>
+        <div class="article__table-scroll">
+          <table>
+            <caption>多磨霊園の令和8年度募集・料金資料による主な金額</caption>
+            <thead>
+              <tr>
+                <th scope="col">施設</th>
+                <th scope="col">使用料</th>
+                <th scope="col">管理料</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <th scope="row">一般埋蔵施設</th>
+                <td><strong>1,567,400〜11,064,000円</strong><br />1.70〜12.00㎡</td>
+                <td><strong>年1,620〜9,720円</strong></td>
+              </tr>
+              <tr>
+                <th scope="row">合葬埋蔵施設</th>
+                <td><strong>遺骨1体 61,000円</strong><br />一定期間後共同埋蔵</td>
+                <td>令和8年度募集資料では記載なし</td>
+              </tr>
+              <tr>
+                <th scope="row">樹林型合葬埋蔵施設 2号基</th>
+                <td><strong>遺骨1体 95,000円</strong><br />粉状遺骨1体 31,000円</td>
+                <td>令和8年度募集資料では記載なし</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="article__note">
+          金額は令和8年度の募集・料金資料によるものです。次回募集時に変更される可能性があります。
+        </p>
+      </section>
+    </article>
+  </Fragment>
+
+  <div class="article">
+    <section aria-labelledby="cost-general-heading">
+      <h2 id="cost-general-heading">一般埋蔵施設の使用料・管理料</h2>
+      <p>
+        令和8年4月1日現在、多磨霊園の一般埋蔵施設使用料は<strong>1㎡あたり922,000円</strong>、
+        管理料は<strong>1㎡あたり年810円</strong>です。
+        令和8年度募集では1.70〜12.00㎡の区画が募集され、区画ごとの使用料・管理料は上表の範囲でした。
+      </p>
+      <p>
+        管理料は園路、トイレ、水くみ場など共用施設の維持管理に使われ、毎年納める費用として公式に案内されています。
+      </p>
+    </section>
+
+    <section aria-labelledby="cost-stone-heading">
+      <h2 id="cost-stone-heading">墓石の価格は使用料に含まれません</h2>
+      <p>
+        一般埋蔵施設は、貸付時に墓石が設置されていない区画です。
+        墓石の建立、彫刻、修理などを行う場合は、東京都へ納める使用料とは別に石材店への費用が必要です。
+      </p>
+      <p><a class="article__button" href={ROUTES.sekizaiten.path}>多磨霊園の石材店を比較する</a></p>
+    </section>
+
+    <section aria-labelledby="cost-noukotsu-heading">
+      <h2 id="cost-noukotsu-heading">納骨先によって費用が変わります</h2>
+      <p>
+        「多磨霊園 納骨費用」と検索する場合も、どの施設へ納骨するかで金額や制度が異なります。
+        みたま堂、合葬埋蔵施設、樹林型合葬埋蔵施設はそれぞれ別の施設です。
+      </p>
+      <ul class="article__related-grid">
+        <li><a class="article__related-card article__related-card--limestone" href={ROUTES.guideMitamado.path}>みたま堂の納骨・現在の利用案内</a></li>
+        <li><a class="article__related-card article__related-card--limestone" href={ROUTES.guideGassou.path}>合葬埋蔵施設の費用・納骨</a></li>
+        <li><a class="article__related-card article__related-card--limestone" href={ROUTES.guideJumokuso.path}>樹木葬・樹林型合葬埋蔵施設の費用</a></li>
+      </ul>
+    </section>
+
+    <section aria-labelledby="cost-closure-heading">
+      <h2 id="cost-closure-heading">墓じまいの費用は別に見積もります</h2>
+      <p>
+        墓じまいは、墓石の量、墓所の広さ、搬出経路、改葬支援の有無などで金額が変わります。
+        当サイトでは、石材店が公開している料金・対応状況を別ページで比較しています。
+      </p>
+      <p><a class="article__button article__button--secondary" href={ROUTES.hakajimai.path}>墓じまい費用・石材店比較を見る</a></p>
+    </section>
+
+    <section aria-labelledby="cost-application-heading">
+      <h2 id="cost-application-heading">新しく申し込む場合</h2>
+      <p>
+        都立霊園は募集時期と申込資格が決められています。令和8年度の募集は終了しています。
+        現在の募集状況や倍率は、<a href={ROUTES.guideApplication.path}>多磨霊園の募集・申し込み</a>で確認できます。
+      </p>
+    </section>
+
+    <section aria-labelledby="cost-sources-heading">
+      <h2 id="cost-sources-heading">情報源</h2>
+      <ul class="article__sources">
+        <li>
+          <a href={GUIDE_SOURCES.reienApplication2026.url} rel="noopener" target="_blank">
+            {GUIDE_SOURCES.reienApplication2026.publisher}「{GUIDE_SOURCES.reienApplication2026.title}」
+          </a>
+          （最終確認日: {GUIDE_SOURCES.reienApplication2026.checkedAt}）
+        </li>
+        <li>
+          <a href={GUIDE_SOURCES.reienFees2026.url} rel="noopener" target="_blank">
+            {GUIDE_SOURCES.reienFees2026.publisher}「{GUIDE_SOURCES.reienFees2026.title}」
+          </a>
+          （最終確認日: {GUIDE_SOURCES.reienFees2026.checkedAt}）
+        </li>
+        <li>
+          <a href={GUIDE_SOURCES.reienPayment2026.url} rel="noopener" target="_blank">
+            {GUIDE_SOURCES.reienPayment2026.publisher}「{GUIDE_SOURCES.reienPayment2026.title}」
+          </a>
+          （最終確認日: {GUIDE_SOURCES.reienPayment2026.checkedAt}）
+        </li>
+      </ul>
+    </section>
+  </div>
+</BaseLayout>
