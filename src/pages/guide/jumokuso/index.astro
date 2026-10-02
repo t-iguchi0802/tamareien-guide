@@ -1,0 +1,124 @@
+---
+import '../../../styles/guide-article.css';
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import { ROUTES } from '../../../lib/routes';
+import { GUIDE_SOURCES } from '../../_lib/guide-sources';
+import { buildArticleJsonLd } from '../../../lib/seo';
+
+const pageTitle = '多磨霊園の樹木葬｜樹林型合葬埋蔵施設・申込・費用';
+const heroHeading = '多磨霊園の樹木葬';
+const description =
+  '多磨霊園の樹木葬として検索される樹林型合葬埋蔵施設について、公式名称、仕組み、令和8年度の使用料、申込時の確認事項を東京都公園協会の情報から整理します。';
+const checkedAtJa = '2026年10月2日';
+
+const articleJsonLd = buildArticleJsonLd({
+  path: ROUTES.guideJumokuso.path,
+  headline: heroHeading,
+  description,
+  datePublished: '2026-10-02',
+  dateModified: '2026-10-02',
+  image: '/images/hero-cemetery-photo-v2.png',
+});
+---
+
+<BaseLayout
+  title={pageTitle}
+  description={description}
+  ogType="article"
+  breadcrumbs={[
+    { name: '多磨霊園ガイド', path: ROUTES.guide.path },
+    { name: '樹木葬', path: ROUTES.guideJumokuso.path },
+  ]}
+  extraJsonLd={[articleJsonLd]}
+>
+  <Fragment slot="beforeSponsor">
+    <article class="article">
+      <p class="article__eyebrow"><a href={ROUTES.guide.path}>多磨霊園ガイド</a> ／ 納骨・供養</p>
+      <h1>{heroHeading}</h1>
+      <p class="article__lead">公式名称は「樹林型合葬埋蔵施設」です</p>
+      <p class="article__meta">更新日：{checkedAtJa}</p>
+
+      <div class="article__callout">
+        <p>
+          多磨霊園で一般に「樹木葬」として探される施設は、東京都の公式案内では
+          <strong>樹林型合葬埋蔵施設</strong>と呼ばれています。シンボルツリーのもとに、多くの遺骨を一緒に埋蔵する形式です。
+        </p>
+      </div>
+
+      <section aria-labelledby="jumokuso-fee-heading">
+        <h2 id="jumokuso-fee-heading">令和8年度の使用料</h2>
+        <div class="article__table-scroll">
+          <table>
+            <caption>多磨霊園 樹林型合葬埋蔵施設（2号基）の募集時使用料</caption>
+            <tbody>
+              <tr><th scope="row">遺骨1体あたり</th><td><strong>95,000円</strong></td></tr>
+              <tr><th scope="row">粉状遺骨1体あたり</th><td><strong>31,000円</strong></td></tr>
+              <tr><th scope="row">年間管理料</th><td>公式の令和8年度募集資料では設定なし</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="article__note">
+          上記は令和8年度募集時の金額です。今後の募集条件・使用料は変更される可能性があるため、申込時は当該年度の公式資料をご確認ください。
+        </p>
+      </section>
+    </article>
+  </Fragment>
+
+  <div class="article">
+    <section aria-labelledby="jumokuso-how-heading">
+      <h2 id="jumokuso-how-heading">どのような施設か</h2>
+      <p>
+        樹林型合葬埋蔵施設は、一般の区画墓地のように個別の墓石を建てる形式ではありません。
+        多くの遺骨を共同で埋蔵する施設で、公式の使用の手引には多磨霊園の1号基・2号基の位置も掲載されています。
+      </p>
+    </section>
+
+    <section aria-labelledby="jumokuso-apply-heading">
+      <h2 id="jumokuso-apply-heading">申し込みについて</h2>
+      <p>
+        都立霊園は年度ごとに募集内容が公表されます。令和8年度の募集は終了しています。
+        居住要件や、生前申込・遺骨申込などの条件は施設や年度によって異なるため、次回募集時の「申込みのしおり」で確認する必要があります。
+      </p>
+      <p>
+        <a class="article__button article__button--secondary" href={GUIDE_SOURCES.reienDownload.url} rel="noopener" target="_blank">
+          東京都公園協会の資料一覧を見る
+        </a>
+      </p>
+    </section>
+
+    <section aria-labelledby="jumokuso-compare-heading">
+      <h2 id="jumokuso-compare-heading">合葬埋蔵施設との違いも確認する</h2>
+      <p>
+        多磨霊園には「合葬埋蔵施設」もあります。名称や埋蔵方法、募集条件が異なるため、
+        <a href={ROUTES.guideGassou.path}>合葬埋蔵施設のガイド</a>もあわせて確認してください。
+      </p>
+    </section>
+
+    <section aria-labelledby="jumokuso-related-heading">
+      <h2 id="jumokuso-related-heading">関連ページ</h2>
+      <ul class="article__related-grid">
+        <li><a class="article__related-card article__related-card--limestone" href={ROUTES.guideGassou.path}>合葬埋蔵施設を見る</a></li>
+        <li><a class="article__related-card article__related-card--limestone" href={ROUTES.guideMitamado.path}>みたま堂を見る</a></li>
+        <li><a class="article__related-card article__related-card--limestone" href={ROUTES.hakajimai.path}>墓じまい費用・比較を見る</a></li>
+      </ul>
+    </section>
+
+    <section aria-labelledby="jumokuso-sources-heading">
+      <h2 id="jumokuso-sources-heading">情報源</h2>
+      <ul class="article__sources">
+        <li>
+          <a href={GUIDE_SOURCES.reienApplication2026.url} rel="noopener" target="_blank">
+            {GUIDE_SOURCES.reienApplication2026.publisher}「{GUIDE_SOURCES.reienApplication2026.title}」
+          </a>
+          （最終確認日: {GUIDE_SOURCES.reienApplication2026.checkedAt}）
+        </li>
+        <li>
+          <a href={GUIDE_SOURCES.jurinGuide.url} rel="noopener" target="_blank">
+            {GUIDE_SOURCES.jurinGuide.publisher}「{GUIDE_SOURCES.jurinGuide.title}」
+          </a>
+          （最終確認日: {GUIDE_SOURCES.jurinGuide.checkedAt}）
+        </li>
+      </ul>
+    </section>
+  </div>
+</BaseLayout>
