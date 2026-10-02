@@ -209,7 +209,11 @@ const description =
   `多磨霊園周辺の石材店${businesses.length}社を、墓石建立・墓じまい・清掃管理など目的別に比較。アクセス、著名人墓所、季節の墓参り情報も掲載する地域ガイドです。`;
 ---
 
-<BaseLayout title={pageTitle} description={description}>
+<BaseLayout
+  title={pageTitle}
+  description={description}
+  preloadImage="/images/hero-cemetery-photo-v2.webp"
+>
   <Fragment slot="pageTop">
     <section class="hero" aria-labelledby="hero-heading">
       <div class="hero__panel">
