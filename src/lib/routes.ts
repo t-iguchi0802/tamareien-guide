@@ -36,6 +36,8 @@ export const ROUTES = {
   guideMitamado: { path: '/guide/mitamado/', description: '多磨霊園みたま堂の利用案内・納骨・墓参' },
   guideJumokuso: { path: '/guide/jumokuso/', description: '多磨霊園の樹木葬・樹林型合葬埋蔵施設ガイド' },
   guideGassou: { path: '/guide/gassou/', description: '多磨霊園の合葬埋蔵施設ガイド' },
+  guideApplication: { path: '/guide/application/', description: '多磨霊園の募集・申込・抽選・倍率ガイド' },
+  guideCost: { path: '/guide/cost/', description: '多磨霊園の費用・使用料・管理料ガイド' },
   guideProcedures: {
     path: '/guide/procedures/',
     description: '墓じまい・お墓の手続き 総合案内（既存の比較・手続きページの入口）',
