@@ -1,14 +1,12 @@
 ---
 /**
- * 3分類だけで探す、シンプルな石材店フィルター。
+ * スマホ優先の石材店フィルター。
  *
- * 2026-09-21 UI再設計:
- * - 細かなサービス別チェックボックスは使わず、目的は3分類だけにする。
- * - 3分類は複数選択可能。各分類の中では、いずれか1サービスを確認できれば
- *   その分類に対応するとみなし、複数分類を選んだ場合は分類間をANDで絞り込む。
- * - メインスポンサー（sponsoredBusinessIds）は、どの分類を選んでも
- *   検索結果に含め、選択時は最上位PR枠へ表示する。
- * - TOP（mode="link"）と一覧（mode="inline"）で同じ3分類を共有する。
+ * 2026-10-03再設計:
+ * - 長い説明付き3分類から、短い6チェック項目へ変更。
+ * - 各分類内はOR、複数分類間はAND。
+ * - TOP（mode="link"）と石材店一覧（mode="inline"）で同じ6分類を共有。
+ * - メインスポンサーは条件選択時も結果に含め、一覧ではPRとして先頭へ表示。
  */
 import type { Business, ServiceKey } from '../../types/business';
 import { PURPOSE_GROUPS } from './serviceLabels';
@@ -19,12 +17,9 @@ interface Props {
   businesses: Business[];
   mode: 'inline' | 'link';
   targetPath?: string;
-  /** 旧API互換。細かな条件UIは廃止したため現在は使用しない。 */
   openByDefault?: boolean;
   externalGrid?: boolean;
-  /** trueの場合、結果件数・クリアUIは呼び出し側で描画する。 */
   externalResult?: boolean;
-  /** メインスポンサーと紐づく事業者ID。 */
   sponsoredBusinessIds?: string[];
 }
 
@@ -38,7 +33,6 @@ const {
 } = Astro.props;
 
 const sponsoredBusinessIdSet = new Set(sponsoredBusinessIds);
-
 const businessFilterData = businesses.map((business) => ({
   id: business.id,
   name: business.name,
@@ -57,10 +51,8 @@ const businessFilterData = businesses.map((business) => ({
   data-filter-target={targetPath ?? ''}
 >
   <div class="service-filter__purpose">
-    <h2 id="service-filter-heading" class="service-filter__heading">どんなことでお困りですか？</h2>
-    <p class="service-filter__hint">
-      複数選択できます。具体的な対応内容は、各石材店の欄で確認できます。
-    </p>
+    <h2 id="service-filter-heading" class="service-filter__heading">何を頼みたいですか？</h2>
+    <p class="service-filter__hint">複数選択できます。選んだ条件をすべて満たす石材店に絞り込みます。</p>
 
     <div class="service-filter__purpose-grid">
       {
@@ -76,11 +68,7 @@ const businessFilterData = businesses.map((business) => ({
             <span class="purpose-card__checkbox" aria-hidden="true">
               <span class="purpose-card__checkbox-check">✓</span>
             </span>
-            <span class="purpose-card__copy">
-              <span class="purpose-card__heading">{group.heading}</span>
-              <span class="purpose-card__description">{group.description}</span>
-              <span class="purpose-card__cta" aria-hidden="true">選択する</span>
-            </span>
+            <span class="purpose-card__heading">{group.heading}</span>
           </button>
         ))
       }
@@ -92,7 +80,7 @@ const businessFilterData = businesses.map((business) => ({
       <div class="service-filter__result">
         <p class="service-filter__result-label">石材店一覧</p>
         <p class="service-filter__result-text" aria-live="polite">
-          <span data-result-prefix>{mode === 'inline' ? 'すべての事業者' : '掲載中'}</span>
+          <span data-result-prefix>掲載石材店</span>
           <strong data-result-count>{businesses.length}</strong>社
         </p>
         <button type="button" class="service-filter__clear" data-filter-clear hidden>
@@ -109,7 +97,7 @@ const businessFilterData = businesses.map((business) => ({
 
   <noscript>
     <p class="service-filter__noscript">
-      絞り込みにはJavaScriptが必要です。JavaScriptが無効なため、現在は全事業者を表示しています。
+      絞り込みにはJavaScriptが必要です。JavaScriptが無効なため、現在は全石材店を表示しています。
     </p>
   </noscript>
 
@@ -174,8 +162,7 @@ const businessFilterData = businesses.map((business) => ({
           .filter((button) => activePurposeIds.has(button.dataset.purposeId || ''))
           .map((button) => ({
             id: button.dataset.purposeId || '',
-            label:
-              button.querySelector<HTMLElement>('.purpose-card__heading')?.textContent?.trim() || '',
+            label: button.querySelector<HTMLElement>('.purpose-card__heading')?.textContent?.trim() || '',
             keys: (button.dataset.purposeServices || '').split(',').filter(Boolean),
           }));
       }
@@ -211,9 +198,7 @@ const businessFilterData = businesses.map((business) => ({
 
         const matchingBusinesses = businessData.filter((business) => {
           if (!hasSelection) return true;
-          // メインスポンサーは、どの3分類を選んでも検索結果に含める。
           if (business.isSponsored) return true;
-          // 各分類内はOR、複数分類間はAND。
           return selections.every((selection) =>
             selection.keys.some((key) => business.services.includes(key)),
           );
@@ -221,15 +206,7 @@ const businessFilterData = businesses.map((business) => ({
         const matchIds = new Set(matchingBusinesses.map((business) => business.id));
 
         if (resultCountEl) resultCountEl.textContent = String(matchIds.size);
-        if (resultPrefixEl) {
-          if (!hasSelection) {
-            resultPrefixEl.textContent = mode === 'inline' ? 'すべての事業者' : '掲載中';
-          } else if (selections.length === 1) {
-            resultPrefixEl.textContent = `${selections[0].label}に対応する事業者`;
-          } else {
-            resultPrefixEl.textContent = '選択した条件に合う事業者';
-          }
-        }
+        if (resultPrefixEl) resultPrefixEl.textContent = hasSelection ? '該当石材店' : '掲載石材店';
 
         if (mode === 'inline' && grid) {
           const cards = Array.from(
@@ -264,23 +241,6 @@ const businessFilterData = businesses.map((business) => ({
               const key = word.dataset.serviceWord || '';
               word.classList.toggle('service-word--matched', hasSelection && activeKeys.has(key));
             });
-
-            const matchBlock = card.querySelector<HTMLElement>('[data-match-block]');
-            const matchListEl = card.querySelector<HTMLElement>('[data-match-list]');
-            if (matchBlock && matchListEl) {
-              const matchedLabels = words
-                .filter((word) => activeKeys.has(word.dataset.serviceWord || ''))
-                .map((word) => word.textContent?.trim() || '')
-                .filter(Boolean);
-
-              if (hasSelection && isMatch && matchedLabels.length > 0) {
-                matchListEl.textContent = matchedLabels.join('、');
-                matchBlock.hidden = false;
-              } else {
-                matchListEl.textContent = '';
-                matchBlock.hidden = true;
-              }
-            }
           });
 
           if (emptyEl) emptyEl.hidden = matchIds.size > 0;
@@ -306,11 +266,8 @@ const businessFilterData = businesses.map((business) => ({
         button.addEventListener('click', () => {
           const id = button.dataset.purposeId || '';
           if (!id) return;
-          if (activePurposeIds.has(id)) {
-            activePurposeIds.delete(id);
-          } else {
-            activePurposeIds.add(id);
-          }
+          if (activePurposeIds.has(id)) activePurposeIds.delete(id);
+          else activePurposeIds.add(id);
           syncPurposeButtons();
           listExpanded = false;
           const resultCount = applyFilter();
@@ -331,7 +288,6 @@ const businessFilterData = businesses.map((business) => ({
         applyFilter();
       });
 
-      // 新URL: ?purpose=build,closure,care
       const params = new URLSearchParams(window.location.search);
       const fromPurpose = (params.get('purpose') || '').split(',').filter(Boolean);
       fromPurpose.forEach((id) => {
@@ -340,7 +296,7 @@ const businessFilterData = businesses.map((business) => ({
         }
       });
 
-      // 旧URL（?services=...）も、該当する分類へ移行する。
+      // 旧URL（?services=...）も新しい6分類へ寄せる。
       if (activePurposeIds.size === 0) {
         const oldServices = new Set((params.get('services') || '').split(',').filter(Boolean));
         if (oldServices.size > 0) {
@@ -372,7 +328,7 @@ const businessFilterData = businesses.map((business) => ({
   }
 
   .service-filter__hint {
-    margin: 0 0 var(--space-4);
+    margin: 0 0 var(--space-3);
     color: var(--color-stone-text);
     font-size: var(--font-size-label);
   }
@@ -380,15 +336,15 @@ const businessFilterData = businesses.map((business) => ({
   .service-filter__purpose-grid {
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: var(--space-4);
+    gap: var(--space-3);
   }
 
   .purpose-card {
     display: flex;
-    align-items: flex-start;
-    gap: var(--space-3);
-    min-height: 146px;
-    padding: var(--space-4);
+    align-items: center;
+    gap: var(--space-2);
+    min-height: 54px;
+    padding: 0.75rem 0.9rem;
     border: 1.5px solid var(--color-stone-line);
     border-radius: var(--radius-card);
     background: #fff;
@@ -396,16 +352,12 @@ const businessFilterData = businesses.map((business) => ({
     text-align: left;
     font: inherit;
     cursor: pointer;
-    transition:
-      border-color 0.15s ease,
-      box-shadow 0.15s ease,
-      transform 0.15s ease;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
   }
 
   .purpose-card:hover {
     border-color: var(--color-accent);
-    box-shadow: 0 4px 12px rgba(41, 44, 41, 0.1);
-    transform: translateY(-1px);
+    box-shadow: 0 3px 10px rgba(41, 44, 41, 0.08);
   }
 
   .purpose-card:focus-visible {
@@ -415,22 +367,21 @@ const businessFilterData = businesses.map((business) => ({
 
   .purpose-card.is-selected {
     border: 2px solid var(--color-accent);
-    background: #fff;
+    background: var(--color-tint-green-bg);
   }
 
   .purpose-card__checkbox {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    flex: 0 0 24px;
-    width: 24px;
-    height: 24px;
-    margin-top: 0.05em;
+    flex: 0 0 22px;
+    width: 22px;
+    height: 22px;
     border: 2px solid var(--color-stone-line);
     border-radius: 5px;
     background: #fff;
     color: #fff;
-    font-size: 0.95rem;
+    font-size: 0.9rem;
     font-weight: 800;
     line-height: 1;
   }
@@ -448,33 +399,12 @@ const businessFilterData = businesses.map((business) => ({
     opacity: 1;
   }
 
-  .purpose-card__copy {
-    display: flex;
-    flex: 1;
-    min-width: 0;
-    flex-direction: column;
-    gap: var(--space-2);
-  }
-
   .purpose-card__heading {
+    min-width: 0;
     font-family: var(--font-family-heading);
     font-weight: 700;
-    font-size: 1.08rem;
-    line-height: 1.4;
-  }
-
-  .purpose-card__description {
-    flex: 1;
-    color: var(--color-stone-text);
-    font-size: var(--font-size-label);
-    line-height: 1.55;
-  }
-
-  .purpose-card__cta {
-    margin-top: auto;
-    color: var(--color-accent);
-    font-size: var(--font-size-caption);
-    font-weight: 700;
+    font-size: 0.98rem;
+    line-height: 1.3;
   }
 
   .service-filter__result {
@@ -482,7 +412,7 @@ const businessFilterData = businesses.map((business) => ({
     flex-wrap: wrap;
     align-items: center;
     gap: var(--space-2) var(--space-3);
-    margin-top: var(--space-8);
+    margin-top: var(--space-5);
     padding: var(--space-4);
     border: 1px solid var(--color-stone-line);
     border-radius: var(--radius-card);
@@ -499,13 +429,13 @@ const businessFilterData = businesses.map((business) => ({
 
   .service-filter__result-text {
     margin: 0;
-    font-size: 1.05rem;
+    font-size: 1.02rem;
   }
 
   .service-filter__result-text strong {
     margin-inline: 0.25em;
     font-family: var(--font-family-heading);
-    font-size: 1.35rem;
+    font-size: 1.3rem;
     color: var(--color-accent-deep);
   }
 
@@ -555,63 +485,60 @@ const businessFilterData = businesses.map((business) => ({
 
     .service-filter__hint {
       margin-bottom: var(--space-2);
-      font-size: 0.82rem;
+      font-size: 0.8rem;
+      line-height: 1.45;
     }
 
     .service-filter__purpose-grid {
-      grid-template-columns: 1fr;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
       gap: 0.45rem;
     }
 
     .purpose-card {
-      min-height: 52px;
-      padding: 0.65rem 0.8rem;
-      align-items: center;
-      gap: 0.7rem;
+      min-height: 48px;
+      padding: 0.55rem 0.6rem;
+      gap: 0.45rem;
     }
 
     .purpose-card__checkbox {
-      flex-basis: 22px;
-      width: 22px;
-      height: 22px;
-      margin-top: 0;
-    }
-
-    .purpose-card__copy {
-      gap: 0;
+      flex-basis: 20px;
+      width: 20px;
+      height: 20px;
     }
 
     .purpose-card__heading {
-      font-size: 0.96rem;
-      line-height: 1.3;
-    }
-
-    .purpose-card__description,
-    .purpose-card__cta {
-      display: none;
+      font-size: 0.86rem;
+      line-height: 1.2;
+      white-space: nowrap;
     }
 
     .service-filter__result {
-      margin-top: var(--space-6);
+      margin-top: var(--space-4);
       padding: var(--space-3) var(--space-4);
     }
 
     .service-filter__result-label {
-      font-size: 0.95rem;
+      font-size: 0.92rem;
     }
 
     .service-filter__result-text {
       width: 100%;
-      font-size: 0.92rem;
+      font-size: 0.9rem;
     }
 
     .service-filter__result-text strong {
-      font-size: 1.2rem;
+      font-size: 1.18rem;
     }
 
     .service-filter__cta {
       flex: 1 1 100%;
       margin-left: 0;
+    }
+  }
+
+  @media (max-width: 360px) {
+    .purpose-card__heading {
+      font-size: 0.8rem;
     }
   }
 </style>
