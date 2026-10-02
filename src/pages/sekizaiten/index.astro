@@ -64,9 +64,9 @@ const sponsoredBusinessIds = getActiveSponsors()
 // title更新（2026-09-02、ナビゲーション・運営者表示・SEO/AIO監査対応
 // 「ページタイトルと検索意図」節）: 「条件で探す」という実際の操作
 // （絞り込みチェックボックス）をより直接的に表す文言へ変更した。
-const pageTitle = '多磨霊園周辺の石材店を目的から比較｜多磨霊園 お墓ガイド';
+const pageTitle = '多磨霊園の石材店・石屋を比較｜墓石・リフォーム・墓じまい';
 const heroHeading = '多磨霊園の石材店一覧・比較';
-const description = `多磨霊園周辺の石材店・お墓関連事業者${businesses.length}社を、墓石を建てる・直す、墓じまい、清掃・管理などの目的から比較できます。公開情報のみで中立に整理しています。`;
+const description = `多磨霊園周辺の石材店・石屋${businesses.length}社を、墓石の建立・リフォーム・修理、墓じまい、清掃・管理などの目的から比較できます。公開情報のみで中立に整理しています。`;
 
 /*
  * ItemList構造化データ（2026-09-02、ミチの編集改善・SEO/AIO対応
@@ -91,7 +91,7 @@ const businessListJsonLd = buildBusinessListItemListJsonLd(
   <Fragment slot="beforeSponsor">
     <h1>{heroHeading}</h1>
     <p class="page-lead">
-      3つの目的から選んで、各石材店の対応内容を比較できます。
+      墓石の建立・リフォーム・修理、墓じまい、清掃・管理など、3つの目的から各石材店の対応内容を比較できます。
     </p>
 
     <ServiceFilter
