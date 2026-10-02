@@ -33,6 +33,9 @@ export const ROUTES = {
   access: { path: '/access/', description: '多磨霊園への行き方（電車・バス・車、門の選び方）' },
   guideHistory: { path: '/guide/history/', description: '多磨霊園の歴史（1923年開園の経緯）' },
   guideFamousGraves: { path: '/guide/famous-graves/', description: '多磨霊園に眠る著名人ガイド' },
+  guideMitamado: { path: '/guide/mitamado/', description: '多磨霊園みたま堂の利用案内・納骨・墓参' },
+  guideJumokuso: { path: '/guide/jumokuso/', description: '多磨霊園の樹木葬・樹林型合葬埋蔵施設ガイド' },
+  guideGassou: { path: '/guide/gassou/', description: '多磨霊園の合葬埋蔵施設ガイド' },
   guideProcedures: {
     path: '/guide/procedures/',
     description: '墓じまい・お墓の手続き 総合案内（既存の比較・手続きページの入口）',
