@@ -76,6 +76,24 @@ jobs:
             };
             console.log('LH_SUMMARY ' + JSON.stringify(row));
           }
+
+          const top = JSON.parse(fs.readFileSync('lighthouse/top.json','utf8'));
+          const a = top.audits;
+          for (const id of Object.keys(a).filter(id => /lcp|largest-contentful|render-blocking|unused-javascript|unused-css|network-requests|mainthread-work|bootup-time|server-response/.test(id))) {
+            const audit = a[id];
+            const out = {
+              id,
+              score: audit.score,
+              numericValue: audit.numericValue,
+              displayValue: audit.displayValue,
+              title: audit.title,
+              detailsType: audit.details?.type,
+              details: audit.details?.items?.slice?.(0,5),
+            };
+            console.log('LH_DETAIL ' + JSON.stringify(out));
+          }
           NODE
 
 # rerun after homepage hero preload
+
+# detail rerun
