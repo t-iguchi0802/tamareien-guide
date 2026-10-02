@@ -1,42 +1,8 @@
 ---
 /**
- * 掲載事業者の一覧・比較表。件数はデータから自動表示する。
- * 正本: CLAUDE_CODE_HANDOFF.md 5章 / src/lib/routes.ts ROUTES.sekizaiten
- *
- * editorial-redesign（2026-08-26）: 「目的から探す」体験の本体をこのページに置く。
- * 共有コンポーネント <ServiceFilter mode="inline"> が、3つの目的ボタン・
- * くわしい条件チェックボックス・対応件数・事業者カードグリッドを
- * まとめて描画する（絞り込みロジックはServiceFilter側に一本化）。
- * TOPページの「この条件で一覧を見る」から遷移した場合、
- * ?services=a,b,c を読み取って同じ選択状態を復元する
- * （ServiceFilter内のスクリプトが担当）。
- *
- * 全12サービスの詳細な比較表（<ComparisonTable>）は、SaaS管理画面的な
- * 密な表を主役にしないよう<details>で折りたたみ、必要な人だけが開く
- * 「詳しい比較表」として維持する（機能・データは変更していない）。
- *
- * 条件未選択時は通常掲載順を維持する。1つ以上のサービス条件を選んだ場合は、
- * AND条件に一致するスポンサー契約店だけを「PR」と明記して
- * 結果の先頭へ表示する。不一致スポンサーは表示せず、重複もさせない。
- *
- * モバイル最優先レビュー対応（2026-09-01）: ページ上部に小さめの写真
- * （hero-cemetery-photo-v2.png、既存プロジェクト内画像を別クロップで再利用。
- * 新規取得はしていない）を追加し、「石材店を比較している」ことが一目で
- * 伝わるようにした。ServiceFilterより前に置くと絞り込みUIが初期画面から
- * さらに押し出されるため、低め高さ（article__hero-photo--compact、
- * guide-article.cssから再利用）に抑えている。「関連ページ」もカード化した。
- * ServiceFilter・ComparisonTable・絞り込みロジックは変更していない。
- *
- * スポンサー枠の位置とモバイル圧縮（2026-09-01、ミチのモバイル優先UI・
- * 文章校正対応「スマートフォンのスポンサー枠」節）: 従来はページ末尾
- * （比較表・関連ページの後）にあったスポンサー枠を、「結果件数の後、
- * 事業者一覧の前」へ移動した。BaseLayout.astroの`beforeSponsor`スロット
- * （TOPページと同じ仕組み）を使い、`<ServiceFilter externalGrid>`で
- * グリッド自体はServiceFilterに描画させず、このページ側で
- * `<BusinessGrid>`として「後半」に描画する（フィルタリングJSは
- * document.querySelectorで探すよう変更済み、判定ロジックは無変更。
- * 詳細はServiceFilter.astro・BusinessGrid.astroのコメント参照）。
- * PCの左右2枠ずつのレイアウトは変更していない。
+ * 多磨霊園周辺の石材店一覧・比較。
+ * 2026-10-03: スマホ優先で6つの短い条件チェック＋コンパクトな石材店カードへ再設計。
+ * 詳細な12サービス比較表は折りたたみ内に残し、必要な人だけが開ける。
  */
 import '../../styles/guide-article.css';
 import BaseLayout from '../../layouts/BaseLayout.astro';
@@ -53,31 +19,11 @@ const businesses = getBusinesses();
 const sponsoredBusinessIds = getActiveSponsors()
   .map((sponsor) => sponsor.linkedBusinessId)
   .filter((id): id is string => id !== null);
-/*
- * title/description/H1の更新（2026-09-02、ミチの編集改善・SEO/AIO対応
- * 「title・description・H1」節）: BaseLayoutのタイトル自動サフィックスを
- * 廃止したため、ページごとに完結した<title>文字列を用意する。H1は
- * ブラウザタブのタイトルとは別に、画面表示用の短い見出し（heroHeading）
- * として分ける（複合タイトルの「｜」がモバイル幅でH1として折り返される
- * ことを避けるため）。
- */
-// title更新（2026-09-02、ナビゲーション・運営者表示・SEO/AIO監査対応
-// 「ページタイトルと検索意図」節）: 「条件で探す」という実際の操作
-// （絞り込みチェックボックス）をより直接的に表す文言へ変更した。
+
 const pageTitle = '多磨霊園の石材店・石屋を比較｜墓石・リフォーム・墓じまい';
 const heroHeading = '多磨霊園の石材店一覧・比較';
 const description = `多磨霊園周辺の石材店・石屋${businesses.length}社を、墓石の建立・リフォーム・修理、墓じまい、清掃・管理などの目的から比較できます。公開情報のみで中立に整理しています。`;
 
-/*
- * ItemList構造化データ（2026-09-02、ミチの編集改善・SEO/AIO対応
- * 「構造化データ」節）: 掲載事業者の一覧であることを構造化データでも示す。
- * itemListOrderをUnorderedにするbuildItemListJsonLd側の実装により、
- * 「推奨順位のランキングではない」ことを明示している（displayOrderは
- * あくまで管理用の安定表示順。data_dictionary.md・CLAUDE.md参照）。
- * 各itemのURLは、個別事業者ページを作らない方針（CLAUDE.md「薄い個別
- * ページを量産しない」）のため、本ページ内の該当カードへのアンカー
- * （#business-{id}、BusinessCard.astroのid属性）を使う。
- */
 const businessListJsonLd = buildBusinessListItemListJsonLd(
   businesses.map((business) => ({
     business,
@@ -91,7 +37,7 @@ const businessListJsonLd = buildBusinessListItemListJsonLd(
   <Fragment slot="beforeSponsor">
     <h1>{heroHeading}</h1>
     <p class="page-lead">
-      墓石の建立・リフォーム・修理、墓じまい、清掃・管理など、3つの目的から各石材店の対応内容を比較できます。
+      6つの項目から選ぶと、対応を確認できた石材店だけに絞り込めます。
     </p>
 
     <ServiceFilter
@@ -106,7 +52,7 @@ const businessListJsonLd = buildBusinessListItemListJsonLd(
   <div class="stone-list-summary">
     <p class="stone-list-summary__label">石材店一覧</p>
     <p class="stone-list-summary__count" aria-live="polite">
-      <span data-result-prefix>すべての事業者</span>
+      <span data-result-prefix>掲載石材店</span>
       <strong data-result-count>{businesses.length}</strong>社
     </p>
     <button type="button" class="stone-list-summary__clear" data-filter-clear hidden>
@@ -114,16 +60,16 @@ const businessListJsonLd = buildBusinessListItemListJsonLd(
     </button>
   </div>
 
-  <section aria-label="事業者一覧・詳しい比較表">
+  <section aria-label="石材店一覧・詳しい比較表">
     <BusinessGrid businesses={businesses} sponsoredBusinessIds={sponsoredBusinessIds} />
 
     <hr class="masonry-rule" />
 
     <details class="detail-table">
-      <summary class="detail-table__summary">全事業者・全12サービスの詳しい比較表を見る</summary>
+      <summary class="detail-table__summary">全31社・全12サービスの詳しい比較表を見る</summary>
       <p class="detail-table__note">
-        上のカードで表示しきれない、すべてのサービスの対応状況を1つの表にまとめたものです。「○
-        公開確認済み」以外は対応がないという意味ではなく、公開ページ上で確認できなかったことを示します。
+        一覧カードでは見やすさを優先して表示を簡潔にしています。ここでは12サービスすべての公開確認状況を比較できます。
+        「○ 公開確認済み」以外は非対応という意味ではなく、公開ページ上で確認できなかったことを示します。
       </p>
       <ComparisonTable businesses={businesses} visibleServices={ALL_SERVICE_KEYS} />
     </details>
@@ -134,32 +80,18 @@ const businessListJsonLd = buildBusinessListItemListJsonLd(
   <section aria-labelledby="links-heading">
     <h2 id="links-heading">関連ページ</h2>
     <ul class="article__related-grid">
-      <li>
-        <a class="article__related-card" href={ROUTES.hakajimai.path}
-          >墓じまい・墓石撤去の比較を見る</a
-        >
-      </li>
-      <li>
-        <a class="article__related-card" href={ROUTES.kanri.path}
-          >墓所管理・清掃・供花の比較を見る</a
-        >
-      </li>
-      <li>
-        <a class="article__related-card" href={ROUTES.tetsuzuki.path}
-          >改葬・墓所返還などの手続きを見る</a
-        >
-      </li>
+      <li><a class="article__related-card" href={ROUTES.hakajimai.path}>墓じまい・墓石撤去の比較を見る</a></li>
+      <li><a class="article__related-card" href={ROUTES.kanri.path}>墓所管理・清掃・供花の比較を見る</a></li>
+      <li><a class="article__related-card" href={ROUTES.tetsuzuki.path}>改葬・墓所返還などの手続きを見る</a></li>
       <li>
         <a
           class="article__related-card"
           href={ROUTES.guideProcedures.path}
           data-event="internal_guide_link_click"
-          data-destination="guide_procedures">墓じまい・お墓の手続き 総合案内を見る</a
-        >
+          data-destination="guide_procedures"
+        >墓じまい・お墓の手続き 総合案内を見る</a>
       </li>
-      <li>
-        <a class="article__related-card" href={ROUTES.sources.path}>情報源・最終確認日を見る</a>
-      </li>
+      <li><a class="article__related-card" href={ROUTES.sources.path}>情報源・最終確認日を見る</a></li>
     </ul>
   </section>
 </BaseLayout>
@@ -170,8 +102,8 @@ const businessListJsonLd = buildBusinessListItemListJsonLd(
     flex-wrap: wrap;
     align-items: center;
     gap: var(--space-2) var(--space-3);
-    margin: 0 0 var(--space-5);
-    padding: var(--space-4);
+    margin: 0 0 var(--space-4);
+    padding: var(--space-3) var(--space-4);
     border: 1px solid var(--color-stone-line);
     border-radius: var(--radius-card);
     background: var(--color-stone-surface);
@@ -187,13 +119,13 @@ const businessListJsonLd = buildBusinessListItemListJsonLd(
 
   .stone-list-summary__count {
     margin: 0;
-    font-size: 1rem;
+    font-size: 0.96rem;
   }
 
   .stone-list-summary__count strong {
     margin-inline: 0.25em;
     font-family: var(--font-family-heading);
-    font-size: 1.3rem;
+    font-size: 1.25rem;
     color: var(--color-accent-deep);
   }
 
@@ -217,36 +149,9 @@ const businessListJsonLd = buildBusinessListItemListJsonLd(
   }
 
   .page-lead {
-    margin: 0 0 var(--space-5);
+    margin: 0 0 var(--space-4);
     color: var(--color-stone-text);
-    font-size: 1.05rem;
-  }
-
-  @media (max-width: 767px) {
-    .stone-list-summary {
-      margin-top: var(--space-3);
-      margin-bottom: var(--space-4);
-      padding: var(--space-3) var(--space-4);
-    }
-
-    .stone-list-summary__label {
-      font-size: 0.95rem;
-    }
-
-    .stone-list-summary__count {
-      width: 100%;
-      font-size: 0.92rem;
-    }
-
-    .stone-list-summary__count strong {
-      font-size: 1.2rem;
-    }
-
-    .page-lead {
-      margin-bottom: var(--space-3);
-      font-size: 0.95rem;
-      line-height: 1.5;
-    }
+    font-size: 1rem;
   }
 
   .detail-table {
@@ -257,7 +162,7 @@ const businessListJsonLd = buildBusinessListItemListJsonLd(
     cursor: pointer;
     font-family: var(--font-family-heading);
     font-weight: 700;
-    font-size: 1.1rem;
+    font-size: 1.05rem;
     min-height: var(--tap-target-min);
     display: flex;
     align-items: center;
@@ -267,5 +172,32 @@ const businessListJsonLd = buildBusinessListItemListJsonLd(
   .detail-table__note {
     color: var(--color-stone-text);
     font-size: var(--font-size-label, 0.9375rem);
+  }
+
+  @media (max-width: 767px) {
+    .stone-list-summary {
+      margin-top: var(--space-2);
+      margin-bottom: var(--space-3);
+      padding: 0.7rem 0.9rem;
+    }
+
+    .stone-list-summary__label {
+      font-size: 0.9rem;
+    }
+
+    .stone-list-summary__count {
+      width: 100%;
+      font-size: 0.88rem;
+    }
+
+    .stone-list-summary__count strong {
+      font-size: 1.15rem;
+    }
+
+    .page-lead {
+      margin-bottom: var(--space-2);
+      font-size: 0.9rem;
+      line-height: 1.45;
+    }
   }
 </style>
