@@ -1,0 +1,42 @@
+name: Verify site build
+
+on:
+  push:
+    branches:
+      - integrated-mvp
+    paths:
+      - .github/workflows/verify-site-build.yml
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: integrated-mvp
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Astro check
+        run: npm run check
+
+      - name: Production build
+        run: npm run build
+
+      - name: Confirm optimized assets
+        run: |
+          test -f dist/images/hero-cemetery-photo-v2.webp
+          test -f dist/images/hero-cemetery-v1.webp
+          test -f dist/images/sponsors/mitaka-anshin-soudan-v1.webp
+          ls -lh dist/images/hero-cemetery-photo-v2.webp dist/images/hero-cemetery-v1.webp dist/images/sponsors/mitaka-anshin-soudan-v1.webp
