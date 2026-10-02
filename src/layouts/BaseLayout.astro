@@ -385,27 +385,26 @@ const hasBeforeSponsor = Astro.slots.has('beforeSponsor');
 
     {
       hasBeforeSponsor ? (
-        <div class="page-shell page-shell--split" data-page-category={pageCategory}>
-          {/* 「本文」ランドマーク（<main>）はHTML上1つだけにする必要があるため、
-              スキップリンクの遷移先も含め、本文の先頭（beforeSponsorの中身）
-              側に<main id="main-content">を置く。後半（既定スロットの中身）は
-              同じ本文の続きだが、間に広告（.sponsor-group）を挟むDOM構造上、
-              単一の<main>で両方を囲めないため、意味的に紐づく<div>にしている。 */}
-          <main id="main-content" class="site-main site-main--before">
+        <main id="main-content" class="page-shell page-shell--split" data-page-category={pageCategory}>
+          {/* 本文前半・広告・本文後半を、ページ全体で1つのmainランドマークにまとめる。
+              SponsorGroupはasideとして本文に付随する広告を表すためmain内に置ける。
+              これにより、検索エンジン・支援技術の双方にページ本文の範囲を
+              より明確に示しつつ、既存のPC左右レール／モバイル表示順は維持する。 */}
+          <div class="site-main site-main--before">
             <slot name="beforeSponsor" />
-          </main>
+          </div>
           <SponsorGroup sponsorSlots={sponsorSlots} pageCategory={pageCategory} />
           <div class="site-main site-main--rest">
             <slot />
           </div>
-        </div>
+        </main>
       ) : (
-        <div class="page-shell" data-page-category={pageCategory}>
-          <main id="main-content" class="site-main">
+        <main id="main-content" class="page-shell" data-page-category={pageCategory}>
+          <div class="site-main">
             <slot />
-          </main>
+          </div>
           <SponsorGroup sponsorSlots={sponsorSlots} pageCategory={pageCategory} />
-        </div>
+        </main>
       )
     }
 
