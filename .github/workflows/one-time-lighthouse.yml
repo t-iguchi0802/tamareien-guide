@@ -1,0 +1,79 @@
+name: One-time Lighthouse audit
+
+on:
+  push:
+    branches:
+      - integrated-mvp
+    paths:
+      - .github/workflows/one-time-lighthouse.yml
+
+permissions:
+  contents: read
+
+jobs:
+  lighthouse:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: integrated-mvp
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build site
+        run: npm run build
+
+      - name: Start local production preview
+        run: |
+          npm run preview -- --host 127.0.0.1 --port 4321 > /tmp/astro-preview.log 2>&1 &
+          echo $! > /tmp/astro-preview.pid
+          for i in {1..30}; do
+            if curl -fsS http://127.0.0.1:4321/ >/dev/null; then
+              exit 0
+            fi
+            sleep 1
+          done
+          cat /tmp/astro-preview.log
+          exit 1
+
+      - name: Run Lighthouse mobile audits
+        run: |
+          mkdir -p lighthouse
+          npx -y lighthouse@12.8.2 http://127.0.0.1:4321/             --output=json --output-path=lighthouse/top.json             --only-categories=performance,accessibility,best-practices,seo             --form-factor=mobile --screenEmulation.mobile=true             --throttling-method=simulate             --chrome-flags="--headless --no-sandbox"
+          npx -y lighthouse@12.8.2 http://127.0.0.1:4321/sekizaiten/             --output=json --output-path=lighthouse/sekizaiten.json             --only-categories=performance,accessibility,best-practices,seo             --form-factor=mobile --screenEmulation.mobile=true             --throttling-method=simulate             --chrome-flags="--headless --no-sandbox"
+          npx -y lighthouse@12.8.2 http://127.0.0.1:4321/hakajimai/             --output=json --output-path=lighthouse/hakajimai.json             --only-categories=performance,accessibility,best-practices,seo             --form-factor=mobile --screenEmulation.mobile=true             --throttling-method=simulate             --chrome-flags="--headless --no-sandbox"
+          npx -y lighthouse@12.8.2 http://127.0.0.1:4321/guide/mitamado/             --output=json --output-path=lighthouse/mitamado.json             --only-categories=performance,accessibility,best-practices,seo             --form-factor=mobile --screenEmulation.mobile=true             --throttling-method=simulate             --chrome-flags="--headless --no-sandbox"
+
+      - name: Print summary
+        run: |
+          node - <<'NODE'
+          const fs = require('fs');
+          const names = ['top','sekizaiten','hakajimai','mitamado'];
+          for (const name of names) {
+            const j = JSON.parse(fs.readFileSync('lighthouse/' + name + '.json', 'utf8'));
+            const cat = j.categories;
+            const a = j.audits;
+            const row = {
+              page: name,
+              performance: Math.round(cat.performance.score * 100),
+              accessibility: Math.round(cat.accessibility.score * 100),
+              bestPractices: Math.round(cat['best-practices'].score * 100),
+              seo: Math.round(cat.seo.score * 100),
+              FCP_ms: Math.round(a['first-contentful-paint'].numericValue),
+              LCP_ms: Math.round(a['largest-contentful-paint'].numericValue),
+              CLS: Number(a['cumulative-layout-shift'].numericValue.toFixed(3)),
+              TBT_ms: Math.round(a['total-blocking-time'].numericValue),
+              speedIndex_ms: Math.round(a['speed-index'].numericValue),
+              transferKB: Math.round((a['total-byte-weight']?.numericValue || 0) / 1024),
+            };
+            console.log('LH_SUMMARY ' + JSON.stringify(row));
+          }
+          NODE
