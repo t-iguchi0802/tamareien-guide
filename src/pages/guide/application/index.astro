@@ -1,0 +1,158 @@
+---
+import '../../../styles/guide-article.css';
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import { ROUTES } from '../../../lib/routes';
+import { GUIDE_SOURCES } from '../../_lib/guide-sources';
+import { buildArticleJsonLd } from '../../../lib/seo';
+
+const pageTitle = '多磨霊園の募集・申し込み｜2026年の抽選・倍率・申込資格';
+const heroHeading = '多磨霊園の募集・申し込み';
+const description =
+  '多磨霊園の令和8年度（2026年度）募集は終了しています。申込期間、一般埋蔵施設・合葬埋蔵施設・樹林型合葬埋蔵施設の倍率、主な申込資格、公式の抽選結果を整理します。';
+const checkedAtJa = '2026年10月2日';
+
+const articleJsonLd = buildArticleJsonLd({
+  path: ROUTES.guideApplication.path,
+  headline: heroHeading,
+  description,
+  datePublished: '2026-10-02',
+  dateModified: '2026-10-02',
+  image: '/images/hero-cemetery-photo-v2.webp',
+});
+
+const lotteryRows = [
+  { type: '一般埋蔵施設', capacity: '360区画', applications: '629件', ratio: '1.7倍' },
+  { type: '合葬埋蔵施設', capacity: '640体', applications: '5,490体', ratio: '8.6倍' },
+  { type: '樹林型合葬埋蔵施設', capacity: '2,430体', applications: '6,073体', ratio: '2.5倍' },
+] as const;
+---
+
+<BaseLayout
+  title={pageTitle}
+  description={description}
+  ogType="article"
+  breadcrumbs={[
+    { name: '多磨霊園ガイド', path: ROUTES.guide.path },
+    { name: '募集・申し込み', path: ROUTES.guideApplication.path },
+  ]}
+  extraJsonLd={[articleJsonLd]}
+>
+  <Fragment slot="beforeSponsor">
+    <article class="article">
+      <p class="article__eyebrow"><a href={ROUTES.guide.path}>多磨霊園ガイド</a> ／ 募集・申し込み</p>
+      <h1>{heroHeading}</h1>
+      <p class="article__lead">令和8年度の募集状況・倍率を公式資料で確認</p>
+      <p class="article__meta">更新日：{checkedAtJa}</p>
+
+      <div class="article__callout article__callout--warm">
+        <p class="article__callout__eyebrow">現在の状況</p>
+        <p>
+          <strong>令和8年度（2026年度）の都立霊園使用者募集は終了しています。</strong>
+          申込期間は2026年6月12日から7月3日まででした。抽選は8月14日に行われ、結果は公式サイトで公開されています。
+        </p>
+      </div>
+
+      <section aria-labelledby="application-lottery-heading">
+        <h2 id="application-lottery-heading">令和8年度の多磨霊園の倍率</h2>
+        <div class="article__table-scroll">
+          <table>
+            <caption>多磨霊園の施設種別ごとの公募受付状況</caption>
+            <thead>
+              <tr>
+                <th scope="col">施設</th>
+                <th scope="col">募集数</th>
+                <th scope="col">受付数</th>
+                <th scope="col">倍率</th>
+              </tr>
+            </thead>
+            <tbody>
+              {lotteryRows.map((row) => (
+                <tr>
+                  <th scope="row">{row.type}</th>
+                  <td>{row.capacity}</td>
+                  <td>{row.applications}</td>
+                  <td><strong>{row.ratio}</strong></td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        <p class="article__note">
+          上記は施設種別全体の集計です。一般埋蔵施設はTA01〜TA07など組ごとに倍率が異なります。詳細は公式の公募受付状況をご確認ください。
+        </p>
+      </section>
+    </article>
+  </Fragment>
+
+  <div class="article">
+    <section aria-labelledby="application-qualification-heading">
+      <h2 id="application-qualification-heading">申し込みには資格があります</h2>
+      <p>
+        一般埋蔵施設では、東京都内に5年以上継続して住んでいること、現在守っている親族の遺骨があること、
+        その遺骨の祭祀を主宰する立場であることなどが主な要件として案内されています。
+      </p>
+      <p>
+        合葬埋蔵施設・樹林型合葬埋蔵施設は、遺骨申込・生前申込などの区分によって条件が異なります。
+        令和8年度の公式案内では、居住要件は原則として都内3年以上です。
+        申込資格は年度・施設・申込区分で変わるため、申込時には必ず当該年度の「申込みのしおり」を確認してください。
+      </p>
+    </section>
+
+    <section aria-labelledby="application-purchase-heading">
+      <h2 id="application-purchase-heading">「購入」ではなく「使用者募集」と案内されています</h2>
+      <p>
+        多磨霊園を「購入」と検索する方もいますが、東京都の公式資料では「使用者募集」「使用料」という表現が使われています。
+        一般埋蔵施設の募集資料でも、使用料は「貸付時のみ」と記載されています。
+      </p>
+    </section>
+
+    <section aria-labelledby="application-next-heading">
+      <h2 id="application-next-heading">次回の募集を確認するには</h2>
+      <p>
+        次年度の申込期間や募集区画は、公式発表前には確定していません。当サイトでは前年の日程から次回日程を推測して掲載しません。
+        東京都公園協会の「都立霊園をご希望の方へ」で最新情報をご確認ください。
+      </p>
+      <div class="article__button-row">
+        <a class="article__button" href={GUIDE_SOURCES.reienRequest2026.url} rel="noopener" target="_blank">
+          公式の募集案内を見る
+        </a>
+        <a class="article__button article__button--secondary" href={GUIDE_SOURCES.reienLotteryResults2026.url} rel="noopener" target="_blank">
+          抽選結果を見る
+        </a>
+      </div>
+    </section>
+
+    <section aria-labelledby="application-related-heading">
+      <h2 id="application-related-heading">施設ごとの内容を見る</h2>
+      <ul class="article__related-grid">
+        <li><a class="article__related-card article__related-card--limestone" href={ROUTES.guideCost.path}>多磨霊園の費用を見る</a></li>
+        <li><a class="article__related-card article__related-card--limestone" href={ROUTES.guideGassou.path}>合葬埋蔵施設を見る</a></li>
+        <li><a class="article__related-card article__related-card--limestone" href={ROUTES.guideJumokuso.path}>樹木葬・樹林型合葬埋蔵施設を見る</a></li>
+      </ul>
+    </section>
+
+    <section aria-labelledby="application-sources-heading">
+      <h2 id="application-sources-heading">情報源</h2>
+      <ul class="article__sources">
+        <li>
+          <a href={GUIDE_SOURCES.reienRequest2026.url} rel="noopener" target="_blank">
+            {GUIDE_SOURCES.reienRequest2026.publisher}「{GUIDE_SOURCES.reienRequest2026.title}」
+          </a>
+          （最終確認日: {GUIDE_SOURCES.reienRequest2026.checkedAt}）
+        </li>
+        <li>
+          <a href={GUIDE_SOURCES.reienApplicationGuide2026.url} rel="noopener" target="_blank">
+            {GUIDE_SOURCES.reienApplicationGuide2026.publisher}「{GUIDE_SOURCES.reienApplicationGuide2026.title}」
+          </a>
+          （最終確認日: {GUIDE_SOURCES.reienApplicationGuide2026.checkedAt}）
+        </li>
+        <li>
+          <a href={GUIDE_SOURCES.reienLottery2026.url} rel="noopener" target="_blank">
+            {GUIDE_SOURCES.reienLottery2026.publisher}「{GUIDE_SOURCES.reienLottery2026.title}」
+          </a>
+          （最終確認日: {GUIDE_SOURCES.reienLottery2026.checkedAt}）
+        </li>
+      </ul>
+    </section>
+  </div>
+</BaseLayout>
