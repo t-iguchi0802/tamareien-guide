@@ -1,0 +1,124 @@
+---
+import '../../../styles/guide-article.css';
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import { ROUTES } from '../../../lib/routes';
+import { GUIDE_SOURCES } from '../../_lib/guide-sources';
+import { buildArticleJsonLd } from '../../../lib/seo';
+
+const pageTitle = '多磨霊園の合葬埋蔵施設｜申込・費用・納骨の基本';
+const heroHeading = '多磨霊園の合葬埋蔵施設';
+const description =
+  '多磨霊園の合葬埋蔵施設について、一定期間後共同埋蔵の仕組み、令和8年度の使用料、申込時の確認事項、墓誌刻字を東京都公園協会の公式情報から整理します。';
+const checkedAtJa = '2026年10月2日';
+
+const articleJsonLd = buildArticleJsonLd({
+  path: ROUTES.guideGassou.path,
+  headline: heroHeading,
+  description,
+  datePublished: '2026-10-02',
+  dateModified: '2026-10-02',
+  image: '/images/hero-cemetery-photo-v2.png',
+});
+---
+
+<BaseLayout
+  title={pageTitle}
+  description={description}
+  ogType="article"
+  breadcrumbs={[
+    { name: '多磨霊園ガイド', path: ROUTES.guide.path },
+    { name: '合葬埋蔵施設', path: ROUTES.guideGassou.path },
+  ]}
+  extraJsonLd={[articleJsonLd]}
+>
+  <Fragment slot="beforeSponsor">
+    <article class="article">
+      <p class="article__eyebrow"><a href={ROUTES.guide.path}>多磨霊園ガイド</a> ／ 納骨・供養</p>
+      <h1>{heroHeading}</h1>
+      <p class="article__lead">一定期間、個別に保管した後に共同埋蔵する施設です</p>
+      <p class="article__meta">更新日：{checkedAtJa}</p>
+
+      <div class="article__callout">
+        <p>
+          令和8年度の募集資料では、多磨霊園の合葬埋蔵施設は
+          <strong>「一定期間後共同埋蔵」</strong>として募集されています。
+          使用許可日から20年間個別に保管した後、共同埋蔵する方式です。
+        </p>
+      </div>
+
+      <section aria-labelledby="gassou-fee-heading">
+        <h2 id="gassou-fee-heading">令和8年度の使用料</h2>
+        <div class="article__table-scroll">
+          <table>
+            <caption>多磨霊園 合葬埋蔵施設の募集時使用料</caption>
+            <tbody>
+              <tr><th scope="row">使用料</th><td><strong>遺骨1体あたり61,000円</strong></td></tr>
+              <tr><th scope="row">年間管理料</th><td>公式の令和8年度募集資料では設定なし</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="article__note">
+          上記は令和8年度募集時の金額です。次回以降の募集では変更される可能性があります。
+        </p>
+      </section>
+    </article>
+  </Fragment>
+
+  <div class="article">
+    <section aria-labelledby="gassou-use-heading">
+      <h2 id="gassou-use-heading">納骨後の扱い</h2>
+      <p>
+        公式資料では、一定期間後共同埋蔵は、使用許可日から20年間個別に保管した後に共同埋蔵する方式と説明されています。
+        共同埋蔵後は、個別の区画墓地のように遺骨ごとの場所を使用する形式ではありません。
+      </p>
+    </section>
+
+    <section aria-labelledby="gassou-name-heading">
+      <h2 id="gassou-name-heading">墓誌への刻字</h2>
+      <p>
+        多磨霊園の合葬埋蔵施設では、施設に備え付けられた石製の墓誌へ、埋蔵者名を有料で刻字できると公式の使用の手引に記載されています。
+        詳細は多磨霊園管理事務所へ確認してください。
+      </p>
+    </section>
+
+    <section aria-labelledby="gassou-apply-heading">
+      <h2 id="gassou-apply-heading">申し込みについて</h2>
+      <p>
+        令和8年度の都立霊園使用者募集は終了しています。募集数、居住要件、生前申込や遺骨申込の区分は年度ごとに確認してください。
+        最新の募集資料は東京都公園協会の案内から確認できます。
+      </p>
+      <p>
+        <a class="article__button article__button--secondary" href={GUIDE_SOURCES.reienDownload.url} rel="noopener" target="_blank">
+          東京都公園協会の資料一覧を見る
+        </a>
+      </p>
+    </section>
+
+    <section aria-labelledby="gassou-related-heading">
+      <h2 id="gassou-related-heading">関連ページ</h2>
+      <ul class="article__related-grid">
+        <li><a class="article__related-card article__related-card--limestone" href={ROUTES.guideJumokuso.path}>樹木葬・樹林墓地を見る</a></li>
+        <li><a class="article__related-card article__related-card--limestone" href={ROUTES.guideMitamado.path}>みたま堂を見る</a></li>
+        <li><a class="article__related-card article__related-card--limestone" href={ROUTES.hakajimai.path}>墓じまい費用・比較を見る</a></li>
+      </ul>
+    </section>
+
+    <section aria-labelledby="gassou-sources-heading">
+      <h2 id="gassou-sources-heading">情報源</h2>
+      <ul class="article__sources">
+        <li>
+          <a href={GUIDE_SOURCES.reienApplication2026.url} rel="noopener" target="_blank">
+            {GUIDE_SOURCES.reienApplication2026.publisher}「{GUIDE_SOURCES.reienApplication2026.title}」
+          </a>
+          （最終確認日: {GUIDE_SOURCES.reienApplication2026.checkedAt}）
+        </li>
+        <li>
+          <a href={GUIDE_SOURCES.gassouGuide.url} rel="noopener" target="_blank">
+            {GUIDE_SOURCES.gassouGuide.publisher}「{GUIDE_SOURCES.gassouGuide.title}」
+          </a>
+          （最終確認日: {GUIDE_SOURCES.gassouGuide.checkedAt}）
+        </li>
+      </ul>
+    </section>
+  </div>
+</BaseLayout>
