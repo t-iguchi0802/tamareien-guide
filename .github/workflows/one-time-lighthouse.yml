@@ -77,3 +77,5 @@ jobs:
             console.log('LH_SUMMARY ' + JSON.stringify(row));
           }
           NODE
+
+# rerun after homepage hero preload
