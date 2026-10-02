@@ -131,9 +131,9 @@ import { buildArticleJsonLd } from '../../lib/seo';
 // 検索意図（交通・駐車場）により合う文言へ変更した。H1「多磨霊園への
 // 行き方」・補足「電車・バス・車と入口の選び方」（<h1>/.article__lead、
 // 前回の複合タイトル分割対応）は変更していない。
-const pageTitle = '多磨霊園へのアクセス・交通・駐車場案内｜多磨霊園 お墓ガイド';
+const pageTitle = '多磨霊園へのアクセス・最寄り駅・駐車場｜区画の確認方法';
 const description =
-  '多磨霊園への行き方を、電車・バス・車のルート別に公式情報をもとに整理しました。門ごとの開閉時間、駐車場について公式ページで確認できる範囲、地図へのリンクを掲載しています。';
+  '多磨霊園へのアクセスを、最寄り駅・電車・バス・車のルート別に公式情報をもとに整理。門ごとの開閉時間、駐車場、区画（区・種・側・番）の確認方法と公式園内案内図へのリンクを掲載しています。';
 
 const tamaOfficial = getSourceById('SRC-TAMA-OFFICIAL');
 const checkedAtJa = '2026年9月1日';
@@ -243,12 +243,12 @@ const transportCards: TransportCard[] = [
       <p class="access-hero__credit">イメージ写真</p>
 
       <section aria-labelledby="access-entry-heading">
-        <h2 id="access-entry-heading">墓所の場所に合う入口を選ぶ</h2>
+        <h2 id="access-entry-heading">区画を確認して、近い入口を選ぶ</h2>
         <p>
           多磨霊園には複数の入口があります。墓所の位置によって、便利な入口が異なります。
         </p>
         <p>
-          墓所の区画（区・種・側・番）がわかる場合は、
+          多磨霊園で区画の場所を確認したい場合、墓所の区画（区・種・側・番）がわかれば、
           <a
             href={GUIDE_SOURCES.tamaMapPdf.url}
             rel="noopener"
