@@ -55,6 +55,42 @@ export const GUIDE_SOURCES = {
     url: 'https://www.tokyo-park.or.jp/reien/tama/news/2026/park_info_1_1_2.html',
     checkedAt: '2026-09-01',
   },
+  tamaMitamadoNotice2026May: {
+    publisher: '公益財団法人東京都公園協会',
+    title: 'みたま堂工事に伴うご納骨、お引き取り、墓参のご案内（その５）',
+    url: 'https://www.tokyo-park.or.jp/reien/tama/news/2026/1_nbsp_nbsp_2_nbsp_nbsp_7_9_29_9_3_3_n_1.html',
+    checkedAt: '2026-10-02',
+  },
+  tamaWinterGateNotice2026: {
+    publisher: '公益財団法人東京都公園協会',
+    title: '開閉門時間の変更のお知らせ',
+    url: 'https://www.tokyo-park.or.jp/reien/tama/news/2026/park_info_1_1_2.html',
+    checkedAt: '2026-10-02',
+  },
+  reienApplication2026: {
+    publisher: '公益財団法人東京都公園協会',
+    title: '令和8年度 都立霊園の使用者を募集します',
+    url: 'https://www.tokyo-park.or.jp/association/assets/reien_pressrelease_20260525.pdf',
+    checkedAt: '2026-10-02',
+  },
+  gassouGuide: {
+    publisher: '公益財団法人東京都公園協会',
+    title: '都立霊園 合葬埋蔵施設 使用の手引',
+    url: 'https://www.tokyo-park.or.jp/assets/files/tebiki_gassou.pdf',
+    checkedAt: '2026-10-02',
+  },
+  jurinGuide: {
+    publisher: '公益財団法人東京都公園協会',
+    title: '都立霊園 樹林型合葬埋蔵施設 使用の手引',
+    url: 'https://www.tokyo-park.or.jp/reien/06_4_Jurin_Guide_2025.pdf',
+    checkedAt: '2026-10-02',
+  },
+  reienDownload: {
+    publisher: '公益財団法人東京都公園協会',
+    title: '資料ダウンロード',
+    url: 'https://www.tokyo-park.or.jp/reien/download/index.html',
+    checkedAt: '2026-10-02',
+  },
   googleMapsTama: {
     publisher: 'Google マップ',
     title: 'Googleマップで「多磨霊園」を開く',
