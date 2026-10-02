@@ -212,6 +212,8 @@ interface Props {
   ogImageAlt?: string;
   /** og:type。記事ページはBaseLayout呼び出し側で'article'を指定する。既定'website'。 */
   ogType?: 'website' | 'article';
+  /** ファーストビューのLCP候補画像を早期取得する場合のサイト内パス。 */
+  preloadImage?: string;
   /** パンくず（JSON-LD BreadcrumbList用）。画面のeyebrowリンク・ヘッダーナビの
    * 階層と一致するものだけを渡す。省略時はBreadcrumbListを出力しない。 */
   breadcrumbs?: { name: string; path: string }[];
@@ -233,6 +235,7 @@ const {
   ogImage = '/images/hero-cemetery-photo-v2.webp',
   ogImageAlt = '多磨霊園の園路と緑（イメージ写真）',
   ogType = 'website',
+  preloadImage,
   breadcrumbs,
   extraJsonLd = [],
 } = Astro.props;
@@ -266,6 +269,7 @@ const hasBeforeSponsor = Astro.slots.has('beforeSponsor');
     <meta name="theme-color" content="#244c3c" />
     {noindex && <meta name="robots" content="noindex, nofollow" />}
     <link rel="canonical" href={canonicalUrl} />
+    {preloadImage && <link rel="preload" as="image" href={preloadImage} fetchpriority="high" />}
     <link rel="icon" type="image/png" sizes="48x48" href="/favicon-48.png" />
     <link rel="icon" type="image/png" sizes="192x192" href="/site-icon-192.png" />
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
