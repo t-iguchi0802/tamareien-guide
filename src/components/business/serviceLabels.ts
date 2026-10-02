@@ -24,39 +24,65 @@ export const SERVICE_LABELS: Record<ServiceKey, string> = {
 };
 
 /**
- * 「目的から探す」の3分類（editorial-redesign）。
+ * 石材店カードで使う短い表示名。
+ * 一覧性を優先し、意味を変えない範囲で語を短くする。
+ */
+export const COMPACT_SERVICE_LABELS: Record<ServiceKey, string> = {
+  new_grave: '建墓',
+  grave_closure: '墓じまい',
+  reburial_support: '改葬',
+  interment: '納骨',
+  engraving: '文字彫刻',
+  cleaning: '清掃',
+  annual_management: '年間管理',
+  flowers: '供花・墓参り',
+  planting: '植木・除草',
+  renovation: '修理・リフォーム',
+  seismic: '耐震',
+  remote_photo_report: '見守り・写真報告',
+};
+
+/**
+ * 「目的から探す」の6分類（2026-10-03、スマホ優先で再設計）。
  *
- * TOPページの3つの目的ボタン・石材店一覧の詳しい条件選択の両方で使う共有定義。
- * 既存の12 ServiceKeyだけを使い、新しいサービスは作らない
- * （12キー全てがちょうど1分類に属し、抜け漏れ・重複がないことをQAで確認する）。
- * 「供養」は納骨後の法事・お参りに関わる行為として、管理・清掃と同じ
- * 「お墓を建てたあとの継続的な手入れ」分類に含めた
- * （interment=「納骨・法事支援」をこの分類に入れる判断）。
+ * 長い説明文を各選択肢に持たせず、短いチェック項目だけで素早く絞り込む。
+ * 各分類内はOR、複数分類間はAND。既存12 ServiceKeyだけを使う。
  */
 export interface PurposeGroup {
   id: string;
   heading: string;
-  description: string;
   serviceKeys: ServiceKey[];
 }
 
 export const PURPOSE_GROUPS: PurposeGroup[] = [
   {
     id: 'build',
-    heading: 'お墓を建てる・整える',
-    description: '新しくお墓を建てる、文字を彫る、修理や耐震補強をする',
-    serviceKeys: ['new_grave', 'engraving', 'renovation', 'seismic'],
+    heading: '墓を建てる',
+    serviceKeys: ['new_grave'],
+  },
+  {
+    id: 'repair',
+    heading: '修理・リフォーム',
+    serviceKeys: ['renovation', 'seismic'],
   },
   {
     id: 'closure',
-    heading: '墓じまい・改葬を考える',
-    description: '墓じまいの相談や、改葬にともなう手続きの支援を受ける',
+    heading: '墓じまい・改葬',
     serviceKeys: ['grave_closure', 'reburial_support'],
   },
   {
+    id: 'interment',
+    heading: '納骨・文字彫刻',
+    serviceKeys: ['interment', 'engraving'],
+  },
+  {
     id: 'care',
-    heading: '管理・清掃・供養を頼む',
-    description: '年間管理、清掃、供花、納骨・法事、遠方からの見守りを頼む',
-    serviceKeys: ['annual_management', 'cleaning', 'flowers', 'planting', 'interment', 'remote_photo_report'],
+    heading: '清掃・年間管理',
+    serviceKeys: ['cleaning', 'annual_management', 'planting'],
+  },
+  {
+    id: 'visit',
+    heading: '供花・墓参り代行',
+    serviceKeys: ['flowers', 'remote_photo_report'],
   },
 ];
