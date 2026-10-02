@@ -1,31 +1,13 @@
 ---
 /**
- * GA4（gtag.js）読み込み用の任意コンポーネント。
+ * GA4（gtag.js）読み込みコンポーネント。
  *
- * `PUBLIC_GA_MEASUREMENT_ID` が未設定の場合は何も出力しない
- * （GA4未設定でもサイトが壊れない、を<head>レベルで担保する）。
- *
- * 統合方法（レイアウト/ページ担当が必要と判断した場合のみ、<head>内で使用）:
- *
- * ```astro
- * ---
- * import GaTag from '../lib/analytics/GaTag.astro';
- * ---
- * <head>
- *   <GaTag />
- * </head>
- * ```
- *
- * このコンポーネント自体はどのレイアウト/ページにも組み込まれていない
- * （src/layouts/** はリード共有のため、seo-analytics担当からは変更しない）。
- * 統合はレイアウト/ページ担当・リードが行う。
- *
- * 実装メモ: 未設定時はfrontmatterで早期return（何も描画しない）する。
- * `{measurementId && (<script>...)}` のようにscriptタグをJSX式で条件分岐
- * すると、prettier-plugin-astroがscript内の`{`/`}`を式コンテナの一部として
- * 誤認しSyntaxErrorになる既知の制約があるため、早期returnで回避している。
- *
- * 所有者: feature/seo-analytics（src/lib/analytics/**）
+ * 2026-10-02 性能改善:
+ * - dataLayer / gtag関数とconfig呼び出しは即時に用意し、ページビューや
+ *   早い操作イベントをキューできる状態を維持する。
+ * - 約500KBの外部gtag.js本体はwindow load後に非同期で読み込む。
+ *   これによりファーストビュー描画と競合する初期のJavaScript実行を避ける。
+ * - gtag.js読み込み前のイベントはdataLayerへ積まれ、読み込み後に処理される。
  */
 import { getGaMeasurementId } from './config';
 
@@ -36,15 +18,40 @@ if (!measurementId) {
 }
 ---
 
-<script is:inline async src={`https://www.googletagmanager.com/gtag/js?id=${measurementId}`}
-></script>
 <script is:inline define:vars={{ measurementId }}>
   window.dataLayer = window.dataLayer || [];
   function gtag() {
-    // eslint-disable-next-line prefer-rest-params -- Google tag's official queue format uses Arguments.
+    // Google tagの公式キュー形式に合わせてArgumentsを積む。
     window.dataLayer.push(arguments);
   }
   window.gtag = gtag;
   gtag('js', new Date());
   gtag('config', measurementId, { send_page_view: true });
+
+  (function deferGoogleTag() {
+    let loaded = false;
+
+    function loadTag() {
+      if (loaded) return;
+      loaded = true;
+      const script = document.createElement('script');
+      script.async = true;
+      script.src = 'https://www.googletagmanager.com/gtag/js?id=' + encodeURIComponent(measurementId);
+      document.head.appendChild(script);
+    }
+
+    function schedule() {
+      if ('requestIdleCallback' in window) {
+        window.requestIdleCallback(loadTag, { timeout: 1000 });
+      } else {
+        window.setTimeout(loadTag, 0);
+      }
+    }
+
+    if (document.readyState === 'complete') {
+      schedule();
+    } else {
+      window.addEventListener('load', schedule, { once: true });
+    }
+  })();
 </script>
