@@ -1,0 +1,42 @@
+name: One-time mobile hero optimization
+
+on:
+  push:
+    branches:
+      - integrated-mvp
+    paths:
+      - .github/workflows/one-time-mobile-hero.yml
+
+permissions:
+  contents: write
+
+jobs:
+  optimize:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: integrated-mvp
+      - name: Install WebP tools
+        run: |
+          sudo apt-get update -y
+          sudo apt-get install -y webp
+      - name: Create mobile hero
+        run: |
+          python - <<'PY'
+          import struct
+          p='public/images/hero-cemetery-photo-v2.png'
+          with open(p,'rb') as f:
+              f.read(16)
+              w,h=struct.unpack('>II',f.read(8))
+          print(f'ORIGINAL_DIMENSIONS {w}x{h}')
+          PY
+          cwebp -quiet -mt -q 78 -resize 900 0 public/images/hero-cemetery-photo-v2.png -o public/images/hero-cemetery-photo-v2-mobile.webp
+          ls -lh public/images/hero-cemetery-photo-v2-mobile.webp
+      - name: Commit mobile hero
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add public/images/hero-cemetery-photo-v2-mobile.webp
+          git commit -m "perf: add responsive mobile hero image"
+          git push origin HEAD:integrated-mvp
