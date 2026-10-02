@@ -206,7 +206,7 @@ interface Props {
   description: string;
   /** trueの場合、検索エンジンにインデックスさせない。 */
   noindex?: boolean;
-  /** OGP画像（サイトルートからの絶対パス、例: "/images/hero-cemetery-photo-v2.png"）。省略時は既定のTOP写真。 */
+  /** OGP画像（サイトルートからの絶対パス、例: "/images/hero-cemetery-photo-v2.webp"）。省略時は既定のTOP写真。 */
   ogImage?: string;
   /** OGP画像の代替テキスト（画面には出さないが、OGPの説明として使う）。 */
   ogImageAlt?: string;
@@ -230,7 +230,7 @@ const {
   title,
   description,
   noindex = false,
-  ogImage = '/images/hero-cemetery-photo-v2.png',
+  ogImage = '/images/hero-cemetery-photo-v2.webp',
   ogImageAlt = '多磨霊園の園路と緑（イメージ写真）',
   ogType = 'website',
   breadcrumbs,
