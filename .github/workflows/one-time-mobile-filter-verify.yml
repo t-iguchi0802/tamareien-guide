@@ -1,0 +1,32 @@
+name: One-time mobile filter verification
+
+on:
+  push:
+    branches:
+      - integrated-mvp
+    paths:
+      - .github/workflows/one-time-mobile-filter-verify.yml
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: integrated-mvp
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run check
+      - run: npm run build
+      - name: Confirm six-filter UI and compact cards
+        run: |
+          grep -q "墓を建てる" dist/index.html
+          grep -q "供花・墓参り代行" dist/index.html
+          grep -q "6つの項目から選ぶと" dist/sekizaiten/index.html
+          grep -q "掲載石材店" dist/sekizaiten/index.html
