@@ -1,7 +1,10 @@
 ---
 /**
- * 墓じまい・墓石撤去の比較と見積項目。
- * 正本: CLAUDE_CODE_HANDOFF.md 5章 / src/lib/routes.ts ROUTES.hakajimai
+ * 多磨霊園の墓じまい費用・墓石撤去・改葬支援の比較。
+ * SEO設計（2026-10-02）: Googleキーワードプランナーで
+ * 「多磨霊園 墓じまい 費用」の需要が「墓じまい」単独より大きいことを確認し、
+ * 価格情報をページ前半へ移動。公開情報で確認できる料金・対応状況を
+ * 同一ページで比較し、検索意図と比較サイトの価値を一致させた。
  */
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import { ROUTES } from '../../lib/routes';
@@ -13,45 +16,71 @@ import CorrectionCta from '../../components/common/CorrectionCta.astro';
 
 const businesses = getBusinesses();
 const serviceKeys = ['grave_closure', 'reburial_support'] as const;
-const pageTitle = '多磨霊園の墓じまい・墓石撤去を比較';
+const pageTitle = '多磨霊園の墓じまい費用・石材店比較｜墓石撤去・改葬';
+const heroHeading = '多磨霊園の墓じまい費用・比較';
 const description =
-  '多磨霊園の墓じまい・墓石撤去、改葬の手続支援について、公開情報で確認できる事業者の対応状況と見積項目を比較します。';
-const browserTitle = `${pageTitle}｜お墓ガイド`;
+  '多磨霊園の墓じまい費用、墓石撤去、改葬支援について、各石材店の公開情報で確認できる料金と対応状況を比較。見積り前に確認したい項目と行政手続きも案内します。';
 ---
 
-<BaseLayout title={browserTitle} description={description}>
-  <h1>{pageTitle}</h1>
+<BaseLayout title={pageTitle} description={description}>
+  <h1>{heroHeading}</h1>
   <p>
-    多磨霊園での墓じまい（墓石の解体・撤去）と、改葬にともなう手続支援について、公開ページで確認できた対応状況をまとめています。実際の見積りは現地確認が必要になることが一般的です。行政手続き（改葬許可申請等）については<a
-      href={ROUTES.tetsuzuki.path}>手続きの案内ページ</a
-    >をご覧ください。
+    多磨霊園で墓じまいを検討する方向けに、各石材店のHP等で確認できた
+    <strong>料金の目安と対応状況</strong>をまとめています。
+    墓石の解体・撤去費用は、墓所の広さ、石の量、搬出経路などで変わるため、最終金額は現地見積りで確認してください。
   </p>
 
-  <section aria-labelledby="hakajimai-comparison-heading">
-    <h2 id="hakajimai-comparison-heading">対応状況の比較</h2>
-    <ComparisonTable businesses={businesses} visibleServices={[...serviceKeys]} />
-  </section>
-
-  <section aria-labelledby="hakajimai-contact-heading">
-    <h2 id="hakajimai-contact-heading">連絡先・アクセス</h2>
-    <BusinessContactList businesses={businesses} caption="墓じまい・改葬手続支援の連絡先一覧" />
-  </section>
-
   <section aria-labelledby="hakajimai-price-heading">
-    <h2 id="hakajimai-price-heading">見積り・価格の目安</h2>
+    <h2 id="hakajimai-price-heading">墓じまい費用の目安</h2>
     <p>
-      公開ページ上に金額の記載がある場合のみ、以下に「◯円〜」の形式で表示します。固定価格ではなく、墓所の広さ・立地・現況等により変動する場合があります。
+      各社の公開ページ上に金額の記載があるものだけを掲載しています。
+      「◯円〜」は最低料金や目安として示されている場合があり、固定価格ではありません。
     </p>
     <PriceList businesses={businesses} serviceKeys={[...serviceKeys]} />
   </section>
 
-  <section aria-labelledby="hakajimai-checklist-heading">
-    <h2 id="hakajimai-checklist-heading">見積りを依頼する前に</h2>
+  <section aria-labelledby="hakajimai-cost-factors-heading">
+    <h2 id="hakajimai-cost-factors-heading">費用が変わる主なポイント</h2>
+    <ul>
+      <li>墓所の広さ、墓石・外柵など撤去する石材の量</li>
+      <li>重機や運搬車が墓所の近くまで入れるかなど、搬出経路の条件</li>
+      <li>遺骨の取り出し、墓所返還までに必要となる作業範囲</li>
+      <li>改葬先や行政手続きの支援を石材店へ依頼するか</li>
+    </ul>
     <p>
-      墓石の広さや搬出経路、行政手続きの要否によって見積り内容は変わります。個別の事業者・墓所ごとの正確な項目や金額は、上の比較表・価格の目安を参考に、各事業者へ直接ご確認ください。行政手続き（改葬許可申請等）の詳細は<a
-        href={ROUTES.tetsuzuki.path}>手続きの案内ページ</a
-      >の公式リンクからご確認ください。
+      同じ「墓じまい」でも条件が違うため、総額を比べるときは、見積書に含まれる作業範囲もあわせて確認してください。
     </p>
+  </section>
+
+  <section aria-labelledby="hakajimai-comparison-heading">
+    <h2 id="hakajimai-comparison-heading">墓じまい・改葬支援の対応比較</h2>
+    <ComparisonTable businesses={businesses} visibleServices={[...serviceKeys]} />
+  </section>
+
+  <section aria-labelledby="hakajimai-contact-heading">
+    <h2 id="hakajimai-contact-heading">石材店の連絡先・アクセス</h2>
+    <BusinessContactList businesses={businesses} caption="墓じまい・改葬手続支援の連絡先一覧" />
+  </section>
+
+  <section aria-labelledby="hakajimai-procedure-heading">
+    <h2 id="hakajimai-procedure-heading">墓じまいと改葬の手続き</h2>
+    <p>
+      墓石を撤去して区画を返す「墓じまい」と、遺骨を別のお墓や納骨施設へ移す「改葬」は別の手続きです。
+      遺骨を移す場合の改葬許可などは、<a href={ROUTES.tetsuzuki.path}>改葬・墓所返還の手続き案内</a>で公式情報へのリンクを確認できます。
+    </p>
+  </section>
+
+  <section aria-labelledby="hakajimai-destination-heading">
+    <h2 id="hakajimai-destination-heading">改葬先を考えるとき</h2>
+    <p>
+      多磨霊園には、みたま堂、合葬埋蔵施設、樹林型合葬埋蔵施設があります。
+      それぞれ利用方法や募集条件が異なるため、改葬先の候補として検討する場合は各ガイドをご確認ください。
+    </p>
+    <ul>
+      <li><a href={ROUTES.guideMitamado.path}>多磨霊園のみたま堂</a></li>
+      <li><a href={ROUTES.guideGassou.path}>多磨霊園の合葬埋蔵施設</a></li>
+      <li><a href={ROUTES.guideJumokuso.path}>多磨霊園の樹木葬・樹林型合葬埋蔵施設</a></li>
+    </ul>
   </section>
 
   <CorrectionCta />
@@ -59,7 +88,9 @@ const browserTitle = `${pageTitle}｜お墓ガイド`;
   <section aria-labelledby="hakajimai-guide-heading">
     <h2 id="hakajimai-guide-heading">関連ページ</h2>
     <ul>
-      <li><a href={ROUTES.guideProcedures.path}>墓じまい・お墓の手続き 総合案内を見る</a></li>
+      <li><a href={ROUTES.guideProcedures.path}>墓じまい・お墓の手続き 総合案内</a></li>
+      <li><a href={ROUTES.guideProceduresHakajimaiVsKaisou.path}>墓じまいと改葬の違い</a></li>
+      <li><a href={ROUTES.sekizaiten.path}>多磨霊園の石材店一覧・比較</a></li>
     </ul>
   </section>
 </BaseLayout>
