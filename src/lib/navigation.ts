@@ -90,9 +90,6 @@ export const FOOTER_NAV_GROUPS: FooterNavGroup[] = [
       { label: '行き方・園内案内', path: ROUTES.access.path },
       { label: '墓じまい・手続き総合案内', path: ROUTES.guideProcedures.path },
       { label: '改葬・手続きの公式リンク', path: ROUTES.tetsuzuki.path },
-      { label: 'みたま堂', path: ROUTES.guideMitamado.path },
-      { label: '樹木葬・樹林墓地', path: ROUTES.guideJumokuso.path },
-      { label: '合葬埋蔵施設', path: ROUTES.guideGassou.path },
       { label: '歴史', path: ROUTES.guideHistory.path },
       { label: '著名人墓所', path: ROUTES.guideFamousGraves.path },
       // ニュース・記事掲載機能（2026-09-13追加、2026-09-14に表記整理）。
