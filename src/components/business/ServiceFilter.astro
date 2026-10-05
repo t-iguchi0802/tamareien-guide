@@ -234,7 +234,7 @@ const businessFilterData = businesses.map((business) => ({
 
             const isSponsor = card.dataset.sponsored === 'true';
             const sponsorBadge = card.querySelector<HTMLElement>('[data-sponsor-result-badge]');
-            if (sponsorBadge) sponsorBadge.hidden = !(hasSelection && isSponsor);
+            if (sponsorBadge) sponsorBadge.hidden = !isSponsor;
 
             const words = Array.from(card.querySelectorAll<HTMLElement>('[data-service-word]'));
             words.forEach((word) => {

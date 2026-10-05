@@ -204,9 +204,9 @@ if (
 // title更新（2026-09-02、ナビゲーション・運営者表示・SEO/AIO監査対応
 // 「ページタイトルと検索意図」節）: 「多磨霊園のお墓・石材店を目的から探す」を
 // 前半に置き、内容（お墓・石材店を目的から探せること）をより明確にした。
-const pageTitle = `多磨霊園の石材店${businesses.length}社を比較｜墓じまい・管理・墓参りガイド`;
+const pageTitle = '多磨霊園 お墓ガイド｜墓じまい・石材店・アクセス・供養';
 const description =
-  `多磨霊園周辺の石材店${businesses.length}社を、墓石建立・墓じまい・清掃管理など目的別に比較。アクセス、著名人墓所、季節の墓参り情報も掲載する地域ガイドです。`;
+  '多磨霊園のお墓・供養に関する地域ガイド。墓じまい、石材店比較、アクセス、みたま堂、樹木葬・合葬、募集・費用などを目的から探せます。';
 ---
 
 <BaseLayout title={pageTitle} description={description}>
@@ -224,17 +224,17 @@ const description =
         />
       </picture>
       <div class="hero__panel">
-        <p class="hero__eyebrow">多磨霊園周辺・{businesses.length}社掲載</p>
+        <p class="hero__eyebrow">多磨霊園のお墓・供養ガイド</p>
         <h1 id="hero-heading" class="hero__heading">
-          <span class="hero__heading-line">多磨霊園の石材店・お墓を</span>
+          <span class="hero__heading-line">多磨霊園のお墓・供養を</span>
           <span class="hero__heading-line">目的から探す</span>
         </h1>
         <p class="hero__lead">
-          墓石を建てる、直す、墓じまい、清掃・管理。必要なことから相談先を探せます。
+          お墓を建てる・整える、墓じまい・改葬、管理・清掃・供養。必要なことから情報や相談先を探せます。
         </p>
-        <a class="hero__cta" href={ROUTES.sekizaiten.path}>
-          {businesses.length}社の一覧を見る
-          <span aria-hidden="true">→</span>
+        <a class="hero__cta" href="#service-filter-heading">
+          目的から探す
+          <span aria-hidden="true">↓</span>
         </a>
       </div>
       <p class="hero__image-credit">イメージ写真</p>
