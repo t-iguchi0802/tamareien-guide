@@ -139,7 +139,8 @@ export function resetNewsDatasetCache(): void {
  */
 export function getPublishedNewsArticles(now: Date = new Date()): NewsArticle[] {
   const { articles } = loadNewsDataset();
-  const todayStr = now.toISOString().slice(0, 10);
+  // 公開日は日本時間で判定する。UTCのままだと午前9時まで前日になる。
+  const todayStr = new Date(now.getTime() + 9 * 60 * 60 * 1000).toISOString().slice(0, 10);
 
   return articles
     .filter((article) => article.published && article.publishedAt <= todayStr)
