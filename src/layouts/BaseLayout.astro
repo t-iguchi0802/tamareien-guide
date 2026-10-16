@@ -552,6 +552,160 @@ const hasBeforeSponsor = Astro.slots.has('beforeSponsor');
     </script>
 
     <script>
+      /**
+       * 比較ページのスマートフォン用スポンサーカルーセル。
+       *
+       * - 実スポンサーだけを対象に表示順をランダム化する。
+       * - 3秒ごとに次のカードへ移動する。
+       * - pointer操作中は自動移動を停止し、手動操作後に再開する。
+       * - PC表示ではDOM順・slot_positionを元に戻し、既存の左右レールを維持する。
+       */
+      (function initMobileSponsorCarousel() {
+        const mediaQuery = window.matchMedia('(max-width: 767px)');
+        const reducedMotionQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
+        const group = document.querySelector<HTMLElement>(
+          ".page-shell--split[data-page-category='comparison'] .sponsor-group",
+        );
+        if (!group) return;
+        const sponsorGroup = group;
+
+        const slotPositions = ['left-1', 'left-2', 'right-1', 'right-2'];
+        const originalPositions = new Map<HTMLElement, string | null>();
+        const allCards = Array.from(sponsorGroup.querySelectorAll<HTMLElement>('.sponsor-card'));
+        allCards.forEach((card) => {
+          originalPositions.set(card, card.dataset.slotPosition ?? null);
+        });
+
+        let mobileCards: HTMLElement[] = [];
+        let currentIndex = 0;
+        let intervalId: number | null = null;
+        let resumeTimeoutId: number | null = null;
+
+        function clearAutoAdvance(): void {
+          if (intervalId !== null) {
+            window.clearInterval(intervalId);
+            intervalId = null;
+          }
+          if (resumeTimeoutId !== null) {
+            window.clearTimeout(resumeTimeoutId);
+            resumeTimeoutId = null;
+          }
+        }
+
+        function shuffle<T>(items: T[]): T[] {
+          const result = [...items];
+          for (let index = result.length - 1; index > 0; index -= 1) {
+            const randomIndex = Math.floor(Math.random() * (index + 1));
+            [result[index], result[randomIndex]] = [result[randomIndex], result[index]];
+          }
+          return result;
+        }
+
+        function alignCard(card: HTMLElement, behavior: ScrollBehavior): void {
+          const groupRect = sponsorGroup.getBoundingClientRect();
+          const cardRect = card.getBoundingClientRect();
+          const sidePeek = sponsorGroup.clientWidth * 0.15;
+          const targetLeft = sponsorGroup.scrollLeft + cardRect.left - groupRect.left - sidePeek;
+          sponsorGroup.scrollTo({ left: Math.max(0, targetLeft), behavior });
+        }
+
+        function getClosestCardIndex(): number {
+          if (mobileCards.length === 0) return 0;
+          const groupRect = sponsorGroup.getBoundingClientRect();
+          const sidePeek = sponsorGroup.clientWidth * 0.15;
+          let closestIndex = 0;
+          let closestDistance = Number.POSITIVE_INFINITY;
+
+          mobileCards.forEach((card, index) => {
+            const cardRect = card.getBoundingClientRect();
+            const distance = Math.abs(cardRect.left - groupRect.left - sidePeek);
+            if (distance < closestDistance) {
+              closestDistance = distance;
+              closestIndex = index;
+            }
+          });
+
+          return closestIndex;
+        }
+
+        function advance(): void {
+          if (!mediaQuery.matches || reducedMotionQuery.matches || mobileCards.length < 2) return;
+          currentIndex = (currentIndex + 1) % mobileCards.length;
+          alignCard(mobileCards[currentIndex], 'smooth');
+        }
+
+        function startAutoAdvance(): void {
+          clearAutoAdvance();
+          if (!mediaQuery.matches || reducedMotionQuery.matches || mobileCards.length < 2) return;
+          intervalId = window.setInterval(advance, 3000);
+        }
+
+        function resumeAfterManualInteraction(): void {
+          if (resumeTimeoutId !== null) window.clearTimeout(resumeTimeoutId);
+          resumeTimeoutId = window.setTimeout(() => {
+            currentIndex = getClosestCardIndex();
+            startAutoAdvance();
+          }, 3000);
+        }
+
+        function applyResponsiveMode(): void {
+          clearAutoAdvance();
+
+          if (!mediaQuery.matches) {
+            allCards.forEach((card) => {
+              card.style.order = '';
+              const originalPosition = originalPositions.get(card);
+              if (originalPosition) card.dataset.slotPosition = originalPosition;
+            });
+            return;
+          }
+
+          mobileCards = shuffle(
+            allCards.filter((card) => !card.classList.contains('sponsor-card--empty')),
+          );
+
+          mobileCards.forEach((card, index) => {
+            card.style.order = String(index);
+            card.dataset.slotPosition = slotPositions[index] ?? 'right-2';
+          });
+
+          currentIndex = 0;
+          if (mobileCards.length > 0) {
+            window.requestAnimationFrame(() => alignCard(mobileCards[0], 'auto'));
+          }
+          startAutoAdvance();
+        }
+
+        sponsorGroup.addEventListener('pointerdown', () => {
+          if (!mediaQuery.matches) return;
+          clearAutoAdvance();
+        });
+
+        sponsorGroup.addEventListener('pointerup', () => {
+          if (!mediaQuery.matches) return;
+          currentIndex = getClosestCardIndex();
+          resumeAfterManualInteraction();
+        });
+
+        sponsorGroup.addEventListener('pointercancel', () => {
+          if (!mediaQuery.matches) return;
+          currentIndex = getClosestCardIndex();
+          resumeAfterManualInteraction();
+        });
+
+        document.addEventListener('visibilitychange', () => {
+          if (!mediaQuery.matches) return;
+          if (document.hidden) clearAutoAdvance();
+          else startAutoAdvance();
+        });
+
+        mediaQuery.addEventListener('change', applyResponsiveMode);
+        reducedMotionQuery.addEventListener('change', startAutoAdvance);
+        applyResponsiveMode();
+      })();
+    </script>
+
+    <script>
       // スポンサー枠の表示回数計測（全ページ共通、2026-08-28に
       // src/pages/index.astroから移設）。IntersectionObserverで
       // 実際にビューポート内に入った枠だけを、1枠につき1回計測する。
@@ -1202,13 +1356,18 @@ const hasBeforeSponsor = Astro.slots.has('beforeSponsor');
       overflow-x: auto;
       width: 100%;
       max-width: 100vw;
-      padding: 3rem var(--space-4) var(--space-5);
+      padding: 3rem 15vw var(--space-5);
       background: var(--color-sponsor-bg);
       border-block: 1px solid var(--color-sponsor-border);
       scroll-snap-type: x mandatory;
+      scroll-padding-inline: 15vw;
       overscroll-behavior-inline: contain;
       -webkit-overflow-scrolling: touch;
-      scrollbar-width: thin;
+      scrollbar-width: none;
+    }
+
+    .page-shell--split[data-page-category='comparison'] .sponsor-group::-webkit-scrollbar {
+      display: none;
     }
 
     .page-shell--split[data-page-category='comparison'] .sponsor-group::before {
@@ -1228,11 +1387,12 @@ const hasBeforeSponsor = Astro.slots.has('beforeSponsor');
     }
 
     .page-shell--split[data-page-category='comparison'] .sponsor-card {
-      flex: 0 0 min(84vw, 340px);
-      width: min(84vw, 340px);
-      min-width: min(84vw, 340px);
+      flex: 0 0 70vw;
+      width: 70vw;
+      min-width: 70vw;
       min-height: 390px;
       scroll-snap-align: start;
+      scroll-snap-stop: always;
       box-shadow: 0 8px 24px rgba(67, 42, 26, 0.18);
     }
 
