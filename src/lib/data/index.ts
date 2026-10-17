@@ -36,13 +36,17 @@ export function getBusinessDataset(): BusinessDataset {
   return dataset;
 }
 
+/** 一覧・検索・件数・構造化データで共有する公開対象の事業者。 */
 export function getBusinesses(): Business[] {
-  return getBusinessDataset().businesses;
+  return getBusinessDataset().businesses.filter((business) => business.listingStatus === 'publish');
 }
 
+/** 共通出典と公開対象事業者の出典だけを返す。 */
 export function getSources(): SourceRecord[] {
-  getBusinessDataset(); // 検証をトリガーする
-  return loadSources();
+  const publishedIds = new Set(getBusinesses().map((business) => business.id));
+  return loadSources().filter(
+    (source) => !source.business_id || publishedIds.has(source.business_id),
+  );
 }
 
 export function getSourceById(sourceId: string): SourceRecord | undefined {

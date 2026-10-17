@@ -29,6 +29,7 @@ export type ServiceKey =
   | 'remote_photo_report';
 
 export type ListingTier = 'A' | 'B';
+export type ListingStatus = 'publish' | 'hold' | 'out_of_scope';
 
 export interface EditorialPolicy {
   researchMethod: string;
@@ -83,7 +84,7 @@ export interface Business {
   slug: string;
   displayOrder: number;
   listingTier: ListingTier;
-  listingStatus: string;
+  listingStatus: ListingStatus;
   name: string;
   legalName: string | null;
   ownershipType: VerificationStatus;

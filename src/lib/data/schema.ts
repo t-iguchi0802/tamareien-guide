@@ -33,6 +33,7 @@ export const serviceKeySchema = z.enum([
 ]);
 
 export const listingTierSchema = z.enum(['A', 'B']);
+export const listingStatusSchema = z.enum(['publish', 'hold', 'out_of_scope']);
 
 const editorialPolicySchema = z.object({
   researchMethod: z.string(),
@@ -86,7 +87,7 @@ export const businessSchema = z.object({
     .regex(/^[a-z0-9-]+$/, 'slugは小文字英数字とハイフンのみ'),
   displayOrder: z.number().int(),
   listingTier: listingTierSchema,
-  listingStatus: z.string().min(1),
+  listingStatus: listingStatusSchema,
   name: z.string().min(1),
   legalName: z.string().nullable(),
   ownershipType: verificationStatusSchema,
