@@ -551,159 +551,6 @@ const hasBeforeSponsor = Astro.slots.has('beforeSponsor');
       })();
     </script>
 
-    <script>
-      /**
-       * 比較ページのスマートフォン用スポンサーカルーセル。
-       *
-       * - 実スポンサーだけを対象に表示順をランダム化する。
-       * - 3秒ごとに次のカードへ移動する。
-       * - pointer操作中は自動移動を停止し、手動操作後に再開する。
-       * - PC表示ではDOM順・slot_positionを元に戻し、既存の左右レールを維持する。
-       */
-      (function initMobileSponsorCarousel() {
-        const mediaQuery = window.matchMedia('(max-width: 767px)');
-        const reducedMotionQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
-        const group = document.querySelector<HTMLElement>(
-          ".page-shell--split[data-page-category='comparison'] .sponsor-group",
-        );
-        if (!group) return;
-        const sponsorGroup = group;
-
-        const slotPositions = ['left-1', 'left-2', 'right-1', 'right-2'];
-        const originalPositions = new Map<HTMLElement, string | null>();
-        const allCards = Array.from(sponsorGroup.querySelectorAll<HTMLElement>('.sponsor-card'));
-        allCards.forEach((card) => {
-          originalPositions.set(card, card.dataset.slotPosition ?? null);
-        });
-
-        let mobileCards: HTMLElement[] = [];
-        let currentIndex = 0;
-        let intervalId: number | null = null;
-        let resumeTimeoutId: number | null = null;
-
-        function clearAutoAdvance(): void {
-          if (intervalId !== null) {
-            window.clearInterval(intervalId);
-            intervalId = null;
-          }
-          if (resumeTimeoutId !== null) {
-            window.clearTimeout(resumeTimeoutId);
-            resumeTimeoutId = null;
-          }
-        }
-
-        function shuffle<T>(items: T[]): T[] {
-          const result = [...items];
-          for (let index = result.length - 1; index > 0; index -= 1) {
-            const randomIndex = Math.floor(Math.random() * (index + 1));
-            [result[index], result[randomIndex]] = [result[randomIndex], result[index]];
-          }
-          return result;
-        }
-
-        function alignCard(card: HTMLElement, behavior: ScrollBehavior): void {
-          const groupRect = sponsorGroup.getBoundingClientRect();
-          const cardRect = card.getBoundingClientRect();
-          const sidePeek = sponsorGroup.clientWidth * 0.15;
-          const targetLeft = sponsorGroup.scrollLeft + cardRect.left - groupRect.left - sidePeek;
-          sponsorGroup.scrollTo({ left: Math.max(0, targetLeft), behavior });
-        }
-
-        function getClosestCardIndex(): number {
-          if (mobileCards.length === 0) return 0;
-          const groupRect = sponsorGroup.getBoundingClientRect();
-          const sidePeek = sponsorGroup.clientWidth * 0.15;
-          let closestIndex = 0;
-          let closestDistance = Number.POSITIVE_INFINITY;
-
-          mobileCards.forEach((card, index) => {
-            const cardRect = card.getBoundingClientRect();
-            const distance = Math.abs(cardRect.left - groupRect.left - sidePeek);
-            if (distance < closestDistance) {
-              closestDistance = distance;
-              closestIndex = index;
-            }
-          });
-
-          return closestIndex;
-        }
-
-        function advance(): void {
-          if (!mediaQuery.matches || reducedMotionQuery.matches || mobileCards.length < 2) return;
-          currentIndex = (currentIndex + 1) % mobileCards.length;
-          alignCard(mobileCards[currentIndex], 'smooth');
-        }
-
-        function startAutoAdvance(): void {
-          clearAutoAdvance();
-          if (!mediaQuery.matches || reducedMotionQuery.matches || mobileCards.length < 2) return;
-          intervalId = window.setInterval(advance, 3000);
-        }
-
-        function resumeAfterManualInteraction(): void {
-          if (resumeTimeoutId !== null) window.clearTimeout(resumeTimeoutId);
-          resumeTimeoutId = window.setTimeout(() => {
-            currentIndex = getClosestCardIndex();
-            startAutoAdvance();
-          }, 3000);
-        }
-
-        function applyResponsiveMode(): void {
-          clearAutoAdvance();
-
-          if (!mediaQuery.matches) {
-            allCards.forEach((card) => {
-              card.style.order = '';
-              const originalPosition = originalPositions.get(card);
-              if (originalPosition) card.dataset.slotPosition = originalPosition;
-            });
-            return;
-          }
-
-          mobileCards = shuffle(
-            allCards.filter((card) => !card.classList.contains('sponsor-card--empty')),
-          );
-
-          mobileCards.forEach((card, index) => {
-            card.style.order = String(index);
-            card.dataset.slotPosition = slotPositions[index] ?? 'right-2';
-          });
-
-          currentIndex = 0;
-          if (mobileCards.length > 0) {
-            window.requestAnimationFrame(() => alignCard(mobileCards[0], 'auto'));
-          }
-          startAutoAdvance();
-        }
-
-        sponsorGroup.addEventListener('pointerdown', () => {
-          if (!mediaQuery.matches) return;
-          clearAutoAdvance();
-        });
-
-        sponsorGroup.addEventListener('pointerup', () => {
-          if (!mediaQuery.matches) return;
-          currentIndex = getClosestCardIndex();
-          resumeAfterManualInteraction();
-        });
-
-        sponsorGroup.addEventListener('pointercancel', () => {
-          if (!mediaQuery.matches) return;
-          currentIndex = getClosestCardIndex();
-          resumeAfterManualInteraction();
-        });
-
-        document.addEventListener('visibilitychange', () => {
-          if (!mediaQuery.matches) return;
-          if (document.hidden) clearAutoAdvance();
-          else startAutoAdvance();
-        });
-
-        mediaQuery.addEventListener('change', applyResponsiveMode);
-        reducedMotionQuery.addEventListener('change', startAutoAdvance);
-        applyResponsiveMode();
-      })();
-    </script>
 
     <script>
       // スポンサー枠の表示回数計測（全ページ共通、2026-08-28に
@@ -1333,71 +1180,103 @@ const hasBeforeSponsor = Astro.slots.has('beforeSponsor');
     }
   }
 
-  /*
-   * 比較ページのスマホ用メインスポンサー表示（2026-09-21）。
-   * PCは従来どおり左右レール。スマホだけ、比較UIより前に来るスポンサー
-   * 4枠を横スワイプ式の目立つ広告帯として表示する。
-   * 空き枠はスマホでは非表示にし、実スポンサーだけを見せる。
-   */
+  /* スマートフォンは全ページ共通のカルーセル。PCの左右レールは維持する。 */
+  .sponsor-carousel {
+    display: contents;
+  }
+
+  .sponsor-controls {
+    display: none;
+  }
+
   @media (max-width: 767px) {
-    /* 石材店比較ページは、選択肢の直後にメインスポンサーを置き、
-       画面高667px前後でもスポンサー帯の先頭がファーストビュー内に
-       入りやすいよう、本文下余白と広告帯上部の余白を圧縮する。 */
     .page-shell--split[data-page-category='comparison'] > .site-main--before {
       margin-bottom: 0;
       padding-top: var(--space-4);
       padding-bottom: var(--space-3);
     }
 
-    .page-shell--split[data-page-category='comparison'] .sponsor-group {
+    .page-shell .sponsor-group {
+      display: block;
+      min-width: 0;
+      width: 100%;
+      padding: var(--space-3) 0 var(--space-4);
+      border-block: 1px solid var(--color-sponsor-border);
+      background: var(--color-sponsor-bg);
+    }
+
+    .sponsor-controls {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: var(--space-2);
+      padding: 0 var(--space-4) var(--space-3);
+    }
+
+    .sponsor-controls__label {
+      margin: 0;
+      color: var(--color-sponsor-fg);
+      font-size: 0.9rem;
+      font-weight: 700;
+    }
+
+    .sponsor-controls__buttons {
+      display: flex;
+      gap: 0.4rem;
+    }
+
+    .sponsor-controls button {
+      min-width: 44px;
+      min-height: 44px;
+      padding: 0.35rem 0.7rem;
+      border: 1px solid var(--color-sponsor-border);
+      border-radius: var(--radius-pill);
+      background: var(--color-surface);
+      color: var(--color-sponsor-fg);
+      font: inherit;
+      font-size: 0.8rem;
+      cursor: pointer;
+    }
+
+    .sponsor-controls [hidden] {
+      display: none;
+    }
+
+    .sponsor-carousel {
       position: relative;
       display: flex;
-      gap: var(--space-3);
-      overflow-x: auto;
+      align-items: stretch;
+      gap: 0.5rem;
+      box-sizing: border-box;
       width: 100%;
-      max-width: 100vw;
-      padding: 3rem 15vw var(--space-5);
-      background: var(--color-sponsor-bg);
-      border-block: 1px solid var(--color-sponsor-border);
+      min-width: 0;
+      padding: 0.25rem 15vw 0.75rem;
+      overflow-x: auto;
       scroll-snap-type: x mandatory;
-      scroll-padding-inline: 15vw;
       overscroll-behavior-inline: contain;
       -webkit-overflow-scrolling: touch;
       scrollbar-width: none;
     }
 
-    .page-shell--split[data-page-category='comparison'] .sponsor-group::-webkit-scrollbar {
+    .sponsor-carousel::-webkit-scrollbar {
       display: none;
     }
 
-    .page-shell--split[data-page-category='comparison'] .sponsor-group::before {
-      content: 'PR｜メインスポンサー';
-      position: absolute;
-      top: var(--space-3);
-      left: var(--space-4);
-      color: var(--color-sponsor-fg);
-      font-family: var(--font-family-heading);
-      font-size: 0.9rem;
-      font-weight: 800;
-      letter-spacing: 0.02em;
-    }
-
-    .page-shell--split[data-page-category='comparison'] .sponsor-rail {
+    .sponsor-carousel .sponsor-rail {
       display: contents;
     }
 
-    .page-shell--split[data-page-category='comparison'] .sponsor-card {
+    .page-shell .sponsor-carousel .sponsor-card {
+      box-sizing: border-box;
       flex: 0 0 70vw;
       width: 70vw;
       min-width: 70vw;
+      max-width: 70vw;
+      height: auto;
       min-height: 390px;
-      scroll-snap-align: start;
+      scroll-snap-align: center;
       scroll-snap-stop: always;
-      box-shadow: 0 8px 24px rgba(67, 42, 26, 0.18);
-    }
-
-    .page-shell--split[data-page-category='comparison'] .sponsor-card--empty {
-      display: none;
     }
   }
 

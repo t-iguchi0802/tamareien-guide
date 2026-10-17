@@ -6,9 +6,9 @@
  * ページ（TOP）」「使わないページ（それ以外）」の2通りの.page-shell構造を
  * 出し分ける際、スポンサー枠のマークアップ自体をソースコード上で
  * 二重に書かないためだけの小さな共通部品（2026-08-28新設）。
- * データ取得・並び順の決定ロジックはBaseLayout.astro側に残し、
- * このコンポーネントは「渡された4枠をそのまま描画する」責務だけを持つ
- * （新しいスポンサー表示ロジックを増やさない）。
+ * データ取得はBaseLayout.astro側で行う。
+ * PCでは渡された4枠を左右レールへ描画し、スマートフォンでは募集枠も
+ * 含む4枠をランダム順のカルーセルとして表示する（2026-10-17修正）。
  *
  * 所有者: リード（src/layouts/**と同じ扱い）。
  *
@@ -24,8 +24,7 @@
  * 共通SponsorCard化（2026-09-02、「スポンサー広告の全面再設計」対応）:
  * `SponsorSlot.astro`を`SponsorCard.astro`へ改名した（写真付き広告・
  * 簡易表示・空枠の3通りをコンポーネント自身が出し分けるようになった。
- * 詳細はSponsorCard.astro参照）。呼び出し方（4枠固定・displayOrder順）は
- * 変更していない。
+ * 詳細はSponsorCard.astro参照）。契約データとPCの4枠固定順は維持する。
  */
 import type { Sponsor } from '../../types/sponsor';
 import SponsorCard from './SponsorCard.astro';
@@ -39,12 +38,231 @@ const { sponsorSlots, pageCategory } = Astro.props;
 ---
 
 <aside class="sponsor-group" data-sponsor-root aria-label="広告">
-  <div class="sponsor-rail sponsor-rail--left">
-    <SponsorCard sponsor={sponsorSlots[0]} position="left-1" pageCategory={pageCategory} />
-    <SponsorCard sponsor={sponsorSlots[1]} position="left-2" pageCategory={pageCategory} />
+  <div class="sponsor-controls">
+    <p class="sponsor-controls__label">広告・スポンサー募集</p>
+    <div class="sponsor-controls__buttons" data-sponsor-controls hidden>
+      <button type="button" data-sponsor-previous aria-label="前の広告">←</button>
+      <button type="button" data-sponsor-toggle aria-pressed="false">自動切替を停止</button>
+      <button type="button" data-sponsor-next aria-label="次の広告">→</button>
+    </div>
   </div>
-  <div class="sponsor-rail sponsor-rail--right">
-    <SponsorCard sponsor={sponsorSlots[2]} position="right-1" pageCategory={pageCategory} />
-    <SponsorCard sponsor={sponsorSlots[3]} position="right-2" pageCategory={pageCategory} />
+  <div class="sponsor-carousel" data-sponsor-carousel role="group" aria-label="広告の切り替え">
+    <div class="sponsor-rail sponsor-rail--left">
+      <SponsorCard sponsor={sponsorSlots[0]} position="left-1" pageCategory={pageCategory} />
+      <SponsorCard sponsor={sponsorSlots[1]} position="left-2" pageCategory={pageCategory} />
+    </div>
+    <div class="sponsor-rail sponsor-rail--right">
+      <SponsorCard sponsor={sponsorSlots[2]} position="right-1" pageCategory={pageCategory} />
+      <SponsorCard sponsor={sponsorSlots[3]} position="right-2" pageCategory={pageCategory} />
+    </div>
   </div>
 </aside>
+
+<script>
+  // 端でも左右に隣の広告を見せるため、表示用の複製を前後に置く。
+  // 広告ID・リンクを維持し、表示回数は既存のID単位の重複除去を利用する。
+  // 募集枠には広告IDを付けず、実スポンサーの表示・クリック計測に含めない。
+  document.querySelectorAll<HTMLElement>('[data-sponsor-root]').forEach((root) => {
+    const element = root.querySelector<HTMLElement>('[data-sponsor-carousel]');
+    if (!element) return;
+    const track = element;
+    const controls = root.querySelector<HTMLElement>('[data-sponsor-controls]');
+    const toggle = root.querySelector<HTMLButtonElement>('[data-sponsor-toggle]');
+    const originals = Array.from(track.querySelectorAll<HTMLElement>('[data-sponsor-card]'));
+    const mobile = window.matchMedia('(max-width: 767px)');
+    const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+    let slides: HTMLElement[] = [];
+    let index = 0;
+    let timer: number | undefined;
+    let settleTimer: number | undefined;
+    let dragging = false;
+    let paused = reducedMotion.matches;
+    let visible = typeof IntersectionObserver === 'undefined';
+    let focusInside = false;
+    let ready = false;
+
+    function stop(): void {
+      window.clearTimeout(timer);
+      timer = undefined;
+    }
+
+    function schedule(): void {
+      stop();
+      if (
+        !ready ||
+        !mobile.matches ||
+        paused ||
+        dragging ||
+        focusInside ||
+        !visible ||
+        document.hidden
+      )
+        return;
+      timer = window.setTimeout(() => move(1), 3000);
+    }
+
+    function updateToggle(): void {
+      if (!toggle) return;
+      toggle.textContent = paused ? '自動切替を再開' : '自動切替を停止';
+      toggle.setAttribute('aria-pressed', String(paused));
+    }
+
+    function center(targetIndex: number, animate: boolean): void {
+      const card = slides[targetIndex];
+      if (!card) return;
+      const box = track.getBoundingClientRect();
+      const cardBox = card.getBoundingClientRect();
+      track.scrollTo({
+        left: track.scrollLeft + cardBox.left - box.left - (track.clientWidth - cardBox.width) / 2,
+        behavior: animate && !reducedMotion.matches ? 'smooth' : 'instant',
+      });
+    }
+
+    function closest(): number {
+      const box = track.getBoundingClientRect();
+      const midpoint = box.left + track.clientWidth / 2;
+      let result = index;
+      let distance = Infinity;
+      slides.forEach((slide, position) => {
+        const rect = slide.getBoundingClientRect();
+        const offset = Math.abs(rect.left + rect.width / 2 - midpoint);
+        if (offset < distance) {
+          distance = offset;
+          result = position;
+        }
+      });
+      return result;
+    }
+
+    function settle(): void {
+      if (!ready || !mobile.matches || dragging) return;
+      index = closest();
+      // 同じ絵柄の中央の周へ戻す。画面上の見た目は変化しない。
+      const count = originals.length;
+      if (index < count || index >= count * 2) {
+        index = count + (index % count);
+        center(index, false);
+      }
+      schedule();
+    }
+
+    function move(direction: number): void {
+      if (!ready || !mobile.matches) return;
+      stop();
+      index = closest();
+      if (index < originals.length || index >= originals.length * 2) {
+        index = originals.length + (index % originals.length);
+        center(index, false);
+      }
+      index += direction;
+      center(index, true);
+      schedule();
+    }
+
+    function configure(): void {
+      stop();
+      window.clearTimeout(settleTimer);
+      ready = false;
+      track.querySelectorAll('[data-sponsor-copy]').forEach((copy) => copy.remove());
+      originals.forEach((card) => {
+        card.style.order = '';
+      });
+      if (controls) controls.hidden = true;
+      if (!mobile.matches || originals.length < 2) return;
+
+      const shuffled = [...originals];
+      for (let i = shuffled.length - 1; i > 0; i -= 1) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+      }
+      const before: HTMLElement[] = [];
+      const after: HTMLElement[] = [];
+      shuffled.forEach((card, position) => {
+        card.style.order = String(position + originals.length);
+        [before, after].forEach((copies, side) => {
+          const copy = card.cloneNode(true) as HTMLElement;
+          copy.dataset.sponsorCopy = '';
+          copy.style.order = String(position + side * originals.length * 2);
+          // 複製はタブ移動・読み上げ順から除く。タッチでのリンク操作は維持。
+          copy.setAttribute('aria-hidden', 'true');
+          copy.setAttribute('tabindex', '-1');
+          copy.querySelectorAll<HTMLElement>('a, button, [tabindex]').forEach((item) => {
+            item.setAttribute('tabindex', '-1');
+          });
+          track.appendChild(copy);
+          copies.push(copy);
+        });
+      });
+      slides = [...before, ...shuffled, ...after];
+      index = originals.length;
+      if (controls) controls.hidden = false;
+      updateToggle();
+      window.requestAnimationFrame(() => {
+        if (!mobile.matches) return;
+        center(index, false);
+        ready = true;
+        schedule();
+      });
+    }
+
+    track.addEventListener(
+      'scroll',
+      () => {
+        if (!ready || !mobile.matches) return;
+        stop();
+        window.clearTimeout(settleTimer);
+        settleTimer = window.setTimeout(settle, 160);
+      },
+      { passive: true },
+    );
+    track.addEventListener('pointerdown', () => {
+      if (!mobile.matches) return;
+      dragging = true;
+      stop();
+    });
+    function release(): void {
+      if (!dragging) return;
+      dragging = false;
+      window.clearTimeout(settleTimer);
+      settleTimer = window.setTimeout(settle, 160);
+    }
+    window.addEventListener('pointerup', release);
+    window.addEventListener('pointercancel', release);
+    root.addEventListener('focusin', () => {
+      focusInside = true;
+      stop();
+    });
+    root.addEventListener('focusout', (event) => {
+      focusInside = event.relatedTarget instanceof Node && root.contains(event.relatedTarget);
+      schedule();
+    });
+    root.querySelector('[data-sponsor-previous]')?.addEventListener('click', () => move(-1));
+    root.querySelector('[data-sponsor-next]')?.addEventListener('click', () => move(1));
+    toggle?.addEventListener('click', () => {
+      paused = !paused;
+      // 再開ボタンで明示的に再開した場合は、ボタンのフォーカスで阻止しない。
+      focusInside = false;
+      updateToggle();
+      schedule();
+    });
+    document.addEventListener('visibilitychange', schedule);
+    mobile.addEventListener('change', configure);
+    reducedMotion.addEventListener('change', () => {
+      paused = reducedMotion.matches;
+      updateToggle();
+      schedule();
+    });
+    if (typeof IntersectionObserver !== 'undefined') {
+      new IntersectionObserver((entries) => {
+        visible = entries.some((entry) => entry.isIntersecting);
+        schedule();
+      }).observe(track);
+    }
+    if (typeof ResizeObserver !== 'undefined') {
+      new ResizeObserver(() => {
+        if (ready && mobile.matches) center(index, false);
+      }).observe(track);
+    }
+    configure();
+  });
+</script>
