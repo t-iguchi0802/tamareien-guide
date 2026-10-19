@@ -1045,7 +1045,9 @@
       "publishedPrices": [],
       "credentials": [],
       "founded": "創業100年（公式サイト表記）",
-      "evidenceSourceIds": [],
+      "evidenceSourceIds": [
+        "SRC-ISHISHIGE-OFFICIAL-20261019"
+      ],
       "editorialNotes": [
         "公式ホームページ https://www.ishishige.co.jp/ に掲載された事業内容に基づきサービス項目を更新。都立霊園の申請関連相談は過去の案内に基づく。"
       ]
