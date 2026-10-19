@@ -161,6 +161,13 @@ const primaryOutbound = business.contact.websiteUrl
     gap: 0.15em;
   }
 
+  /* 会社名・所在地・対応項目のみを左枠から離す（全掲載カード共通） */
+  .business-card__header,
+  .business-card__services-block,
+  .business-card__services--none {
+    margin-left: 12px;
+  }
+
   .business-card__sponsor-badge {
     width: fit-content;
     margin: 0 0 var(--space-1);
