@@ -85,6 +85,10 @@ const articleJsonLd = buildArticleJsonLd({
 
     {article.body.map((paragraph) => <p>{paragraph}</p>)}
 
+    {article.consultationLink && (
+      <p><a href="/sekizaiten/">多磨霊園周辺の石材店一覧・比較を見る →</a></p>
+    )}
+
     {
       article.sourceName && article.sourceUrl && (
         <section aria-labelledby="news-article-source-heading">

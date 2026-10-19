@@ -67,6 +67,7 @@ const newsArticleSchema = z
       .optional(),
     sourceName: z.string().min(1).optional(),
     sourceUrl: httpUrlSchema.optional(),
+    consultationLink: z.boolean().optional(),
     published: z.boolean(),
   })
   .refine((a) => !a.sourceName === !a.sourceUrl, {

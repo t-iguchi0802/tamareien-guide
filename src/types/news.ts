@@ -86,6 +86,7 @@ export interface NewsArticle {
   /** 参考にした情報源のURL（sourceNameとセットで指定する）。 */
   sourceUrl?: string;
   /** falseの場合、公開日に関わらず一覧・詳細のどちらにも表示しない（下書き）。 */
+  consultationLink?: boolean;
   published: boolean;
 }
 
