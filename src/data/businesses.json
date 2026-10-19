@@ -1010,7 +1010,7 @@
       "name": "石繁 伊東石材店",
       "legalName": "有限会社石繁 伊東石材店",
       "ownershipType": "not_confirmed",
-      "summary": "府中市若松町に店舗を置き、墓石の施工・販売、彫刻、墓地のメンテナンスなどを案内している。",
+      "summary": "府中市若松町に店舗を置き、墓石の設計・施工・販売、リフォーム・修理、墓じまい・改葬、墓地の清掃・メンテナンス、戒名・追加彫刻、都立霊園の申請関連相談を案内している。",
       "location": {
         "postalCode": "183-0005",
         "prefecture": "東京都",
@@ -1029,16 +1029,16 @@
         "parking": "not_confirmed"
       },
       "services": {
-        "new_grave": "not_confirmed",
-        "grave_closure": "not_confirmed",
-        "reburial_support": "not_confirmed",
+        "new_grave": "confirmed",
+        "grave_closure": "confirmed",
+        "reburial_support": "confirmed",
         "interment": "not_confirmed",
-        "engraving": "not_confirmed",
-        "cleaning": "not_confirmed",
+        "engraving": "confirmed",
+        "cleaning": "confirmed",
         "annual_management": "not_confirmed",
         "flowers": "not_confirmed",
         "planting": "not_confirmed",
-        "renovation": "not_confirmed",
+        "renovation": "confirmed",
         "seismic": "not_confirmed",
         "remote_photo_report": "not_confirmed"
       },
@@ -1047,7 +1047,7 @@
       "founded": "創業100年（公式サイト表記）",
       "evidenceSourceIds": [],
       "editorialNotes": [
-        "2026-10-19：ユーザー指定により旧石山石材店の枠を石繁 伊東石材店に変更。会社概要 https://www.ishishige.co.jp/company/ から基本情報を確認。多磨霊園での対応業務の項目別確認は未実施。"
+        "公式ホームページ https://www.ishishige.co.jp/ に掲載された事業内容に基づきサービス項目を更新。都立霊園の申請関連相談は過去の案内に基づく。"
       ]
     },
     {
