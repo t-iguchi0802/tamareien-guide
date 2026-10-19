@@ -972,7 +972,7 @@
       },
       "contact": {
         "phone": "042-361-8650",
-        "websiteUrl": "https://tamayasekizai.co.jp/",
+        "websiteUrl": "http://tamayasekizai.co.jp/",
         "contactUrl": null,
         "businessHours": "8:00～17:00",
         "closedDays": "火曜日",
@@ -1122,8 +1122,8 @@
       },
       "contact": {
         "phone": "042-361-2120",
-        "websiteUrl": "https://www.mitamaya.jp/",
-        "contactUrl": "https://www.mitamaya.jp/contact/",
+        "websiteUrl": "http://www.mitamaya.jp/",
+        "contactUrl": "http://www.mitamaya.jp/contact/",
         "businessHours": null,
         "closedDays": null,
         "parking": "not_confirmed"
@@ -1222,8 +1222,8 @@
       },
       "contact": {
         "phone": "042-361-8778",
-        "websiteUrl": "https://www.148onoda.co.jp/",
-        "contactUrl": "https://www.148onoda.co.jp/contact/contact.php",
+        "websiteUrl": "http://www.148onoda.co.jp/",
+        "contactUrl": "http://www.148onoda.co.jp/contact/contact.php",
         "businessHours": null,
         "closedDays": null,
         "parking": "not_confirmed"
@@ -1783,7 +1783,7 @@
       },
       "contact": {
         "phone": null,
-        "websiteUrl": "https://tsurukawaya.jp/",
+        "websiteUrl": "http://tsurukawaya.jp/",
         "contactUrl": null,
         "businessHours": null,
         "closedDays": null,
