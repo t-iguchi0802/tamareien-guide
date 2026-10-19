@@ -1007,49 +1007,48 @@
       "displayOrder": 190,
       "listingTier": "A",
       "listingStatus": "publish",
-      "name": "石山石材店",
-      "legalName": "有限会社石山石材店",
+      "name": "石繁 伊東石材店",
+      "legalName": "有限会社石繁 伊東石材店",
       "ownershipType": "not_confirmed",
-      "summary": "多磨霊園近くで、墓石の設計施工、修繕・リフォーム、改葬・墓じまい、納骨などを案内している。",
+      "summary": "府中市若松町に店舗を置き、墓石の施工・販売、彫刻、墓地のメンテナンスなどを案内している。",
       "location": {
-        "postalCode": "183-0004",
+        "postalCode": "183-0005",
         "prefecture": "東京都",
         "city": "府中市",
-        "addressLine": "紅葉丘1-34-2",
-        "nearestGate": "正門",
-        "nearestGateStatus": "confirmed",
-        "locationNote": "公式サイトで多磨霊園から徒歩5分と案内。"
+        "addressLine": "若松町1-11-28",
+        "nearestGate": null,
+        "nearestGateStatus": "not_confirmed",
+        "locationNote": null
       },
       "contact": {
-        "phone": "042-361-3045",
-        "websiteUrl": "https://www.stone-ishiyama.co.jp/",
-        "contactUrl": "https://www.stone-ishiyama.co.jp/contact",
-        "businessHours": "9:00～17:00",
-        "closedDays": "木曜日",
+        "phone": "042-368-2244",
+        "websiteUrl": "https://www.ishishige.co.jp/",
+        "contactUrl": null,
+        "businessHours": null,
+        "closedDays": null,
         "parking": "not_confirmed"
       },
       "services": {
-        "new_grave": "confirmed",
-        "grave_closure": "confirmed",
-        "reburial_support": "confirmed",
-        "interment": "confirmed",
+        "new_grave": "not_confirmed",
+        "grave_closure": "not_confirmed",
+        "reburial_support": "not_confirmed",
+        "interment": "not_confirmed",
         "engraving": "not_confirmed",
         "cleaning": "not_confirmed",
         "annual_management": "not_confirmed",
         "flowers": "not_confirmed",
         "planting": "not_confirmed",
-        "renovation": "confirmed",
+        "renovation": "not_confirmed",
         "seismic": "not_confirmed",
         "remote_photo_report": "not_confirmed"
       },
       "publishedPrices": [],
       "credentials": [],
       "founded": "創業100年（公式サイト表記）",
-      "evidenceSourceIds": [
-        "SRC-ISHIYAMA",
-        "SRC-RECHECK-20261017-ISHIYAMA"
-      ],
-      "editorialNotes": []
+      "evidenceSourceIds": [],
+      "editorialNotes": [
+        "2026-10-19：ユーザー指定により旧石山石材店の枠を石繁 伊東石材店に変更。会社概要 https://www.ishishige.co.jp/company/ から基本情報を確認。多磨霊園での対応業務の項目別確認は未実施。"
+      ]
     },
     {
       "id": "biz-matsunoya",
@@ -1921,7 +1920,7 @@
       "slug": "iseya",
       "displayOrder": 370,
       "listingTier": "A",
-      "listingStatus": "publish",
+      "listingStatus": "hold",
       "name": "いせや",
       "legalName": "株式会社いせや",
       "ownershipType": "not_confirmed",
@@ -1967,7 +1966,9 @@
         "SRC-ISEYA-MOVING",
         "SRC-ISEYA-ORIGINAL"
       ],
-      "editorialNotes": []
+      "editorialNotes": [
+        "2026-10-19：多磨霊園での具体的な対応範囲を確認するまで掲載保留（ユーザー指示）。"
+      ]
     }
   ]
 }
