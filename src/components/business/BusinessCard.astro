@@ -137,19 +137,12 @@ const primaryOutbound = business.contact.websiteUrl
     border: 1px solid var(--color-border);
     border-top: 3px double var(--color-stone-line);
     border-radius: var(--radius-card);
-    padding: var(--space-5);
+    padding: 14px 16px;
+    box-sizing: border-box;
   }
 
   .business-card[hidden] {
     display: none;
-  }
-
-  /* 一覧30社共通：文字・操作ボタンを左枠から少し離す */
-  .business-card__header,
-  .business-card__services-block,
-  .business-card__services--none,
-  .business-card__actions {
-    padding-inline-start: 6px;
   }
 
   .business-card--sponsored {
@@ -280,7 +273,7 @@ const primaryOutbound = business.contact.websiteUrl
   @media (max-width: 767px) {
     .business-card {
       gap: 0.65rem;
-      padding: 0.9rem 1rem;
+      padding: 14px 16px;
     }
 
     .business-card--sponsored {
