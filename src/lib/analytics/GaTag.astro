@@ -22,6 +22,7 @@ if (!measurementId) {
   window.dataLayer = window.dataLayer || [];
   function gtag() {
     // Google tagの公式キュー形式に合わせてArgumentsを積む。
+    // eslint-disable-next-line prefer-rest-params -- gtag.js expects the Arguments queue format.
     window.dataLayer.push(arguments);
   }
   window.gtag = gtag;
