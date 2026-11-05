@@ -80,6 +80,12 @@ export interface NewsArticle {
     src: string;
     alt: string;
     note?: string;
+    credit?: {
+      name: string;
+      sourceUrl: string;
+      licenseName: string;
+      licenseUrl: string;
+    };
   };
   /** 参考にした情報源の名称（sourceUrlとセットで指定する）。 */
   sourceName?: string;

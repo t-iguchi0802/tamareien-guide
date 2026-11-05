@@ -63,6 +63,14 @@ const newsArticleSchema = z
         src: z.string().min(1),
         alt: z.string().min(1),
         note: z.string().min(1).optional(),
+        credit: z
+          .object({
+            name: z.string().min(1),
+            sourceUrl: httpUrlSchema,
+            licenseName: z.string().min(1),
+            licenseUrl: httpUrlSchema,
+          })
+          .optional(),
       })
       .optional(),
     sourceName: z.string().min(1).optional(),
