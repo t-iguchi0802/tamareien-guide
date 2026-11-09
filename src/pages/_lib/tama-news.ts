@@ -38,6 +38,19 @@ export interface TamaNewsItem {
 
 export const TAMA_NEWS_ITEMS: TamaNewsItem[] = [
   {
+    title: '合葬埋蔵施設の献花式｜代表献花の動画を公開',
+    publishedAt: '2026-10-01',
+    sourceName: '公益財団法人東京都公園協会',
+    sourceUrl: 'https://www.tokyo-park.or.jp/reien/tama/news/2026/6_youtube_2.html',
+  },
+  {
+    title: '冬季の開閉門時間｜正門・小金井門・バス通りは8:30〜17:30',
+    publishedAt: '2026-09-30',
+    sourceName: '公益財団法人東京都公園協会',
+    sourceUrl: 'https://www.tokyo-park.or.jp/reien/tama/news/2026/park_info_1_1_2.html',
+    expiresAt: '2027-02-28',
+  },
+  {
     // 2026-09-14、src/data/news.json（周辺の読みもの枠）から移設。
     // 東京都公園協会の公式発表そのものであり、独自取材の読みものではないため
     // （CLAUDE.md2章「公式情報と周辺の読みものの分離」）、公式お知らせ枠へ
