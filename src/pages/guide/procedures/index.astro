@@ -24,21 +24,28 @@ const browserTitle = `${pageTitle}｜多磨霊園 お墓ガイド`;
 ---
 
 <BaseLayout title={browserTitle} description={description}>
-  <h1>{pageTitle}</h1>
-  <p>
-    墓じまい・改葬・墓所返還は、行政手続きと石材店への依頼の両方が関わります。当サイトでは、行政手続きは公式ページへのリンクで、石材店の対応状況は公開情報の比較で、それぞれ中立にご案内しています。
-  </p>
+  <Fragment slot="beforeSponsor">
+    <h1>{pageTitle}</h1>
+    <p>
+      墓じまい・改葬・墓所返還は、行政手続きと石材店への依頼の両方が関わります。当サイトでは、行政手続きは公式ページへのリンクで、石材店の対応状況は公開情報の比較で、それぞれ中立にご案内しています。
+    </p>
+  </Fragment>
 
   <section aria-labelledby="procedures-first-heading">
     <h2 id="procedures-first-heading">まず読む記事</h2>
     <ul>
-      <li><a href={ROUTES.guideProceduresHakajimaiVsKaisou.path}>墓じまいと改葬の違い｜多磨霊園で手続きを始める前に</a></li>
+      <li>
+        <a href={ROUTES.guideProceduresHakajimaiVsKaisou.path}
+          >墓じまいと改葬の違い｜多磨霊園で手続きを始める前に</a>
+      </li>
     </ul>
   </section>
 
   <section aria-labelledby="procedures-official-heading">
     <h2 id="procedures-official-heading">行政手続き・公式リンク</h2>
-    <p>改葬許可申請や墓所工事の届出など、行政手続きの詳細は公式ページへのリンクとともに案内しています。</p>
+    <p>
+      改葬許可申請や墓所工事の届出など、行政手続きの詳細は公式ページへのリンクとともに案内しています。
+    </p>
     <ul>
       <li><a href={ROUTES.tetsuzuki.path}>改葬・墓所返還・施設変更の違いと公式リンクを見る</a></li>
     </ul>
@@ -46,7 +53,9 @@ const browserTitle = `${pageTitle}｜多磨霊園 お墓ガイド`;
 
   <section aria-labelledby="procedures-compare-heading">
     <h2 id="procedures-compare-heading">石材店の対応比較</h2>
-    <p>墓じまい・墓石撤去や、その後の墓所管理・清掃について、公開情報で確認できる事業者の対応状況を比較できます。</p>
+    <p>
+      墓じまい・墓石撤去や、その後の墓所管理・清掃について、公開情報で確認できる事業者の対応状況を比較できます。
+    </p>
     <ul>
       <li><a href={ROUTES.hakajimai.path}>墓じまい・墓石撤去の比較を見る</a></li>
       <li><a href={ROUTES.kanri.path}>墓所管理・清掃・供花の比較を見る</a></li>
@@ -61,4 +70,3 @@ const browserTitle = `${pageTitle}｜多磨霊園 お墓ガイド`;
     </ul>
   </section>
 </BaseLayout>
-

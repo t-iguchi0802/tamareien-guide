@@ -50,11 +50,13 @@ const itemListJsonLd =
   description={description}
   extraJsonLd={itemListJsonLd ? [itemListJsonLd] : []}
 >
-  <h1>{heroHeading}</h1>
-  <p>
-    多磨霊園と周辺地域について、飲食店・散策情報、著名人・歴史、墓参り・アクセスの実用情報などを、独自の視点で確認したうえでまとめています。行政・東京都公園協会等の公式発表は
-    <a href={ROUTES.top.path}>トップページの「多磨霊園の公式お知らせ」</a>でご案内しています。
-  </p>
+  <Fragment slot="beforeSponsor">
+    <h1>{heroHeading}</h1>
+    <p>
+      多磨霊園と周辺地域について、飲食店・散策情報、著名人・歴史、墓参り・アクセスの実用情報などを、独自の視点で確認したうえでまとめています。行政・東京都公園協会等の公式発表は
+      <a href={ROUTES.top.path}>トップページの「多磨霊園の公式お知らせ」</a>でご案内しています。
+    </p>
+  </Fragment>
 
   {
     articles.length > 0 ? (

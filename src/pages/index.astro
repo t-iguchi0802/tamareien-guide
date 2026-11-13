@@ -1,862 +1,404 @@
 ---
-/**
- * トップページ・目的から探す入口。
- * 正本: CLAUDE_CODE_HANDOFF.md 5章 / src/lib/routes.ts ROUTES.top
- *
- * editorial-redesign（2026-08-26）: 「業者データベース」ではなく
- * 「目的から相談先を探せる地域ガイド」という方向で全面再設計した。
- * 事業者の詳細な一覧・カードグリッドはここに複製せず、共有コンポーネント
- * <ServiceFilter mode="link"> の「この条件で一覧を見る」から
- * /sekizaiten/ へ選択条件（?services=a,b,c）を引き継いで遷移する
- * （困りごと別の入口というこのページの役割を保ちつつ、
- * 「3つの目的→くわしい条件→対応できた件数」の体験は共通化する）。
- *
- * QA監査 M-1（2026-08-26）対応: <ServiceFilter>は自身のルート要素として
- * `aria-labelledby="service-filter-heading"` を持つ<section>を描画するため、
- * ここで同じaria-labelledbyを持つ<section>を重ねてラップしない
- * （同名ランドマークの二重ネストを避けるため、ラップ用のsectionは置かない）。
- *
- * 公開前仕上げ修正（2026-08-26）: 「公開情報をもとに整理しています」という
- * 趣旨の説明が、このページの「当サイトについて」セクションと /sekizaiten/
- * とで異なる文言により重複していたため、指定の推奨文へ統一し、
- * このページの上部（ヒーロー直下）に1回だけ表示するよう移動した
- * （下部の「当サイトについて」からは同趣旨の文を削除し、リンク段落のみ残す）。
- * 「事業者への確認で得た情報は、確認後に随時反映します」という文言により、
- * 事前ヒアリングを実施済みであるとは述べていない（今後確認が得られた場合の
- * 反映方針を示すのみ）。
- *
- * レイアウト刷新（2026-08-26, 2026-08-27に再調整、2026-08-27に
- * しきい値1280px→1500pxへ再々調整。詳細は本ファイル末尾の
- * 「条件選択UI視認性修正」コメント参照）:
- * - 中央本文内にあった「スポンサー」セクションを削除し、PC幅
- *   （1500px以上）では中央本文（最大960px）の左右にSponsorSlotを
- *   2枠ずつ・計4枠配置する固定レイアウトへ変更した。1499px以下では
- *   左右枠を解除し、検索条件セクションの直後に4枠をまとめて
- *   コンパクトな2列グリッドとして表示する。
- *   DOM上は4つのSponsorSlotを1回ずつしか描画せず（表示回数計測の二重化・
- *   スクリーンリーダーでの重複読み上げを避けるため）、
- *   `.top-layout__rails`（モバイル/タブレットでは実グリッド、PCでは
- *   `display: contents`で透過）と`.sponsor-rail`（PCでは実フレックス列、
- *   モバイル/タブレットでは`display: contents`で透過）を入れ子にし、
- *   ブレークポイントごとにどちらか一方だけを「実体のある箱」にすることで、
- *   同じ4要素をCSSだけで配置し直している。
- * - スポンサー表示は検索条件・検索結果件数を一切参照せず、絞り込み操作の
- *   前後でも内容・DOM構造が変化しないことをQAで確認する。
- * - QA監査 M-1（2026-08-27）対応: 4枠のDOM順は「見出し→検索条件→広告→
- *   当サイトについて」とし、1499px以下での視覚順（検索条件の直後に広告）
- *   と一致させた。
- * - `.site-main`（BaseLayout共有、既定は960px）の最大幅をこのページの
- *   バンドルCSS内でのみ`:global()`により拡張している（他ページのCSS
- *   バンドルには含まれないため、BaseLayout.astro自体や他ページの
- *   レイアウトには影響しない）。
- *
- * 再調整（2026-08-27、依頼: PCスポンサー枠の大幅拡大／ヒーロー写真を
- * 白く薄めず画面全幅に／スポンサー枠は220〜260px幅・300〜340px高）:
- * - ヒーローを<div class="top-layout">の3列グリッドから完全に外に出した。
- *   CSS Gridのアイテムは自分自身の「グリッドセル」がpercentage解決の
- *   containing blockになるため、グリッドセルの中で
- *   `width:100vw; margin-inline:calc(50% - 50vw)`という定番の
- *   フルブリード手法を使っても正しく画面端まで広がらない
- *   （セル幅を基準にした計算になってしまう）。ヒーローを
- *   `.site-main`直下の通常フロー要素に戻すことで、この手法が
- *   正しく機能するようにした（`.site-main`がmargin-inline:autoで
- *   中央寄せされている限り、ネストの深さに関係なく画面幅に
- *   ブリードできる）。
- * - ヒーロー全体への白いオーバーレイ（`.hero::before`）を廃止し、
- *   見出し・補足文だけを囲む半透明の濃色パネル（`.hero__panel`、
- *   深緑ベース）に変更した。写真自体の明るさ・彩度は一切変更していない。
- *   パネル背景色とパネル内の白文字とのコントラストをCanvas合成で実測し、
- *   WCAG AAを満たすことを確認する。
- * - スポンサー枠は「本文の左右」という位置づけ（filter・trustの左右）は
- *   維持しつつ、指示のとおりPCでは幅clamp(220px,14vw,260px)・
- *   高さ300〜340px相当まで拡大した（ヒーローの左右に重ねる案は
- *   「してもよい」という許容であり必須ではないため、実装リスクを避けて
- *   見送った。ヒーローの左右に重ねなくても「PCで左右のスポンサー枠が
- *   中央本文と均衡している」という要件は、filter・trust脇の拡大された
- *   レールで満たしている）。
- *
- * 条件選択UI視認性修正（2026-08-27、調査結果に基づく修正）:
- * 症状「スポンサー枠を追加してから画面レイアウトがおかしくなった」
- * 「条件をチェックしてAND絞り込みする仕組みが画面から消えた」を調査した結果、
- * ServiceFilter.astro本体・呼び出し・JS・ServiceKeyのいずれも壊れておらず、
- * 直接原因はヒーローの`min-height`が段階的に拡大（無指定→260〜400px→
- * 520〜700px）し、条件選択UI（目的ボタン・くわしい条件）が初期表示の
- * スクロール範囲外へ押し出されていたことだった。これに対し、
- * - `.hero`の`min-height`をPC側`clamp(300px,32vw,420px)`、
- *   767px以下`clamp(240px,58vw,340px)`へ縮小した（写真は
- *   画面全幅・background-size: coverのまま、白く薄めもしていない）。
- * - `<ServiceFilter mode="link">`にのみ`openByDefault`を指定し、
- *   TOPページでは「くわしい条件から選ぶ」を初期状態で開いた状態にした
- *   （ServiceFilter.astro側にopenByDefault?: boolean、既定falseの
- *   propを追加。open属性の初期値だけを変え、絞り込みロジック・
- *   ServiceKey・チェックボックス・分析イベントには触れていない。
- *   ユーザーは表示後も任意に開閉できる）。
- *
- * スポンサー枠の全ページ共通化（2026-08-28）: 左右4枠のSponsorSlot呼び出し・
- * 表示回数計測スクリプト・PC幅でのレール化（旧しきい値1500px）・
- * `:global(.site-main)`の1650pxへの拡張は、すべてsrc/layouts/BaseLayout.astroへ
- * 移設した。TOPページ固有の重複実装は廃止し、`.top-layout`は
- * filter/trustの縦積みだけを担当する単純な構成に戻した
- * （左右スポンサーとの位置関係はBaseLayout側の`.page-shell`が
- * 全ページ共通で決める）。
- *
- * ヒーロー説明領域の圧縮（2026-09-01、ミチのモバイル優先UI・文章校正対応
- * 「TOPヒーロー」節）: スマートフォンで黒い説明領域が写真の大部分を
- * 覆っているという指摘に対応した。見出しはそのまま維持し、補足の2段落
- * （hero__lead / hero__note）を1段落へ統合、パネルのpaddingを縮小、
- * 不透明度を0.78→0.68へ下げて写真をより見せた。文字にはtext-shadowを
- * 強めて対応し、写真上のコントラストを維持している。TOP全体の構造
- * （写真→余白→3列の目的選択・条件選択エリア）は変更していない。
- *
- * 編集改善・ブランド表示の短縮（2026-09-02、ミチの編集改善・SEO/AIO対応）:
- * - H1・補足文を指定の文言へ変更した（H1「多磨霊園のお墓のこと、目的から
- *   探す」、補足「墓石を建てる、直す、墓じまい、清掃・管理。必要なことから
- *   相談先を探せます。」）。「公開情報を同じ基準で整理しています」という
- *   制作側の事情を説明する文はヒーローから外し、代わりに「掲載方針・
- *   情報源」という小さなリンク1つ（/about/、運営方針ページ）を
- *   ヒーロー直下に置いた。データの取得方法・事業者確認の予定・制作方法の
- *   説明は、従来どおり/about/側にのみ置く（このページへは複製しない）。
- * - <title>はブラウザタブ・検索結果向けの複合タイトルを別途指定し
- *   （BaseLayoutが自動でsiteConfig.nameを付け足す処理をやめたため）、
- *   画面上のH1とは独立させた。descriptionもTOP専用の文言にした。
- * - ヒーローのPC側サイズ（.hero、min-height）・スポンサーとの位置関係
- *   （pageTopスロット→page-shell外）は変更していない。
- *
- * 公式情報と周辺の読みものの分離（2026-09-14、サイト所有者判断による恒久
- * ルール。詳細はCLAUDE.md2章「公式情報と周辺の読みものの分離」）:
- * - 「多磨霊園の公式お知らせ」（東京都公園協会等の公式発表、tama-news.ts）と
- *   「多磨霊園・周辺の読みもの」（独自の地域メディア・ブログ枠、news.json。
- *   旧名称「多磨霊園・周辺の新着記事」から改称）を、まとめて「新着情報エリア」
- *   として`<div id="latest-info">`で1つに包んだ。
- * - 「読みもの一覧を見る」（旧「新着記事一覧を見る」）のリンク先は
- *   引き続き`/news/`のまま変更していない。
- *
- * ヒーローの新着情報バー（2026-09-14再修正、サイト所有者判断）: ヒーロー内に
- * 追加していた「新着情報」ボタン（`/#latest-info`へのページ内スクロール）は、
- * ファーストビューだけでは何が新着なのか分からないという指摘を受け廃止した。
- * 代わりに、ヒーロー直下（ファーストビューに収まる位置）へ、`tamaNewsItems`
- * （公式お知らせ）と`newsArticles`（読みもの）を比較して**公開日が最も新しい
- * 1件だけ**を表示する`.latest-info-bar`を追加した。読みものの場合は記事詳細
- * ページへ、公式お知らせの場合は公式情報源（外部）へ直接リンクする（要件どおり、
- * 下方の「多磨霊園の公式お知らせ」「多磨霊園・周辺の読みもの」セクション自体は
- * 変更・削除していない）。「◯社の一覧を見る」は単独の主CTAに戻し、優先度を
- * 下げていない。
- */
 import BaseLayout from '../layouts/BaseLayout.astro';
-import { ROUTES } from '../lib/routes';
-import { getBusinesses, getPublishedNewsArticles } from '../lib/data';
+import SeasonalHero from '../components/common/SeasonalHero.astro';
 import ServiceFilter from '../components/business/ServiceFilter.astro';
+import { getBusinesses, getPublishedNewsArticles } from '../lib/data';
 import { getActiveTamaNewsItems } from './_lib/tama-news';
-import { formatJaDate, formatShortJaDate } from './_lib/news-display';
+import { formatJaDate } from './_lib/news-display';
 import NewsCard from './_partials/NewsCard.astro';
-
+import { seasonInTokyo } from '../lib/season';
 const businesses = getBusinesses();
-const tamaNewsItems = getActiveTamaNewsItems();
-// 「多磨霊園・周辺の読みもの」（2026-09-13追加、2026-09-14に名称整理）。
-// 東京都公園協会の公式お知らせ（上のtamaNewsItems）とは別枠の、独自の
-// 地域メディア・ブログ枠（src/data/news.json、人が確認した記事のみ）。
-// 最大3件、公開日の新しい順（getPublishedNewsArticlesが既に降順ソート済み）。
 const newsArticles = getPublishedNewsArticles().slice(0, 3);
-
-/**
- * ヒーロー直下の新着情報バー用データ（2026-09-14追加）。
- * 「多磨霊園の公式お知らせ」（tamaNewsItems）と「多磨霊園・周辺の読みもの」
- * （newsArticles）を公開日で比較し、最も新しい1件だけを選ぶ。
- *
- * - tamaNewsItemsは配列順が公開日の降順である保証がない
- *   （tama-news.ts側は手動管理の配列のため）ため、ここで明示的に最大値を求める。
- * - newsArticlesはgetPublishedNewsArticles()が既に公開日の降順で返すため、
- *   先頭要素がそのまま最新の読みものになる。
- * - 公開日が同日の場合は「読みもの」を優先する（独自記事の方が具体的な内容を
- *   持つことが多いため。公式発表そのものは下の「多磨霊園の公式お知らせ」
- *   セクションで引き続き確認できる）。
- */
-type LatestInfoItem =
-  | { kind: 'reading'; title: string; publishedAt: string; href: string; slug: string }
-  | { kind: 'official'; title: string; publishedAt: string; href: string };
-
-const latestOfficialItem = tamaNewsItems.reduce<(typeof tamaNewsItems)[number] | null>(
-  (latest, item) => (!latest || item.publishedAt > latest.publishedAt ? item : latest),
-  null,
-);
-const latestReadingItem = newsArticles[0] ?? null;
-
-let latestInfo: LatestInfoItem | null = null;
-if (
-  latestReadingItem &&
-  (!latestOfficialItem || latestReadingItem.publishedAt >= latestOfficialItem.publishedAt)
-) {
-  latestInfo = {
-    kind: 'reading',
-    title: latestReadingItem.title,
-    publishedAt: latestReadingItem.publishedAt,
-    href: `/news/${latestReadingItem.slug}/`,
-    slug: latestReadingItem.slug,
-  };
-} else if (latestOfficialItem) {
-  latestInfo = {
-    kind: 'official',
-    title: latestOfficialItem.title,
-    publishedAt: latestOfficialItem.publishedAt,
-    href: latestOfficialItem.sourceUrl,
-  };
-}
-// title更新（2026-09-02、ナビゲーション・運営者表示・SEO/AIO監査対応
-// 「ページタイトルと検索意図」節）: 「多磨霊園のお墓・石材店を目的から探す」を
-// 前半に置き、内容（お墓・石材店を目的から探せること）をより明確にした。
-const pageTitle = '多磨霊園 お墓ガイド｜墓じまい・石材店・アクセス・供養';
-const description =
-  '多磨霊園のお墓・供養に関する地域ガイド。墓じまい、石材店比較、アクセス、みたま堂、樹木葬・合葬、募集・費用などを目的から探せます。';
+const tamaNewsItems = getActiveTamaNewsItems();
+const preloadImage =
+  seasonInTokyo() === 'autumn'
+    ? '/images/editorial/magazine-scenes.webp'
+    : '/images/editorial/seasonal-scenes.webp';
 ---
 
-<BaseLayout title={pageTitle} description={description}>
-  <Fragment slot="pageTop">
-    <section class="hero" aria-labelledby="hero-heading">
-      <picture class="hero__media" aria-hidden="true">
-        <source media="(max-width: 767px)" srcset="/images/hero-cemetery-photo-v2-mobile.webp" />
-        <img
-          src="/images/hero-cemetery-photo-v2.webp"
-          alt=""
-          width="1672"
-          height="941"
-          fetchpriority="high"
-          decoding="async"
-        />
-      </picture>
-      <div class="hero__panel">
-        <p class="hero__eyebrow">多磨霊園のお墓・供養ガイド</p>
-        <h1 id="hero-heading" class="hero__heading">
-          <span class="hero__heading-line">多磨霊園のお墓・供養を</span>
-          <span class="hero__heading-line">目的から探す</span>
-        </h1>
-        <p class="hero__lead">
-          お墓を建てる・整える、墓じまい・改葬、管理・清掃・供養。必要なことから情報や相談先を探せます。
-        </p>
-        <a class="hero__cta" href="#service-filter-heading">
-          目的から探す
-          <span aria-hidden="true">↓</span>
-        </a>
-      </div>
-      <p class="hero__image-credit">イメージ写真</p>
-    </section>
-
-    {
-      /*
-       * ヒーロー直下の新着情報バー（2026-09-14追加）。ファーストビューに
-       * 収まる位置に置き、公式お知らせ・読みもののうち公開日が最も新しい
-       * 1件だけをコンパクトに表示する。0件（両方とも情報がない）場合は
-       * 何も表示しない（空の枠を作らない）。
-       */
-      latestInfo && latestInfo.kind === 'reading' && (
-        <a
-          class="latest-info-bar"
-          href={latestInfo.href}
-          data-event="internal_guide_link_click"
-          data-destination={`news_hero_bar:${latestInfo.slug}`}
-        >
-          <span class="latest-info-bar__label">新着情報</span>
-          <span class="latest-info-bar__date">{formatShortJaDate(latestInfo.publishedAt)}</span>
-          <span class="latest-info-bar__title">{latestInfo.title}</span>
-          <span class="latest-info-bar__arrow" aria-hidden="true">
-            →
-          </span>
-        </a>
-      )
-    }
-    {
-      latestInfo && latestInfo.kind === 'official' && (
-        <a
-          class="latest-info-bar"
-          href={latestInfo.href}
-          rel="noopener"
-          target="_blank"
-          data-event="official_procedure_click"
-          data-authority="tokyo_park_association"
-          data-topic="top_latest_info_bar"
-        >
-          <span class="latest-info-bar__label">新着情報</span>
-          <span class="latest-info-bar__date">{formatShortJaDate(latestInfo.publishedAt)}</span>
-          <span class="latest-info-bar__title">{latestInfo.title}</span>
-          <span class="latest-info-bar__arrow" aria-hidden="true">
-            →
-          </span>
-        </a>
-      )
-    }
-  </Fragment>
-
-  <Fragment slot="beforeSponsor">
-    <ServiceFilter businesses={businesses} mode="link" targetPath={ROUTES.sekizaiten.path} />
-  </Fragment>
-
-  <hr class="masonry-rule" />
-
-  {
-    /*
-     * 「新着情報エリア」（2026-09-14、公式情報と周辺の読みものの分離に伴い
-     * 新設。詳細はCLAUDE.md2章「公式情報と周辺の読みものの分離」）。
-     * 性質の異なる次の2つを、まとめて1つのページ内スクロール先にする。
-     * - 「多磨霊園の公式お知らせ」: 東京都公園協会等の公式発表のみ
-     *   （tama-news.ts、getActiveTamaNewsItems()）。
-     * - 「多磨霊園・周辺の読みもの」: 独自の地域メディア・ブログ枠
-     *   （news.json、getPublishedNewsArticles()）。旧名称
-     *   「多磨霊園・周辺の新着記事」から改称した（公式発表と混同されない
-     *   表現にするため）。
-     * ヒーローの「新着情報」ボタンは`/#latest-info`（このdivの先頭）へ
-     * スクロールする。どちらか一方が0件でも、もう一方の見出しへ確実に
-     * 到達できるよう、個々のsectionではなくこのdiv自体にidを持たせている。
-     */
-    (tamaNewsItems.length > 0 || newsArticles.length > 0) && (
-      <div id="latest-info" class="latest-info">
-        {tamaNewsItems.length > 0 && (
-          <section aria-labelledby="tama-news-heading" class="tama-news">
-            <h2 id="tama-news-heading">多磨霊園の公式お知らせ</h2>
-            <ul class="tama-news__list">
-              {tamaNewsItems.map((item) => (
-                <li class="tama-news__item">
-                  <a
-                    class="tama-news__link"
-                    href={item.sourceUrl}
-                    rel="noopener"
-                    target="_blank"
-                    data-event="official_procedure_click"
-                    data-authority="tokyo_park_association"
-                    data-topic="top_tama_news"
-                  >
-                    {item.title}
-                  </a>
-                  <p class="tama-news__meta">
-                    {item.sourceName}（公開日: {formatJaDate(item.publishedAt)}）
-                  </p>
-                </li>
-              ))}
-            </ul>
-            <p>
-              <a href="https://www.tokyo-park.or.jp/reien/tama/news/index.html">
-                多磨霊園の公式お知らせ一覧を見る →
-              </a>
-            </p>
-          </section>
-        )}
-
-        {tamaNewsItems.length > 0 && newsArticles.length > 0 && <hr class="masonry-rule" />}
-
-        {
-          /*
-           * 記事が1件もない場合は、空の枠・ダミー記事を表示せず、
-           * セクションごと出力しない（CLAUDE_CODE_HANDOFF.md追加要件）。
-           */
-          newsArticles.length > 0 && (
-            <section aria-labelledby="local-news-heading" class="local-news">
-              <h2 id="local-news-heading">多磨霊園・周辺の読みもの</h2>
-              <ul class="local-news__list">
-                {newsArticles.map((article) => (
-                  <NewsCard article={article} />
-                ))}
-              </ul>
-              <p class="local-news__more">
-                <a href={ROUTES.news.path}>読みもの一覧を見る</a>
-              </p>
-            </section>
-          )
-        }
-      </div>
-    )
-  }
-
-  <hr class="masonry-rule" />
-
-  <section aria-labelledby="trust-heading" class="trust">
-    <h2 id="trust-heading">このサイトでできること</h2>
-    <p>
-      多磨霊園周辺の石材店・お墓関連事業者{
-        businesses.length
-      }社を、墓石建立、墓じまい、管理・清掃などの目的から探せます。各社の連絡先や確認できたサービスを、ひとつの画面で見比べられます。
-    </p>
-    <p><a href={ROUTES.about.path}>運営者・掲載情報を見る</a></p>
+<BaseLayout
+  title="多磨霊園 お墓ガイド｜墓じまい・石材店・アクセス・供養"
+  description="多磨霊園の石材店探しと、墓参りに役立つ地域情報。石材店の比較、墓じまい・管理・納骨、アクセス、歴史や著名人の物語を紹介します。"
+  preloadImage={preloadImage}
+>
+  <Fragment slot="beforeSponsor"><SeasonalHero /></Fragment>
+  <section class="home-search" aria-labelledby="home-search-heading">
+    <h2 id="home-search-heading">多磨霊園周辺の石材店を探す</h2>
+    <p>対応内容や店舗情報を見比べて、相談先を選べます。</p>
+    <a class="home-button" href="/sekizaiten/"
+      >{businesses.length}社の石材店一覧・比較へ <span aria-hidden="true">→</span></a
+    >
+    <p class="home-search__note">お墓づくり・納骨・修理・墓じまいなど</p>
   </section>
-
-  <hr class="masonry-rule" />
-
-  <section aria-labelledby="top-guide-heading" class="top-guide">
-    <h2 id="top-guide-heading">多磨霊園ガイド</h2>
-    <p class="top-guide__lead">
-      お参り・納骨・お墓の手続き・歴史について、公式情報を中心にまとめた記事です。
-    </p>
-    <div class="top-guide__entries">
-      <a
-        class="top-guide__entry"
-        href={ROUTES.access.path}
-        data-event="internal_guide_link_click"
-        data-destination="access"
+  <div class="home-utilities">
+    <a href="/access/">電車・バス・車での行き方 →</a><a href="/guide/procedures/"
+      >墓じまい・お墓の手続き →</a>
+  </div>
+  <section class="home-editorial" aria-labelledby="home-editorial-heading">
+    <h2 class="home-heading" id="home-editorial-heading">多磨霊園を知る、まちを楽しむ</h2>
+    <a
+      class="home-feature"
+      href="/guide/famous-graves/"
+      data-event="internal_guide_link_click"
+      data-destination="famous_graves"
+    >
+      <div class="home-scene home-scene--books" role="img" aria-label="本と万年筆のイメージ">
+        <span>イメージ</span>
+      </div>
+      <div>
+        <span class="home-category">人と歴史</span><h3>多磨霊園に<br />眠る著名人</h3><p>
+          名前の先に、その人の物語がある。<br />人物の一覧を見る →
+        </p>
+      </div>
+    </a>
+    <div class="home-stories">
+      <a href="/guide/history/" data-event="internal_guide_link_click" data-destination="history"
+        ><div class="home-scene home-scene--park" role="img" aria-label="並木道のイメージ">
+          <span>イメージ</span>
+        </div><div>
+          <span class="home-category">まちの歴史</span><h3>多磨霊園は、どのように生まれた？</h3><p>
+            開園からの歩みをたどる →
+          </p>
+        </div></a
       >
-        <span class="top-guide__entry-heading">行き方・園内案内</span>
-        <span class="top-guide__entry-description"
-          >電車・バス・車での行き方と、門ごとの開閉時間です。</span
-        >
-      </a>
-      <a
-        class="top-guide__entry"
-        href={ROUTES.guideProcedures.path}
-        data-event="internal_guide_link_click"
-        data-destination="guide_procedures"
+      <a href="/kanri/" data-event="internal_guide_link_click" data-destination="kanri"
+        ><div class="home-scene home-scene--stone" role="img" aria-label="墓石と供花のイメージ">
+          <span>イメージ</span>
+        </div><div>
+          <span class="home-category">お墓の手入れ</span><h3>清掃・供花を頼める相談先は？</h3><p>
+            管理・清掃の対応を見比べる →
+          </p>
+        </div></a
       >
-        <span class="top-guide__entry-heading">墓じまい・各種手続き</span>
-        <span class="top-guide__entry-description"
-          >墓じまいと改葬の違いや、行政手続きの公式リンクです。</span
-        >
-      </a>
-      <a
-        class="top-guide__entry"
-        href={ROUTES.guideMitamado.path}
-        data-event="internal_guide_link_click"
-        data-destination="mitamado"
-      >
-        <span class="top-guide__entry-heading">みたま堂・納骨・合葬</span>
-        <span class="top-guide__entry-description"
-          >みたま堂の現在の利用状況、樹木葬・合葬施設への入口です。</span
-        >
-      </a>
-      <a
-        class="top-guide__entry"
-        href={ROUTES.guideHistory.path}
-        data-event="internal_guide_link_click"
-        data-destination="history"
-      >
-        <span class="top-guide__entry-heading">歴史・著名人の墓所</span>
-        <span class="top-guide__entry-description"
-          >1923年開園の経緯と、著名人の墓所についてです。</span
-        >
-      </a>
     </div>
   </section>
+  {
+    newsArticles.length > 0 && (
+      <section class="home-reading" aria-labelledby="local-news-heading">
+        <>
+          <div class="home-section-bar">
+            <>
+              <h2 id="local-news-heading" class="home-heading">
+                多磨霊園・周辺の読みもの
+              </h2>
+              <a href="/news/">すべて見る →</a>
+            </>
+          </div>
+          <ul class="home-reading__list">
+            {newsArticles.map((article) => (
+              <NewsCard article={article} />
+            ))}
+          </ul>
+        </>
+      </section>
+    )
+  }
+  <details class="home-filter">
+    <summary>相談したい内容から石材店を絞り込む</summary><ServiceFilter
+      businesses={businesses}
+      mode="link"
+      targetPath="/sekizaiten/"
+    />
+  </details>
+  <section class="home-guides" aria-labelledby="home-guides-heading">
+    <h2 id="home-guides-heading" class="home-heading">墓参りと、お墓のガイド</h2><div
+      class="home-guide-grid"
+    >
+      <a href="/guide/mitamado/">みたま堂・納骨 <span>→</span></a><a href="/guide/gassou/"
+        >合葬埋蔵施設 <span>→</span></a
+      ><a href="/guide/application/">霊園の募集・申込み <span>→</span></a><a href="/guide/cost/"
+        >お墓にかかる費用 <span>→</span></a
+      >
+    </div>
+  </section>
+  <section class="home-official" aria-labelledby="tama-news-heading" id="latest-info">
+    <h2 id="tama-news-heading">多磨霊園の公式お知らせ</h2>
+    {
+      tamaNewsItems.length > 0 && (
+        <ul>
+          {tamaNewsItems.map((item) => (
+            <li>
+              <a
+                href={item.sourceUrl}
+                target="_blank"
+                rel="noopener"
+                data-event="official_procedure_click"
+                data-authority="tokyo_park_association"
+                data-topic="top_tama_news"
+              >
+                {item.title} ↗
+              </a>
+              <small>
+                {item.sourceName}・公開日：{formatJaDate(item.publishedAt)}
+              </small>
+            </li>
+          ))}
+        </ul>
+      )
+    }
+    <a href="https://www.tokyo-park.or.jp/reien/tama/news/index.html" target="_blank" rel="noopener"
+      >公式サイトのお知らせ一覧へ ↗</a
+    >
+  </section>
 </BaseLayout>
-
 <style>
-  /* --- ヒーロー（画面全幅、写真そのまま、見出し周りだけ濃色パネル） ---
-     2026-08-28再訂正: 同日中に一度「本文幅へ収める」構成へ変更したが
-     （スポンサー枠を全ページ共通化した際、ヒーローを誤って.page-shellの
-     3列グリッドの内側＝本文列に含めてしまったため）、ヒーローの左右にも
-     スポンサー枠が並ぶ配置は意図と異なるという指摘を受け、フルブリード
-     （画面全幅・単独表示）へ戻した。ヒーローはBaseLayout.astroの
-     `<slot name="pageTop" />`（.page-shellより前、3列グリッドの外）へ
-     渡しており、スポンサー枠とは完全に独立した領域になっている
-     （src/layouts/BaseLayout.astro参照）。
-     定番のフルブリード手法。.site-mainがmargin-inline:autoで中央寄せ
-     されている限り、ネストの深さに関わらず画面幅いっぱいに広がる。 */
-  .hero {
-    position: relative;
-    isolation: isolate;
-    width: 100vw;
-    margin-inline: calc(50% - 50vw);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    /* 2026-08-27 再修正: 65vh・700pxまでの拡大は、条件選択UI（目的ボタン・
-       くわしい条件）をスクロールなしの初期画面から押し出してしまう
-       副作用が確認されたため縮小した。PC/スマートフォンとも、
-       写真は画面全幅・background-size: coverのまま維持し、高さだけを抑える。 */
-    min-height: clamp(300px, 32vw, 420px);
-    padding: var(--space-6);
-    overflow: hidden;
-    /* ヒーロー下端と、下のスポンサー付き比較エリアとの間に、
-       少しだけ縦の余白を設ける（8〜12px程度広げる指示に基づき、
-       目安値のclamp(28px,2vw,36px)を採用）。 */
-    margin-bottom: clamp(28px, 2vw, 36px);
-  }
-
-  .hero__media {
-    position: absolute;
-    inset: 0;
-    z-index: 0;
-    display: block;
-    width: 100%;
-    height: 100%;
-  }
-
-  .hero__media img {
-    display: block;
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    object-position: center;
-  }
-
-  @media (max-width: 767px) {
-    .hero {
-      min-height: 220px;
-      padding: var(--space-4);
-      margin-bottom: var(--space-4);
-    }
-  }
-
-  .hero__panel {
-    position: relative;
-    z-index: 1;
-    max-width: 720px;
-    width: 100%;
-    padding: var(--space-5, 1.25rem) var(--space-8);
-    border-radius: var(--radius-card);
+  .home-search {
+    border: 1px solid var(--color-accent);
+    background: white;
+    padding: 24px;
     text-align: center;
-    /* 深緑ベースの半透明パネル。画像全体は薄めず、見出し周辺だけに
-       濃色の地を敷いてコントラストを確保する。
-       2026-09-01（ミチのモバイル優先UI・文章校正対応「TOPヒーロー」節）:
-       スマートフォンで黒い説明領域が写真の大部分を覆っているという
-       指摘に対応し、(1)説明文を1段落へ集約して縦幅を減らし、
-       (2)paddingをspace-6→space-5へ縮小し、(3)不透明度を0.78→0.68へ
-       落として写真がより見えるようにした。白文字側にはtext-shadowを
-       0 1px 3px→0 1px 4px相当まで強め、opacityを下げた分の
-       コントラスト低下を補っている（見出し・本文とも実機の写真上で
-       目視確認）。 */
-    background: rgba(18, 42, 31, 0.82);
-    border: 1px solid rgba(214, 170, 88, 0.8);
-    box-shadow: 0 14px 38px rgba(9, 22, 16, 0.28);
   }
-
-  @media (max-width: 767px) {
-    .hero__panel {
-      padding: var(--space-4) var(--space-5, 1.25rem);
-    }
+  .home-search h2 {
+    font-size: 26px;
+    margin: 0 0 12px;
   }
-
-  .hero__eyebrow {
-    display: inline-flex;
-    align-items: center;
-    min-height: 30px;
-    margin: 0 0 var(--space-2);
-    padding: 0.2em 0.8em;
-    border: 1px solid rgba(255, 249, 236, 0.55);
-    border-radius: var(--radius-pill);
-    background: rgba(214, 170, 88, 0.16);
-    color: #f4cf83;
-    font-size: var(--font-size-caption, 0.875rem);
-    font-weight: 700;
-    letter-spacing: 0.04em;
+  .home-search p {
+    font-size: 14px;
+    margin: 8px 0 18px;
   }
-
-  .hero__heading {
-    font-family: var(--font-family-heading);
-    font-weight: 700;
-    font-size: clamp(1.2rem, 5.7vw, 2.75rem);
-    line-height: 1.45;
-    letter-spacing: 0.01em;
-    margin: 0 0 var(--space-3);
-    color: #fffdf8;
-    text-shadow: 0 1px 4px rgba(0, 0, 0, 0.45);
-  }
-
-  .hero__heading-line {
+  .home-button {
     display: block;
-    white-space: nowrap;
-  }
-
-  .hero__lead {
-    margin: 0;
-    font-size: 1.1rem;
-    color: #f3ead9;
-    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
-  }
-
-  /* 「〇社の一覧を見る」（2026-09-14、新着情報バー追加に伴い単独の主CTAへ
-     戻した。検索導線の優先度を下げないため、ボタンの見た目・margin-topは
-     変更していない）。 */
-  .hero__cta {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: var(--space-2);
-    min-height: var(--tap-target-min);
-    margin-top: var(--space-4);
-    padding: 0.75em 1.55em;
-    border-radius: var(--radius-pill);
-    background: #d6aa58;
-    color: #172b23;
-    font-weight: 800;
-    text-decoration: none;
-    box-shadow: 0 7px 18px rgba(8, 20, 14, 0.34);
-    transition:
-      transform 160ms ease,
-      background-color 160ms ease;
-  }
-
-  .hero__cta:hover {
-    background: #e4bc70;
-    transform: translateY(-2px);
-  }
-
-  /* ヒーロー直下の新着情報バー（2026-09-14追加）。ヒーロー自体はフルブリード
-     （画面全幅、.page-shellの外）だが、このバーは`.site-main`と同じ960px幅の
-     中央寄せ列に揃える。`min()`でmax-widthに「画面幅 − 左右space-4」も
-     候補として渡し、960px未満の画面でも左右に最小限の余白を確保する
-     （固定pxのmargin-inline + auto centeringだけでは、画面幅が960pxより
-     狭いときに中央寄せが効かず左右の余白が付かないため）。 */
-  .latest-info-bar {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: var(--space-2) var(--space-3);
-    max-width: min(960px, calc(100% - var(--space-4) * 2));
-    margin: 0 auto var(--space-6);
-    padding: var(--space-3) var(--space-4);
-    min-height: var(--tap-target-min);
-    border: 1px solid #c8d5cd;
-    border-left: 6px solid var(--color-accent);
-    border-radius: var(--radius-card, 10px);
-    background: var(--color-surface);
-    color: var(--color-text);
-    text-decoration: none;
-    box-shadow: 0 8px 24px rgba(30, 60, 47, 0.09);
-  }
-
-  .latest-info-bar:hover {
-    border-color: var(--color-accent);
-    background: var(--color-accent-soft);
-  }
-
-  .latest-info-bar__label {
-    flex: none;
-    padding: 0.2em 0.7em;
-    border-radius: var(--radius-tag, 6px);
-    background: #d6aa58;
-    color: #172b23;
-    font-weight: 800;
-    font-size: var(--font-size-caption, 0.875rem);
-  }
-
-  .latest-info-bar__date {
-    flex: none;
-    color: var(--color-text-muted);
-    font-weight: 800;
-    font-size: var(--font-size-caption, 0.875rem);
-  }
-
-  /* PC等の広い幅では1行に収め、長いタイトルは末尾を省略する。
-     767px以下では2行目へ折り返せるよう、nowrap/ellipsisを解除する
-     （要件「スマホでは1〜2行表示」に対応）。 */
-  .latest-info-bar__title {
-    flex: 1 1 auto;
-    min-width: 0;
-    overflow: hidden;
-    white-space: nowrap;
-    text-overflow: ellipsis;
-    font-weight: 800;
-    color: var(--color-text);
-  }
-
-  @media (max-width: 767px) {
-    .latest-info-bar__title {
-      flex-basis: 100%;
-      white-space: normal;
-      overflow: visible;
-      text-overflow: unset;
-    }
-  }
-
-  .latest-info-bar__arrow {
-    flex: none;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 34px;
-    height: 34px;
-    border-radius: 50%;
+    max-width: 450px;
+    margin: auto;
+    padding: 14px 18px;
+    color: white;
     background: var(--color-accent);
-    color: #fffdf8;
-    font-weight: 700;
-  }
-
-  @media (max-width: 767px) {
-    .latest-info-bar {
-      padding: var(--space-4);
-    }
-
-    .latest-info-bar__arrow {
-      margin-left: auto;
-    }
-  }
-
-  .hero__image-credit {
-    position: absolute;
-    z-index: 1;
-    right: var(--space-4);
-    bottom: var(--space-3);
-    margin: 0;
-    padding: 0.15em 0.6em;
-    border-radius: var(--radius-tag);
-    background: rgba(255, 255, 255, 0.65);
-    color: #2b2926;
-    font-size: var(--font-size-caption, 0.875rem);
-  }
-
-  .masonry-rule {
-    margin-block: var(--space-6);
-  }
-
-  /* 「多磨霊園に関する最新情報」（2026-09-02追加）。条件選択・石材店への主導線の後、
-     「当サイトについて」の前に置く、最大3件のコンパクトなお知らせ一覧。
-     検索・フィルターUIの邪魔にならないよう、写真やタグを使わず、
-     リンク＋出典・公開日の2行だけの控えめなカードにとどめる。 */
-  .tama-news {
-    color: var(--color-text);
-  }
-
-  .tama-news h2 {
-    font-family: var(--font-family-heading);
-    margin: 0 0 var(--space-4);
-  }
-
-  .tama-news__list {
-    display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: var(--space-3);
-    list-style: none;
-    margin: 0;
-    padding: 0;
-  }
-
-  @media (max-width: 767px) {
-    .tama-news__list {
-      grid-template-columns: 1fr;
-    }
-  }
-
-  .tama-news__item {
-    padding: var(--space-4);
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-card, 10px);
-    background: var(--color-surface);
-  }
-
-  .tama-news__link {
-    display: block;
-    font-weight: 700;
-    color: var(--color-accent);
     text-decoration: none;
-    line-height: 1.5;
+    font-size: 19px;
+    border-radius: 3px;
   }
-
-  .tama-news__link:hover {
-    text-decoration: underline;
+  .home-button:hover {
+    background: #38516b;
   }
-
-  .tama-news__meta {
-    margin: var(--space-2) 0 0;
+  .home-search .home-search__note {
+    font-size: 12px;
+    margin: 12px 0 0;
     color: var(--color-text-muted);
-    font-size: var(--font-size-caption, 0.875rem);
   }
-
-  /* 「新着情報エリア」（2026-09-14追加）。「多磨霊園の公式お知らせ」と
-     「多磨霊園・周辺の読みもの」をまとめて包む親要素。ヒーローの
-     「新着情報」ボタンから`/#latest-info`でここへページ内スクロールする。
-     現状ヘッダーは固定表示ではないが、将来固定ヘッダーになった場合でも
-     見出しが隠れないよう、念のため`scroll-margin-top`を設定しておく。 */
-  .latest-info {
-    scroll-margin-top: var(--space-6);
-  }
-
-  /* 「多磨霊園・周辺の読みもの」（2026-09-13追加、2026-09-14に
-     「多磨霊園・周辺の新着記事」から改称。公式発表との混同を避けるため）。
-     カード自体の見た目は_partials/NewsCard.astro側で持つため、ここでは
-     一覧のグリッド配置と「読みもの一覧を見る」リンクだけを担当する。 */
-  .local-news {
-    color: var(--color-text);
-  }
-
-  .local-news h2 {
-    font-family: var(--font-family-heading);
-    margin: 0 0 var(--space-4);
-  }
-
-  .local-news__list {
+  .home-utilities {
     display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: var(--space-3);
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin: 16px 0 38px;
+  }
+  .home-utilities a {
+    border: 1px solid #aab0b7;
+    text-decoration: none;
+    padding: 13px 8px;
+    text-align: center;
+    font-size: 14px;
+  }
+  .home-heading {
+    font-size: 26px;
+    border-left: 3px solid var(--color-gold);
+    padding-left: 14px;
+    margin: 32px 0 22px;
+  }
+  .home-feature {
+    display: grid;
+    grid-template-columns: 1.2fr 1fr;
+    gap: 24px;
+    align-items: center;
+    text-decoration: none;
+  }
+  .home-feature h3 {
+    font: 500 30px/1.6 var(--font-family-heading);
+    margin: 12px 0;
+  }
+  .home-feature p {
+    font-size: 14px;
+    color: var(--color-text-muted);
+  }
+  .home-category {
+    font-size: 12px;
+    color: #795820;
+    border: 1px solid var(--color-gold);
+    padding: 3px 8px;
+  }
+  .home-scene {
+    position: relative;
+    aspect-ratio: 1.5;
+    background: url('/images/editorial/magazine-scenes.webp') 0 0/200% 200%;
+    overflow: hidden;
+  }
+  .home-scene--books {
+    background-position: 0 100%;
+  }
+  .home-scene--stone {
+    background-position: 100% 0;
+  }
+  .home-scene span {
+    position: absolute;
+    bottom: 5px;
+    right: 6px;
+    background: #24364ba6;
+    color: white;
+    font-size: 10px;
+    padding: 1px 5px;
+  }
+  .home-stories {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 22px;
+    margin-top: 30px;
+  }
+  .home-stories > a {
+    text-decoration: none;
+  }
+  .home-stories .home-category {
+    display: inline-block;
+    margin-top: 14px;
+  }
+  .home-stories h3 {
+    font: 500 22px/1.65 var(--font-family-heading);
+    margin: 10px 0;
+  }
+  .home-stories p {
+    font-size: 13px;
+    color: var(--color-text-muted);
+    margin: 0;
+  }
+  .home-feature:hover h3,
+  .home-stories a:hover h3 {
+    text-decoration: underline;
+    text-decoration-color: var(--color-gold);
+  }
+  .home-section-bar {
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+    align-items: center;
+  }
+  .home-section-bar > a {
+    font-size: 13px;
+    flex: none;
+  }
+  .home-reading__list {
+    display: grid;
+    gap: 14px;
     list-style: none;
-    margin: 0 0 var(--space-4);
+    padding: 0;
+    margin: 0;
+  }
+  .home-filter {
+    margin: 30px 0;
+    border-block: 1px solid var(--color-border);
+    padding: 10px 0;
+  }
+  .home-filter > summary {
+    min-height: 48px;
+    padding: 10px 0;
+    font-weight: 600;
+    color: var(--color-accent);
+  }
+  .home-guide-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+  .home-guide-grid a {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    text-decoration: none;
+    background: white;
+    border: 1px solid var(--color-border);
+    padding: 16px;
+    font-size: 15px;
+  }
+  .home-official {
+    margin: 32px 0 0;
+    padding: 22px;
+    border: 1px solid #aab0b7;
+  }
+  .home-official h2 {
+    font-size: 22px;
+    margin: 0 0 15px;
+  }
+  .home-official ul {
+    list-style: none;
     padding: 0;
   }
-
+  .home-official li {
+    margin: 16px 0;
+  }
+  .home-official a {
+    font-size: 14px;
+  }
+  .home-official small {
+    display: block;
+    font-size: 12px;
+    color: var(--color-text-muted);
+  }
   @media (max-width: 767px) {
-    .local-news__list {
-      grid-template-columns: 1fr;
+    .home-search {
+      padding: 20px 15px;
     }
-  }
-
-  .local-news__more {
-    margin: 0;
-    font-weight: 700;
-  }
-
-  /* --- 「当サイトについて」。ServiceFilterはBaseLayout.astroの
-     beforeSponsorスロットへ渡しているため、このページ自身は個別の
-     セクションを縦に並べるだけの単純な構成になっている
-     （2026-08-28、スポンサー枠の全ページ共通化・TOPのスマートフォン
-     表示順修正）。 --- */
-  .trust {
-    color: var(--color-text);
-  }
-
-  .trust p {
-    color: inherit;
-  }
-
-  /* --- 多磨霊園ガイド（控えめな4入口。石材店比較の主役性を奪わない） --- */
-  .top-guide {
-    max-width: 960px;
-    margin-inline: auto;
-  }
-
-  .top-guide h2 {
-    font-family: var(--font-family-heading);
-    margin: 0 0 var(--space-2);
-  }
-
-  .top-guide__lead {
-    margin: 0 0 var(--space-4);
-    color: var(--color-stone-text);
-    font-size: var(--font-size-label);
-  }
-
-  .top-guide__entries {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: var(--space-4);
-  }
-
-  @media (max-width: 767px) {
-    .top-guide__entries {
-      grid-template-columns: 1fr;
+    .home-search h2 {
+      font-size: 22px;
     }
-  }
-
-  .top-guide__entry {
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-2);
-    padding: var(--space-4) var(--space-5, 1.25rem);
-    border: 1px solid var(--color-stone-line);
-    border-radius: var(--radius-card);
-    background: var(--color-stone-surface);
-    color: var(--color-text);
-    text-decoration: none;
-    min-height: var(--tap-target-min);
-  }
-
-  .top-guide__entry:hover {
-    background: var(--color-surface);
-    border-color: var(--color-accent);
-  }
-
-  .top-guide__entry-heading {
-    font-family: var(--font-family-heading);
-    font-weight: 700;
-    font-size: 1.05rem;
-    color: var(--color-text);
-  }
-
-  .top-guide__entry-description {
-    color: var(--color-stone-text);
-    font-size: var(--font-size-label);
-    line-height: 1.6;
+    .home-button {
+      font-size: 17px;
+    }
+    .home-utilities {
+      gap: 10px;
+      margin-bottom: 28px;
+    }
+    .home-utilities a {
+      font-size: 13px;
+    }
+    .home-heading {
+      font-size: 23px;
+    }
+    .home-feature {
+      display: block;
+    }
+    .home-feature .home-scene {
+      aspect-ratio: 1.8;
+    }
+    .home-feature .home-category {
+      display: inline-block;
+      margin-top: 16px;
+    }
+    .home-feature h3 {
+      font-size: 26px;
+      margin: 10px 0;
+    }
+    .home-stories {
+      display: block;
+    }
+    .home-stories > a {
+      display: grid;
+      grid-template-columns: 38% 1fr;
+      gap: 16px;
+      align-items: center;
+      border-top: 1px solid var(--color-border);
+      padding: 18px 0;
+    }
+    .home-stories .home-category {
+      margin-top: 0;
+      font-size: 11px;
+    }
+    .home-stories h3 {
+      font-size: 19px;
+      margin: 8px 0;
+    }
+    .home-stories p {
+      font-size: 12px;
+    }
+    .home-section-bar {
+      display: block;
+    }
+    .home-section-bar > a {
+      display: inline-block;
+      margin: -8px 0 16px;
+    }
+    .home-guide-grid a {
+      font-size: 14px;
+      padding: 13px;
+    }
+    .home-official {
+      padding: 18px;
+    }
   }
 </style>

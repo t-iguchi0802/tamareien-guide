@@ -1,0 +1,67 @@
+---
+import type { FamousGraveEntry } from '../../pages/_lib/famous-graves-data';
+import { FAMOUS_PROFILES, compactName } from '../../pages/_lib/famous-profiles';
+interface Props {
+  entry: FamousGraveEntry;
+}
+const { entry } = Astro.props;
+const name = compactName(entry.name);
+const profile = FAMOUS_PROFILES[name];
+---
+
+<article class="person-card" data-person>
+  <p class="person-card__field">{entry.career}</p>
+  <h4>{name}</h4>
+  {profile && <p class="person-card__description">{profile.description}</p>}
+  <p class="person-card__location">
+    <span>墓所</span>{entry.block}区 {entry.section}種 {entry.side}側 {entry.number}番
+  </p>
+</article>
+<style>
+  .person-card {
+    padding: 16px 0 24px;
+    min-width: 0;
+  }
+  .person-card__field {
+    font-size: 12px;
+    color: #795820;
+    margin: 0 0 5px;
+  }
+  .person-card h4 {
+    font: 500 25px/1.6 var(--font-family-heading);
+    color: var(--color-accent);
+    margin: 0;
+    letter-spacing: 0.03em;
+  }
+  .person-card__description {
+    font-size: 15px;
+    line-height: 1.9;
+    color: #55616e;
+    margin: 12px 0 16px;
+  }
+  .person-card__location {
+    font-size: 12px;
+    color: var(--color-text-muted);
+    margin: 14px 0 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
+  }
+  .person-card__location span {
+    border: 1px solid var(--color-border);
+    padding: 1px 6px;
+    font-size: 11px;
+  }
+  @media (max-width: 767px) {
+    .person-card {
+      border-top: 1px solid #e7e3dd;
+    }
+    .person-card h4 {
+      font-size: 25px;
+    }
+    .person-card__description {
+      font-size: 16px;
+    }
+  }
+</style>

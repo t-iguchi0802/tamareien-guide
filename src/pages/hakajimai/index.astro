@@ -23,12 +23,14 @@ const description =
 ---
 
 <BaseLayout title={pageTitle} description={description}>
-  <h1>{heroHeading}</h1>
-  <p>
-    多磨霊園で墓じまいを検討する方向けに、各石材店のHP等で確認できた
-    <strong>料金の目安と対応状況</strong>をまとめています。
-    墓石の解体・撤去費用は、墓所の広さ、石の量、搬出経路などで変わるため、最終金額は現地見積りで確認してください。
-  </p>
+  <Fragment slot="beforeSponsor">
+    <h1>{heroHeading}</h1>
+    <p>
+      多磨霊園で墓じまいを検討する方向けに、各石材店のHP等で確認できた
+      <strong>料金の目安と対応状況</strong>をまとめています。
+      墓石の解体・撤去費用は、墓所の広さ、石の量、搬出経路などで変わるため、最終金額は現地見積りで確認してください。
+    </p>
+  </Fragment>
 
   <section aria-labelledby="hakajimai-price-heading">
     <h2 id="hakajimai-price-heading">墓じまい費用の目安</h2>
@@ -66,7 +68,8 @@ const description =
     <h2 id="hakajimai-procedure-heading">墓じまいと改葬の手続き</h2>
     <p>
       墓石を撤去して区画を返す「墓じまい」と、遺骨を別のお墓や納骨施設へ移す「改葬」は別の手続きです。
-      遺骨を移す場合の改葬許可などは、<a href={ROUTES.tetsuzuki.path}>改葬・墓所返還の手続き案内</a>で公式情報へのリンクを確認できます。
+      遺骨を移す場合の改葬許可などは、<a href={ROUTES.tetsuzuki.path}>改葬・墓所返還の手続き案内</a
+      >で公式情報へのリンクを確認できます。
     </p>
   </section>
 

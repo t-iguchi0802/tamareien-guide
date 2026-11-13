@@ -46,7 +46,13 @@ const { sponsorSlots, pageCategory } = Astro.props;
       <button type="button" data-sponsor-next aria-label="次の広告">→</button>
     </div>
   </div>
-  <div class="sponsor-carousel" data-sponsor-carousel role="group" aria-label="広告の切り替え">
+  <div
+    class="sponsor-carousel"
+    data-sponsor-carousel
+    role="group"
+    tabindex="0"
+    aria-label="広告の切り替え。左右にスワイプできます"
+  >
     <div class="sponsor-rail sponsor-rail--left">
       <SponsorCard sponsor={sponsorSlots[0]} position="left-1" pageCategory={pageCategory} />
       <SponsorCard sponsor={sponsorSlots[1]} position="left-2" pageCategory={pageCategory} />
@@ -69,7 +75,7 @@ const { sponsorSlots, pageCategory } = Astro.props;
     const controls = root.querySelector<HTMLElement>('[data-sponsor-controls]');
     const toggle = root.querySelector<HTMLButtonElement>('[data-sponsor-toggle]');
     const originals = Array.from(track.querySelectorAll<HTMLElement>('[data-sponsor-card]'));
-    const mobile = window.matchMedia('(max-width: 767px)');
+    const mobile = window.matchMedia('(max-width: 999px)');
     const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
     let slides: HTMLElement[] = [];
     let index = 0;
@@ -143,7 +149,7 @@ const { sponsorSlots, pageCategory } = Astro.props;
         index = count + (index % count);
         center(index, false);
       }
-      schedule();
+      if (timer === undefined) schedule();
     }
 
     function move(direction: number): void {
@@ -209,12 +215,17 @@ const { sponsorSlots, pageCategory } = Astro.props;
       'scroll',
       () => {
         if (!ready || !mobile.matches) return;
-        stop();
         window.clearTimeout(settleTimer);
         settleTimer = window.setTimeout(settle, 160);
       },
       { passive: true },
     );
+    track.addEventListener('wheel', stop, { passive: true });
+    track.addEventListener('keydown', (event) => {
+      if (event.target !== track || !['ArrowLeft', 'ArrowRight'].includes(event.key)) return;
+      event.preventDefault();
+      move(event.key === 'ArrowLeft' ? -1 : 1);
+    });
     track.addEventListener('pointerdown', () => {
       if (!mobile.matches) return;
       dragging = true;

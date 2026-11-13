@@ -1,0 +1,107 @@
+---
+import { seasonInTokyo, seasonNames } from '../../lib/season';
+const season = seasonInTokyo();
+---
+
+<section class="season-hero" data-season={season} aria-labelledby="hero-heading">
+  <div
+    class="season-hero__scene"
+    role="img"
+    aria-label={`${seasonNames[season]}の並木道を描いた景観イメージ`}
+  >
+  </div>
+  <div class="season-hero__copy">
+    <h1 id="hero-heading">大切なお墓のこと。<br />このまちのこと。</h1>
+    <p>多磨霊園の石材店探しと、<br />墓参りに役立つ地域情報。</p>
+  </div>
+  <span class="season-hero__caption">{seasonNames[season]}の景観イメージ（生成画像）</span>
+</section>
+<script>
+  import { seasonInTokyo, seasonNames } from '../../lib/season';
+  const hero = document.querySelector<HTMLElement>('.season-hero');
+  function updateSeason() {
+    if (!hero) return;
+    const season = seasonInTokyo();
+    hero.dataset.season = season;
+    hero
+      .querySelector('[role="img"]')
+      ?.setAttribute('aria-label', `${seasonNames[season]}の並木道を描いた景観イメージ`);
+    const caption = hero.querySelector('.season-hero__caption');
+    if (caption) caption.textContent = `${seasonNames[season]}の景観イメージ（生成画像）`;
+  }
+  updateSeason();
+  document.addEventListener('visibilitychange', updateSeason);
+  window.setInterval(updateSeason, 60000);
+</script>
+<style>
+  .season-hero {
+    position: relative;
+    overflow: hidden;
+  }
+  .season-hero__scene {
+    aspect-ratio: 1.65;
+    background: url('/images/editorial/magazine-scenes.webp') 0 0/200% 200%;
+  }
+  .season-hero[data-season='spring'] .season-hero__scene,
+  .season-hero[data-season='summer'] .season-hero__scene,
+  .season-hero[data-season='winter'] .season-hero__scene {
+    background-image: url('/images/editorial/seasonal-scenes.webp');
+  }
+  .season-hero[data-season='summer'] .season-hero__scene {
+    background-position: 100% 0;
+  }
+  .season-hero[data-season='winter'] .season-hero__scene {
+    background-position: 0 100%;
+  }
+  .season-hero__copy {
+    position: absolute;
+    left: 20px;
+    bottom: 30px;
+    max-width: 90%;
+    padding: 20px 24px;
+    background: #fafaf8f5;
+  }
+  .season-hero__copy h1 {
+    font: 500 clamp(26px, 2.55vw, 38px)/1.6 var(--font-family-heading);
+    margin: 0;
+    border-left: 3px solid var(--color-gold);
+    padding-left: 14px;
+    letter-spacing: 0.025em;
+  }
+  .season-hero__copy p {
+    font-size: 14px;
+    margin: 12px 0 0;
+    line-height: 1.8;
+  }
+  .season-hero__caption {
+    position: absolute;
+    bottom: 5px;
+    right: 8px;
+    font-size: 10px;
+    background: #24364bbd;
+    color: white;
+    padding: 1px 5px;
+  }
+  @media (max-width: 767px) {
+    .season-hero__scene {
+      aspect-ratio: 1.8;
+    }
+    .season-hero__copy {
+      left: 16px;
+      bottom: 24px;
+      padding: 12px 16px;
+    }
+    .season-hero__copy h1 {
+      font-size: 25px;
+      padding-left: 10px;
+    }
+    .season-hero__copy p {
+      display: none;
+    }
+  }
+  @media (max-width: 359px) {
+    .season-hero__copy h1 {
+      font-size: 22px;
+    }
+  }
+</style>

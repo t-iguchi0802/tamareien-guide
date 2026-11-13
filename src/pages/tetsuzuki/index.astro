@@ -49,10 +49,12 @@ const tamaOfficial = getSourceById('SRC-TAMA-OFFICIAL');
 ---
 
 <BaseLayout title={browserTitle} description={description}>
-  <h1>{pageTitle}</h1>
-  <p>
-    このページは特定の事業者を比較するページではありません。多磨霊園に関わる行政手続きについて、公開されている公式ページへの案内を中心にまとめています。手続きの正式な流れ・必要書類・受付窓口は、必ず下記の公式ページでご確認ください。当サイトの記載内容は法律相談ではありません。
-  </p>
+  <Fragment slot="beforeSponsor">
+    <h1>{pageTitle}</h1>
+    <p>
+      このページは特定の事業者を比較するページではありません。多磨霊園に関わる行政手続きについて、公開されている公式ページへの案内を中心にまとめています。手続きの正式な流れ・必要書類・受付窓口は、必ず下記の公式ページでご確認ください。当サイトの記載内容は法律相談ではありません。
+    </p>
+  </Fragment>
 
   <section aria-labelledby="kaiso-heading">
     <h2 id="kaiso-heading">改葬（かいそう）</h2>

@@ -161,6 +161,7 @@
  * 同じ高さを維持する既存方針は変更していない）。
  */
 import '../styles/tokens.css';
+import '../styles/site.css';
 import { siteConfig } from '../lib/siteConfig';
 import { ROUTES } from '../lib/routes';
 import { getActiveSponsors } from '../lib/data';
@@ -245,7 +246,8 @@ const ogImageUrl = buildCanonicalUrl(ogImage);
 
 const organizationJsonLd = buildOrganizationJsonLd();
 const webSiteJsonLd = buildWebSiteJsonLd();
-const breadcrumbJsonLd = breadcrumbs && breadcrumbs.length > 0 ? buildBreadcrumbListJsonLd(breadcrumbs) : null;
+const breadcrumbJsonLd =
+  breadcrumbs && breadcrumbs.length > 0 ? buildBreadcrumbListJsonLd(breadcrumbs) : null;
 const currentPathname = Astro.url.pathname;
 
 const sponsors = getActiveSponsors();
@@ -266,7 +268,7 @@ const hasBeforeSponsor = Astro.slots.has('beforeSponsor');
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{pageTitle}</title>
     <meta name="description" content={description} />
-    <meta name="theme-color" content="#244c3c" />
+    <meta name="theme-color" content="#24364b" />
     {noindex && <meta name="robots" content="noindex, nofollow" />}
     <link rel="canonical" href={canonicalUrl} />
     {preloadImage && <link rel="preload" as="image" href={preloadImage} fetchpriority="high" />}
@@ -289,29 +291,47 @@ const hasBeforeSponsor = Astro.slots.has('beforeSponsor');
 
     <script type="application/ld+json" set:html={JSON.stringify(organizationJsonLd)} is:inline />
     <script type="application/ld+json" set:html={JSON.stringify(webSiteJsonLd)} is:inline />
-    {breadcrumbJsonLd && <script type="application/ld+json" set:html={JSON.stringify(breadcrumbJsonLd)} is:inline />}
-    {extraJsonLd.map((jsonLd) => <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} is:inline />)}
+    {
+      breadcrumbJsonLd && (
+        <script type="application/ld+json" set:html={JSON.stringify(breadcrumbJsonLd)} is:inline />
+      )
+    }
+    {
+      extraJsonLd.map((jsonLd) => (
+        <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} is:inline />
+      ))
+    }
 
     <GaTag />
   </head>
-  <body>
+  <body data-design="magazine" data-home={currentPathname === '/' ? 'true' : undefined}>
     <a class="skip-link" href="#main-content">本文へスキップ</a>
 
     <header class="site-header">
       <div class="site-header__inner">
         <a class="site-header__brand" href={ROUTES.top.path}>
-          <img class="site-header__brand-icon" src="/site-icon-192.png" alt="" width="44" height="44" />
+          <img
+            class="site-header__brand-icon"
+            src="/site-icon-192.png"
+            alt=""
+            width="44"
+            height="44"
+          />
           <span class="site-header__brand-copy">
             <span class="site-header__name">{siteConfig.name}</span>
             <span class="site-header__subtitle">{siteConfig.subtitle}</span>
           </span>
         </a>
+        <a class="site-header__sponsor" href="/about/#sponsor-info-heading"
+          >スポンサー掲載のご案内 <span aria-hidden="true">→</span></a
+        >
         <input type="checkbox" id="nav-toggle" class="site-header__nav-checkbox" />
         <label for="nav-toggle" class="site-header__nav-toggle-label">
           <span aria-hidden="true">メニュー</span>
           <span class="sr-only">主要メニューを開く・閉じる</span>
         </label>
-        {/*
+        {
+          /*
           主要ナビゲーション（2026-09-02、ナビゲーション監査・共通化対応）。
           src/lib/navigation.ts の PRIMARY_NAV（正本）をそのまま描画する。
           「多磨霊園を知る」はドロップダウン（ガイド一覧・歴史・著名人墓所）にし、
@@ -325,16 +345,23 @@ const hasBeforeSponsor = Astro.slots.has('beforeSponsor');
           ドロップダウンの中身を常時展開表示にし（`.site-header__dropdown-menu`
           のmax-width:640pxのメディアクエリ上書き参照）、開閉ボタンの操作に
           関係なく全リンクが見える1本のリストとして扱う。
-        */}
+        */
+        }
         <nav class="site-header__nav" aria-label="主要メニュー">
           {
             PRIMARY_NAV.map((entry) =>
               entry.kind === 'link' ? (
-                <a href={entry.path} aria-current={isCurrentPath(currentPathname, entry.path) ? 'page' : undefined}>
+                <a
+                  href={entry.path}
+                  aria-current={isCurrentPath(currentPathname, entry.path) ? 'page' : undefined}
+                >
                   {entry.label}
                 </a>
               ) : (
-                <div class="site-header__dropdown site-header__dropdown--align-right" data-nav-dropdown>
+                <div
+                  class="site-header__dropdown site-header__dropdown--align-right"
+                  data-nav-dropdown
+                >
                   <button
                     type="button"
                     class="site-header__dropdown-trigger"
@@ -344,15 +371,31 @@ const hasBeforeSponsor = Astro.slots.has('beforeSponsor');
                     data-nav-dropdown-trigger
                   >
                     {entry.label}
-                    <svg class="site-header__dropdown-chevron" width="14" height="14" viewBox="0 0 20 20" aria-hidden="true" focusable="false">
-                      <path d="M5 7.5 L10 12.5 L15 7.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                    <svg
+                      class="site-header__dropdown-chevron"
+                      width="14"
+                      height="14"
+                      viewBox="0 0 20 20"
+                      aria-hidden="true"
+                      focusable="false"
+                    >
+                      <path
+                        d="M5 7.5 L10 12.5 L15 7.5"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                      />
                     </svg>
                   </button>
                   <div class="site-header__dropdown-menu" id={entry.id} data-nav-dropdown-menu>
                     {entry.items.map((item) => (
                       <a
                         href={item.path}
-                        aria-current={isCurrentPath(currentPathname, item.path) ? 'page' : undefined}
+                        aria-current={
+                          isCurrentPath(currentPathname, item.path) ? 'page' : undefined
+                        }
                         data-event="internal_guide_link_click"
                         data-destination={item.path}
                       >
@@ -364,18 +407,23 @@ const hasBeforeSponsor = Astro.slots.has('beforeSponsor');
               ),
             )
           }
-          {/*
+          {
+            /*
             モバイルメニュー内の運営系ページ（2026-09-02追加）。「スマート
             フォンではハンバーガーメニュー等の中に、主要ページと運営系
             ページを整理して表示する」という要件に対応する。640px超では
             `.site-header__nav-mobile-extra`をCSSで非表示にし、PCヘッダーの
             見た目（主要4項目のみ）は変えない。
-          */}
+          */
+          }
           <div class="site-header__nav-mobile-extra">
             <p class="site-header__nav-mobile-label">サイトについて</p>
             {
               OPERATOR_NAV.map((item) => (
-                <a href={item.path} aria-current={isCurrentPath(currentPathname, item.path) ? 'page' : undefined}>
+                <a
+                  href={item.path}
+                  aria-current={isCurrentPath(currentPathname, item.path) ? 'page' : undefined}
+                >
                   {item.label}
                 </a>
               ))
@@ -389,7 +437,11 @@ const hasBeforeSponsor = Astro.slots.has('beforeSponsor');
 
     {
       hasBeforeSponsor ? (
-        <main id="main-content" class="page-shell page-shell--split" data-page-category={pageCategory}>
+        <main
+          id="main-content"
+          class="page-shell page-shell--split"
+          data-page-category={pageCategory}
+        >
           {/* 本文前半・広告・本文後半を、ページ全体で1つのmainランドマークにまとめる。
               SponsorGroupはasideとして本文に付随する広告を表すためmain内に置ける。
               これにより、検索エンジン・支援技術の双方にページ本文の範囲を
@@ -412,9 +464,22 @@ const hasBeforeSponsor = Astro.slots.has('beforeSponsor');
       )
     }
 
+    <section class="sponsor-invitation" aria-labelledby="sponsor-invitation-heading">
+      <div>
+        <p class="sponsor-invitation__eyebrow">地域の事業者のみなさまへ</p><h2
+          id="sponsor-invitation-heading"
+        >
+          このまちで、相談先を探す人に届ける。
+        </h2><p>多磨霊園のお墓・墓参りに役立つ情報とともに、事業者のサービスをご紹介します。</p>
+      </div>
+      <a href="/about/#sponsor-info-heading"
+        >スポンサー掲載について <span aria-hidden="true">→</span></a
+      >
+    </section>
     <footer class="site-footer">
       <div class="site-footer__inner">
-        {/* 主要リンクの優先表示（2026-09-01、ミチのモバイル優先UI・文章校正
+        {
+          /* 主要リンクの優先表示（2026-09-01、ミチのモバイル優先UI・文章校正
             対応「フッター」節）。スマートフォンで縦に長く並ぶ問題に対し、
             最もよく使われる4本（トップ・石材店一覧・墓じまい手続き・
             運営方針）だけは、開閉に関係なく常時見える形でここへ出す。
@@ -438,26 +503,34 @@ const hasBeforeSponsor = Astro.slots.has('beforeSponsor');
             すべての幅でネイティブな開閉操作ができるようにした
             （「開閉可能にする」という要件は満たすが、「モバイルで
             初期状態から折りたたまれている」わけではない。この設計判断は
-            最終報告に記載する）。 */}
-        {/* 2026-09-02、ナビゲーション監査・共通化対応: ヘッダー同様、
+            最終報告に記載する）。 */
+        }
+        {
+          /* 2026-09-02、ナビゲーション監査・共通化対応: ヘッダー同様、
             src/lib/navigation.ts（FOOTER_PRIMARY_LINKS / FOOTER_NAV_GROUPS）を
-            正本として描画する。直書きのリンク一覧は廃止した。 */}
+            正本として描画する。直書きのリンク一覧は廃止した。 */
+        }
         <nav class="site-footer__primary" aria-label="主要リンク">
           {
             FOOTER_PRIMARY_LINKS.map((item) => (
-              <a href={item.path} aria-current={isCurrentPath(currentPathname, item.path) ? 'page' : undefined}>
+              <a
+                href={item.path}
+                aria-current={isCurrentPath(currentPathname, item.path) ? 'page' : undefined}
+              >
                 {item.label}
               </a>
             ))
           }
         </nav>
 
-        {/* 「比較する」「ガイド」「運営」の3グループ（details/summary、
+        {
+          /* 「比較する」「ガイド」「運営」の3グループ（details/summary、
             2026-09-01）。スマートフォン・タブレット幅ではネイティブの
             開閉機能（JS不使用）で折りたたみ、PC幅（769px以上）では
             CSSだけで常時展開表示に切り替える（`open`属性そのものは
             付与せず、`display`の上書きだけで見た目を変える。詳細は
-            下記CSSの`.site-footer__groups details > nav`参照）。 */}
+            下記CSSの`.site-footer__groups details > nav`参照）。 */
+        }
         <div class="site-footer__groups">
           {
             FOOTER_NAV_GROUPS.map((group) => (
@@ -465,7 +538,10 @@ const hasBeforeSponsor = Astro.slots.has('beforeSponsor');
                 <summary class="site-footer__group-label">{group.label}</summary>
                 <nav class="site-footer__nav" aria-label={`${group.label}のページ`}>
                   {group.items.map((item) => (
-                    <a href={item.path} aria-current={isCurrentPath(currentPathname, item.path) ? 'page' : undefined}>
+                    <a
+                      href={item.path}
+                      aria-current={isCurrentPath(currentPathname, item.path) ? 'page' : undefined}
+                    >
                       {item.label}
                     </a>
                   ))}
@@ -475,14 +551,19 @@ const hasBeforeSponsor = Astro.slots.has('beforeSponsor');
           }
         </div>
 
-        {/* 運営者表示（2026-09-02追加）。サイト名（ブランド）と運営法人を
-            分けて表示し、法人名は運営者情報ページへのリンクにする。 */}
+        {
+          /* 運営者表示（2026-09-02追加）。サイト名（ブランド）と運営法人を
+            分けて表示し、法人名は運営者情報ページへのリンクにする。 */
+        }
         <p class="site-footer__operator">
           <span class="site-footer__site-name">{siteConfig.name}</span>
           <br />
           運営：<a href={ROUTES.operator.path}>{siteConfig.operator.name}</a>
         </p>
-        <p class="site-footer__copyright">&copy; {new Date().getFullYear()} {siteConfig.operator.name}</p>
+        <p class="site-footer__copyright">
+          &copy; {new Date().getFullYear()}
+          {siteConfig.operator.name}
+        </p>
       </div>
     </footer>
 
@@ -551,7 +632,6 @@ const hasBeforeSponsor = Astro.slots.has('beforeSponsor');
       })();
     </script>
 
-
     <script>
       // スポンサー枠の表示回数計測（全ページ共通、2026-08-28に
       // src/pages/index.astroから移設）。IntersectionObserverで
@@ -567,7 +647,9 @@ const hasBeforeSponsor = Astro.slots.has('beforeSponsor');
         if (roots.length === 0) return;
         if (typeof IntersectionObserver === 'undefined') return;
 
-        const slots = roots.flatMap((root) => Array.from(root.querySelectorAll<HTMLElement>('[data-sponsor-id]')));
+        const slots = roots.flatMap((root) =>
+          Array.from(root.querySelectorAll<HTMLElement>('[data-sponsor-id]')),
+        );
         if (slots.length === 0) return;
 
         const pagePath = window.location.pathname;
@@ -576,15 +658,26 @@ const hasBeforeSponsor = Astro.slots.has('beforeSponsor');
         const observer = new IntersectionObserver(
           (entries) => {
             entries.forEach((entry) => {
-              if (!entry.isIntersecting) return;
+              if (!entry.isIntersecting || entry.intersectionRatio < 0.5) return;
               const el = entry.target as HTMLElement;
               const sponsorId = el.getAttribute('data-sponsor-id');
               const sponsorName = el.getAttribute('data-sponsor-name');
               const campaignId = el.getAttribute('data-campaign-id');
-              const slotPosition = el.getAttribute('data-slot-position') as SponsorSlotPosition | null;
+              const slotPosition = el.getAttribute(
+                'data-slot-position',
+              ) as SponsorSlotPosition | null;
               const pageCategory = el.getAttribute('data-page-category');
-              if (!sponsorId || !sponsorName || !campaignId || !slotPosition || !pageCategory || seen.has(sponsorId)) return;
-              seen.add(sponsorId);
+              const key = `${sponsorId}:${slotPosition}`;
+              if (
+                !sponsorId ||
+                !sponsorName ||
+                !campaignId ||
+                !slotPosition ||
+                !pageCategory ||
+                seen.has(key)
+              )
+                return;
+              seen.add(key);
               trackSponsorImpression({
                 sponsor_id: sponsorId,
                 sponsor_name: sponsorName,
@@ -600,817 +693,20 @@ const hasBeforeSponsor = Astro.slots.has('beforeSponsor');
         );
 
         slots.forEach((slot) => observer.observe(slot));
+        roots.forEach((root) =>
+          new MutationObserver((records) => {
+            records.forEach((record) =>
+              record.addedNodes.forEach((node) => {
+                if (!(node instanceof HTMLElement)) return;
+                if (node.matches('[data-sponsor-id]')) observer.observe(node);
+                node
+                  .querySelectorAll<HTMLElement>('[data-sponsor-id]')
+                  .forEach((card) => observer.observe(card));
+              }),
+            );
+          }).observe(root, { childList: true, subtree: true }),
+        );
       })();
     </script>
   </body>
 </html>
-
-<style is:global>
-  /*
-   * 基盤デザイントークン・リセット（Phase 0）。
-   * 実際の見た目・コンポーネントスタイルは feature/ui-components が
-   * src/styles/** に構築する。ここでは以下だけを保証する。
-   *   - サイト全体で共有する配色・タイポグラフィのトークン
-   *   - header/footer/main の最低限読める構造
-   *   - 高齢者・40〜60代家族にも読みやすい基礎値（本文16px以上等）
-   */
-  :root {
-    /* CLAUDE_CODE_HANDOFF.md 9章: 白・深緑・石色を基調。東京都公式の外観は模倣しない。
-       2026-09-02（ミチの編集改善・SEO/AIO対応「色と全体デザイン」節）:
-       全面ベージュ・グレーの印象を弱め、明るく清潔な地域ガイドへ更新した。
-       背景を#FBF9F4（ごく淡い生成り）、カード・本文面を純白#FFFFFFにし、
-       ベージュ（下記--color-stone-*）は注意欄・補足欄・一部の帯だけに限定する
-       （全面を同じベージュで塗らない）。本文文字#292C29・深緑#29483Aは
-       指定値をそのまま採用（計算上のコントラストは--color-textがbg比
-       13.4:1、--color-accentが白背景ボタン比10.1:1でいずれもAAAレベル）。
-       補助色#62747Dは、本文muted系（--color-text-muted）に採用
-       （bg比4.63:1、AA適合）。全ペアWCAG AA（4.5:1）以上を計算式で確認済み。 */
-    --color-bg: #fbf9f4;
-    --color-surface: #ffffff;
-    --color-text: #292c29;
-    --color-text-muted: #62747d;
-    --color-accent: #29483a;
-    --color-accent-soft: #e4e9e0;
-    --color-border: #e4e2da;
-
-    --font-family-base: 'Noto Sans JP', system-ui, -apple-system, 'Segoe UI', sans-serif;
-
-    --font-size-base: 17px;
-    --line-height-base: 1.7;
-
-    --space-2: 0.5rem;
-    --space-3: 0.75rem;
-    --space-4: 1rem;
-    --space-6: 1.5rem;
-    --space-8: 2rem;
-  }
-
-  * {
-    box-sizing: border-box;
-  }
-
-  html {
-    color-scheme: light;
-  }
-
-  body {
-    margin: 0;
-    background: var(--color-bg);
-    color: var(--color-text);
-    font-family: var(--font-family-base);
-    font-size: var(--font-size-base);
-    line-height: var(--line-height-base);
-  }
-
-  a {
-    color: var(--color-accent);
-  }
-
-  .skip-link {
-    position: absolute;
-    left: -9999px;
-    top: 0;
-    background: var(--color-surface);
-    color: var(--color-text);
-    padding: var(--space-3) var(--space-4);
-    z-index: 100;
-  }
-  .skip-link:focus {
-    left: var(--space-4);
-    top: var(--space-4);
-  }
-
-  .site-header__inner {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    justify-content: space-between;
-    gap: var(--space-4);
-    padding: var(--space-4) var(--space-6);
-  }
-
-  .site-header__brand {
-    display: flex;
-    align-items: center;
-    gap: var(--space-3);
-    text-decoration: none;
-    color: var(--color-text);
-  }
-  .site-header__brand-icon {
-    flex: none;
-    border-radius: 12px;
-    box-shadow: 0 3px 10px rgba(36, 76, 60, 0.2);
-  }
-  .site-header__brand-copy {
-    display: flex;
-    flex-direction: column;
-  }
-  .site-header__name {
-    font-weight: 700;
-    font-size: 1.25rem;
-    color: var(--color-accent-deep, #1c2e26);
-  }
-  .site-header__subtitle {
-    font-size: 0.9rem;
-    color: var(--color-text-muted);
-  }
-
-  @media (max-width: 420px) {
-    .site-header__inner {
-      padding-inline: var(--space-4);
-    }
-
-    .site-header__brand {
-      gap: var(--space-2);
-    }
-
-    .site-header__brand-icon {
-      width: 38px;
-      height: 38px;
-      border-radius: 10px;
-    }
-
-    .site-header__name {
-      font-size: 1.08rem;
-    }
-
-    .site-header__subtitle {
-      display: none;
-    }
-  }
-
-  .site-header__nav {
-    display: flex;
-    flex-wrap: wrap;
-    gap: var(--space-4);
-  }
-
-  /* ナビ折りたたみ（640px以下のみ）。JS不使用のチェックボックス方式。
-     4項目という短い構成のため、タブレット幅以上では常時1行表示のまま
-     折りたたみを発生させない。
-     640px超では、チェックボックス・labelとも`display: none`にして
-     アクセシビリティツリー・Tab順から完全に外す。640px以下でだけ
-     視覚的に隠したチェックボックス＋見えるlabelという構成にする
-     （`display: none`のlabelは支援技術からも見えなくなり、
-     チェックボックスの実質的なラベルが失われてaxeの`label`違反に
-     なることを実機で確認したため、labelだけでなくチェックボックス側も
-     640px超では確実に非表示にする）。 */
-  .site-header__nav-checkbox {
-    display: none;
-  }
-
-  .site-header__nav-toggle-label {
-    display: none;
-  }
-
-  @media (max-width: 640px) {
-    .site-header__nav-checkbox {
-      position: absolute;
-      display: block;
-      width: 1px;
-      height: 1px;
-      opacity: 0;
-      pointer-events: none;
-    }
-
-    .site-header__nav-toggle-label {
-      display: inline-flex;
-      align-items: center;
-      min-height: var(--tap-target-min);
-      padding: 0.4em 0.9em;
-      border: 1px solid var(--color-border);
-      border-radius: var(--radius-pill, 999px);
-      background: var(--color-surface);
-      color: var(--color-text);
-      font-size: 0.9rem;
-      cursor: pointer;
-    }
-
-    .site-header__nav-checkbox:focus-visible + .site-header__nav-toggle-label {
-      outline: 3px solid var(--color-accent);
-      outline-offset: 2px;
-    }
-
-    .site-header__nav {
-      display: none;
-      flex-direction: column;
-      width: 100%;
-      order: 3;
-      gap: 0;
-      border-top: 1px solid var(--color-border);
-      margin-top: var(--space-2);
-      padding-top: var(--space-2);
-    }
-
-    .site-header__nav a {
-      box-sizing: border-box;
-      padding: 0.35rem 0;
-      min-height: var(--tap-target-min);
-      display: flex;
-      align-items: center;
-    }
-
-    .site-header__nav-checkbox:checked ~ .site-header__nav {
-      display: flex;
-    }
-  }
-
-  /*
-   * ヘッダーの「多磨霊園を知る」ドロップダウン（2026-09-02、ナビゲーション
-   * 監査対応「ヘッダーを増やしすぎない」節）。
-   *
-   * PC（641px以上）: トリガーボタンをクリック/Enter/Spaceで開閉し、
-   * メニューは`.site-header__dropdown[data-open]`のときだけ絶対配置で表示する
-   * （hoverだけに依存しない。開閉制御は下記<script>参照）。
-   * モバイル（640px以下）: メニューの中身は常時展開表示にする
-   * （`.site-header__dropdown-menu`を参照。開閉ボタンの状態に関係なく、
-   * モバイルメニューを開いた時点で3つのリンクがそのまま見える1本の
-   * リストになる）。
-   */
-  .site-header__dropdown {
-    position: relative;
-  }
-
-  .site-header__dropdown-trigger {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.3em;
-    font: inherit;
-    color: var(--color-accent);
-    background: none;
-    border: none;
-    padding: 0;
-    cursor: pointer;
-  }
-
-  .site-header__dropdown-trigger:hover {
-    text-decoration: underline;
-  }
-
-  .site-header__dropdown-chevron {
-    transition: transform 0.15s ease;
-  }
-
-  .site-header__dropdown[data-open] .site-header__dropdown-chevron {
-    transform: rotate(180deg);
-  }
-
-  .site-header__dropdown-menu {
-    display: none;
-    flex-direction: column;
-    gap: 0;
-  }
-
-  @media (min-width: 641px) {
-    .site-header__dropdown-menu {
-      position: absolute;
-      top: 100%;
-      left: 0;
-      z-index: 20;
-      min-width: 220px;
-      margin-top: var(--space-2);
-      padding: var(--space-2);
-      background: var(--color-surface);
-      border: 1px solid var(--color-border);
-      border-radius: var(--radius-card, 10px);
-      box-shadow: 0 4px 16px rgba(41, 44, 41, 0.12);
-    }
-
-    /* 画面右端でのはみ出し防止（ヘッダー右寄りに置かれるドロップダウン用）。 */
-    .site-header__dropdown--align-right .site-header__dropdown-menu {
-      left: auto;
-      right: 0;
-    }
-
-    .site-header__dropdown[data-open] .site-header__dropdown-menu {
-      display: flex;
-    }
-
-    .site-header__dropdown-menu a {
-      padding: 0.6em var(--space-2);
-      border-radius: var(--radius-tag, 6px);
-      white-space: nowrap;
-      cursor: pointer;
-    }
-
-    .site-header__dropdown-menu a:hover {
-      background: var(--color-accent-soft);
-    }
-  }
-
-  @media (max-width: 640px) {
-    .site-header__dropdown-menu {
-      display: flex;
-      padding-left: var(--space-4);
-      border-left: 2px solid var(--color-border);
-      margin: 0 0 var(--space-2);
-    }
-
-    .site-header__dropdown-menu a {
-      box-sizing: border-box;
-      padding: 0.3rem 0;
-      min-height: var(--tap-target-min);
-      display: flex;
-      align-items: center;
-    }
-
-    .site-header__dropdown-trigger {
-      box-sizing: border-box;
-      padding: 0.35rem 0;
-      min-height: var(--tap-target-min);
-      pointer-events: none;
-    }
-
-    .site-header__dropdown-chevron {
-      display: none;
-    }
-  }
-
-  /* モバイルメニュー内の運営系ページ（2026-09-02追加）。640px超では
-     PCヘッダーの見た目（主要4項目のみ）を変えないよう非表示にする。 */
-  .site-header__nav-mobile-extra {
-    display: none;
-  }
-
-  @media (max-width: 640px) {
-    .site-header__nav-mobile-extra {
-      display: flex;
-      flex-direction: column;
-      gap: 0;
-      border-top: 1px solid var(--color-border);
-      margin-top: var(--space-1);
-      padding-top: var(--space-1);
-    }
-
-    .site-header__nav-mobile-extra a {
-      box-sizing: border-box;
-      padding: 0.35rem 0;
-      min-height: var(--tap-target-min);
-      display: flex;
-      align-items: center;
-    }
-  }
-
-  .site-header__nav-mobile-label {
-    margin: 0 0 var(--space-1);
-    font-size: var(--font-size-caption, 0.875rem);
-    font-weight: 700;
-    color: var(--color-text-muted);
-  }
-
-  /* aria-current="page" の視覚表示（ヘッダー・フッター共通）。下線の
-     太さだけで示し、色数を増やさない。 */
-  .site-header__nav a[aria-current='page'],
-  .site-header__dropdown-menu a[aria-current='page'] {
-    text-decoration: underline;
-    text-decoration-thickness: 2px;
-    text-underline-offset: 3px;
-  }
-
-  /* 主要リンクの優先表示（2026-09-01）。フッター最上部に常時見える
-     横並び（折り返し）のリンク。下の.site-footer__groupsとは別物。 */
-  .site-footer__primary {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: var(--space-2) var(--space-4);
-    padding-bottom: var(--space-4);
-    margin-bottom: var(--space-4);
-    border-bottom: 1px solid var(--color-border);
-    width: 100%;
-  }
-
-  .site-footer__primary a {
-    font-weight: 700;
-    min-height: var(--tap-target-min);
-    display: inline-flex;
-    align-items: center;
-    padding: 0.2em 0.4em;
-  }
-
-  .site-footer__groups {
-    display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: var(--space-6) var(--space-4);
-    width: 100%;
-    text-align: left;
-  }
-
-  @media (max-width: 640px) {
-    .site-footer__groups {
-      grid-template-columns: 1fr;
-      text-align: center;
-    }
-  }
-
-  /* .site-footer__group は<details>要素（2026-09-01、モバイル最優先
-     レビュー対応「フッター」節）。768px以下ではネイティブの開閉動作
-     （JS不使用）をそのまま使う。769px以上では、<summary>を見出し風に、
-     <nav>を常時展開表示に上書きし、従来（<div><p>見出し</p><nav>...）と
-     同じ見た目に戻す。`open`属性そのものは付与しない
-     （UA既定の`details:not([open]) > *:not(summary){display:none}`より
-     author側のこの`display`宣言のほうがカスケード優先度が高いため、
-     `open`属性がなくても769px以上ではnavを表示できる）。 */
-  .site-footer__group {
-    border: none;
-    margin: 0;
-    padding: 0;
-  }
-
-  .site-footer__group-label {
-    margin: 0 0 var(--space-2);
-    font-weight: 700;
-    color: var(--color-text);
-    cursor: pointer;
-    list-style: none;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.4em;
-    min-height: var(--tap-target-min);
-  }
-
-  @media (min-width: 769px) {
-    .site-footer__group-label {
-      justify-content: flex-start;
-    }
-  }
-
-  .site-footer__group-label::-webkit-details-marker {
-    display: none;
-  }
-
-  .site-footer__group-label::marker {
-    content: '';
-  }
-
-  /* 開閉の目印（▸/▾）。 */
-  .site-footer__group-label::after {
-    content: '▸';
-    font-size: 0.8em;
-    color: var(--color-text-muted);
-  }
-
-  .site-footer__group[open] > .site-footer__group-label::after {
-    content: '▾';
-  }
-
-  .site-footer__group-label:focus-visible {
-    outline: 3px solid var(--color-accent);
-    outline-offset: 2px;
-  }
-
-  .site-footer__nav {
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-2);
-    padding-top: var(--space-2);
-  }
-
-  @media (max-width: 640px) {
-    .site-footer__nav {
-      align-items: center;
-    }
-  }
-
-  .site-main {
-    max-width: 960px;
-    margin-inline: auto;
-    padding: var(--space-6);
-    min-height: 40vh;
-  }
-
-  /* --- スポンサー枠（全ページ共通、2026-08-28）。src/pages/index.astroが
-     元々使っていた3列グリッド＋display:contents入れ子と同じ仕組みを
-     BaseLayout側へ移設し、サイト全体で共有する。
-     1499px以下ではCSS Gridを使わず通常フローのまま（DOM順が
-     main→sponsor-groupなので、それだけで正しい縦積み表示になる）。
-     グリッドアイテムには既定でmin-width:autoが働き、比較表・
-     アクセスページの表など横スクロール用のmin-widthを持つ子要素が
-     グリッドトラックごと押し広げてページが横スクロールする不具合を
-     実機で確認したため、min-width:0を上書きする対応を試みたが、
-     フレックス/グリッド固有のサイズ計算の絡みで確実に解消しなかった。
-     必要な帯（1400px以上の3列レイアウト）でだけgridを使うことで、
-     この問題を構造的に避けている。 --- */
-  .page-shell {
-    gap: var(--space-6);
-  }
-
-  .page-shell > .site-main {
-    margin-bottom: var(--space-6);
-  }
-
-  /*
-   * スマートフォン表示のスポンサー領域の余白・横スクロール対策
-   * （2026-09-02、「スマートフォン表示のスポンサー領域を修正」対応）。
-   *
-   * 従来`.sponsor-group`に左右・上下の余白がなく、検索条件領域と
-   * スポンサー枠が画面端に張り付いて一体に見える指摘に対応し、
-   * 左右24px・上下32pxの余白を追加した。この宣言は1400px未満だけで
-   * 意味を持つ（1400px以上では下記`@media(min-width:1400px)`ブロックで
-   * `.sponsor-group{display:contents}`に上書きされ、`display:contents`
-   * の要素はpadding/border/backgroundを一切描画しないため、PC幅では
-   * 自動的に無効化される。メディアクエリで包む必要がない）。
-   *
-   * 横スクロール対策: グリッドアイテムは既定でmin-width:autoが働き、
-   * 中身がトラック幅を超えて広がるとページ全体が横スクロールする
-   * （実機で確認済みの既知の原因）。`grid-template-columns:repeat(2,
-   * minmax(0, 1fr))`のminmax(0, ...)で各トラックの最小幅を明示的に0にし、
-   * `.sponsor-card`側にも`min-width:0`・`width:100%`・
-   * `box-sizing:border-box`を設定して、カード自身がトラック幅を
-   * 超えないようにしている（詳細はSponsorCard.astro参照）。
-   */
-  .sponsor-group {
-    box-sizing: border-box;
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: var(--space-3);
-    width: 100%;
-    max-width: 100%;
-    padding: var(--space-8) var(--space-6);
-  }
-
-  /* 340px未満の極端に狭い画面だけ、2列では窮屈になるため1列×4段へ
-     切り替える。360px・390pxは対象外（2列×2段を維持する）。 */
-  @media (max-width: 339px) {
-    .sponsor-group {
-      grid-template-columns: 1fr;
-    }
-  }
-
-  .sponsor-rail {
-    /* モバイル・タブレットでは箱を持たせず、左右レール2つの中身
-       （計4枠）を.sponsor-groupの2列グリッドへ直接参加させ、
-       正しい読み順（1段目に2枠・2段目に2枠）の2×2にする。 */
-    display: contents;
-  }
-
-  /*
-   * 「4枠すべて同じ高さ」の担保（2026-09-02、「スマートフォン表示の
-   * スポンサー領域を修正」対応）。
-   *
-   * CSS Gridの`align-items: stretch`（既定値）は「同じ行のアイテム」の
-   * 高さはそろえるが、2×2グリッドの1段目と2段目は別々のトラック
-   * （grid-auto-rows既定のauto）のため、行をまたいだ高さは自動的には
-   * そろわない。実広告（写真・地域タグ・見出し・キャッチコピー・
-   * サービスタグ・正式名称・CTAの7要素）は、募集カード（見出し・
-   * キャッチコピー・CTAの3要素）よりコンテンツ量が多く、何も
-   * 対策しないと段ごとに高さが変わってしまう（実機検証で確認）。
-   *
-   * 対応: 4枠に共通の`min-height`を、カード幅の帯ごとに実測に基づいて
-   * 設定し、募集カードの余った縦スペースはSponsorCard.astro側の
-   * `.sponsor-card__cta { margin-top: auto }`でCTAをカード下部へ
-   * 押し下げることで自然に吸収する（「CTAの位置をカード下部で統一する」
-   * 要件にも対応）。固定heightではなくmin-heightのため、実広告側の
-   * 文章が万一長くなっても切れることはない。
-   */
-  .page-shell .sponsor-group .sponsor-card {
-    min-height: 420px;
-  }
-
-  @media (min-width: 481px) {
-    .page-shell .sponsor-group .sponsor-card {
-      min-height: 470px;
-    }
-  }
-
-  @media (min-width: 1024px) {
-    .page-shell .sponsor-group .sponsor-card {
-      min-height: 555px;
-    }
-  }
-
-  /* スマートフォンは全ページ共通のカルーセル。PCの左右レールは維持する。 */
-  .sponsor-carousel {
-    display: contents;
-  }
-
-  .sponsor-controls {
-    display: none;
-  }
-
-  @media (max-width: 767px) {
-    .page-shell--split[data-page-category='comparison'] > .site-main--before {
-      margin-bottom: 0;
-      padding-top: var(--space-4);
-      padding-bottom: var(--space-3);
-    }
-
-    .page-shell .sponsor-group {
-      display: block;
-      min-width: 0;
-      width: 100%;
-      padding: var(--space-3) 0 var(--space-4);
-      border-block: 1px solid var(--color-sponsor-border);
-      background: var(--color-sponsor-bg);
-    }
-
-    .sponsor-controls {
-      display: flex;
-      flex-wrap: wrap;
-      align-items: center;
-      justify-content: space-between;
-      gap: var(--space-2);
-      padding: 0 var(--space-4) var(--space-3);
-    }
-
-    .sponsor-controls__label {
-      margin: 0;
-      color: var(--color-sponsor-fg);
-      font-size: 0.9rem;
-      font-weight: 700;
-    }
-
-    .sponsor-controls__buttons {
-      display: flex;
-      gap: 0.4rem;
-    }
-
-    .sponsor-controls button {
-      min-width: 44px;
-      min-height: 44px;
-      padding: 0.35rem 0.7rem;
-      border: 1px solid var(--color-sponsor-border);
-      border-radius: var(--radius-pill);
-      background: var(--color-surface);
-      color: var(--color-sponsor-fg);
-      font: inherit;
-      font-size: 0.8rem;
-      cursor: pointer;
-    }
-
-    .sponsor-controls [hidden] {
-      display: none;
-    }
-
-    .sponsor-carousel {
-      position: relative;
-      display: flex;
-      align-items: stretch;
-      gap: 0.5rem;
-      box-sizing: border-box;
-      width: 100%;
-      min-width: 0;
-      padding: 0.25rem 15vw 0.75rem;
-      overflow-x: auto;
-      scroll-snap-type: x mandatory;
-      overscroll-behavior-inline: contain;
-      -webkit-overflow-scrolling: touch;
-      scrollbar-width: none;
-    }
-
-    .sponsor-carousel::-webkit-scrollbar {
-      display: none;
-    }
-
-    .sponsor-carousel .sponsor-rail {
-      display: contents;
-    }
-
-    .page-shell .sponsor-carousel .sponsor-card {
-      box-sizing: border-box;
-      flex: 0 0 70vw;
-      width: 70vw;
-      min-width: 70vw;
-      max-width: 70vw;
-      height: auto;
-      min-height: 390px;
-      scroll-snap-align: center;
-      scroll-snap-stop: always;
-    }
-  }
-
-  @media (min-width: 1400px) {
-    .page-shell > .site-main {
-      margin-bottom: 0;
-    }
-
-    .page-shell {
-      display: grid;
-      /* 左右レール220〜260px（clamp）・中央最大960px（.site-main自身の
-         既定最大幅と合わせる。ページによりさらに狭い記事幅（800px等）を
-         使う場合も、この960pxの中で内側に自己中央寄せされる）・
-         列間はclamp(28px,2vw,36px)（従来22px固定から拡大）。
-         中央列をminmax(0,960px)と有限にすることで、グリッド全体の幅を
-         約260+36+960+36+260=1552px前後に収め、justify-content: centerで
-         画面中央に配置する（1frにすると超ワイド画面でレールが画面端まで
-         広がり、本文から大きく離れてしまうため採用しない）。 */
-      grid-template-columns: clamp(220px, 14vw, 260px) minmax(0, 960px) clamp(220px, 14vw, 260px);
-      grid-template-areas: 'rail-left main rail-right';
-      column-gap: clamp(28px, 2vw, 36px);
-      justify-content: center;
-      align-items: start;
-    }
-
-    .page-shell > .site-main {
-      grid-area: main;
-    }
-
-    /* --- 分割レイアウト（.page-shell--split、TOPのみ）。beforeSponsorの
-       中身と既定スロットの中身を2行に分け、左右レール（rail-left /
-       rail-right）はTOPページの本文全体の高さ（2行分）を通しで
-       縦に並ぶよう2行にまたがせる。PC幅でのスポンサーの視覚位置は、
-       「本文の左右」という意味では通常の.page-shellと同じである。 --- */
-    .page-shell--split {
-      grid-template-areas: 'rail-left before rail-right' 'rail-left rest rail-right';
-      row-gap: var(--space-6);
-    }
-
-    .page-shell--split .site-main--before {
-      grid-area: before;
-    }
-
-    .page-shell--split .site-main--rest {
-      grid-area: rest;
-    }
-
-    .sponsor-group {
-      display: contents;
-    }
-
-    .sponsor-rail {
-      display: grid;
-      grid-template-rows: repeat(2, 470px);
-      gap: 22px;
-      align-self: start;
-    }
-
-    /* 画面の高さが十分あるときだけstickyにする（2枠分の高さ
-       （320px×2＋列間22px≒662px）が収まらない低い画面ではstickyにしない）。 */
-    @media (min-height: 700px) {
-      .sponsor-rail {
-        position: sticky;
-        top: var(--space-4);
-      }
-    }
-
-    .sponsor-rail--left {
-      grid-area: rail-left;
-    }
-
-    .sponsor-rail--right {
-      grid-area: rail-right;
-    }
-
-    /* スポンサー枠本体のPCサイズ（高さのみ上書き。幅はレール＝グリッド列の
-       幅にフレックスで追従する）。SponsorCard.astro自身のスコープ済み
-       ルール（Astroのdata-astro-cid属性で詳細度が上がる）に確実に勝つため、
-       セレクタをクラス3つにしている。
-       重要: このスタイルブロックは<style is:global>のため、Astroの
-       スコープ変換（:global()を素のセレクタへ展開する処理）自体が
-       走らない。したがって`:global(...)`は書いても外側に伝播せず、
-       ブラウザには理解できない疑似クラスとしてそのまま出力されて
-       死んだルールになる（実機・ビルド警告で確認）。ここでは
-       `:global()`を使わず、素のセレクタのままクラス3つの詳細度を
-       確保している。
-       2026-09-02（「スポンサー広告の全面再設計」対応）: 従来320pxだった
-       高さを400pxへ引き上げた。写真付き広告の目安サイズ（写真約140〜
-       170px＋本文約220〜250px＝合計約390〜430px）に合わせるためで、
-       「4枠は常に同じ大きさ」という既存の設計方針（SponsorCard.astro
-       コメント参照）どおり、空枠・簡易表示の3枠にも同じ高さが適用される。 */
-    .page-shell .sponsor-rail .sponsor-card {
-      box-sizing: border-box;
-      height: 470px !important;
-      min-height: 470px !important;
-      max-height: 470px !important;
-      overflow: hidden;
-    }
-  }
-
-  .site-footer {
-    border-top: 1px solid var(--color-border);
-    padding: var(--space-6);
-    color: var(--color-text-muted);
-    font-size: 0.9rem;
-  }
-
-  .site-footer__inner {
-    max-width: 960px;
-    margin-inline: auto;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: var(--space-3);
-    text-align: center;
-  }
-
-  .site-footer__operator {
-    margin: var(--space-4) 0 0;
-    line-height: 1.6;
-  }
-
-  .site-footer__site-name {
-    font-weight: 700;
-    color: var(--color-text);
-  }
-
-  .site-footer__copyright {
-    margin-top: var(--space-2);
-  }
-
-  a:focus-visible,
-  button:focus-visible {
-    outline: 3px solid var(--color-accent);
-    outline-offset: 2px;
-  }
-</style>

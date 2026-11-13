@@ -85,34 +85,17 @@ const sponsorTheme = sponsor?.id === 'sunarrows_mitaka_anshin' ? 'mitaka-kurashi
     >
       <div class="sponsor-card__media sponsor-card__media--recruit">
         <span class="sponsor-card__eyebrow sponsor-card__eyebrow--on-photo">広告</span>
-        <svg
-          class="sponsor-card__recruit-icon"
-          width="40"
-          height="40"
-          viewBox="0 0 40 40"
+        <span
+          class:list={[
+            'sponsor-card__recruit-scene',
+            {
+              'sponsor-card__recruit-scene--tools': position === 'right-1',
+              'sponsor-card__recruit-scene--park': position === 'right-2',
+            },
+          ]}
           aria-hidden="true"
-          focusable="false"
-        >
-          <rect
-            x="3"
-            y="7"
-            width="34"
-            height="26"
-            rx="3"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-          />
-          <circle cx="14" cy="16" r="3.2" fill="none" stroke="currentColor" stroke-width="2" />
-          <path
-            d="M6 28 L15 20 L21 25 L27 17 L34 26"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          />
-        </svg>
+        />
+        <span class="sponsor-card__image-note">イメージ</span>
       </div>
       <div class="sponsor-card__body">
         <p class="sponsor-card__headline">スポンサー募集中</p>
@@ -256,398 +239,192 @@ const sponsorTheme = sponsor?.id === 'sunarrows_mitaka_anshin' ? 'mitaka-kurashi
   .sponsor-card {
     display: flex;
     flex-direction: column;
-    /* 横スクロール対策（2026-09-02、「スマートフォン表示のスポンサー領域を
-       修正」対応）: グリッドアイテムは既定でmin-width:autoが働き、
-       中身（画像・長い文字列等）がトラック幅を超えて広がるとページ全体の
-       横スクロールを引き起こす。box-sizing・幅・最小幅を明示して
-       トラック幅に確実に収まるようにする。 */
-    box-sizing: border-box;
-    width: 100%;
-    max-width: 100%;
     min-width: 0;
-    height: 100%;
-    background: var(--color-sponsor-bg);
-    border: 2px solid var(--color-sponsor-border);
-    border-radius: var(--radius-card);
-    box-shadow: 0 5px 18px rgba(67, 42, 26, 0.13);
-  }
-
-  /* --- 簡易表示（画像なしスポンサー用。ロゴ・要約のみ） --- */
-  .sponsor-card--simple {
-    gap: var(--space-2);
-    min-height: 180px;
-    padding: var(--space-3);
-  }
-
-  /* みたか暮らし相談室: リニューアル後HPのネイビー＋オレンジを反映。 */
-  .sponsor-card[data-brand-theme='mitaka-kurashi'] {
-    border-color: #c86b32;
-    box-shadow: 0 7px 22px rgba(23, 50, 77, 0.16);
-  }
-
-  .sponsor-card[data-brand-theme='mitaka-kurashi'] .sponsor-card__headline {
-    margin-top: 0.25em;
-    color: #17324d;
-    font-size: 1.35rem;
-    line-height: 1.22;
-    letter-spacing: -0.02em;
-  }
-
-  .sponsor-card[data-brand-theme='mitaka-kurashi'] .sponsor-card__area {
-    border-color: #c86b32;
-    background: #f7f4ee;
-    color: #17324d;
-  }
-
-  .sponsor-card[data-brand-theme='mitaka-kurashi'] .sponsor-card__tags li {
-    background: #fbefe7;
-    color: #7d3b17;
-  }
-
-  .sponsor-card[data-brand-theme='mitaka-kurashi'] .sponsor-card__eyebrow--on-photo {
-    background: rgba(23, 50, 77, 0.9);
-  }
-
-  .sponsor-card[data-brand-theme='mitaka-kurashi'] .sponsor-card__cta {
-    background: #17324d;
-  }
-
-  .sponsor-card[data-brand-theme='mitaka-kurashi']:hover .sponsor-card__cta {
-    background: #234663;
-    box-shadow: 0 3px 10px rgba(23, 50, 77, 0.28);
-  }
-
-  .sponsor-card__eyebrow {
-    margin: 0;
-    font-size: var(--font-size-caption);
-    font-weight: 700;
-    letter-spacing: 0.12em;
-    color: var(--color-sponsor-fg);
-  }
-
-  .sponsor-card__filled {
-    display: flex;
-    flex-direction: column;
-    gap: 0.4em;
-    flex: 1;
-  }
-
-  .sponsor-card__logo {
-    flex: none;
-    width: 32px;
-    height: 32px;
-    object-fit: contain;
-    border-radius: 6px;
-    background: var(--color-surface);
-  }
-
-  .sponsor-card__name {
-    margin: 0;
-    font-weight: 700;
-    font-size: 0.95rem;
+    width: 100%;
+    border: 1px solid var(--color-gold);
+    background: white;
     color: var(--color-text);
-  }
-
-  .sponsor-card__summary {
-    margin: 0;
-    color: var(--color-text);
-    font-size: var(--font-size-caption);
-    line-height: 1.5;
-  }
-
-  .sponsor-card__link {
-    margin-top: auto;
-    align-self: flex-start;
-    display: inline-flex;
-    align-items: center;
-    min-height: var(--tap-target-min);
-    padding: 0.4em 0.9em;
-    border-radius: var(--radius-pill);
-    background: var(--color-surface);
-    border: 1.5px solid var(--color-sponsor-border);
-    color: var(--color-sponsor-fg);
-    font-weight: 700;
-    font-size: var(--font-size-caption);
     text-decoration: none;
-  }
-
-  .sponsor-card__link:hover {
-    background: var(--color-sponsor-border);
-    color: var(--color-surface);
-  }
-
-  .sponsor-card__link:focus-visible {
-    outline: 3px solid var(--color-accent);
-    outline-offset: 2px;
-  }
-
-  /*
-   * --- 写真付き広告クリエイティブ／スポンサー募集カード
-   * （.sponsor-card--photo / .sponsor-card--empty） ---
-   * カード全体が1つの<a>。「広告としての訴求力」を目的に、写真
-   * （または募集カードの場合は抽象的なビジュアル領域）をカード上部の
-   * 主役にし、背景を白／温かいアイボリーへ変更した（従来の薄い
-   * ベージュ一色の箱をやめる指示に対応）。実広告・募集カードで
-   * まったく同じ構造（ビジュアル領域→本文）を共有することで、
-   * 「4つの広告枠が同じ価値で提供されているように見える」ようにする。
-   */
-  .sponsor-card--photo,
-  .sponsor-card--empty {
+    border-radius: 3px;
     overflow: hidden;
-    background: var(--color-surface);
-    border-color: var(--color-sponsor-border);
-    color: var(--color-text);
-    text-decoration: none;
-    cursor: pointer;
-    transition:
-      box-shadow 0.15s ease,
-      border-color 0.15s ease;
+    box-shadow: 0 4px 15px #24364b06;
   }
-
-  .sponsor-card--photo:hover,
-  .sponsor-card--empty:hover {
-    box-shadow: 0 6px 18px rgba(43, 41, 38, 0.16);
-    border-color: var(--color-accent);
+  .sponsor-card:hover {
+    box-shadow: 0 5px 20px #24364b15;
   }
-
-  .sponsor-card--photo:focus-visible,
-  .sponsor-card--empty:focus-visible {
-    outline: 3px solid var(--color-accent);
-    outline-offset: 2px;
-  }
-
   .sponsor-card__media {
     position: relative;
     width: 100%;
-    max-width: 100%;
-    aspect-ratio: 3 / 2;
+    aspect-ratio: 1.55;
     overflow: hidden;
-    background: var(--color-stone-surface);
-    flex-shrink: 0;
+    background: #ece9e3;
   }
-
-  /* スポンサー募集カードのビジュアル領域。架空のロゴ・企業名・写真を
-     使わず、サイトの配色（石色・緑）の控えめなグラデーションと、
-     「ここに写真が入ります」を示す一般的なプレースホルダーアイコンだけで
-     構成する（単なる空白にしない）。 */
-  .sponsor-card__media--recruit {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background:
-      radial-gradient(circle at 82% 18%, rgba(255, 218, 170, 0.75) 0 14%, transparent 15%),
-      radial-gradient(circle at 15% 85%, rgba(255, 255, 255, 0.18) 0 20%, transparent 21%),
-      linear-gradient(135deg, #075c70 0%, #13839b 52%, #f29a50 100%);
-  }
-
-  .sponsor-card__recruit-icon {
-    color: #fff;
-    opacity: 0.95;
-  }
-
   .sponsor-card__photo {
-    display: block;
     width: 100%;
-    max-width: 100%;
     height: 100%;
+    display: block;
     object-fit: cover;
-    /* 人物の顔が中央〜上寄りに来る写真を想定し、上端寄りを基準にする。 */
     object-position: center 25%;
   }
-
-  /* 「広告」ラベルは写真左上に小さく重ねる（本文側には重複表示しない）。 */
+  .sponsor-card__recruit-scene {
+    position: absolute;
+    inset: 0;
+    background: url('/images/editorial/magazine-scenes.webp') 100% 0 / 200% 200%;
+  }
+  .sponsor-card__recruit-scene--tools {
+    background-position: 100% 100%;
+  }
+  .sponsor-card__recruit-scene--park {
+    background-position: 0 0;
+  }
+  .sponsor-card__eyebrow {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    color: #795820;
+    margin: 0;
+  }
   .sponsor-card__eyebrow--on-photo {
     position: absolute;
-    top: var(--space-2);
-    left: var(--space-2);
-    margin: 0;
-    padding: 0.2em 0.6em;
-    border-radius: var(--radius-tag, 6px);
-    background: rgba(28, 27, 25, 0.68);
-    color: #fff;
-    letter-spacing: 0.08em;
+    top: 8px;
+    left: 8px;
+    background: #24364be8;
+    color: white;
+    padding: 2px 8px;
   }
-
   .sponsor-card__image-note {
     position: absolute;
-    right: var(--space-2);
-    bottom: var(--space-2);
-    padding: 0.1em 0.5em;
-    border-radius: var(--radius-tag, 6px);
-    background: rgba(255, 255, 255, 0.75);
-    color: #2b2926;
-    font-size: 0.6875rem;
+    bottom: 5px;
+    right: 5px;
+    background: #fffe;
+    color: #59616b;
+    font-size: 10px;
+    padding: 1px 5px;
   }
-
   .sponsor-card__body {
     display: flex;
     flex-direction: column;
+    gap: 8px;
+    padding: 14px;
     flex: 1;
-    gap: 0.35em;
-    min-width: 0;
-    padding: var(--space-3) var(--space-3) var(--space-3);
   }
-
-  .sponsor-card__area {
-    align-self: flex-start;
-    padding: 0.15em 0.6em;
-    border-radius: var(--radius-pill);
-    border: 1px solid #9bc8d2;
-    background: #e8f6f8;
-    color: #075166;
-    font-size: 0.6875rem;
-    font-weight: 700;
-  }
-
   .sponsor-card__headline {
-    margin: 0.2em 0 0;
-    font-family: var(--font-family-heading);
-    font-weight: 700;
-    font-size: 1.15rem;
-    line-height: 1.35;
-    color: var(--color-sponsor-cta);
-    text-wrap: balance;
-  }
-
-  .sponsor-card__tagline {
+    font: 600 20px/1.5 var(--font-family-heading);
+    color: var(--color-accent);
     margin: 0;
-    color: var(--color-text);
-    font-size: 0.8125rem;
-    line-height: 1.5;
   }
-
-  .sponsor-card__byline {
-    margin: 0.15em 0 0;
+  .sponsor-card__area {
+    font-size: 11px;
+    color: #795820;
+  }
+  .sponsor-card__tagline {
+    font-size: 13px;
+    line-height: 1.7;
+    margin: 0;
+  }
+  .sponsor-card__byline,
+  .sponsor-card__name {
+    font-size: 12px;
+    margin: 0;
     color: var(--color-text-muted);
-    font-size: 0.75rem;
-    font-weight: 700;
-    line-height: 1.4;
   }
-
   .sponsor-card__highlight {
-    margin: 0.25em 0 0;
-    padding: 0.35em 0.55em;
-    border-left: 3px solid #c86b32;
-    background: #f7f4ee;
-    color: #17324d;
-    font-size: 0.75rem;
-    font-weight: 800;
-    line-height: 1.35;
+    font-size: 12px;
+    line-height: 1.6;
+    margin: 0;
+    background: #f5f2eb;
+    border-left: 2px solid var(--color-gold);
+    padding: 6px 8px;
   }
-
   .sponsor-card__tags {
     display: flex;
     flex-wrap: wrap;
-    gap: 0.3em;
-    margin: 0.2em 0 0;
-    padding: 0;
+    gap: 4px;
     list-style: none;
+    margin: 0;
+    padding: 0;
   }
-
   .sponsor-card__tags li {
-    padding: 0.15em 0.55em;
-    border-radius: var(--radius-tag, 6px);
-    background: #fff0e5;
-    color: #873714;
-    font-size: 0.6875rem;
-    font-weight: 700;
+    font-size: 11px;
+    background: #f1eee7;
+    padding: 2px 6px;
   }
-
-  .sponsor-card--photo .sponsor-card__name {
-    margin: 0.3em 0 0;
-    color: var(--color-text-muted);
-    font-size: 0.75rem;
-    font-weight: 400;
-    /* 折り返し時に「口」のような1文字だけの行が残らないようにする。 */
-    text-wrap: balance;
+  .sponsor-card__tags-inline {
+    display: none;
   }
-
-  .sponsor-card__cta {
-    box-sizing: border-box;
+  .sponsor-card__cta,
+  .sponsor-card__link {
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 0.35em;
-    width: 100%;
-    /* 常にカード下部へ押し下げる（コンテンツ量が少ない募集カードでも
-       CTAの位置をそろえるため。カードの高さはmin-heightで統一している）。 */
+    gap: 8px;
+    min-height: 44px;
+    background: var(--color-accent);
+    color: white;
+    font-size: 13px;
+    font-weight: 600;
+    padding: 10px 8px;
+    text-decoration: none;
     margin-top: auto;
-    min-height: 48px;
-    padding: 0.4em 0.6em;
-    border-radius: var(--radius-pill);
-    background: var(--color-sponsor-cta);
-    color: #fff;
-    font-weight: 700;
-    font-size: 0.875rem;
+    border-radius: 2px;
   }
-
-  .sponsor-card--photo:hover .sponsor-card__cta,
-  .sponsor-card--empty:hover .sponsor-card__cta {
-    background: var(--color-sponsor-cta-hover);
-    box-shadow: 0 3px 10px rgba(6, 63, 77, 0.35);
+  .sponsor-card:hover .sponsor-card__cta {
+    background: #38516b;
   }
-
   .sponsor-card__cta-arrow {
-    transition: transform 0.15s ease;
+    width: 12px;
+    height: 12px;
   }
-
-  .sponsor-card--photo:hover .sponsor-card__cta-arrow,
-  .sponsor-card--empty:hover .sponsor-card__cta-arrow {
-    transform: translateX(3px);
+  .sponsor-card--simple {
+    padding: 16px;
+    gap: 10px;
   }
-
-  /* 対応内容の表示切り替え（2026-09-02追加）。480px超はタグ3つ、
-     480px以下は「相続・空き家・見守り」の1行文字列にする
-     （3タグが2段に折り返して縦に間延びするのを防ぐ）。 */
-  .sponsor-card__tags-inline {
-    display: none;
-    margin: 0.2em 0 0;
-    color: var(--color-text-muted);
-    font-size: 0.75rem;
+  .sponsor-card__filled {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    flex: 1;
   }
-
-  @media (max-width: 480px) {
+  .sponsor-card__summary {
+    font-size: 14px;
+    margin: 0;
+  }
+  .sponsor-card__logo {
+    width: 40px;
+    height: 40px;
+    object-fit: contain;
+  }
+  @media (max-width: 999px) {
+    .sponsor-card__media {
+      aspect-ratio: 2.15;
+    }
+    .sponsor-card__body {
+      padding: 12px 14px;
+      gap: 5px;
+    }
+    .sponsor-card__headline {
+      font-size: 21px;
+    }
     .sponsor-card__tags {
       display: none;
     }
-
     .sponsor-card__tags-inline {
       display: block;
+      font-size: 11px;
+      margin: 0;
+      color: var(--color-text-muted);
     }
-
-    /* 360px前後の狭いカード幅でも見出し・キャッチコピー・正式名称が
-       2行程度に収まるよう、文字サイズだけをわずかに詰める
-       （文字を切り詰める＝truncateはしない。折り返しは許容する）。 */
-    .sponsor-card__headline {
-      font-size: 1.0625rem;
-    }
-
-    .sponsor-card__tagline,
-    .sponsor-card__byline,
-    .sponsor-card__highlight,
-    .sponsor-card--photo .sponsor-card__name,
-    .sponsor-card--empty .sponsor-card__tagline {
-      font-size: 0.75rem;
-    }
-
-    .sponsor-card[data-brand-theme='mitaka-kurashi'] .sponsor-card__headline {
-      font-size: 1.2rem;
-    }
-
-    /* 「掲載について見る」（8文字＋矢印）がカード幅の狭いモバイルで
-       2行に折り返さないよう、この幅だけ文字を少し詰める。 */
     .sponsor-card__cta {
-      gap: 0.2em;
-      padding: 0.4em 0.4em;
-      font-size: 0.8125rem;
+      margin-top: 7px;
     }
-  }
-
-  @media (prefers-reduced-motion: reduce) {
-    .sponsor-card--photo,
-    .sponsor-card--empty,
-    .sponsor-card__cta-arrow {
-      transition: none;
+    .sponsor-card__area {
+      display: none;
+    }
+    .sponsor-card--empty .sponsor-card__body {
+      justify-content: flex-start;
+    }
+    .sponsor-card--empty .sponsor-card__cta {
+      margin-top: auto;
     }
   }
 </style>

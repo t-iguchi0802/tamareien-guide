@@ -41,7 +41,9 @@ const browserTitle = `${pageTitle}｜多磨霊園 お墓ガイド`;
 ---
 
 <BaseLayout title={browserTitle} description={description}>
-  <h1>{pageTitle}</h1>
+  <Fragment slot="beforeSponsor">
+    <h1>{pageTitle}</h1>
+  </Fragment>
 
   <section aria-labelledby="operator-basic-heading">
     <h2 id="operator-basic-heading">基本情報</h2>

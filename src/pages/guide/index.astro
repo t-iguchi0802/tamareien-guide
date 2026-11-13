@@ -20,18 +20,27 @@ const categories = [
   {
     id: 'access',
     heading: '墓参り・アクセス',
-    description: '最寄り駅、電車・バス・車での行き方、区画の確認、門ごとの開閉時間、公式案内図へのリンクです。',
-    links: [{ href: ROUTES.access.path, label: '多磨霊園へのアクセス｜最寄り駅・区画・駐車場の確認' }],
+    description:
+      '最寄り駅、電車・バス・車での行き方、区画の確認、門ごとの開閉時間、公式案内図へのリンクです。',
+    links: [
+      { href: ROUTES.access.path, label: '多磨霊園へのアクセス｜最寄り駅・区画・駐車場の確認' },
+    ],
   },
   {
     id: 'burial',
     heading: '募集・費用・納骨',
     description: '新規募集と費用、みたま堂、樹林型・合葬埋蔵施設の公式情報を整理しています。',
     links: [
-      { href: ROUTES.guideApplication.path, label: '多磨霊園の募集・申し込み｜抽選・倍率・申込資格' },
+      {
+        href: ROUTES.guideApplication.path,
+        label: '多磨霊園の募集・申し込み｜抽選・倍率・申込資格',
+      },
       { href: ROUTES.guideCost.path, label: '多磨霊園の費用｜使用料・管理料・墓石・納骨' },
       { href: ROUTES.guideMitamado.path, label: '多磨霊園のみたま堂｜納骨・墓参・現在の利用案内' },
-      { href: ROUTES.guideJumokuso.path, label: '多磨霊園の樹木葬｜樹林型合葬埋蔵施設・申込・費用' },
+      {
+        href: ROUTES.guideJumokuso.path,
+        label: '多磨霊園の樹木葬｜樹林型合葬埋蔵施設・申込・費用',
+      },
       { href: ROUTES.guideGassou.path, label: '多磨霊園の合葬埋蔵施設｜申込・費用・納骨の基本' },
     ],
   },
@@ -41,7 +50,10 @@ const categories = [
     description: '墓じまい・改葬・墓所返還など、行政手続きと石材店対応をあわせて整理しています。',
     links: [
       { href: ROUTES.guideProcedures.path, label: '墓じまい・お墓の手続き 総合案内' },
-      { href: ROUTES.guideProceduresHakajimaiVsKaisou.path, label: '墓じまいと改葬の違い｜多磨霊園で手続きを始める前に' },
+      {
+        href: ROUTES.guideProceduresHakajimaiVsKaisou.path,
+        label: '墓じまいと改葬の違い｜多磨霊園で手続きを始める前に',
+      },
       { href: ROUTES.hakajimai.path, label: '墓じまい・墓石撤去の比較を見る' },
       { href: ROUTES.kanri.path, label: '墓所管理・清掃・供花の比較を見る' },
       { href: ROUTES.tetsuzuki.path, label: '改葬・墓所返還・施設変更の公式リンク' },
@@ -60,12 +72,14 @@ const categories = [
 ---
 
 <BaseLayout title={browserTitle} description={description}>
-  <h1>{pageTitle}</h1>
-  <p>
-    多磨霊園にお参り・お墓相談で訪れる方向けに、行き方、納骨・供養、手続き、歴史についての記事をまとめています。石材店の比較は<a
-      href={ROUTES.sekizaiten.path}>石材店一覧・比較ページ</a
-    >をご覧ください。
-  </p>
+  <Fragment slot="beforeSponsor">
+    <h1>{pageTitle}</h1>
+    <p>
+      多磨霊園にお参り・お墓相談で訪れる方向けに、行き方、納骨・供養、手続き、歴史についての記事をまとめています。石材店の比較は<a
+        href={ROUTES.sekizaiten.path}>石材店一覧・比較ページ</a
+      >をご覧ください。
+    </p>
+  </Fragment>
 
   <div class="guide-categories">
     {

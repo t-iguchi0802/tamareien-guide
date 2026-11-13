@@ -38,8 +38,10 @@ const browserTitle = `${pageTitle}｜多磨霊園 お墓ガイド`;
 ---
 
 <BaseLayout title={browserTitle} description={description}>
-  <h1>{pageTitle}</h1>
-  <p>最終更新日: {lastUpdated}</p>
+  <Fragment slot="beforeSponsor">
+    <h1>{pageTitle}</h1>
+    <p>最終更新日: {lastUpdated}</p>
+  </Fragment>
 
   <section aria-labelledby="privacy-scope-heading">
     <h2 id="privacy-scope-heading">このページについて</h2>

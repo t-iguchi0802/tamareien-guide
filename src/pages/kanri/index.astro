@@ -23,10 +23,12 @@ const browserTitle = `${pageTitle}｜お墓ガイド`;
 ---
 
 <BaseLayout title={browserTitle} description={description}>
-  <h1>{pageTitle}</h1>
-  <p>
-    年間管理、墓所清掃、供花・墓参り代行、植木、遠方対応について、各石材店のHP等から確認できた内容を一覧にしています。
-  </p>
+  <Fragment slot="beforeSponsor">
+    <h1>{pageTitle}</h1>
+    <p>
+      年間管理、墓所清掃、供花・墓参り代行、植木、遠方対応について、各石材店のHP等から確認できた内容を一覧にしています。
+    </p>
+  </Fragment>
 
   <section aria-labelledby="kanri-comparison-heading">
     <h2 id="kanri-comparison-heading">サービス比較</h2>

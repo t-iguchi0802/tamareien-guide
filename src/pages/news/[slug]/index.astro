@@ -58,47 +58,55 @@ const articleJsonLd = buildArticleJsonLd({
   ogType="article"
   extraJsonLd={[articleJsonLd]}
 >
-  <article class="article">
-    <p class="article__eyebrow">
-      <a href={ROUTES.news.path}>多磨霊園・周辺の読みもの</a> ／ {
-        NEWS_CATEGORY_LABELS[article.category]
-      }
-    </p>
-    <h1>{article.title}</h1>
-    <p class="article__meta">
-      公開日: {formatJaDate(article.publishedAt)}
+  <Fragment slot="beforeSponsor">
+    <article class="article">
+      <p class="article__eyebrow">
+        <a href={ROUTES.news.path}>多磨霊園・周辺の読みもの</a> ／ {
+          NEWS_CATEGORY_LABELS[article.category]
+        }
+      </p>
+      <h1>{article.title}</h1>
+      <p class="article__meta">
+        公開日: {formatJaDate(article.publishedAt)}
+        {
+          article.updatedAt && article.updatedAt !== article.publishedAt && (
+            <>（更新日: {formatJaDate(article.updatedAt)}）</>
+          )
+        }
+      </p>
+
       {
-        article.updatedAt && article.updatedAt !== article.publishedAt && (
-          <>（更新日: {formatJaDate(article.updatedAt)}）</>
+        article.image && (
+          <figure class="article__image">
+            <img src={article.image.src} alt={article.image.alt} loading="lazy" />
+            {(article.image.note || article.image.credit) && (
+              <figcaption>
+                {article.image.note}
+                {article.image.credit && (
+                  <>
+                    {article.image.note && <br />}
+                    写真：<a href={article.image.credit.sourceUrl}>{article.image.credit.name}</a>（
+                    <a href={article.image.credit.licenseUrl}>{article.image.credit.licenseName}</a>
+                    ）
+                  </>
+                )}
+              </figcaption>
+            )}
+          </figure>
         )
       }
-    </p>
-
-    {
-      article.image && (
-        <figure class="article__image">
-          <img src={article.image.src} alt={article.image.alt} loading="lazy" />
-          {(article.image.note || article.image.credit) && (
-            <figcaption>
-              {article.image.note}
-              {article.image.credit && (
-                <>
-                  {article.image.note && <br />}
-                  写真：<a href={article.image.credit.sourceUrl}>{article.image.credit.name}</a>
-                  （<a href={article.image.credit.licenseUrl}>{article.image.credit.licenseName}</a>）
-                </>
-              )}
-            </figcaption>
-          )}
-        </figure>
-      )
-    }
-
+    </article>
+  </Fragment>
+  <article class="article">
     {article.body.map((paragraph) => <p>{paragraph}</p>)}
 
-    {article.consultationLink && (
-      <p><a href="/sekizaiten/">多磨霊園周辺の石材店一覧・比較を見る →</a></p>
-    )}
+    {
+      article.consultationLink && (
+        <p>
+          <a href="/sekizaiten/">多磨霊園周辺の石材店一覧・比較を見る →</a>
+        </p>
+      )
+    }
 
     {
       article.sourceName && article.sourceUrl && (
