@@ -233,29 +233,38 @@ input:focus-visible {
 .site-main--rest {
   grid-area: rest;
 }
-.sponsor-group,
-.sponsor-carousel {
+.sponsor-group {
+  /* 四枠を同じグリッドで計算し、広告の文字量が違っても高さを揃える。 */
+  display: grid;
+  grid-column: 1 / -1;
+  grid-row: 1 / -1;
+  grid-template-columns: subgrid;
+  grid-template-rows: repeat(2, 1fr);
+  row-gap: 22px;
+  align-self: start;
+  pointer-events: none;
+}
+.sponsor-carousel,
+.sponsor-rail {
   display: contents;
 }
 .sponsor-controls {
   display: none;
 }
-.sponsor-rail {
-  display: grid;
-  gap: 22px;
-  align-self: start;
+.sponsor-group .sponsor-card {
+  pointer-events: auto;
 }
-.sponsor-rail--left {
-  grid-area: rail-left;
+.sponsor-rail--left > .sponsor-card {
+  grid-column: 1;
 }
-.sponsor-rail--right {
-  grid-area: rail-right;
+.sponsor-rail--right > .sponsor-card {
+  grid-column: 3;
 }
-@media (min-height: 1000px) {
-  .sponsor-rail {
-    position: sticky;
-    top: 16px;
-  }
+.sponsor-rail > .sponsor-card:first-child {
+  grid-row: 1;
+}
+.sponsor-rail > .sponsor-card:last-child {
+  grid-row: 2;
 }
 .sponsor-invitation {
   max-width: 1392px;
@@ -397,6 +406,7 @@ body[data-design] .purpose-card.is-selected {
   .sponsor-group {
     container-type: inline-size;
     display: block;
+    pointer-events: auto;
     min-width: 0;
     width: 100%;
     border-block: 1px solid #dcd8d0;

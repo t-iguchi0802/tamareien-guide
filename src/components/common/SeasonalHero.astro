@@ -1,9 +1,17 @@
 ---
 import { seasonInTokyo, seasonNames } from '../../lib/season';
+interface Props {
+  fullWidth?: boolean;
+}
+const { fullWidth = false } = Astro.props;
 const season = seasonInTokyo();
 ---
 
-<section class="season-hero" data-season={season} aria-labelledby="hero-heading">
+<section
+  class:list={['season-hero', { 'season-hero--wide': fullWidth }]}
+  data-season={season}
+  aria-labelledby="hero-heading"
+>
   <div
     class="season-hero__scene"
     role="img"
@@ -82,7 +90,24 @@ const season = seasonInTokyo();
     color: white;
     padding: 1px 5px;
   }
+  .season-hero--wide {
+    margin-bottom: 24px;
+  }
+  .season-hero--wide .season-hero__scene {
+    aspect-ratio: auto;
+    height: clamp(300px, 32vw, 420px);
+    background-size: 200% auto;
+  }
+  .season-hero--wide .season-hero__copy {
+    left: max(24px, calc((100% - 1000px) / 2));
+  }
   @media (max-width: 767px) {
+    .season-hero--wide .season-hero__scene {
+      height: 220px;
+    }
+    .season-hero--wide .season-hero__copy {
+      left: 16px;
+    }
     .season-hero__scene {
       aspect-ratio: 1.8;
     }
