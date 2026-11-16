@@ -98,7 +98,12 @@ const articleJsonLd = buildArticleJsonLd({
     </article>
   </Fragment>
   <article class="article">
-    {article.body.map((paragraph) => <p>{paragraph}</p>)}
+    {
+      article.body.map((paragraph) => {
+        const heading = article.bodyHeadings && /^【([^】]+)】$/.exec(paragraph);
+        return heading ? <h2>{heading[1]}</h2> : <p>{paragraph}</p>;
+      })
+    }
 
     {
       article.consultationLink && (
@@ -118,6 +123,13 @@ const articleJsonLd = buildArticleJsonLd({
                 {article.sourceName}
               </a>
             </li>
+            {article.additionalSources?.map((source) => (
+              <li>
+                <a href={source.url} rel="noopener" target="_blank">
+                  {source.name}
+                </a>
+              </li>
+            ))}
           </ul>
         </section>
       )

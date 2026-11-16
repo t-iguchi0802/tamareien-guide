@@ -58,6 +58,7 @@ const newsArticleSchema = z
     updatedAt: isoDateSchema.optional(),
     summary: z.string().min(1).optional(),
     body: z.array(z.string().min(1)).min(1, '本文は1段落以上必要です'),
+    bodyHeadings: z.boolean().optional(),
     image: z
       .object({
         src: z.string().min(1),
@@ -75,6 +76,9 @@ const newsArticleSchema = z
       .optional(),
     sourceName: z.string().min(1).optional(),
     sourceUrl: httpUrlSchema.optional(),
+    additionalSources: z
+      .array(z.object({ name: z.string().min(1), url: httpUrlSchema }))
+      .optional(),
     consultationLink: z.boolean().optional(),
     published: z.boolean(),
   })

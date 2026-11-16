@@ -75,6 +75,8 @@ export interface NewsArticle {
   summary?: string;
   /** 記事本文（段落ごとの配列。プレーンテキストのみ、HTML/Markdownは解釈しない）。 */
   body: string[];
+  /** 単独の【見出し】段落をh2として表示する場合のみ指定。 */
+  bodyHeadings?: boolean;
   /** 記事詳細ページに表示する画像（写真ではなくイメージの場合も含む）。 */
   image?: {
     src: string;
@@ -91,6 +93,8 @@ export interface NewsArticle {
   sourceName?: string;
   /** 参考にした情報源のURL（sourceNameとセットで指定する）。 */
   sourceUrl?: string;
+  /** 複数の出典を使う記事の補足リンク。 */
+  additionalSources?: { name: string; url: string }[];
   /** falseの場合、公開日に関わらず一覧・詳細のどちらにも表示しない（下書き）。 */
   consultationLink?: boolean;
   published: boolean;
