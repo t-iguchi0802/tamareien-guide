@@ -38,6 +38,12 @@ export interface TamaNewsItem {
 
 export const TAMA_NEWS_ITEMS: TamaNewsItem[] = [
   {
+    title: '令和8年度 都立霊園の補欠繰上げ状況（第1回）',
+    publishedAt: '2026-11-06',
+    sourceName: '公益財団法人東京都公園協会',
+    sourceUrl: 'https://www.tokyo-park.or.jp/reien/news/2026/8_2.html',
+  },
+  {
     title: '合葬埋蔵施設の献花式｜代表献花の動画を公開',
     publishedAt: '2026-10-01',
     sourceName: '公益財団法人東京都公園協会',
