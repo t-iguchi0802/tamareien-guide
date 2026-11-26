@@ -2,6 +2,57 @@
   "schemaVersion": "1.0.0",
   "articles": [
     {
+      "slug": "2026-fuchu-art-museum-postal-art",
+      "title": "多磨霊園の墓参り帰りに、府中市美術館で切手と消印を楽しむ",
+      "category": "area_feature",
+      "publishedAt": "2026-11-27",
+      "summary": "府中市美術館で12月12日から企画展「郵便と／の美術」。初週末の記念消印のもらい方と、多磨霊園表門から乗り換えなしで行けるバスを紹介します。",
+      "image": {
+        "src": "/images/news/2026-fuchu-art-museum.jpg",
+        "alt": "府中市美術館のガラス張りの正面と前庭",
+        "note": "府中市美術館の外観（2017年3月31日撮影）。",
+        "credit": {
+          "name": "Fuchu／Wikimedia Commons",
+          "sourceUrl": "https://commons.wikimedia.org/wiki/File:Fuchu.no.mori.kouen_02.jpg",
+          "licenseName": "CC BY-SA 4.0",
+          "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0/"
+        }
+      },
+      "bodyHeadings": true,
+      "body": [
+        "切手を貼ったはがきに、その日の日付が入った記念の消印を押してもらう。12月に多磨霊園へお参りするなら、帰りに府中市美術館で、そんな一枚を作ってみませんか。企画展「郵便と／の美術」は、2026年12月12日（土）から2027年2月21日（日）まで開かれます。",
+        "【切手の原画を見て、帰りに一枚つくる】",
+        "展示には、横尾忠則が1953年の切手図案募集に出した原画や、1937年の速達郵便のポスター原画が並びます。小さな切手ではどんな絵が目に留まるか、離れたところから見るポスターでは何が先に伝わるか。二つの見せ方を比べてみると、ふだん見慣れた郵便にも発見がありそうです。一部の作品は会期中に入れ替わります。",
+        "12月12日・13日の2日間は、2階の企画展ロビーで記念の消印を押してもらえます。観覧券と85円以上の切手が必要です。持ち帰って残したい方は、切手を貼った台紙を用意しておきましょう。展示を見た日を、日付の入った小さな記念品にできます。",
+        "郵送で押印を頼む場合は、12月4日（金）到着分までが受付です。送付先や同封物は、下記の日本郵便の案内に掲載されています。",
+        "【表門から美術館へ、バスで乗り換えなし】",
+        "墓参りのあとは「多磨霊園表門」から、ちゅうバスの多磨町ルート・府中駅行きへ。「府中の森公園」まで時刻表上は約12分で、バス停から美術館までは徒歩約6分です。バスは30分間隔、運賃は1乗車100円。午前中にお参りを済ませて、午後を鑑賞にあてる半日コースはいかがでしょうか。",
+        "開館は10時～17時、入館は16時30分まで。観覧料は一般800円、高校・大学生400円、小・中学生200円です。会期中の休館日は月曜日（1月11日は開館）、12月28日～1月4日、1月12日。年末のお参りと組み合わせるなら、年末年始の休館前に予定を立てるとよさそうです。",
+        "情報確認日：2026年11月27日。"
+      ],
+      "sourceName": "府中市美術館「郵便と／の美術」",
+      "sourceUrl": "https://www.city.fuchu.tokyo.jp/art/tenrankai/kikakuten/2026_Postal-Art.html",
+      "additionalSources": [
+        {
+          "name": "府中市美術館「小型記念日付印押印サービス」",
+          "url": "https://www.city.fuchu.tokyo.jp/art/event_artstudio/events/tenrankai/tenrankai_2026/1212_PostalArt_event.html"
+        },
+        {
+          "name": "日本郵便「小型印」― 郵送依頼の締切・送付方法",
+          "url": "https://www.post.japanpost.jp/enjoy/culture/stamp/small/index.php?keyword=%25B&mode=search&p=1&year="
+        },
+        {
+          "name": "府中市「ちゅうバス」路線図・時刻表",
+          "url": "https://www.city.fuchu.tokyo.jp/kurashi/machi/chubus/bus.html"
+        },
+        {
+          "name": "府中市美術館「交通案内」",
+          "url": "https://www.city.fuchu.tokyo.jp/art/goriyou/fam_access.html"
+        }
+      ],
+      "published": true
+    },
+    {
       "slug": "2026-tama-cemetery-tree-pruning-removal",
       "title": "多磨霊園のお墓の植木｜剪定と撤去、どちらを頼む？",
       "category": "cemetery_feature",
